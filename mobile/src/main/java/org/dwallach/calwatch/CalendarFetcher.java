@@ -17,6 +17,11 @@ import com.android.calendarcommon2.EventRecurrence;
 import com.android.calendarcommon2.RecurrenceProcessor;
 import com.android.calendarcommon2.RecurrenceSet;
 
+import org.dwallach.calwatch.proto.WireEvent;
+
+import java.util.LinkedList;
+import java.util.List;
+
 /**
  * Created by dwallach on 8/13/14.
  *

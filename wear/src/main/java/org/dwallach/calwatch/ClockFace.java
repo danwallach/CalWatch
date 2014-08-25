@@ -8,8 +8,11 @@ import android.graphics.Path;
 import android.text.format.DateUtils;
 import android.util.Log;
 
+import org.dwallach.calwatch.proto.WireEvent;
+
 import java.text.SimpleDateFormat;
 import java.util.Date;
+import java.util.List;
 import java.util.Locale;
 import java.util.TimeZone;
 
@@ -178,7 +181,7 @@ public class ClockFace {
         path.close();
     }
 
-    public void drawRadialArc(Canvas canvas, CalendarResults.Event e, double secondsStart, double secondsEnd, float startRadius, float endRadius, Paint paint, Paint outlinePaint) {
+    public void drawRadialArc(Canvas canvas, PathCache pc, double secondsStart, double secondsEnd, float startRadius, float endRadius, Paint paint, Paint outlinePaint) {
         /*
          * Below is an attempt to do this "correctly" using the arc functionality supported natively
          * by Android's Path. This implementation totally didn't work. Rather than debugging it,
@@ -210,8 +213,9 @@ public class ClockFace {
          * Caching the path in the event gives us good performance, despite the delta theta
          * being awfully small and thus a whole lot of trig going on in here.
          */
-        if(e.path == null) {
-            Path p = new Path();
+        Path p = pc.get();
+        if(p == null) {
+            p = new Path();
             double dt = 0.2; // smaller numbers == closer to a proper arc
 
             p.moveTo(clockX(secondsStart, startRadius), clockY(secondsStart, startRadius));
@@ -223,11 +227,11 @@ public class ClockFace {
                 p.lineTo(clockX(theta, endRadius), clockY(theta, endRadius));
             p.close();
 
-            e.path = p; // save for later on!
+            pc.set(p);
         }
 
-        canvas.drawPath(e.path, paint);
-        canvas.drawPath(e.path, outlinePaint);
+        canvas.drawPath(p, paint);
+        canvas.drawPath(p, outlinePaint);
     }
 
     public void drawMonthBox(Canvas canvas) {
@@ -388,17 +392,21 @@ public class ClockFace {
     private Path stipplePathCache = null;
 
     public void drawCalendar(Canvas canvas) {
-        CalendarFetcher fetcher = WearActivity.getSingletonActivity().getFetcher();
-        if(fetcher == null) return; // must not be ready yet
+        WearReceiver receiver = WearActivity.getSingletonActivity().getReceiver();
+        if(receiver == null) return; // must not be ready yet
 
-        CalendarResults results = fetcher.getContent();
+
+        List<EventWrapper> results = receiver.getEventList();
         if(results == null) return; // again, must not be ready yet
+
+        int maxLevel = receiver.getMaxLevel();
 
         TimeZone tz = TimeZone.getDefault();
         int gmtOffset = tz.getRawOffset() + tz.getDSTSavings();
 
-        for(CalendarResults.Event e: results.events) {
+        for(EventWrapper eventWrapper: results) {
             double arcStart, arcEnd;
+            WireEvent e = eventWrapper.getWireEvent();
             // this turns out to have a bug if the start/end straddle midnight; this whole
             // business was to deal with float having inadequate resolution to deal with
             // milliseconds since the epoch. For now, we're leaving this out.
@@ -409,10 +417,10 @@ public class ClockFace {
             arcEnd = (e.endTime + gmtOffset) / 720000.0;
 
             // path caching happens inside drawRadialArc
-            drawRadialArc(canvas, e, arcStart, arcEnd,
-                    calendarRingMaxRadius - e.minLevel * calendarRingWidth / (results.maxLevel+1),
-                    calendarRingMaxRadius - (e.maxLevel+1) * calendarRingWidth / (results.maxLevel+1),
-                    e.paint, outlineBlack);
+            drawRadialArc(canvas, eventWrapper.getPathCache(), arcStart, arcEnd,
+                    calendarRingMaxRadius - e.minLevel * calendarRingWidth / (maxLevel+1),
+                    calendarRingMaxRadius - (e.maxLevel+1) * calendarRingWidth / (maxLevel+1),
+                    eventWrapper.getPaint(), outlineBlack);
         }
 
         // Lastly, draw a stippled pattern at the current hour mark to delineate where the

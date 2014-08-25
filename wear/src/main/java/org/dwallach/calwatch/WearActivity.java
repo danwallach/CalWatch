@@ -30,9 +30,9 @@ public class WearActivity extends Activity {
             public void onLayoutInflated(WatchViewStub stub) {
                 mTextView = (TextView) stub.findViewById(R.id.text);
 
-                textOut("starting fetcher");
-                CalendarFetcher fetcher = getFetcher();
-                CalendarResults cr = fetcher.getContent();
+                textOut("starting data API receiver");
+
+                getReceiver().go();
             }
         });
     }
@@ -50,13 +50,13 @@ public class WearActivity extends Activity {
     }
 
 
-    private CalendarFetcher fetcher = null;
+    private WearReceiver receiver = null;
 
-    public CalendarFetcher getFetcher() {
+    public WearReceiver getReceiver() {
         // nothing, for now
-        if(fetcher == null) {
-            fetcher = new CalendarFetcher(this);
+        if(receiver == null) {
+            receiver = new WearReceiver(this);
         }
-        return fetcher;
+        return receiver;
     }
 }

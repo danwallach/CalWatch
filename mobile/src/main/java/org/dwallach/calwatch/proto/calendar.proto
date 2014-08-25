@@ -1,14 +1,16 @@
 // compile with:
 
 // % cd CalWatch/mobile
-// % java -jar wire-compiler-1.5.1-jar-with-dependencies.jar --proto_path=src/main/java --java_out=src/main/java/org/dwallach/calwatch/proto org/dwallach/calwatch/proto/calendar.proto
+// % java -jar wire-compiler-1.5.1-jar-with-dependencies.jar --proto_path=src/main/java --java_out=src/main/java/ org/dwallach/calwatch/proto/calendar.proto
 
-// then edit the resulting class file (by hand... uggh) to add a package name, since this seems to be broken
-// then copy the file from the 'mobile' side over to the 'wear' side
+
+// then copy the resulting WireEvent.java file from the 'mobile' side over to the 'wear' side
 
 // Hopefully, this won't have to happen very often. All of this really belongs in the Gradle file,
 // with automated support from Android Studio, but there are bugs surrounding that. Lovely. So we go
 // by hand.
+
+package org.dwallach.calwatch.proto;
 
 message WireEvent {
     required int64 startTime = 1;
@@ -16,4 +18,8 @@ message WireEvent {
     required int32 eventColor = 3;
     required int32 minLevel = 4;
     required int32 maxLevel = 5;
+}
+
+message WireEventList {
+    repeated WireEvent events = 1;
 }

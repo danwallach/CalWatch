@@ -27,10 +27,9 @@ public class PhoneActivity extends Activity {
     private static PhoneActivity theActivity;
 
     private Switch toggle;
-    private MyViewAnim surfaceView;
     private RadioButton toolButton, numbersButton, liteButton;
     private CalendarFetcher fetcher = null;
-    private ClockFace clockFace = null;
+    private ClockFaceStub clockFace = new ClockFaceStub();
 
     public static PhoneActivity getSingletonActivity() {
         return theActivity;
@@ -63,7 +62,7 @@ public class PhoneActivity extends Activity {
 
         SharedPreferences prefs = getPreferences(MODE_PRIVATE);
         boolean showSeconds = prefs.getBoolean("showSeconds", true);
-        int faceMode = prefs.getInt("faceMode", ClockFace.FACE_TOOL);
+        int faceMode = prefs.getInt("faceMode", ClockFaceStub.FACE_TOOL);
 
         clockFace.setFaceMode(faceMode);
         clockFace.setShowSeconds(showSeconds);
@@ -86,13 +85,13 @@ public class PhoneActivity extends Activity {
         }
 
         switch(mode) {
-            case ClockFace.FACE_TOOL:
+            case ClockFaceStub.FACE_TOOL:
                 toolButton.performClick();
                 break;
-            case ClockFace.FACE_NUMBERS:
+            case ClockFaceStub.FACE_NUMBERS:
                 numbersButton.performClick();
                 break;
-            case ClockFace.FACE_LITE:
+            case ClockFaceStub.FACE_LITE:
                 liteButton.performClick();
                 break;
             default:
@@ -110,11 +109,11 @@ public class PhoneActivity extends Activity {
         }
 
         if(toolButton.isChecked())
-            mode = ClockFace.FACE_TOOL;
+            mode = ClockFaceStub.FACE_TOOL;
         else if(numbersButton.isChecked())
-            mode = ClockFace.FACE_NUMBERS;
+            mode = ClockFaceStub.FACE_NUMBERS;
         else if(liteButton.isChecked())
-            mode = ClockFace.FACE_LITE;
+            mode = ClockFaceStub.FACE_LITE;
         else Log.v("PhoneActivity", "no buttons are selected? weird.");
 
         if(mode != -1 && clockFace != null) {
@@ -131,11 +130,11 @@ public class PhoneActivity extends Activity {
 
     }
 
-    public void setClockFace(ClockFace clockFace) {
+    public void setClockFace(ClockFaceStub clockFace) {
         this.clockFace = clockFace;
     }
 
-    public ClockFace getClockFace() {
+    public ClockFaceStub getClockFace() {
         return clockFace;
     }
 
@@ -147,7 +146,6 @@ public class PhoneActivity extends Activity {
 
         // Core UI widgets: find 'em
         toggle = (Switch)findViewById(R.id.toggleButton);
-        surfaceView = (MyViewAnim) findViewById(R.id.surfaceView);
         liteButton = (RadioButton) findViewById(R.id.liteButton);
         toolButton = (RadioButton) findViewById(R.id.toolButton);
         numbersButton = (RadioButton) findViewById(R.id.numbersButton);
@@ -190,14 +188,12 @@ public class PhoneActivity extends Activity {
     protected void onStop() {
         super.onStop();
         if(fetcher != null) fetcher.haltUpdates();
-        if(surfaceView != null) surfaceView.stop();
         textOut("Stop!");
     }
 
     protected void onStart() {
         super.onStart();
         if(fetcher != null) fetcher.resumeUpdates();
-        if(surfaceView != null) surfaceView.resume();
         textOut("Start!");
     }
 
@@ -215,7 +211,7 @@ public class PhoneActivity extends Activity {
     protected void onPause() {
         super.onPause();
         if(fetcher != null) fetcher.haltUpdates();
-        if(surfaceView != null) surfaceView.pause();
+
         textOut("Pause!");
     }
 
