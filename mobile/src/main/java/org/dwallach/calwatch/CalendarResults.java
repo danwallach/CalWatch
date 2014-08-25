@@ -4,8 +4,12 @@ import android.graphics.Paint;
 import android.graphics.Path;
 import android.util.SparseArray;
 
+import org.dwallach.calwatch.proto.CalUpdate;
+
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.LinkedList;
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -91,5 +95,33 @@ public class CalendarResults {
         calendars = new SparseArray<Calendar>();
         colors = new HashMap<String, Color>();
         events = new ArrayList<Event>();
+    }
+
+    public List<CalUpdate.Event> getWireEvents() {
+        List<CalUpdate.Event> wireList = new LinkedList<CalUpdate.Event>();
+        for(Event e : events) {
+            wireList.add(new CalUpdate.Event(e.startTime, e.endTime, e.eventColor, e.minLevel, e.maxLevel));
+        }
+        return wireList;
+    }
+
+    // barebones constructor from the wire format; populates events and nothing else
+    public CalendarResults(List<CalUpdate.Event> wireEvents) {
+        calendars = null;
+        colors = null;
+
+        int maxLevel = 0;
+
+        for(CalUpdate.Event wEvent : wireEvents) {
+            Event e = new Event();
+            e.startTime = wEvent.startTime;
+            e.endTime = wEvent.endTime;
+            e.eventColor = wEvent.eventColor;
+            e.minLevel = wEvent.minLevel;
+            e.maxLevel = wEvent.maxLevel;
+
+            if(e.maxLevel > maxLevel)
+                maxLevel = e.maxLevel;
+        }
     }
 }
