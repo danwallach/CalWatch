@@ -63,6 +63,11 @@ Subtasks:
     -- Also, https://developer.android.com/training/wearables/data-layer/index.html
     -- Probably the right page: https://developer.android.com/training/wearables/data-layer/events.html
 
+    -- Food for thought: we want the face state (tool, lite, etc.) and the show-seconds stuff to use
+       the standard data layer APIs, and we want to use the snazzy protobufs only for sending events,
+       since they're more complicated. This *might* simplify things, since the *activity* can set and
+       manage the persistent preferences and the *service* can deal with the events. Hmmm.
+
     TODO verify on round face
     TODO deal with dimming (kill second hand? lower frame rate? all white?)
 
