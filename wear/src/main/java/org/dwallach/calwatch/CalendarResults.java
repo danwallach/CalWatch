@@ -87,7 +87,6 @@ public class CalendarResults {
     public int maxLevel; // filled in by the layout algorithm as well, levels go from 0 to this, **inclusive**
 
     public CalendarResults() {
-        // calendars = new HashMap<Integer, Calendar>();
         calendars = new SparseArray<Calendar>();
         colors = new HashMap<String, Color>();
         events = new ArrayList<Event>();

@@ -19,6 +19,7 @@ public class WearActivity extends Activity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        textOut("starting onCreate");
 
         singletonActivity = this;
 
@@ -28,6 +29,10 @@ public class WearActivity extends Activity {
             @Override
             public void onLayoutInflated(WatchViewStub stub) {
                 mTextView = (TextView) stub.findViewById(R.id.text);
+
+                textOut("starting fetcher");
+                CalendarFetcher fetcher = getFetcher();
+                CalendarResults cr = fetcher.getContent();
             }
         });
     }
@@ -44,7 +49,14 @@ public class WearActivity extends Activity {
         // nothing, for now
     }
 
+
+    private CalendarFetcher fetcher = null;
+
     public CalendarFetcher getFetcher() {
         // nothing, for now
+        if(fetcher == null) {
+            fetcher = new CalendarFetcher(this);
+        }
+        return fetcher;
     }
 }

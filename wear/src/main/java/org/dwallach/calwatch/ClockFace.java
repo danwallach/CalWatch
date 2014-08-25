@@ -80,7 +80,7 @@ public class ClockFace {
     public ClockFace(Context context) {
         this.context = context;
 
-        WearActivity.textOut("setup!");
+        WearActivity.textOut("ClockFace setup!");
         white = newPaint();
         yellow = newPaint();
         smWhite = newPaint();

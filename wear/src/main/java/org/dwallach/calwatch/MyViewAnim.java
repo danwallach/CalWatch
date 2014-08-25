@@ -13,25 +13,8 @@ import android.util.Log;
 import android.view.SurfaceHolder;
 import android.view.SurfaceView;
 
-/**
- * Created by dwallach on 8/12/14.
- *
- * Useful source for understanding this crap:
- * http://danielnadeau.blogspot.com/2012/01/android-canvas-beginners-tutorial.html
- *
- * Also useful:
- * http://www.compiletimeerror.com/2013/09/introduction-to-2d-drawing-in-android.html
- *
- * TODO: eventually we're going to want to have multiple instances of this running
- * at the same time (e.g., three buttons to select the clockface type, all displaying
- * running clocks). If we instantiate this three times, it's not going to play correctly
- * with WearActivity, which is currently built to assume there's only one clockface. The
- * necessary change is going to be having each face displayed its own way, having the
- * activity just interact with the radio-button preferences, etc.
- */
 public class MyViewAnim extends SurfaceView implements SurfaceHolder.Callback {
     private PanelThread drawThread;
-    private static final float freqUpdate = 5;  // 5 Hz, or 0.20sec for second hand
     private ClockFace clockFace;
     private TimeAnimator animator;
 
@@ -46,7 +29,7 @@ public class MyViewAnim extends SurfaceView implements SurfaceHolder.Callback {
     }
 
     private void setup(Context ctx) {
-        WearActivity.textOut("setup!");
+        WearActivity.textOut("MyViewAnim setup!");
         getHolder().addCallback(this);
         clockFace = new ClockFace(ctx);
         WearActivity.getSingletonActivity().setClockFace(clockFace);
