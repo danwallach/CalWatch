@@ -1,0 +1,55 @@
+Here's an output from the event layout:
+
+08-16 00:29:06.156    6130-6145/edu.rice.dwallach.test2 V/EventLayout﹕ Title(test2), displayColor(ff9a9cff), minLevel(0), maxLevel(0)   -- very small, but overlaps with test3
+08-16 00:29:06.166    6130-6145/edu.rice.dwallach.test2 V/EventLayout﹕ --> Start: August 16, 12:00 AM, End: August 16, 1:00 AM
+08-16 00:29:06.166    6130-6145/edu.rice.dwallach.test2 V/EventLayout﹕ Title(test3), displayColor(ff9a9cff), minLevel(1), maxLevel(4)   -- huge, fills the rest of the levels
+08-16 00:29:06.166    6130-6145/edu.rice.dwallach.test2 V/EventLayout﹕ --> Start: August 16, 12:30 AM, End: August 16, 1:30 AM
+08-16 00:29:06.166    6130-6145/edu.rice.dwallach.test2 V/EventLayout﹕ Title(test4), displayColor(ff9a9cff), minLevel(0), maxLevel(0)   -- gets shoehorned back in level0 , but doesn't overlap with test3 so it can work
+08-16 00:29:06.166    6130-6145/edu.rice.dwallach.test2 V/EventLayout﹕ --> Start: August 16, 1:00 AM, End: August 16, 2:00 AM
+08-16 00:29:06.166    6130-6145/edu.rice.dwallach.test2 V/EventLayout﹕ Title(test5), displayColor(ff9a9cff), minLevel(2), maxLevel(4)   -- none of the previous ones overlap with this at all, so it should have started out with [0, max], but that's not what happened
+08-16 00:29:06.166    6130-6145/edu.rice.dwallach.test2 V/EventLayout﹕ --> Start: August 16, 3:30 AM, End: August 16, 4:30 AM
+08-16 00:29:06.166    6130-6145/edu.rice.dwallach.test2 V/EventLayout﹕ Title(test6), displayColor(ff9a9cff), minLevel(3), maxLevel(3)   -- overlaps 6/7/8 and we have here [3,3], [0,1] and [4,4]
+08-16 00:29:06.166    6130-6145/edu.rice.dwallach.test2 V/EventLayout﹕ --> Start: August 16, 4:30 AM, End: August 16, 5:30 AM
+08-16 00:29:06.166    6130-6145/edu.rice.dwallach.test2 V/EventLayout﹕ Title(test7), displayColor(ff9a9cff), minLevel(0), maxLevel(1)
+08-16 00:29:06.166    6130-6145/edu.rice.dwallach.test2 V/EventLayout﹕ --> Start: August 16, 3:00 AM, End: August 16, 6:00 AM
+08-16 00:29:06.166    6130-6145/edu.rice.dwallach.test2 V/EventLayout﹕ Title(test8), displayColor(ff9a9cff), minLevel(4), maxLevel(4)
+08-16 00:29:06.166    6130-6145/edu.rice.dwallach.test2 V/EventLayout﹕ --> Start: August 16, 5:00 AM, End: August 16, 6:30 AM
+
+TODO prerender background, only redraw it when screen changes; blt it to the screen all the time
+-- Tried it and got a *lower* framerate; the cost of bitblt seems to really matter, at least at
+   the high res on a Nexus 5. Revisit later on an actual Android Wear watch where the resolution
+   is so much lower.
+
+   Git note: preliminary code 'stashed' on my laptop.
+   Root: c5e2c9851167e2221ec55b4f7f00291887ac8e89
+   Branch: b3a5c0b1485751235dd36564e5900f78379b942e (branchBackground)
+
+   New idea: cache *paths* rather than bitmaps. This will avoid a lot of trig, and the paths will
+   probably be loaded into the GPU, avoiding some bus bandwidth.
+
+-- The cache is implemented. No real performance bump. Some N7 numbers: 47-53 FPS when in landscape,
+   28-29 FPS when in portrait. This implies that the essential difference is simply the cost of pushing
+   more pixels to the bigger screen, since it's the same exact CPU usage; just different GPU load.
+
+   Also tried breaking the complex path with 60 ticks into 60 little paths. Zero difference.
+
+   Curiously, switching from "tool" to "lite" mode changes FPS from 29 to 42-51FPS. It's hard to believe
+   that just a few tick marks makes such a big performance difference, but then there you go. Hopefully,
+   all of this will be irrelevant when we get to the phone, with its insanely low-res screen.
+
+TODO deal with recurring events
+-- RecurrenceProcessor.expand() seems to do exactly what I want. Hypothetically, this is going to
+   be a quick hack, if it work.
+
+   maybe I need a better RFC 2245 (iCal) parser? Google has one:
+   https://code.google.com/p/google-rfc-2445/
+
+   Curiously, it's blowing up on the E2E VIV office hours, which has an exDate field of this:
+   America/Los_Angeles;20140815T100000,20140822T100000,20140829T100000)
+
+   The claim is that there's a "missing LHS" in the timezone part. Hrmm.
+
+TODO port to Android Wear
+-- Useful article including sample code: http://toastdroid.com/2014/07/18/developing-watchfaces-for-android-wear/
+
+TODO fancier control panel: Material Layout cards
