@@ -59,6 +59,8 @@ Subtasks:
     TODO and get things rendering locally and remotely?
 
     TODO service needs to deal with all the persistent state; app kicks service, service kicks watch
+    -- See: https://developer.android.com/reference/com/google/android/gms/wearable/WearableListenerService.html
+    -- Also, https://developer.android.com/training/wearables/data-layer/index.html
 
     TODO verify on round face
     TODO deal with dimming (kill second hand? lower frame rate? all white?)
