@@ -51,5 +51,23 @@ TODO deal with recurring events
 
 TODO port to Android Wear
 -- Useful article including sample code: http://toastdroid.com/2014/07/18/developing-watchfaces-for-android-wear/
+-- How to set up the damn emulator: http://www.tech-recipes.com/rx/49586/how-do-i-connect-an-android-wear-emulator-to-a-real-phone/
+
+Subtasks:
+    TODO sort out DataItems to move data from phone to watch (use shiny new proto bufs)
+    TODO move calendar scraping from main app to a separate service
+    TODO and get things rendering locally and remotely?
+
+    TODO service needs to deal with all the persistent state; app kicks service, service kicks watch
+
+    TODO verify on round face
+    TODO deal with dimming (kill second hand? lower frame rate? all white?)
+
+TODO sort out how to compile protobufs automatically via Gradle (vs. known bugs lodged with Google)
+-- At least the Square protobuf runtime is automatically fetched and compiled
+
+
+
+
 
 TODO fancier control panel: Material Layout cards
