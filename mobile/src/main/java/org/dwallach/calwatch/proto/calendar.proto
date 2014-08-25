@@ -10,22 +10,10 @@
 // with automated support from Android Studio, but there are bugs surrounding that. Lovely. So we go
 // by hand.
 
-message CalUpdate {
-    message Event {
-        required int64 startTime = 1;
-        required int64 endTime = 2;
-        required int32 eventColor = 3;
-        required int32 minLevel = 4;
-        required int32 maxLevel = 5;
-    }
-
-    enum FaceStyle {
-        TOOL = 0;
-        LITE = 1;
-        NUMBERS = 2;
-    }
-
-    required FaceStyle style = 1 [default = TOOL];
-    required bool showSeconds = 2 [default = true];
-    repeated Event events = 3;
+message WireEvent {
+    required int64 startTime = 1;
+    required int64 endTime = 2;
+    required int32 eventColor = 3;
+    required int32 minLevel = 4;
+    required int32 maxLevel = 5;
 }
