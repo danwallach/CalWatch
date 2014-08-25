@@ -72,6 +72,11 @@ public class WearReceiver extends WearableListenerService {
     }
 
 
+    //
+    // below code borrowed from https://developer.android.com/training/wearables/data-layer/events.html
+    // TODO fixing and integrating it and making it actually work
+    //
+
 
     private static final String TAG = "DataLayerSample";
     private static final String START_ACTIVITY_PATH = "/start-activity";
