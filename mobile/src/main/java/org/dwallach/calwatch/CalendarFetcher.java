@@ -21,6 +21,7 @@ import org.dwallach.calwatch.proto.WireEvent;
 
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Observable;
 
 /**
  * Created by dwallach on 8/13/14.
@@ -28,7 +29,7 @@ import java.util.List;
  * Support for extracting calendar data from the platform's Calendar service.
  * Decent documentation: http://www.grokkingandroid.com/androids-calendarcontract-provider/
  */
-public class CalendarFetcher implements Runnable {
+public class CalendarFetcher extends Observable implements Runnable {
     private Context ctx = null;
 
     public CalendarFetcher(Context ctx) {
@@ -42,6 +43,9 @@ public class CalendarFetcher implements Runnable {
     private ConditionVariable conditionWait;  // used to wake up the running thread
     private volatile boolean running = false;
     private volatile boolean newContentAvailable = true;
+
+    // just to confuse things, we're simultaneously an *observer* of the underlying
+    // calendar database *and* we're *observable* by other classes
     private MyObserver observer = null, observer2 = null;
     private volatile CalendarResults calendarResults = null;
 
@@ -80,6 +84,10 @@ public class CalendarFetcher implements Runnable {
             // this boolean could have been made true in a number of ways: either because we hit a new hour (as above) or because our cursor on the calendar detected a change
             if(newContentAvailable) {
                 this.calendarResults = loadContent(); // lots of work happens here... which is why we're on a separate thread
+                setChanged();
+                notifyObservers();
+                clearChanged();
+
 
                 newContentAvailable = false;
             }

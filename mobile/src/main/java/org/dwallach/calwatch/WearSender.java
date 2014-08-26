@@ -27,7 +27,7 @@ public class WearSender implements GoogleApiClient.ConnectionCallbacks, GoogleAp
      * Top half of this file: code for handling our watch / calendar data. Bottom half: boilerplate
      * for dealing with PlayServices and the Wear API. Guess which is longer and uglier?
      */
-    public void send(List<WireEvent> wireEvents) {
+    public void store(List<WireEvent> wireEvents) {
         WireEventList wList = new WireEventList(wireEvents);
         byte[] wBytes = wList.toByteArray();
 
@@ -36,11 +36,9 @@ public class WearSender implements GoogleApiClient.ConnectionCallbacks, GoogleAp
         makeMapRequest();
         DataMap map = mapRequest.getDataMap();
         map.putByteArray("Events", wBytes);
-
-        sendNow();
     }
 
-    public void send(ClockFaceStub stub) {
+    public void store(ClockFaceStub stub) {
         boolean showSeconds = stub.getShowSeconds();
         int faceMode = stub.getFaceMode();
 
@@ -50,8 +48,6 @@ public class WearSender implements GoogleApiClient.ConnectionCallbacks, GoogleAp
         DataMap map = mapRequest.getDataMap();
         map.putBoolean("ShowSeconds", showSeconds);
         map.putInt("FaceMode", faceMode);
-
-        sendNow();
     }
 
     private void makeMapRequest() {
@@ -76,7 +72,7 @@ public class WearSender implements GoogleApiClient.ConnectionCallbacks, GoogleAp
      * Major source: https://developer.android.com/google/auth/api-client.html
      */
 
-    private void sendNow() {
+    public void sendNow() {
         if(!isActiveConnection()) return;
         if(mapRequest == null) return;
 

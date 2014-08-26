@@ -6,19 +6,29 @@ import android.content.SharedPreferences;
 import android.os.IBinder;
 import android.util.Log;
 
+import java.util.Observable;
+import java.util.Observer;
+
 public class WatchCalendarService extends Service {
     private static WatchCalendarService singletonService;
     private WearSender wearSender;
     private ClockFaceStub clockFaceStub;
+    private CalendarFetcher calendarFetcher;
 
     public WatchCalendarService() {
         Log.v("WatchCalendarService", "starting calendar fetcher");
-        CalendarFetcher cf = new CalendarFetcher(this); // automatically allocates a thread and runs
         singletonService = this;
 
-        // TODO: start up calendar fetcher
-
         wearSender = new WearSender();
+        calendarFetcher = new CalendarFetcher(this); // automatically allocates a thread and runs
+
+        calendarFetcher.addObserver(new Observer() {
+                                        @Override
+                                        public void update(Observable observable, Object data) {
+                                            calHandler();
+                                        }
+                                    });
+
         clockFaceStub = new ClockFaceStub();
     }
 
@@ -40,6 +50,9 @@ public class WatchCalendarService extends Service {
 
         if(!editor.commit())
             Log.v("WatchCalendarService", "savePreferences commit failed ?!");
+
+        wearSender.store(clockFaceStub);
+        wearSender.sendNow();
     }
 
     public void loadPreferences() {
@@ -59,6 +72,9 @@ public class WatchCalendarService extends Service {
         clockFaceStub.setFaceMode(faceMode);
         clockFaceStub.setShowSeconds(showSeconds);
 
+        wearSender.store(clockFaceStub);
+        wearSender.sendNow();
+
         if(phoneActivity != null) {
             if (phoneActivity.toggle == null || phoneActivity.toolButton == null || phoneActivity.numbersButton == null || phoneActivity.liteButton == null) {
                 Log.v("WatchCalendarService", "loadPreferences has no widgets to update");
@@ -68,6 +84,19 @@ public class WatchCalendarService extends Service {
             phoneActivity.toggle.setChecked(showSeconds);
             phoneActivity.setFaceModeUI(faceMode);
         }
+    }
+
+    // this is called when there's something new from the calendar DB; we'll be running
+    // on the calendar's thread, not the UI thread
+    private void calHandler() {
+        if(wearSender == null) {
+            Log.v("WatchCalendarService", "no wear sender?!");
+            return;
+        }
+        wearSender.store(clockFaceStub);
+        wearSender.store(calendarFetcher.getContent().getWireEvents());
+        wearSender.sendNow();
+
     }
 
 
