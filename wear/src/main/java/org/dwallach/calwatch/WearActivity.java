@@ -33,7 +33,6 @@ public class WearActivity extends Activity {
                 view = (MyViewAnim) stub.findViewById(R.id.surfaceView);
 
                 textOut("starting data API receiver");
-                getReceiver(); // ignoring result; this still causes the instance to be created
             }
         });
     }
@@ -48,16 +47,5 @@ public class WearActivity extends Activity {
 
     public void setClockFace(ClockFace face) {
         // nothing, for now
-    }
-
-
-    private WearReceiver receiver = null;
-
-    public WearReceiver getReceiver() {
-        // nothing, for now
-        if(receiver == null) {
-            receiver = new WearReceiver(this);
-        }
-        return receiver;
     }
 }

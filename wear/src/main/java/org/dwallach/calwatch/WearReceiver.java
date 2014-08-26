@@ -41,8 +41,16 @@ public class WearReceiver extends WearableListenerService implements GoogleApiCl
     private boolean showSeconds = true;
     private int faceMode = ClockFace.FACE_TOOL;
     private GoogleApiClient mGoogleApiClient = null;
+    private static WearReceiver singleton;
 
-    public WearReceiver() { super(); }
+    public WearReceiver() {
+        super();
+        singleton = this;
+    }
+
+    public static WearReceiver getSingleton() {
+        return singleton;
+    }
 
     public boolean getShowSeconds() { return showSeconds; }
     public int getFaceMode() { return faceMode; }

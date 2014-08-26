@@ -392,7 +392,7 @@ public class ClockFace {
     private Path stipplePathCache = null;
 
     public void drawCalendar(Canvas canvas) {
-        WearReceiver receiver = WearActivity.getSingletonActivity().getReceiver();
+        WearReceiver receiver = WearReceiver.getSingleton();
         if(receiver == null) return; // must not be ready yet
 
 
