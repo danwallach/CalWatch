@@ -26,50 +26,15 @@ import android.widget.Switch;
 public class PhoneActivity extends Activity {
     private static PhoneActivity theActivity;
 
-    private Switch toggle;
-    private RadioButton toolButton, numbersButton, liteButton;
+    Switch toggle;
+    RadioButton toolButton, numbersButton, liteButton;
     private CalendarFetcher fetcher = null;
-    private ClockFaceStub clockFace = new ClockFaceStub();
+
+    private ClockFaceStub clockFace;
 
     public static PhoneActivity getSingletonActivity() {
         return theActivity;
     }
-
-    public void savePreferences() {
-        Log.v("PhoneActivity", "savePreferences");
-        SharedPreferences prefs = getPreferences(MODE_PRIVATE);
-        SharedPreferences.Editor editor = prefs.edit();
-
-        editor.putBoolean("showSeconds", clockFace.getShowSeconds());
-        editor.putInt("faceMode", clockFace.getFaceMode());
-
-        if(!editor.commit())
-            Log.v("PhoneActivity", "savePreferences commit failed ?!");
-    }
-
-    public void loadPreferences() {
-        Log.v("PhoneActivity", "loadPreferences");
-
-        if(clockFace == null) {
-            Log.v("PhoneActivity", "loadPreferences has no clock to put them in");
-            return;
-        }
-
-        if(toggle == null || toolButton == null || numbersButton == null || liteButton == null) {
-            Log.v("PhoneActivity", "loadPreferences has no widgets to update");
-            return;
-        }
-
-        SharedPreferences prefs = getPreferences(MODE_PRIVATE);
-        boolean showSeconds = prefs.getBoolean("showSeconds", true);
-        int faceMode = prefs.getInt("faceMode", ClockFaceStub.FACE_TOOL);
-
-        clockFace.setFaceMode(faceMode);
-        clockFace.setShowSeconds(showSeconds);
-        toggle.setChecked(showSeconds);
-        setFaceModeUI(faceMode);
-    }
-
     CalendarFetcher getFetcher() {
         return fetcher;
     }
@@ -78,7 +43,7 @@ public class PhoneActivity extends Activity {
     // this will be called, eventually, from whatever feature is responsible for
     // restoring saved user preferences
     //
-    private void setFaceModeUI(int mode) {
+    public void setFaceModeUI(int mode) {
         if(toolButton == null || numbersButton == null || liteButton == null) {
             Log.v("PhoneActivity", "trying to set face mode without buttons active yet");
             return;
@@ -130,6 +95,12 @@ public class PhoneActivity extends Activity {
 
     }
 
+    public void savePreferences() {
+        WatchCalendarService service = WatchCalendarService.getSingletonService();
+        if(service != null)
+            service.savePreferences();
+    }
+
     public void setClockFace(ClockFaceStub clockFace) {
         this.clockFace = clockFace;
     }
@@ -176,6 +147,10 @@ public class PhoneActivity extends Activity {
                 getFaceModeFromUI();
             }
         });
+
+        WatchCalendarService watchCalendarService = WatchCalendarService.getSingletonService();
+        if(watchCalendarService != null)
+            setClockFace(watchCalendarService.getClockFace());
 
         if(fetcher != null) {
             Log.w("PhoneActivity", "whoa, multiple calendar fetchers!?");
