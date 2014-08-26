@@ -59,12 +59,15 @@ public class WearSender implements GoogleApiClient.ConnectionCallbacks, GoogleAp
     private GoogleApiClient mGoogleApiClient;
     private String nodeId;
 
-    /* warning: this uses a blocking connect call; don't do this on the UI thread */
+    private static WearSender singleton = null;
     public WearSender() {
+        if(singleton == null)
+            singleton = this;
         onCreate();
+    }
 
-        // retrieveDeviceNode();
-
+    public static WearSender getSingleton() {
+        return singleton;
     }
 
     /*

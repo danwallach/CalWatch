@@ -45,6 +45,7 @@ public class WearReceiver extends WearableListenerService implements GoogleApiCl
 
     public WearReceiver() {
         super();
+        Log.v("WearReceiver", "starting listening service");
         singleton = this;
     }
 

@@ -51,8 +51,11 @@ public class WatchCalendarService extends Service {
         if(!editor.commit())
             Log.v("WatchCalendarService", "savePreferences commit failed ?!");
 
-        wearSender.store(clockFaceStub);
-        wearSender.sendNow(false);
+        if(wearSender != null) {
+            wearSender.store(clockFaceStub);
+            wearSender.sendNow(false);
+        } else
+            Log.e("WatchCalendarService", "no sender available to save preferences ?!");
     }
 
     public void loadPreferences() {
@@ -72,8 +75,11 @@ public class WatchCalendarService extends Service {
         clockFaceStub.setFaceMode(faceMode);
         clockFaceStub.setShowSeconds(showSeconds);
 
-        wearSender.store(clockFaceStub);
-        wearSender.sendNow(false);
+        if(wearSender != null) {
+            wearSender.store(clockFaceStub);
+            wearSender.sendNow(false);
+        } else
+            Log.e("WatchCalendarService", "no sender available to load preferences ?!");
 
         if(phoneActivity != null) {
             if (phoneActivity.toggle == null || phoneActivity.toolButton == null || phoneActivity.numbersButton == null || phoneActivity.liteButton == null) {

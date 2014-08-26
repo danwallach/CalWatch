@@ -28,15 +28,10 @@ public class PhoneActivity extends Activity {
 
     Switch toggle;
     RadioButton toolButton, numbersButton, liteButton;
-    private CalendarFetcher fetcher = null;
-
     private ClockFaceStub clockFace;
 
     public static PhoneActivity getSingletonActivity() {
         return theActivity;
-    }
-    CalendarFetcher getFetcher() {
-        return fetcher;
     }
 
     //
@@ -151,24 +146,15 @@ public class PhoneActivity extends Activity {
         WatchCalendarService watchCalendarService = WatchCalendarService.getSingletonService();
         if(watchCalendarService != null)
             setClockFace(watchCalendarService.getClockFace());
-
-        if(fetcher != null) {
-            Log.w("PhoneActivity", "whoa, multiple calendar fetchers!?");
-        } else {
-            textOut("starting fetcher");
-            fetcher = new CalendarFetcher(this);
-        }
     }
 
     protected void onStop() {
         super.onStop();
-        if(fetcher != null) fetcher.haltUpdates();
         textOut("Stop!");
     }
 
     protected void onStart() {
         super.onStart();
-        if(fetcher != null) fetcher.resumeUpdates();
         textOut("Start!");
     }
 
@@ -185,8 +171,6 @@ public class PhoneActivity extends Activity {
 
     protected void onPause() {
         super.onPause();
-        if(fetcher != null) fetcher.haltUpdates();
-
         textOut("Pause!");
     }
 
