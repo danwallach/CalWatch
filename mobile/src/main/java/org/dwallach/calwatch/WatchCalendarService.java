@@ -17,6 +17,12 @@ public class WatchCalendarService extends Service {
 
     public WatchCalendarService() {
         Log.v("WatchCalendarService", "starting calendar fetcher");
+        if(singletonService != null) {
+            Log.v("WatchCalendarService", "whoa, multiple services!");
+            if(calendarFetcher != null)
+                calendarFetcher.haltUpdates();
+        }
+
         singletonService = this;
 
         wearSender = new WearSender();
@@ -109,5 +115,25 @@ public class WatchCalendarService extends Service {
     public IBinder onBind(Intent intent) {
         // TODO: Return the communication channel to the service.
         throw new UnsupportedOperationException("Not yet implemented");
+    }
+
+    @Override
+    public int onStartCommand(Intent intent, int flags, int startId) {
+        Log.v("WatchCalendarService", "service starting!");
+        // handleCommand(intent);
+        // We want this service to continue running until it is explicitly
+        // stopped, so return sticky.
+        return START_STICKY;
+    }
+
+    @Override
+    public void onCreate() {
+        Log.v("WatchCalendarService", "service created!");
+    }
+
+    @Override
+    public void onDestroy() {
+        // Cancel the persistent notification.
+        Log.v("WatchCalendarService", "service destroyed!");
     }
 }

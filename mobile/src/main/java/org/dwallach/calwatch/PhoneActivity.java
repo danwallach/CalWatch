@@ -1,5 +1,6 @@
 package org.dwallach.calwatch;
 import android.app.Activity;
+import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.util.Log;
@@ -143,7 +144,18 @@ public class PhoneActivity extends Activity {
             }
         });
 
+        // start the calendar service, if it's not already running
         WatchCalendarService watchCalendarService = WatchCalendarService.getSingletonService();
+
+        if(watchCalendarService == null) {
+            Intent serviceIntent = new Intent(this, WatchCalendarService.class);
+            startService(serviceIntent);
+
+            // do it again; we should get something different this time
+            watchCalendarService = WatchCalendarService.getSingletonService();
+        }
+
+
         if(watchCalendarService != null)
             setClockFace(watchCalendarService.getClockFace());
     }
