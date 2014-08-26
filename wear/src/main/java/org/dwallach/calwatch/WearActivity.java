@@ -6,6 +6,8 @@ import android.support.wearable.view.WatchViewStub;
 import android.util.Log;
 import android.widget.TextView;
 
+import com.google.android.gms.common.api.GoogleApiClient;
+
 public class WearActivity extends Activity {
 
     private static WearActivity singletonActivity = null;
@@ -14,7 +16,7 @@ public class WearActivity extends Activity {
         return singletonActivity;
     }
 
-    private TextView mTextView;
+    private MyViewAnim view;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -28,11 +30,10 @@ public class WearActivity extends Activity {
         stub.setOnLayoutInflatedListener(new WatchViewStub.OnLayoutInflatedListener() {
             @Override
             public void onLayoutInflated(WatchViewStub stub) {
-                mTextView = (TextView) stub.findViewById(R.id.text);
+                view = (MyViewAnim) stub.findViewById(R.id.surfaceView);
 
                 textOut("starting data API receiver");
-
-                getReceiver().go();
+                getReceiver(); // ignoring result; this still causes the instance to be created
             }
         });
     }

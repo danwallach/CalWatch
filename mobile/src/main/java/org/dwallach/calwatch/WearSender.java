@@ -72,7 +72,7 @@ public class WearSender implements GoogleApiClient.ConnectionCallbacks, GoogleAp
      * Major source: https://developer.android.com/google/auth/api-client.html
      */
 
-    public void sendNow() {
+    public void sendNow(boolean blocking) {
         if(!isActiveConnection()) return;
         if(mapRequest == null) return;
 
@@ -81,8 +81,9 @@ public class WearSender implements GoogleApiClient.ConnectionCallbacks, GoogleAp
         // DataMap map = mapRequest.getDataMap();
         PutDataRequest request = mapRequest.asPutDataRequest();
 
-        PendingResult<DataApi.DataItemResult> pendingResult = Wearable.DataApi
-                .putDataItem(mGoogleApiClient, request);
+        PendingResult<DataApi.DataItemResult> pendingResult = Wearable.DataApi.putDataItem(mGoogleApiClient, request);
+        if(blocking)
+            pendingResult.await();
 
         mapRequest = null;  // we've sent it, we can drop the reference
     }
@@ -118,7 +119,7 @@ public class WearSender implements GoogleApiClient.ConnectionCallbacks, GoogleAp
         // The good stuff goes here.
         readyToSend = true;
         if(mapRequest != null)
-            sendNow();
+            sendNow(false);
     }
 
     @Override

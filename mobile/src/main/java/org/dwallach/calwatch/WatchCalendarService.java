@@ -52,7 +52,7 @@ public class WatchCalendarService extends Service {
             Log.v("WatchCalendarService", "savePreferences commit failed ?!");
 
         wearSender.store(clockFaceStub);
-        wearSender.sendNow();
+        wearSender.sendNow(false);
     }
 
     public void loadPreferences() {
@@ -73,7 +73,7 @@ public class WatchCalendarService extends Service {
         clockFaceStub.setShowSeconds(showSeconds);
 
         wearSender.store(clockFaceStub);
-        wearSender.sendNow();
+        wearSender.sendNow(false);
 
         if(phoneActivity != null) {
             if (phoneActivity.toggle == null || phoneActivity.toolButton == null || phoneActivity.numbersButton == null || phoneActivity.liteButton == null) {
@@ -95,8 +95,7 @@ public class WatchCalendarService extends Service {
         }
         wearSender.store(clockFaceStub);
         wearSender.store(calendarFetcher.getContent().getWireEvents());
-        wearSender.sendNow();
-
+        wearSender.sendNow(true);
     }
 
 
