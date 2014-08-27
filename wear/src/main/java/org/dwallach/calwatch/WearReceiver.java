@@ -35,7 +35,7 @@ import static com.google.android.gms.wearable.Wearable.DataApi;
  * Created by dwallach on 8/25/14.
  *
  */
-public class WearReceiver extends WearableListenerService implements GoogleApiClient.ConnectionCallbacks, GoogleApiClient.OnConnectionFailedListener {
+public class WearReceiver extends WearableListenerService {
     private final static String TAG = "WearReceiver";
 
     private ClockFace clockFace;
@@ -163,13 +163,14 @@ public class WearReceiver extends WearableListenerService implements GoogleApiCl
         Log.v(TAG, "onCreate!");
         mGoogleApiClient = new GoogleApiClient.Builder(this)
                 .addApi(Wearable.API)
-                .addConnectionCallbacks(this)
-                .addOnConnectionFailedListener(this)
+                // .addConnectionCallbacks(this)
+                // .addOnConnectionFailedListener(this)
                 .build();
         mGoogleApiClient.connect();
         Log.v(TAG, "Google API connected! Hopefully.");
     }
 
+    /*
     @Override
     public void onConnected(Bundle connectionHint) {
         Log.v(TAG, "onConnected!");
@@ -196,6 +197,7 @@ public class WearReceiver extends WearableListenerService implements GoogleApiCl
         mGoogleApiClient.disconnect();
         mGoogleApiClient = null;
     }
+    */
 
     public void onPeerConnected(Node peer) {
         Log.v(TAG, "phone is connected!, "+peer.getDisplayName());
