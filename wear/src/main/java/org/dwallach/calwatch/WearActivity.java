@@ -12,6 +12,7 @@ import com.google.android.gms.common.api.GoogleApiClient;
 public class WearActivity extends Activity {
 
     private static WearActivity singletonActivity = null;
+    private WearReceiver receiver;
 
     public static WearActivity getSingletonActivity() {
         return singletonActivity;
@@ -22,23 +23,12 @@ public class WearActivity extends Activity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        textOut("starting onCreate");
+        Log.v("WearActivity", "starting onCreate");
 
         singletonActivity = this;
 
-        setContentView(R.layout.activity_wear);
-        final WatchViewStub stub = (WatchViewStub) findViewById(R.id.watch_view_stub);
-        stub.setOnLayoutInflatedListener(new WatchViewStub.OnLayoutInflatedListener() {
-            @Override
-            public void onLayoutInflated(WatchViewStub stub) {
-                view = (MyViewAnim) stub.findViewById(R.id.surfaceView);
-
-                textOut("starting data API receiver");
-            }
-        });
-
         // start the calendar service, if it's not already running
-        WearReceiver receiver = WearReceiver.getSingleton();
+        receiver = WearReceiver.getSingleton();
 
         if(receiver == null) {
             Intent serviceIntent = new Intent(this, WearReceiver.class);
@@ -47,10 +37,19 @@ public class WearActivity extends Activity {
             // do it again; we should get something different this time
             receiver = WearReceiver.getSingleton();
         }
-    }
 
-    public static void textOut(String text) {
-        Log.v("WearActivity", text);
+        // bring up the UI
+
+        setContentView(R.layout.activity_wear);
+        final WatchViewStub stub = (WatchViewStub) findViewById(R.id.watch_view_stub);
+        stub.setOnLayoutInflatedListener(new WatchViewStub.OnLayoutInflatedListener() {
+            @Override
+            public void onLayoutInflated(WatchViewStub stub) {
+                view = (MyViewAnim) stub.findViewById(R.id.surfaceView);
+
+                Log.v("WearActivity", "starting data API receiver");
+            }
+        });
     }
 
     public void loadPreferences() {
@@ -58,6 +57,9 @@ public class WearActivity extends Activity {
     }
 
     public void setClockFace(ClockFace face) {
-        // nothing, for now
+        if(receiver == null)
+            Log.v("WearActivity", "no receiver running yet!");
+        else
+            receiver.setClockFace(face);
     }
 }

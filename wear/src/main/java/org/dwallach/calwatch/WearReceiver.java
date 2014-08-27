@@ -36,10 +36,12 @@ import static com.google.android.gms.wearable.Wearable.DataApi;
  *
  */
 public class WearReceiver extends WearableListenerService implements GoogleApiClient.ConnectionCallbacks, GoogleApiClient.OnConnectionFailedListener {
-    private List<EventWrapper> eventList = null;
-    private int maxLevel = 0;
-    private boolean showSeconds = true;
-    private int faceMode = ClockFace.FACE_TOOL;
+    private ClockFace clockFace;
+
+    // private List<EventWrapper> eventList = null;
+    // private int maxLevel = 0;
+    // private boolean showSeconds = true;
+    // private int faceMode = ClockFace.FACE_TOOL;
     private GoogleApiClient mGoogleApiClient = null;
     private static WearReceiver singleton;
 
@@ -49,19 +51,18 @@ public class WearReceiver extends WearableListenerService implements GoogleApiCl
         singleton = this;
     }
 
-    public static WearReceiver getSingleton() {
-        return singleton;
-    }
+    public static WearReceiver getSingleton() { return singleton; }
 
-    public boolean getShowSeconds() { return showSeconds; }
-    public int getFaceMode() { return faceMode; }
-    public int getMaxLevel() { return maxLevel; }
-
-    public List<EventWrapper> getEventList() {
-        return eventList;
+    public void setClockFace(ClockFace clockFace) {
+        this.clockFace = clockFace;
     }
 
     private void newEventBytes(byte[] eventBytes) {
+        if(clockFace == null) {
+            Log.v("WearReceiver", "nowhere to put new events!");
+            return;
+        }
+
         Wire wire = new Wire();
         WireEventList wireEventList = null;
 
@@ -74,14 +75,16 @@ public class WearReceiver extends WearableListenerService implements GoogleApiCl
 
         ArrayList<EventWrapper> results = new ArrayList<EventWrapper>();
 
+        int maxLevel = -1;
         for (WireEvent wireEvent : wireEventList.events) {
             results.add(new EventWrapper(wireEvent));
 
-            if (wireEvent.maxLevel > this.maxLevel)
-                this.maxLevel = wireEvent.maxLevel;
+            if (wireEvent.maxLevel > maxLevel)
+                maxLevel = wireEvent.maxLevel;
         }
 
-        eventList = results;
+        clockFace.setMaxLevel(maxLevel);
+        clockFace.setEventList(results);
         Log.v("WearReceiver", "new calendar event list, " + results.size() + " entries");
     }
 
@@ -125,13 +128,22 @@ public class WearReceiver extends WearableListenerService implements GoogleApiCl
                     }
 
                     if(dataMap.containsKey("ShowSeconds")) {
-                        showSeconds = dataMap.getBoolean("ShowSeconds");
+                        boolean showSeconds = dataMap.getBoolean("ShowSeconds");
                         Log.v("WearReceiver", "showSeconds updated: " + Boolean.toString(showSeconds));
+                        if(clockFace == null)
+                            Log.v("WearReceiver", "nowhere to put new showSeconds data!");
+                        else
+                            clockFace.setShowSeconds(showSeconds);
                     }
 
                     if(dataMap.containsKey("FaceMode")) {
-                        faceMode = dataMap.getInt("FaceMode");
+                        int faceMode = dataMap.getInt("FaceMode");
                         Log.v("WearReceiver", "faceMode updated: " + faceMode);
+
+                        if(clockFace == null)
+                            Log.v("WearReceiver", "nowhere to put new faceMode data!");
+                        else
+                            clockFace.setFaceMode(faceMode);
                     }
                 } else {
                     Log.v("WearReceiver", "received data on weird path: "+ path);

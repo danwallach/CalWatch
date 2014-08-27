@@ -83,7 +83,7 @@ public class ClockFace {
     public ClockFace(Context context) {
         this.context = context;
 
-        WearActivity.textOut("ClockFace setup!");
+        Log.v("ClockFace", "ClockFace setup!");
         white = newPaint();
         yellow = newPaint();
         smWhite = newPaint();
@@ -133,19 +133,19 @@ public class ClockFace {
      * the expectation is that you call this method *not* from the UI thread but instead
      * from a helper thread, elsewhere
      */
-    public void drawEverything(Canvas canvas) {
+    public void drawEverything(Context context, Canvas canvas) {
         // background?
 
         // canvas.drawCircle(cx, cy, radius, gray);
         // canvas.drawCircle(cx, cy, radius * .95f, black);
 
         // draw the calendar wedges first, at the bottom of the stack, then the face indices
-        drawCalendar(canvas);
-        drawFace(canvas);
+        drawCalendar(context, canvas);
+        drawFace(context, canvas);
 
         // something a real watch can't do: float the text over the hands
-        drawHands(canvas);
-        drawMonthBox(canvas);
+        drawHands(context, canvas);
+        drawMonthBox(context, canvas);
     }
 
     public void drawRadialLine(Canvas canvas, double seconds, float startRadius, float endRadius, Paint paint, Paint shadowPaint) {
@@ -234,7 +234,7 @@ public class ClockFace {
         canvas.drawPath(p, outlinePaint);
     }
 
-    public void drawMonthBox(Canvas canvas) {
+    public void drawMonthBox(Context context, Canvas canvas) {
         // for now, hard-coded to the 9-oclock position
         String m = localMonthDay();
         String d = localDayOfWeek();
@@ -264,7 +264,7 @@ public class ClockFace {
     private volatile Path facePathCache = null;
     private volatile int facePathCacheMode = -1;
 
-    public void drawFace(Canvas canvas) {
+    public void drawFace(Context context, Canvas canvas) {
         Path p = facePathCache; // make a local copy, avoid concurrency crap
         // draw thin lines (indices)
 
@@ -367,7 +367,7 @@ public class ClockFace {
         }
     }
 
-    public void drawHands(Canvas canvas) {
+    public void drawHands(Context context, Canvas canvas) {
         TimeZone tz = TimeZone.getDefault();
         int gmtOffset = tz.getRawOffset() + tz.getDSTSavings();
         long time = System.currentTimeMillis() + gmtOffset;
@@ -391,20 +391,24 @@ public class ClockFace {
     private long stippleTimeCache = -1;
     private Path stipplePathCache = null;
 
-    public void drawCalendar(Canvas canvas) {
-        WearReceiver receiver = WearReceiver.getSingleton();
-        if(receiver == null) return; // must not be ready yet
+    private int maxLevel;
+    private List<EventWrapper> eventList;
 
+    public void setMaxLevel(int maxLevel) {
+        this.maxLevel = maxLevel;
+    }
 
-        List<EventWrapper> results = receiver.getEventList();
-        if(results == null) return; // again, must not be ready yet
+    public void setEventList(List<EventWrapper> eventList) {
+        this.eventList = eventList;
+    }
 
-        int maxLevel = receiver.getMaxLevel();
+    public void drawCalendar(Context context, Canvas canvas) {
+        if(eventList == null) return; // again, must not be ready yet
 
         TimeZone tz = TimeZone.getDefault();
         int gmtOffset = tz.getRawOffset() + tz.getDSTSavings();
 
-        for(EventWrapper eventWrapper: results) {
+        for(EventWrapper eventWrapper: eventList) {
             double arcStart, arcEnd;
             WireEvent e = eventWrapper.getWireEvent();
             // this turns out to have a bug if the start/end straddle midnight; this whole
