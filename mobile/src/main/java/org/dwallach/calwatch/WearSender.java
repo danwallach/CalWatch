@@ -101,17 +101,20 @@ public class WearSender implements GoogleApiClient.ConnectionCallbacks, GoogleAp
     protected void onCreate() {
         Log.v("WearSender", "onCreate!");
         // Create a GoogleApiClient instance
-        WatchCalendarService service = WatchCalendarService.getSingletonService();
-        if(service == null) {
-            Log.v("WearSender", "no service?!");
+        // WatchCalendarService service = WatchCalendarService.getSingletonService();
+        PhoneActivity activity = PhoneActivity.getSingletonActivity();
+        if(activity == null) {
+            Log.v("WearSender", "no activity?!");
             return;
         }
-        mGoogleApiClient = new GoogleApiClient.Builder(service)
+        GoogleApiClient tmp =  new GoogleApiClient.Builder(activity)
                 .addApi(Wearable.API)
-                .addConnectionCallbacks(this)
-                .addOnConnectionFailedListener(this)
+        //        .addConnectionCallbacks(this)
+        //        .addOnConnectionFailedListener(this)
                 .build();
-        mGoogleApiClient.connect();
+        tmp.connect();
+
+        mGoogleApiClient = tmp; // only assign after it works
     }
 
     private boolean readyToSend = false;

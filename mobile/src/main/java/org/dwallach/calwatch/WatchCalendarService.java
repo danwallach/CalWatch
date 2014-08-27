@@ -26,7 +26,7 @@ public class WatchCalendarService extends Service {
         singletonService = this;
 
         wearSender = new WearSender();
-        calendarFetcher = new CalendarFetcher(this); // automatically allocates a thread and runs
+        calendarFetcher = new CalendarFetcher(); // automatically allocates a thread and runs
 
         calendarFetcher.addObserver(new Observer() {
                                         @Override

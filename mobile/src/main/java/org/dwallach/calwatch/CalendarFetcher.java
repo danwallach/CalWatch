@@ -32,10 +32,10 @@ import java.util.Observable;
 public class CalendarFetcher extends Observable implements Runnable {
     private Context ctx = null;
 
-    public CalendarFetcher(Context ctx) {
+    public CalendarFetcher() {
         Log.v("CalendarFetcher", "starting fetcher thread");
 
-        this.ctx = ctx;
+        this.ctx = PhoneActivity.getSingletonActivity();
         this.conditionWait = new ConditionVariable();
         new Thread(this).start();
     }

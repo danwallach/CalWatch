@@ -1,6 +1,7 @@
 package org.dwallach.calwatch;
 
 import android.app.Activity;
+import android.content.Intent;
 import android.os.Bundle;
 import android.support.wearable.view.WatchViewStub;
 import android.util.Log;
@@ -35,6 +36,17 @@ public class WearActivity extends Activity {
                 textOut("starting data API receiver");
             }
         });
+
+        // start the calendar service, if it's not already running
+        WearReceiver receiver = WearReceiver.getSingleton();
+
+        if(receiver == null) {
+            Intent serviceIntent = new Intent(this, WearReceiver.class);
+            startService(serviceIntent);
+
+            // do it again; we should get something different this time
+            receiver = WearReceiver.getSingleton();
+        }
     }
 
     public static void textOut(String text) {
