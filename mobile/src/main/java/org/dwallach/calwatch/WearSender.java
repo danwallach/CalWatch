@@ -110,11 +110,23 @@ public class WearSender implements GoogleApiClient.ConnectionCallbacks, GoogleAp
         // DataMap map = mapRequest.getDataMap();
         PutDataRequest request = mapRequest.asPutDataRequest();
 
+        Wearable.DataApi.putDataItem(mGoogleApiClient, request)
+                .setResultCallback(new ResultCallback<DataApi.DataItemResult>() {
+                    @Override
+                    public void onResult(DataApi.DataItemResult dataItemResult) {
+                        Log.d(TAG, "putDataItem status: " + dataItemResult.getStatus().toString());
+                    }
+                });
+
+        /*
         PendingResult<DataApi.DataItemResult> pendingResult = Wearable.DataApi.putDataItem(mGoogleApiClient, request);
-        if(blocking)
+        if(blocking) {
+            Log.v(TAG, "waiting for send to complete");
             pendingResult.await();
+        }
 
         Log.v(TAG, "sent!");
+        */
 
         mapRequest = null;  // we've sent it, we can drop the reference
     }
