@@ -88,6 +88,8 @@ public class WearSender implements GoogleApiClient.ConnectionCallbacks, GoogleAp
         if(blocking)
             pendingResult.await();
 
+        Log.v("WearSender", "sent!");
+
         mapRequest = null;  // we've sent it, we can drop the reference
     }
 
@@ -109,8 +111,8 @@ public class WearSender implements GoogleApiClient.ConnectionCallbacks, GoogleAp
         }
         GoogleApiClient tmp =  new GoogleApiClient.Builder(activity)
                 .addApi(Wearable.API)
-        //        .addConnectionCallbacks(this)
-        //        .addOnConnectionFailedListener(this)
+                .addConnectionCallbacks(this)
+                .addOnConnectionFailedListener(this)
                 .build();
         tmp.connect();
 

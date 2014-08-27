@@ -136,6 +136,8 @@ public class WearReceiver extends WearableListenerService implements GoogleApiCl
                 } else {
                     Log.v("WearReceiver", "received data on weird path: "+ path);
                 }
+            } else {
+                Log.v("WearReceiver", "odd event type: "+ event.getType());
             }
         }
     }
