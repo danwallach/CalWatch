@@ -161,15 +161,13 @@ public class WearReceiver extends WearableListenerService implements GoogleApiCl
         super.onCreate();
 
         Log.v(TAG, "onCreate!");
-        if(mGoogleApiClient == null) {
-            mGoogleApiClient = new GoogleApiClient.Builder(this)
-                    .addApi(Wearable.API)
-                    .addConnectionCallbacks(this)
-                    .addOnConnectionFailedListener(this)
-                    .build();
-            mGoogleApiClient.connect();
-            Log.v(TAG, "Google API connected! Hopefully.");
-        }
+        mGoogleApiClient = new GoogleApiClient.Builder(this)
+                .addApi(Wearable.API)
+                .addConnectionCallbacks(this)
+                .addOnConnectionFailedListener(this)
+                .build();
+        mGoogleApiClient.connect();
+        Log.v(TAG, "Google API connected! Hopefully.");
     }
 
     @Override
