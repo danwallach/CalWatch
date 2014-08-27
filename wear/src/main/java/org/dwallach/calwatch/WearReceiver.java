@@ -1,7 +1,9 @@
 package org.dwallach.calwatch;
 
+import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
+import android.os.IBinder;
 import android.util.Log;
 
 import org.dwallach.calwatch.proto.WireEvent;
@@ -85,13 +87,19 @@ public class WearReceiver extends WearableListenerService implements GoogleApiCl
         Log.v("WearReceiver", "new calendar event list, " + results.size() + " entries");
     }
 
-
+    @Override
+    public int onStartCommand(Intent intent, int flags, int startId) {
+        Log.v("WearReceiver", "service starting!");
+        // handleCommand(intent);
+        // We want this service to continue running until it is explicitly
+        // stopped, so return sticky.
+        return START_STICKY;
+    }
 
     //
     // Official documentation: https://developer.android.com/training/wearables/data-layer/events.html
     // Very, very helpful: http://www.doubleencore.com/2014/07/create-custom-ongoing-notification-android-wear/
     //
-
 
     @Override
     public void onDataChanged(DataEventBuffer dataEvents) {
