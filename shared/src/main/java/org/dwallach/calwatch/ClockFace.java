@@ -42,7 +42,8 @@ public class ClockFace {
     private int cy;
     private int radius;
     private float shadow;
-    private boolean showSeconds = true;
+    private boolean showSeconds = Constants.DefaultShowSeconds;
+
     private static final float freqUpdate = 5;  // 5 Hz, or 0.20sec for second hand
 
     private static float calendarRingMinRadius = 0.2f;
@@ -60,7 +61,7 @@ public class ClockFace {
     public final static int FACE_NUMBERS = 1;
     public final static int FACE_LITE = 2;
 
-    private volatile int faceMode = FACE_TOOL;
+    private volatile int faceMode = Constants.DefaultWatchFace;
 
     public void setFaceMode(int faceMode) {
         // warning: this might come in from another thread!

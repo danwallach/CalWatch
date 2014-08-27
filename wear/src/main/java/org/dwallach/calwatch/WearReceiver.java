@@ -36,6 +36,8 @@ import static com.google.android.gms.wearable.Wearable.DataApi;
  *
  */
 public class WearReceiver extends WearableListenerService implements GoogleApiClient.ConnectionCallbacks, GoogleApiClient.OnConnectionFailedListener {
+    private final static String TAG = "WearReceiver";
+
     private ClockFace clockFace;
 
     // private List<EventWrapper> eventList = null;
@@ -47,7 +49,7 @@ public class WearReceiver extends WearableListenerService implements GoogleApiCl
 
     public WearReceiver() {
         super();
-        Log.v("WearReceiver", "starting listening service");
+        Log.v(TAG, "starting listening service");
         singleton = this;
     }
 
@@ -59,7 +61,7 @@ public class WearReceiver extends WearableListenerService implements GoogleApiCl
 
     private void newEventBytes(byte[] eventBytes) {
         if(clockFace == null) {
-            Log.v("WearReceiver", "nowhere to put new events!");
+            Log.v(TAG, "nowhere to put new events!");
             return;
         }
 
@@ -69,7 +71,7 @@ public class WearReceiver extends WearableListenerService implements GoogleApiCl
         try {
             wireEventList = (WireEventList) wire.parseFrom(eventBytes, WireEventList.class);
         } catch (IOException ioe) {
-            Log.e("WearReceiver", "parse failure on protobuf: " + ioe.toString());
+            Log.e(TAG, "parse failure on protobuf: " + ioe.toString());
             return;
         }
 
@@ -85,7 +87,7 @@ public class WearReceiver extends WearableListenerService implements GoogleApiCl
 
         clockFace.setMaxLevel(maxLevel);
         clockFace.setEventList(results);
-        Log.v("WearReceiver", "new calendar event list, " + results.size() + " entries");
+        Log.v(TAG, "new calendar event list, " + results.size() + " entries");
     }
 
 
@@ -98,17 +100,17 @@ public class WearReceiver extends WearableListenerService implements GoogleApiCl
 
     @Override
     public void onDataChanged(DataEventBuffer dataEvents) {
-        Log.v("WearReceiver", "data changed!");
+        Log.v(TAG, "data changed!");
 
         final List<DataEvent> events = FreezableUtils.freezeIterable(dataEvents);
         dataEvents.close();
 
         if (!mGoogleApiClient.isConnected()) {
-            Log.v("WearReceiver", "reconnecting GoogleApiClient?!");
+            Log.v(TAG, "reconnecting GoogleApiClient?!");
             ConnectionResult connectionResult = mGoogleApiClient
                     .blockingConnect(30, TimeUnit.SECONDS);
             if (!connectionResult.isSuccess()) {
-                Log.e("WearReceiver", "Service failed to connect to GoogleApiClient.");
+                Log.e(TAG, "Service failed to connect to GoogleApiClient.");
                 return;
             }
         }
@@ -116,40 +118,40 @@ public class WearReceiver extends WearableListenerService implements GoogleApiCl
         for (DataEvent event : events) {
             if (event.getType() == DataEvent.TYPE_CHANGED) {
                 String path = event.getDataItem().getUri().getPath();
-                if ("/calwatch".equals(path)) {
+                if (Constants.WearDataPath.equals(path)) {
                     // Get the data out of the event
                     DataMapItem dataMapItem =
                             DataMapItem.fromDataItem(event.getDataItem());
                     DataMap dataMap = dataMapItem.getDataMap();
 
-                    if(dataMap.containsKey("Events")) {
-                        byte[] eventBytes = dataMap.getByteArray("Events");
+                    if(dataMap.containsKey(Constants.WearDataEvents)) {
+                        byte[] eventBytes = dataMap.getByteArray(Constants.WearDataEvents);
                         newEventBytes(eventBytes);
                     }
 
-                    if(dataMap.containsKey("ShowSeconds")) {
-                        boolean showSeconds = dataMap.getBoolean("ShowSeconds");
-                        Log.v("WearReceiver", "showSeconds updated: " + Boolean.toString(showSeconds));
+                    if(dataMap.containsKey(Constants.WearDataShowSeconds)) {
+                        boolean showSeconds = dataMap.getBoolean(Constants.WearDataShowSeconds);
+                        Log.v(TAG, "showSeconds updated: " + Boolean.toString(showSeconds));
                         if(clockFace == null)
-                            Log.v("WearReceiver", "nowhere to put new showSeconds data!");
+                            Log.v(TAG, "nowhere to put new showSeconds data!");
                         else
                             clockFace.setShowSeconds(showSeconds);
                     }
 
-                    if(dataMap.containsKey("FaceMode")) {
-                        int faceMode = dataMap.getInt("FaceMode");
-                        Log.v("WearReceiver", "faceMode updated: " + faceMode);
+                    if(dataMap.containsKey(Constants.WearDataFaceMode)) {
+                        int faceMode = dataMap.getInt(Constants.WearDataFaceMode);
+                        Log.v(TAG, "faceMode updated: " + faceMode);
 
                         if(clockFace == null)
-                            Log.v("WearReceiver", "nowhere to put new faceMode data!");
+                            Log.v(TAG, "nowhere to put new faceMode data!");
                         else
                             clockFace.setFaceMode(faceMode);
                     }
                 } else {
-                    Log.v("WearReceiver", "received data on weird path: "+ path);
+                    Log.v(TAG, "received data on weird path: "+ path);
                 }
             } else {
-                Log.v("WearReceiver", "odd event type: "+ event.getType());
+                Log.v(TAG, "odd event type: "+ event.getType());
             }
         }
     }
@@ -158,7 +160,7 @@ public class WearReceiver extends WearableListenerService implements GoogleApiCl
     public void onCreate() {
         super.onCreate();
 
-        Log.v("WearReceiver", "onCreate!");
+        Log.v(TAG, "onCreate!");
         if(mGoogleApiClient == null) {
             mGoogleApiClient = new GoogleApiClient.Builder(this)
                     .addApi(API)
@@ -166,13 +168,13 @@ public class WearReceiver extends WearableListenerService implements GoogleApiCl
                     .addOnConnectionFailedListener(this)
                     .build();
             mGoogleApiClient.connect();
-            Log.v("WearReceiver", "Google API connected! Hopefully.");
+            Log.v(TAG, "Google API connected! Hopefully.");
         }
     }
 
     @Override
     public void onConnected(Bundle connectionHint) {
-        Log.v("WearReceiver", "onConnected!");
+        Log.v(TAG, "onConnected!");
     }
 
     @Override
@@ -180,7 +182,7 @@ public class WearReceiver extends WearableListenerService implements GoogleApiCl
         // The connection has been interrupted.
         // Disable any UI components that depend on Google APIs
         // until onConnected() is called.
-        Log.v("WearReceiver", "suspended connection!");
+        Log.v(TAG, "suspended connection!");
         mGoogleApiClient.disconnect();
         mGoogleApiClient = null;
     }
@@ -192,16 +194,16 @@ public class WearReceiver extends WearableListenerService implements GoogleApiCl
         //
         // More about this in the next section.
 
-        Log.v("WearReceiver", "lost connection!");
+        Log.v(TAG, "lost connection!");
         mGoogleApiClient.disconnect();
         mGoogleApiClient = null;
     }
 
     public void onPeerConnected(Node peer) {
-        Log.v("WearReceiver", "phone is connected!, "+peer.getDisplayName());
+        Log.v(TAG, "phone is connected!, "+peer.getDisplayName());
     }
 
     public void onPeerDisconnected(Node peer) {
-        Log.v("WearReceiver", "phone is disconnected!, "+peer.getDisplayName());
+        Log.v(TAG, "phone is disconnected!, "+peer.getDisplayName());
     }
 }

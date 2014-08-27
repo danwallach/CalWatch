@@ -10,6 +10,7 @@ import android.widget.TextView;
 import com.google.android.gms.common.api.GoogleApiClient;
 
 public class WearActivity extends Activity {
+    private static final String TAG = "WearActivity";
 
     private static WearActivity singletonActivity = null;
     private WearReceiver receiver;
@@ -23,7 +24,7 @@ public class WearActivity extends Activity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        Log.v("WearActivity", "starting onCreate");
+        Log.v(TAG, "starting onCreate");
 
         singletonActivity = this;
 
@@ -47,7 +48,7 @@ public class WearActivity extends Activity {
             public void onLayoutInflated(WatchViewStub stub) {
                 view = (MyViewAnim) stub.findViewById(R.id.surfaceView);
 
-                Log.v("WearActivity", "starting data API receiver");
+                Log.v(TAG, "starting data API receiver");
             }
         });
     }
@@ -58,7 +59,7 @@ public class WearActivity extends Activity {
 
     public void setClockFace(ClockFace face) {
         if(receiver == null)
-            Log.v("WearActivity", "no receiver running yet!");
+            Log.v(TAG, "no receiver running yet!");
         else
             receiver.setClockFace(face);
     }

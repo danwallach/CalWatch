@@ -28,10 +28,12 @@ import java.util.Observable;
  * Decent documentation: http://www.grokkingandroid.com/androids-calendarcontract-provider/
  */
 public class CalendarFetcher extends Observable implements Runnable {
+    private final static String TAG = "CalendarFetcher";
+
     private Context ctx = null;
 
     public CalendarFetcher() {
-        Log.v("CalendarFetcher", "starting fetcher thread");
+        Log.v(TAG, "starting fetcher thread");
 
         this.ctx = PhoneActivity.getSingletonActivity();
         this.conditionWait = new ConditionVariable();
@@ -50,7 +52,7 @@ public class CalendarFetcher extends Observable implements Runnable {
     private long lastQueryStartTime = 0;
 
     public void run() {
-        Log.v("CalendarFetcher", "CalendarFetcher starting");
+        Log.v(TAG, "starting");
         running = true;
 
         //
@@ -72,7 +74,7 @@ public class CalendarFetcher extends Observable implements Runnable {
         // against the calendar.
         //
         for(;;) {
-            // Log.v("CalendarFetcher", "CalendarFetcher ping");
+            // Log.v(TAG, "ping");
             long queryStartMillis = (long) (Math.floor(SystemClock.currentThreadTimeMillis() / 3600000.0) * 360000.0); // if it's currently 12:32pm, this value will be 12:00pm
             if(queryStartMillis > lastQueryStartTime) { // we've rolled to a new hour, so it's time to reload!
                 newContentAvailable = true;
@@ -93,10 +95,10 @@ public class CalendarFetcher extends Observable implements Runnable {
             conditionWait.close();
             if(conditionWait.block(2000)) { // wait for two seconds, wake up, and see what's up
                 // we were signalled
-                Log.v("CalendarFetcher", "CalendarFetcher: Wakeup signal received");
+                Log.v(TAG, "Wakeup signal received");
             } // else {
                 // the timeout happened
-                // Log.v("CalendarFetcher", "CalendarFetcher: Wakeup timeout");
+                // Log.v(TAG, " Wakeup timeout");
             // }
 
             if(!running && observer != null) {
@@ -128,7 +130,7 @@ public class CalendarFetcher extends Observable implements Runnable {
     public void haltUpdates() {
         // we might get here from the UI thread even though we haven't finished setting things up yet,
         // so the proper answer is to quietly do nothing and return
-        Log.v("CalendarFetcher", "Calendar: halt update");
+        Log.v(TAG, "Calendar: halt update");
         if(conditionWait != null) {
             running = false;
             conditionWait.open();
@@ -138,7 +140,7 @@ public class CalendarFetcher extends Observable implements Runnable {
     public void resumeUpdates() {
         // we might get here from the UI thread even though we haven't finished setting things up yet,
         // so the proper answer is to quietly do nothing and return
-        Log.v("CalendarFetcher", "Calendar: resume update");
+        Log.v(TAG, "Calendar: resume update");
         if(conditionWait != null) {
             running = true;
             newContentAvailable = true;
@@ -161,7 +163,7 @@ public class CalendarFetcher extends Observable implements Runnable {
         CalendarResults cr = new CalendarResults();
 
         // first, get the list of calendars
-        Log.v("CalendarFetcher", "CalendarFetcher starting to load content");
+        Log.v(TAG, "starting to load content");
         final String[] calProjection =
                 new String[]{
                         CalendarContract.Calendars._ID,
@@ -194,14 +196,14 @@ public class CalendarFetcher extends Observable implements Runnable {
                 cal.calendarColorKey = calCursor.getString(i++);
                 cal.visible = (calCursor.getInt(i++) != 0);
 
-                // Log.v("CalendarFetcher", "Found calendar. ID(" + cal.ID + "), name(" + cal.name + "), color(" + Integer.toHexString(cal.calendarColor) + "), colorKey(" + cal.calendarColorKey + "), accountName(" + cal.accountName + "), visible(" + Boolean.toString(cal.visible)+ ")");
+                // Log.v(TAG, "Found calendar. ID(" + cal.ID + "), name(" + cal.name + "), color(" + Integer.toHexString(cal.calendarColor) + "), colorKey(" + cal.calendarColorKey + "), accountName(" + cal.accountName + "), visible(" + Boolean.toString(cal.visible)+ ")");
 
                 cr.calendars.put(cal.ID, cal);
                 calendarsFound++;
             }
             while (calCursor.moveToNext()) ;
         }
-        Log.v("CalendarFetcher", "calendars found ("+ calendarsFound + ")");
+        Log.v(TAG, "calendars found ("+ calendarsFound + ")");
 
         calCursor.close();
 
@@ -222,7 +224,7 @@ public class CalendarFetcher extends Observable implements Runnable {
                 color.key = colorCursor.getString(i++);
                 color.paint = PaintCan.getPaint(color.argb);
 
-                // Log.v("CalendarFetcher", "Found color. ID(" + color.key + "), argb=(" + Integer.toHexString(color.argb) + ")");
+                // Log.v(TAG, "Found color. ID(" + color.key + "), argb=(" + Integer.toHexString(color.argb) + ")");
 
                 cr.colors.put(color.key, color);
             } while(colorCursor.moveToNext());
@@ -241,7 +243,7 @@ public class CalendarFetcher extends Observable implements Runnable {
         long queryStartMillis = (long) (Math.floor(time / 3600000.0) * 3600000.0); // if it's currently 12:32pm, this value will be 12:00pm
         long queryEndMillis = queryStartMillis + 43200000; // twelve hours later
 
-        Log.v("CalendarFetcher", "Query times... Now: " + DateUtils.formatDateTime(ctx, time, DateUtils.FORMAT_SHOW_DATE | DateUtils.FORMAT_SHOW_TIME) + ", QueryStart: " + DateUtils.formatDateTime(ctx, queryStartMillis, DateUtils.FORMAT_SHOW_TIME | DateUtils.FORMAT_SHOW_DATE)  + ", QueryEnd: " + DateUtils.formatDateTime(ctx, queryEndMillis, DateUtils.FORMAT_SHOW_TIME | DateUtils.FORMAT_SHOW_DATE));
+        Log.v(TAG, "Query times... Now: " + DateUtils.formatDateTime(ctx, time, DateUtils.FORMAT_SHOW_DATE | DateUtils.FORMAT_SHOW_TIME) + ", QueryStart: " + DateUtils.formatDateTime(ctx, queryStartMillis, DateUtils.FORMAT_SHOW_TIME | DateUtils.FORMAT_SHOW_DATE)  + ", QueryEnd: " + DateUtils.formatDateTime(ctx, queryEndMillis, DateUtils.FORMAT_SHOW_TIME | DateUtils.FORMAT_SHOW_DATE));
 
         // select events that end after the start of our window AND start before the end of our window,
         // filtering out any all-day events and any events that aren't visible
@@ -334,10 +336,10 @@ public class CalendarFetcher extends Observable implements Runnable {
 
                     } catch (DateException de) {
                         // whatever... just means that we won't be adding any recurring events
-                        Log.v("CalendarFetcher", "DateException: " + de.toString());
+                        Log.v(TAG, "DateException: " + de.toString());
                     } catch (EventRecurrence.InvalidFormatException ie) {
                         // this shouldn't really happen, but at least it doesn't happen often!
-                        Log.v("CalendarFetcher", "InvalidFormatException: Title(" + e.title +
+                        Log.v(TAG, "InvalidFormatException: Title(" + e.title +
                                 "), dtStart(" + e.startTime +
                                 "), dtEnd(" + e.endTime +
                                 "), rRule(" + e.rRule +
@@ -369,7 +371,7 @@ public class CalendarFetcher extends Observable implements Runnable {
         // sort out the overlapping calendar layers
         cr.maxLevel = EventLayout.go(cr.events);
 
-        Log.v("CalendarFetcher", "database found events(" + cr.events.size() + ")");
+        Log.v(TAG, "database found events(" + cr.events.size() + ")");
 
         // EventLayout.debugDump(ctx, cr.events);
         /*
@@ -386,10 +388,10 @@ public class CalendarFetcher extends Observable implements Runnable {
     }
 
     private void addEvent(CalendarResults cr, CalendarResults.Event e, long queryStartMillis, long queryEndMillis) {
-        // Log.v("CalendarFetcher", "Found visible event. Title(" + e.title + "), calID(" + e.calendarID + "), eventColor(" + Integer.toHexString(e.eventColor) + "), eventColorKey(" + e.eventColorKey + "), displayColor(" + Integer.toHexString(e.displayColor) + ")");
-        // Log.v("CalendarFetcher", "--> Start: " + DateUtils.formatDateTime(ctx, e.startTime, DateUtils.FORMAT_SHOW_DATE | DateUtils.FORMAT_SHOW_TIME) + ", End: " + DateUtils.formatDateTime(ctx, e.endTime, DateUtils.FORMAT_SHOW_TIME | DateUtils.FORMAT_SHOW_DATE));
+        // Log.v(TAG, "Found visible event. Title(" + e.title + "), calID(" + e.calendarID + "), eventColor(" + Integer.toHexString(e.eventColor) + "), eventColorKey(" + e.eventColorKey + "), displayColor(" + Integer.toHexString(e.displayColor) + ")");
+        // Log.v(TAG, "--> Start: " + DateUtils.formatDateTime(ctx, e.startTime, DateUtils.FORMAT_SHOW_DATE | DateUtils.FORMAT_SHOW_TIME) + ", End: " + DateUtils.formatDateTime(ctx, e.endTime, DateUtils.FORMAT_SHOW_TIME | DateUtils.FORMAT_SHOW_DATE));
         if (e.startTime < queryEndMillis && e.endTime > queryStartMillis && e.visible && !e.allDay) {
-            // Log.v("CalendarFetcher", "--> Match!");
+            // Log.v(TAG, "--> Match!");
 
             // if we get here, the event is visible; we just need to clip it to fit the twelve hour window
             if (e.startTime < queryStartMillis) e.startTime = queryStartMillis;

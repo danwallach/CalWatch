@@ -10,15 +10,17 @@ import java.util.Observable;
 import java.util.Observer;
 
 public class WatchCalendarService extends Service {
+    private final String TAG = "WatchCalendarService";
+
     private static WatchCalendarService singletonService;
     private WearSender wearSender;
     private ClockFaceStub clockFaceStub;
     private CalendarFetcher calendarFetcher;
 
     public WatchCalendarService() {
-        Log.v("WatchCalendarService", "starting calendar fetcher");
+        Log.v(TAG, "starting calendar fetcher");
         if(singletonService != null) {
-            Log.v("WatchCalendarService", "whoa, multiple services!");
+            Log.v(TAG, "whoa, multiple services!");
             if(calendarFetcher != null)
                 calendarFetcher.haltUpdates();
         }
@@ -47,7 +49,7 @@ public class WatchCalendarService extends Service {
     }
 
     public void savePreferences() {
-        Log.v("WatchCalendarService", "savePreferences");
+        Log.v(TAG, "savePreferences");
         SharedPreferences prefs = getSharedPreferences("org.dwallach.calwatch.prefs", MODE_PRIVATE);
         SharedPreferences.Editor editor = prefs.edit();
 
@@ -55,20 +57,20 @@ public class WatchCalendarService extends Service {
         editor.putInt("faceMode", clockFaceStub.getFaceMode());
 
         if(!editor.commit())
-            Log.v("WatchCalendarService", "savePreferences commit failed ?!");
+            Log.v(TAG, "savePreferences commit failed ?!");
 
         if(wearSender != null) {
             wearSender.store(clockFaceStub);
             wearSender.sendNow(false);
         } else
-            Log.e("WatchCalendarService", "no sender available to save preferences ?!");
+            Log.e(TAG, "no sender available to save preferences ?!");
     }
 
     public void loadPreferences() {
-        Log.v("WatchCalendarService", "loadPreferences");
+        Log.v(TAG, "loadPreferences");
 
         if(clockFaceStub == null) {
-            Log.v("WatchCalendarService", "loadPreferences has no clock to put them in");
+            Log.v(TAG, "loadPreferences has no clock to put them in");
             return;
         }
 
@@ -85,11 +87,11 @@ public class WatchCalendarService extends Service {
             wearSender.store(clockFaceStub);
             wearSender.sendNow(false);
         } else
-            Log.e("WatchCalendarService", "no sender available to load preferences ?!");
+            Log.e(TAG, "no sender available to load preferences ?!");
 
         if(phoneActivity != null) {
             if (phoneActivity.toggle == null || phoneActivity.toolButton == null || phoneActivity.numbersButton == null || phoneActivity.liteButton == null) {
-                Log.v("WatchCalendarService", "loadPreferences has no widgets to update");
+                Log.v(TAG, "loadPreferences has no widgets to update");
                 return;
             }
 
@@ -102,7 +104,7 @@ public class WatchCalendarService extends Service {
     // on the calendar's thread, not the UI thread
     private void calHandler() {
         if(wearSender == null) {
-            Log.v("WatchCalendarService", "no wear sender?!");
+            Log.v(TAG, "no wear sender?!");
             return;
         }
         wearSender.store(clockFaceStub);
@@ -119,7 +121,7 @@ public class WatchCalendarService extends Service {
 
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
-        Log.v("WatchCalendarService", "service starting!");
+        Log.v(TAG, "service starting!");
         // handleCommand(intent);
         // We want this service to continue running until it is explicitly
         // stopped, so return sticky.
@@ -128,12 +130,12 @@ public class WatchCalendarService extends Service {
 
     @Override
     public void onCreate() {
-        Log.v("WatchCalendarService", "service created!");
+        Log.v(TAG, "service created!");
     }
 
     @Override
     public void onDestroy() {
         // Cancel the persistent notification.
-        Log.v("WatchCalendarService", "service destroyed!");
+        Log.v(TAG, "service destroyed!");
     }
 }

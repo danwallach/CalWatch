@@ -25,6 +25,8 @@ import android.widget.Switch;
 
 
 public class PhoneActivity extends Activity {
+    private final static String TAG = "PhoneActivity";
+
     private static PhoneActivity theActivity;
 
     Switch toggle;
@@ -41,22 +43,22 @@ public class PhoneActivity extends Activity {
     //
     public void setFaceModeUI(int mode) {
         if(toolButton == null || numbersButton == null || liteButton == null) {
-            Log.v("PhoneActivity", "trying to set face mode without buttons active yet");
+            Log.v(TAG, "trying to set face mode without buttons active yet");
             return;
         }
 
         switch(mode) {
-            case ClockFaceStub.FACE_TOOL:
+            case ClockFace.FACE_TOOL:
                 toolButton.performClick();
                 break;
-            case ClockFaceStub.FACE_NUMBERS:
+            case ClockFace.FACE_NUMBERS:
                 numbersButton.performClick();
                 break;
-            case ClockFaceStub.FACE_LITE:
+            case ClockFace.FACE_LITE:
                 liteButton.performClick();
                 break;
             default:
-                Log.v("PhoneActivity", "bogus face mode: " + mode);
+                Log.v(TAG, "bogus face mode: " + mode);
                 break;
         }
     }
@@ -65,17 +67,17 @@ public class PhoneActivity extends Activity {
         int mode = -1;
 
         if(toolButton == null || numbersButton == null || liteButton == null) {
-            Log.v("PhoneActivity", "trying to set face mode without buttons active yet");
+            Log.v(TAG, "trying to set face mode without buttons active yet");
             return;
         }
 
         if(toolButton.isChecked())
-            mode = ClockFaceStub.FACE_TOOL;
+            mode = ClockFace.FACE_TOOL;
         else if(numbersButton.isChecked())
-            mode = ClockFaceStub.FACE_NUMBERS;
+            mode = ClockFace.FACE_NUMBERS;
         else if(liteButton.isChecked())
-            mode = ClockFaceStub.FACE_LITE;
-        else Log.v("PhoneActivity", "no buttons are selected? weird.");
+            mode = ClockFace.FACE_LITE;
+        else Log.v(TAG, "no buttons are selected? weird.");
 
         if(mode != -1 && clockFace != null) {
             clockFace.setFaceMode(mode);
@@ -106,7 +108,7 @@ public class PhoneActivity extends Activity {
     }
 
     private void activitySetup() {
-        textOut("And in the beginning ...");
+        Log.v(TAG, "And in the beginning ...");
         theActivity = this;
 
         setContentView(R.layout.activity_phone);
@@ -117,7 +119,7 @@ public class PhoneActivity extends Activity {
         toolButton = (RadioButton) findViewById(R.id.toolButton);
         numbersButton = (RadioButton) findViewById(R.id.numbersButton);
 
-        textOut("registering callback");
+        Log.v(TAG, "registering callback");
 
         // Register the onClick listener for the seconds? button
         toggle.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
@@ -162,39 +164,33 @@ public class PhoneActivity extends Activity {
 
     protected void onStop() {
         super.onStop();
-        textOut("Stop!");
+        Log.v(TAG, "Stop!");
     }
 
     protected void onStart() {
         super.onStart();
-        textOut("Start!");
+        Log.v(TAG, "Start!");
     }
 
     protected void onResume() {
         super.onResume();
 
         if(this != theActivity) {
-            textOut("Resuming on new activity!");
+            Log.v(TAG, "Resuming on new activity!");
             activitySetup();
         }
 
-        textOut("Resume!");
+        Log.v(TAG, "Resume!");
     }
 
     protected void onPause() {
         super.onPause();
-        textOut("Pause!");
-    }
-
-    public static void textOut(String text) {
-        Log.v("PhoneActivity", text);
-
-        // there used to be a textView, but it's dead, so this method is now vestigal
+        Log.v(TAG, "Pause!");
     }
 
     // when the user clicks the button
     protected void showSecondsStateChange(boolean state) {
-        textOut(state?"Selected":"Unselected");
+        Log.v(TAG, state?"Selected":"Unselected");
 
         if(clockFace != null) {
             clockFace.setShowSeconds(state);
