@@ -163,7 +163,7 @@ public class WearReceiver extends WearableListenerService implements GoogleApiCl
         Log.v(TAG, "onCreate!");
         if(mGoogleApiClient == null) {
             mGoogleApiClient = new GoogleApiClient.Builder(this)
-                    .addApi(API)
+                    .addApi(Wearable.API)
                     .addConnectionCallbacks(this)
                     .addOnConnectionFailedListener(this)
                     .build();
