@@ -38,6 +38,7 @@ TODO deal with recurring events
 TODO port to Android Wear
 -- Useful article including sample code: http://toastdroid.com/2014/07/18/developing-watchfaces-for-android-wear/
 -- How to set up the damn emulator: http://www.tech-recipes.com/rx/49586/how-do-i-connect-an-android-wear-emulator-to-a-real-phone/
+   adb -d forward tcp:5601 tcp:5601
 
 Subtasks:
     TODO sort out DataItems to move data from phone to watch (use shiny new proto bufs)

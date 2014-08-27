@@ -13,11 +13,11 @@ public final class WireEventList extends Message {
 
   public static final List<WireEvent> DEFAULT_EVENTS = Collections.emptyList();
 
-  @ProtoField(tag = 1, label = REPEATED)
+  @ProtoField(tag = 1, label = Label.REPEATED)
   public final List<WireEvent> events;
 
   public WireEventList(List<WireEvent> events) {
-    this.events = immutableCopyOf(events);
+    this.events = Message.immutableCopyOf(events);
   }
 
   private WireEventList(Builder builder) {
@@ -48,11 +48,11 @@ public final class WireEventList extends Message {
     public Builder(WireEventList message) {
       super(message);
       if (message == null) return;
-      this.events = copyOf(message.events);
+      this.events = Message.copyOf(message.events);
     }
 
     public Builder events(List<WireEvent> events) {
-      this.events = checkForNulls(events);
+      this.events = Builder.checkForNulls(events);
       return this;
     }
 

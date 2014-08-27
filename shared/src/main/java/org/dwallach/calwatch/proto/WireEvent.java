@@ -17,19 +17,19 @@ public final class WireEvent extends Message {
   public static final Integer DEFAULT_MINLEVEL = 0;
   public static final Integer DEFAULT_MAXLEVEL = 0;
 
-  @ProtoField(tag = 1, type = INT64, label = REQUIRED)
+  @ProtoField(tag = 1, type = Datatype.INT64, label = Label.REQUIRED)
   public final Long startTime;
 
-  @ProtoField(tag = 2, type = INT64, label = REQUIRED)
+  @ProtoField(tag = 2, type = Datatype.INT64, label = Label.REQUIRED)
   public final Long endTime;
 
-  @ProtoField(tag = 3, type = INT32, label = REQUIRED)
+  @ProtoField(tag = 3, type = Datatype.INT32, label = Label.REQUIRED)
   public final Integer eventColor;
 
-  @ProtoField(tag = 4, type = INT32, label = REQUIRED)
+  @ProtoField(tag = 4, type = Datatype.INT32, label = Label.REQUIRED)
   public final Integer minLevel;
 
-  @ProtoField(tag = 5, type = INT32, label = REQUIRED)
+  @ProtoField(tag = 5, type = Datatype.INT32, label = Label.REQUIRED)
   public final Integer maxLevel;
 
   public WireEvent(Long startTime, Long endTime, Integer eventColor, Integer minLevel, Integer maxLevel) {
