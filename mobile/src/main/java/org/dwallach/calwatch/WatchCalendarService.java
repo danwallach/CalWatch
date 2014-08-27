@@ -76,7 +76,7 @@ public class WatchCalendarService extends Service {
 
         SharedPreferences prefs = getSharedPreferences("org.dwallach.calwatch.prefs", MODE_PRIVATE);
         boolean showSeconds = prefs.getBoolean("showSeconds", true);
-        int faceMode = prefs.getInt("faceMode", ClockFaceStub.FACE_TOOL);
+        int faceMode = prefs.getInt("faceMode", ClockFace.FACE_TOOL);
 
         clockFaceStub.setFaceMode(faceMode);
         clockFaceStub.setShowSeconds(showSeconds);

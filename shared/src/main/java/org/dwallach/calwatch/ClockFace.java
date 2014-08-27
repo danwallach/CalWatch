@@ -54,6 +54,7 @@ public class ClockFace {
     private Paint white, yellow, smWhite, smYellow, black, smBlack, smRed, gray, outlineBlack, superThinBlack;
 
     Context context;
+    Canvas canvas;
 
     public final static int FACE_TOOL = 0;
     public final static int FACE_NUMBERS = 1;
@@ -114,6 +115,14 @@ public class ClockFace {
         superThinBlack.setStyle(Paint.Style.STROKE);
     }
 
+    public void setContext(Context context) {
+        this.context = context;
+    }
+
+    public void setCanvas(Canvas canvas) {
+        this.canvas = canvas;
+    }
+
     public void setShowSeconds(boolean showSeconds) {
         this.showSeconds = showSeconds;
     }
@@ -133,19 +142,25 @@ public class ClockFace {
      * the expectation is that you call this method *not* from the UI thread but instead
      * from a helper thread, elsewhere
      */
-    public void drawEverything(Context context, Canvas canvas) {
+    public void drawEverything(Canvas canvas) {
+        // note that we're saving the main canvas in a class variable; some methods in the
+        // class don't take a canvas and will just draw into this class-canvas. Others take
+        // a canvas as an argument. Those ones, specifically, might be used elsewhere at some
+        // future time for rendering to off-screen bitmaps (wrapped in a Canvas).
+        this.canvas = canvas;
+
         // background?
 
         // canvas.drawCircle(cx, cy, radius, gray);
         // canvas.drawCircle(cx, cy, radius * .95f, black);
 
         // draw the calendar wedges first, at the bottom of the stack, then the face indices
-        drawCalendar(context, canvas);
-        drawFace(context, canvas);
+        drawCalendar();
+        drawFace();
 
         // something a real watch can't do: float the text over the hands
-        drawHands(context, canvas);
-        drawMonthBox(context, canvas);
+        drawHands();
+        drawMonthBox();
     }
 
     public void drawRadialLine(Canvas canvas, double seconds, float startRadius, float endRadius, Paint paint, Paint shadowPaint) {
@@ -234,7 +249,7 @@ public class ClockFace {
         canvas.drawPath(p, outlinePaint);
     }
 
-    public void drawMonthBox(Context context, Canvas canvas) {
+    public void drawMonthBox() {
         // for now, hard-coded to the 9-oclock position
         String m = localMonthDay();
         String d = localDayOfWeek();
@@ -264,7 +279,7 @@ public class ClockFace {
     private volatile Path facePathCache = null;
     private volatile int facePathCacheMode = -1;
 
-    public void drawFace(Context context, Canvas canvas) {
+    public void drawFace() {
         Path p = facePathCache; // make a local copy, avoid concurrency crap
         // draw thin lines (indices)
 
@@ -367,7 +382,7 @@ public class ClockFace {
         }
     }
 
-    public void drawHands(Context context, Canvas canvas) {
+    public void drawHands() {
         TimeZone tz = TimeZone.getDefault();
         int gmtOffset = tz.getRawOffset() + tz.getDSTSavings();
         long time = System.currentTimeMillis() + gmtOffset;
@@ -402,7 +417,7 @@ public class ClockFace {
         this.eventList = eventList;
     }
 
-    public void drawCalendar(Context context, Canvas canvas) {
+    public void drawCalendar() {
         if(eventList == null) return; // again, must not be ready yet
 
         TimeZone tz = TimeZone.getDefault();

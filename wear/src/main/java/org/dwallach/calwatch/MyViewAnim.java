@@ -202,7 +202,7 @@ public class MyViewAnim extends SurfaceView implements SurfaceHolder.Callback {
                 }
 
                 c.drawColor(Color.TRANSPARENT, PorterDuff.Mode.CLEAR);
-                clockFace.drawEverything(context, c);
+                clockFace.drawEverything(c);
 
 
 
