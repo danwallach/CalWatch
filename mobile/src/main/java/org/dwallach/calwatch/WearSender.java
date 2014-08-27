@@ -1,11 +1,15 @@
 package org.dwallach.calwatch;
 
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.os.Bundle;
 import android.util.Log;
 
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.api.GoogleApiClient;
 import com.google.android.gms.common.api.PendingResult;
+import com.google.android.gms.common.api.ResultCallback;
+import com.google.android.gms.wearable.Asset;
 import com.google.android.gms.wearable.DataApi;
 import com.google.android.gms.wearable.DataMap;
 import com.google.android.gms.wearable.PutDataMapRequest;
@@ -22,17 +26,40 @@ import java.util.List;
  */
 public class WearSender implements GoogleApiClient.ConnectionCallbacks, GoogleApiClient.OnConnectionFailedListener {
     private static final String TAG = "WearSender";
-    /*
-     * Top half of this file: code for handling our watch / calendar data. Bottom half: boilerplate
-     * for dealing with PlayServices and the Wear API. Guess which is longer and uglier?
-     */
+
+    /* code that's known to work, taken from WearOngoingNotificationSample
+
+    private void sendMessage() {
+        if (mGoogleApiClient.isConnected()) {
+            PutDataMapRequest putDataMapRequest = PutDataMapRequest.create(Constants.PATH_NOTIFICATION);
+
+            // Add data to the request
+            putDataMapRequest.getDataMap().putString(Constants.KEY_TITLE, String.format("hello world! %d", count++));
+
+            Bitmap icon = BitmapFactory.decodeResource(getResources(), R.drawable.ic_launcher);
+            Asset asset = createAssetFromBitmap(icon);
+            putDataMapRequest.getDataMap().putAsset(Constants.KEY_IMAGE, asset);
+
+            PutDataRequest request = putDataMapRequest.asPutDataRequest();
+
+            Wearable.DataApi.putDataItem(mGoogleApiClient, request)
+                    .setResultCallback(new ResultCallback<DataApi.DataItemResult>() {
+                        @Override
+                        public void onResult(DataApi.DataItemResult dataItemResult) {
+                            Log.d(TAG, "putDataItem status: " + dataItemResult.getStatus().toString());
+                        }
+                    });
+        }
+    }
+    */
+
+
     public void store(List<WireEvent> wireEvents) {
         WireEventList wList = new WireEventList(wireEvents);
         byte[] wBytes = wList.toByteArray();
 
         Log.v(TAG, "preparing event list for transmission, length(" + wBytes.length + " bytes)");
 
-        makeMapRequest();
         DataMap map = mapRequest.getDataMap();
         map.putByteArray(Constants.WearDataEvents, wBytes);
     }
@@ -43,15 +70,15 @@ public class WearSender implements GoogleApiClient.ConnectionCallbacks, GoogleAp
 
         Log.v(TAG, "preparing preferences for transmission");
 
-        makeMapRequest();
         DataMap map = mapRequest.getDataMap();
         map.putBoolean(Constants.WearDataShowSeconds, showSeconds);
         map.putInt(Constants.WearDataFaceMode, faceMode);
     }
-
-    private void makeMapRequest() {
-        if(mapRequest == null)
+    public void begin() {
+        if(mGoogleApiClient.isConnected())
             mapRequest = PutDataMapRequest.create(Constants.WearDataPath);
+        else
+            Log.v(TAG, "MapRequest: No Google API!");
     }
 
     private PutDataMapRequest mapRequest;

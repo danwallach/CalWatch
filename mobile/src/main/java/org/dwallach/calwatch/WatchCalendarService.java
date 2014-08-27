@@ -60,6 +60,7 @@ public class WatchCalendarService extends Service {
             Log.v(TAG, "savePreferences commit failed ?!");
 
         if(wearSender != null) {
+            wearSender.begin();
             wearSender.store(clockFaceStub);
             wearSender.sendNow(false);
         } else
@@ -84,6 +85,7 @@ public class WatchCalendarService extends Service {
         clockFaceStub.setShowSeconds(showSeconds);
 
         if(wearSender != null) {
+            wearSender.begin();
             wearSender.store(clockFaceStub);
             wearSender.sendNow(false);
         } else
@@ -107,6 +109,7 @@ public class WatchCalendarService extends Service {
             Log.v(TAG, "no wear sender?!");
             return;
         }
+        wearSender.begin();
         wearSender.store(clockFaceStub);
         wearSender.store(calendarFetcher.getContent().getWireEvents());
         wearSender.sendNow(true);
