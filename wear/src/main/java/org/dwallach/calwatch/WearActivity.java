@@ -11,9 +11,9 @@ import com.google.android.gms.common.api.GoogleApiClient;
 
 public class WearActivity extends Activity {
     private static final String TAG = "WearActivity";
+    private static ClockFace clockFace;
 
     private static WearActivity singletonActivity = null;
-    private WearReceiver receiver;
 
     public static WearActivity getSingletonActivity() {
         return singletonActivity;
@@ -29,18 +29,12 @@ public class WearActivity extends Activity {
         singletonActivity = this;
 
         // start the calendar service, if it's not already running
-        receiver = WearReceiver.getSingleton();
-
-        if(receiver == null) {
+        if(WearReceiver.getSingleton() == null) {
             Intent serviceIntent = new Intent(this, WearReceiver.class);
             startService(serviceIntent);
-
-            // do it again; we should get something different this time
-            receiver = WearReceiver.getSingleton();
         }
 
         // bring up the UI
-
         setContentView(R.layout.activity_wear);
         final WatchViewStub stub = (WatchViewStub) findViewById(R.id.watch_view_stub);
         stub.setOnLayoutInflatedListener(new WatchViewStub.OnLayoutInflatedListener() {
@@ -53,14 +47,11 @@ public class WearActivity extends Activity {
         });
     }
 
-    public void loadPreferences() {
-        // nothing, for now
+    public static void setClockFace(ClockFace face) {
+        WearActivity.clockFace = face;
     }
 
-    public void setClockFace(ClockFace face) {
-        if(receiver == null)
-            Log.v(TAG, "no receiver running yet!");
-        else
-            receiver.setClockFace(face);
+    public static ClockFace getClockFace() {
+        return clockFace;
     }
 }

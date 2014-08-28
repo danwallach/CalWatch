@@ -4,6 +4,7 @@ import android.app.Service;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.IBinder;
+import android.provider.ContactsContract;
 import android.util.Log;
 
 import java.util.Observable;
@@ -27,7 +28,10 @@ public class WatchCalendarService extends Service {
 
         singletonService = this;
 
-        wearSender = new WearSender();
+        // we'd much rather use the *service* than the *activity* here, but that seems
+        // not work, for unknown reasons
+        wearSender = new WearSender(PhoneActivity.getSingletonActivity());
+
         calendarFetcher = new CalendarFetcher(); // automatically allocates a thread and runs
 
         calendarFetcher.addObserver(new Observer() {
@@ -60,9 +64,8 @@ public class WatchCalendarService extends Service {
             Log.v(TAG, "savePreferences commit failed ?!");
 
         if(wearSender != null) {
-            wearSender.begin();
             wearSender.store(clockFaceStub);
-            wearSender.sendNow(false);
+            wearSender.sendNow();
         } else
             Log.e(TAG, "no sender available to save preferences ?!");
     }
@@ -85,9 +88,8 @@ public class WatchCalendarService extends Service {
         clockFaceStub.setShowSeconds(showSeconds);
 
         if(wearSender != null) {
-            wearSender.begin();
             wearSender.store(clockFaceStub);
-            wearSender.sendNow(false);
+            wearSender.sendNow();
         } else
             Log.e(TAG, "no sender available to load preferences ?!");
 
@@ -109,10 +111,8 @@ public class WatchCalendarService extends Service {
             Log.v(TAG, "no wear sender?!");
             return;
         }
-        wearSender.begin();
-        wearSender.store(clockFaceStub);
-        wearSender.store(calendarFetcher.getContent().getWireEvents());
-        wearSender.sendNow(true);
+        wearSender.store(calendarFetcher.getContent().getWireEvents(), clockFaceStub);
+        wearSender.sendNow();
     }
 
 

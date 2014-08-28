@@ -1,10 +1,8 @@
 // compile with:
 
-// % cd CalWatch/mobile
+// % cd CalWatch/shared
 // % java -jar wire-compiler-1.5.1-jar-with-dependencies.jar --proto_path=src/main/java --java_out=src/main/java/ org/dwallach/calwatch/proto/calendar.proto
 
-
-// then copy the resulting WireEvent.java file from the 'mobile' side over to the 'wear' side
 
 // Hopefully, this won't have to happen very often. All of this really belongs in the Gradle file,
 // with automated support from Android Studio, but there are bugs surrounding that. Lovely. So we go
@@ -20,6 +18,9 @@ message WireEvent {
     required int32 maxLevel = 5;
 }
 
-message WireEventList {
+message WireUpdate {
     repeated WireEvent events = 1;
+    required bool newEvents = 2; // true: the events are new, have a look; false: ignore the events field
+    required bool showSeconds = 3;
+    required int32 faceMode = 4;
 }

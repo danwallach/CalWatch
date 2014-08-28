@@ -36,8 +36,7 @@ public class MyViewAnim extends SurfaceView implements SurfaceHolder.Callback {
         this.context = ctx;
         getHolder().addCallback(this);
         clockFace = new ClockFace(ctx);
-        WearActivity.getSingletonActivity().setClockFace(clockFace);
-        WearActivity.getSingletonActivity().loadPreferences();
+        WearActivity.setClockFace(clockFace);
     }
 
     @Override
@@ -102,7 +101,6 @@ public class MyViewAnim extends SurfaceView implements SurfaceHolder.Callback {
                 });
             }
         }
-        WearActivity.getSingletonActivity().loadPreferences();
     }
 
     public void stop() {
