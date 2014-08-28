@@ -41,26 +41,10 @@ TODO port to Android Wear
    adb -d forward tcp:5601 tcp:5601
 
 Subtasks:
-    TODO sort out DataItems to move data from phone to watch (use shiny new proto bufs)
-    TODO move calendar scraping from main app to a separate service
     TODO and get things rendering locally and remotely?
-    -- instead, hacked out all the rendering from the phone side and moved it all to the watch
-
-    TODO service needs to deal with all the persistent state; app kicks service, service kicks watch
-    -- See: https://developer.android.com/reference/com/google/android/gms/wearable/WearableListenerService.html
-    -- Also, https://developer.android.com/training/wearables/data-layer/index.html
-    -- Probably the right page: https://developer.android.com/training/wearables/data-layer/events.html
-
-    -- Food for thought: we want the face state (tool, lite, etc.) and the show-seconds stuff to use
-       the standard data layer APIs, and we want to use the snazzy protobufs only for sending events,
-       since they're more complicated. This *might* simplify things, since the *activity* can set and
-       manage the persistent preferences and the *service* can deal with the events. Hmmm.
-
-    -- Current hackery: the service and the activity run in the same process, sharing memory, and
-       even share the same dispatch thread. So, we're calling back and forth from one to the other.
-       Keeping this straight under all circumstances will require this to not be a gross kludge, which
-       is exactly what it is right now.
-
+    TODO fix path caching / rendering (data is correctly available on the watch, at least!)
+    TODO new watch sends message to phone (hi! send data!)
+    TODO regular pings watch to phone (hi! not dead yet!)
     TODO verify on round face
     TODO deal with dimming (kill second hand? lower frame rate? all white?)
 
