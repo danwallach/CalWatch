@@ -17,6 +17,7 @@ import java.util.Locale;
 import java.util.TimeZone;
 
 public class ClockFace {
+    private static final String TAG = "ClockFace";
     //
     // A couple performance notes:
     //
@@ -403,7 +404,7 @@ public class ClockFace {
         }
     }
 
-    // private static int calendarTicker = 0;
+    private static int calendarTicker = 0;
     private long stippleTimeCache = -1;
     private Path stipplePathCache = null;
 
@@ -419,7 +420,12 @@ public class ClockFace {
     }
 
     public void drawCalendar() {
-        if(eventList == null) return; // again, must not be ready yet
+        calendarTicker++;
+
+        if(eventList == null) {
+            if (calendarTicker % 1000 == 0) Log.v(TAG, "drawCalendar starting, eventList is null");
+            return; // again, must not be ready yet
+        }
 
         TimeZone tz = TimeZone.getDefault();
         int gmtOffset = tz.getRawOffset() + tz.getDSTSavings();
@@ -427,6 +433,9 @@ public class ClockFace {
         for(EventWrapper eventWrapper: eventList) {
             double arcStart, arcEnd;
             WireEvent e = eventWrapper.getWireEvent();
+            if(calendarTicker % 1000 == 0) {
+                Log.v(TAG, "rendering event: start "+ e.startTime + ", end " + e.endTime + ", minLevel " + e.minLevel + ", maxlevel " + e.maxLevel + ", color " + e.eventColor);
+            }
             // this turns out to have a bug if the start/end straddle midnight; this whole
             // business was to deal with float having inadequate resolution to deal with
             // milliseconds since the epoch. For now, we're leaving this out.
@@ -458,11 +467,9 @@ public class ClockFace {
             stipplePathCache = new Path();
             stippleTimeCache = stippleTime;
 
-            /*
             if(calendarTicker % 1000 == 0)
                 Log.v("ClockFace", "StippleTime(" + stippleTime +
                         "),  currentTime(" + Float.toString((System.currentTimeMillis() + gmtOffset) / 720000f) + ")");
-            */
 
             float r1=calendarRingMinRadius, r2;
 
@@ -514,16 +521,12 @@ public class ClockFace {
                 stipplePathCache.close();
                 // canvas.drawPath(p, black);
 
-                /*
                 if(calendarTicker % 1000 == 0)
                     Log.v("ClockFace", "x1(" + Float.toString(x1) + "), y1(" + Float.toString(y1) +
                             "), x2(" + Float.toString(x1) + "), y2(" + Float.toString(y2) +
                             "), xlow(" + Float.toString(xlow) + "), ylow(" + Float.toString(ylow) +
                             "), xhigh(" + Float.toString(xhigh) + "), yhigh(" + Float.toString(yhigh) +
                             ")");
-
-                calendarTicker++;
-                */
             }
         }
         canvas.drawPath(stipplePathCache, black);
