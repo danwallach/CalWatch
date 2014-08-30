@@ -17,6 +17,7 @@ import java.util.Locale;
 import java.util.TimeZone;
 
 public class ClockFace {
+    private static final String TAG = "ClockFace";
     //
     // A couple performance notes:
     //
@@ -42,7 +43,8 @@ public class ClockFace {
     private int cy;
     private int radius;
     private float shadow;
-    private boolean showSeconds = true;
+    private boolean showSeconds = Constants.DefaultShowSeconds;
+
     private static final float freqUpdate = 5;  // 5 Hz, or 0.20sec for second hand
 
     private static float calendarRingMinRadius = 0.2f;
@@ -54,12 +56,13 @@ public class ClockFace {
     private Paint white, yellow, smWhite, smYellow, black, smBlack, smRed, gray, outlineBlack, superThinBlack;
 
     Context context;
+    Canvas canvas;
 
     public final static int FACE_TOOL = 0;
     public final static int FACE_NUMBERS = 1;
     public final static int FACE_LITE = 2;
 
-    private volatile int faceMode = FACE_TOOL;
+    private volatile int faceMode = Constants.DefaultWatchFace;
 
     public void setFaceMode(int faceMode) {
         // warning: this might come in from another thread!
@@ -83,7 +86,7 @@ public class ClockFace {
     public ClockFace(Context context) {
         this.context = context;
 
-        WearActivity.textOut("ClockFace setup!");
+        Log.v("ClockFace", "ClockFace setup!");
         white = newPaint();
         yellow = newPaint();
         smWhite = newPaint();
@@ -114,6 +117,14 @@ public class ClockFace {
         superThinBlack.setStyle(Paint.Style.STROKE);
     }
 
+    public void setContext(Context context) {
+        this.context = context;
+    }
+
+    public void setCanvas(Canvas canvas) {
+        this.canvas = canvas;
+    }
+
     public void setShowSeconds(boolean showSeconds) {
         this.showSeconds = showSeconds;
     }
@@ -134,18 +145,24 @@ public class ClockFace {
      * from a helper thread, elsewhere
      */
     public void drawEverything(Canvas canvas) {
+        // note that we're saving the main canvas in a class variable; some methods in the
+        // class don't take a canvas and will just draw into this class-canvas. Others take
+        // a canvas as an argument. Those ones, specifically, might be used elsewhere at some
+        // future time for rendering to off-screen bitmaps (wrapped in a Canvas).
+        this.canvas = canvas;
+
         // background?
 
         // canvas.drawCircle(cx, cy, radius, gray);
         // canvas.drawCircle(cx, cy, radius * .95f, black);
 
         // draw the calendar wedges first, at the bottom of the stack, then the face indices
-        drawCalendar(canvas);
-        drawFace(canvas);
+        drawCalendar();
+        drawFace();
 
         // something a real watch can't do: float the text over the hands
-        drawHands(canvas);
-        drawMonthBox(canvas);
+        drawHands();
+        drawMonthBox();
     }
 
     public void drawRadialLine(Canvas canvas, double seconds, float startRadius, float endRadius, Paint paint, Paint shadowPaint) {
@@ -234,7 +251,7 @@ public class ClockFace {
         canvas.drawPath(p, outlinePaint);
     }
 
-    public void drawMonthBox(Canvas canvas) {
+    public void drawMonthBox() {
         // for now, hard-coded to the 9-oclock position
         String m = localMonthDay();
         String d = localDayOfWeek();
@@ -264,7 +281,7 @@ public class ClockFace {
     private volatile Path facePathCache = null;
     private volatile int facePathCacheMode = -1;
 
-    public void drawFace(Canvas canvas) {
+    public void drawFace() {
         Path p = facePathCache; // make a local copy, avoid concurrency crap
         // draw thin lines (indices)
 
@@ -367,7 +384,7 @@ public class ClockFace {
         }
     }
 
-    public void drawHands(Canvas canvas) {
+    public void drawHands() {
         TimeZone tz = TimeZone.getDefault();
         int gmtOffset = tz.getRawOffset() + tz.getDSTSavings();
         long time = System.currentTimeMillis() + gmtOffset;
@@ -387,26 +404,38 @@ public class ClockFace {
         }
     }
 
-    // private static int calendarTicker = 0;
+    private static int calendarTicker = 0;
     private long stippleTimeCache = -1;
     private Path stipplePathCache = null;
 
-    public void drawCalendar(Canvas canvas) {
-        WearReceiver receiver = WearReceiver.getSingleton();
-        if(receiver == null) return; // must not be ready yet
+    private int maxLevel;
+    private List<EventWrapper> eventList;
 
+    public void setMaxLevel(int maxLevel) {
+        this.maxLevel = maxLevel;
+    }
 
-        List<EventWrapper> results = receiver.getEventList();
-        if(results == null) return; // again, must not be ready yet
+    public void setEventList(List<EventWrapper> eventList) {
+        this.eventList = eventList;
+    }
 
-        int maxLevel = receiver.getMaxLevel();
+    public void drawCalendar() {
+        calendarTicker++;
+
+        if(eventList == null) {
+            if (calendarTicker % 1000 == 0) Log.v(TAG, "drawCalendar starting, eventList is null");
+            return; // again, must not be ready yet
+        }
 
         TimeZone tz = TimeZone.getDefault();
         int gmtOffset = tz.getRawOffset() + tz.getDSTSavings();
 
-        for(EventWrapper eventWrapper: results) {
+        for(EventWrapper eventWrapper: eventList) {
             double arcStart, arcEnd;
             WireEvent e = eventWrapper.getWireEvent();
+            if(calendarTicker % 1000 == 0) {
+                Log.v(TAG, "rendering event: start "+ e.startTime + ", end " + e.endTime + ", minLevel " + e.minLevel + ", maxlevel " + e.maxLevel + ", color " + e.eventColor);
+            }
             // this turns out to have a bug if the start/end straddle midnight; this whole
             // business was to deal with float having inadequate resolution to deal with
             // milliseconds since the epoch. For now, we're leaving this out.
@@ -438,11 +467,9 @@ public class ClockFace {
             stipplePathCache = new Path();
             stippleTimeCache = stippleTime;
 
-            /*
             if(calendarTicker % 1000 == 0)
                 Log.v("ClockFace", "StippleTime(" + stippleTime +
                         "),  currentTime(" + Float.toString((System.currentTimeMillis() + gmtOffset) / 720000f) + ")");
-            */
 
             float r1=calendarRingMinRadius, r2;
 
@@ -494,16 +521,12 @@ public class ClockFace {
                 stipplePathCache.close();
                 // canvas.drawPath(p, black);
 
-                /*
                 if(calendarTicker % 1000 == 0)
                     Log.v("ClockFace", "x1(" + Float.toString(x1) + "), y1(" + Float.toString(y1) +
                             "), x2(" + Float.toString(x1) + "), y2(" + Float.toString(y2) +
                             "), xlow(" + Float.toString(xlow) + "), ylow(" + Float.toString(ylow) +
                             "), xhigh(" + Float.toString(xhigh) + "), yhigh(" + Float.toString(yhigh) +
                             ")");
-
-                calendarTicker++;
-                */
             }
         }
         canvas.drawPath(stipplePathCache, black);

@@ -4,28 +4,34 @@ import android.app.Service;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.IBinder;
+import android.provider.ContactsContract;
 import android.util.Log;
 
 import java.util.Observable;
 import java.util.Observer;
 
 public class WatchCalendarService extends Service {
+    private final String TAG = "WatchCalendarService";
+
     private static WatchCalendarService singletonService;
     private WearSender wearSender;
     private ClockFaceStub clockFaceStub;
     private CalendarFetcher calendarFetcher;
 
     public WatchCalendarService() {
-        Log.v("WatchCalendarService", "starting calendar fetcher");
+        Log.v(TAG, "starting calendar fetcher");
         if(singletonService != null) {
-            Log.v("WatchCalendarService", "whoa, multiple services!");
+            Log.v(TAG, "whoa, multiple services!");
             if(calendarFetcher != null)
                 calendarFetcher.haltUpdates();
         }
 
         singletonService = this;
 
-        wearSender = new WearSender();
+        // we'd much rather use the *service* than the *activity* here, but that seems
+        // not work, for unknown reasons
+        wearSender = new WearSender(PhoneActivity.getSingletonActivity());
+
         calendarFetcher = new CalendarFetcher(); // automatically allocates a thread and runs
 
         calendarFetcher.addObserver(new Observer() {
@@ -47,7 +53,7 @@ public class WatchCalendarService extends Service {
     }
 
     public void savePreferences() {
-        Log.v("WatchCalendarService", "savePreferences");
+        Log.v(TAG, "savePreferences");
         SharedPreferences prefs = getSharedPreferences("org.dwallach.calwatch.prefs", MODE_PRIVATE);
         SharedPreferences.Editor editor = prefs.edit();
 
@@ -55,20 +61,20 @@ public class WatchCalendarService extends Service {
         editor.putInt("faceMode", clockFaceStub.getFaceMode());
 
         if(!editor.commit())
-            Log.v("WatchCalendarService", "savePreferences commit failed ?!");
+            Log.v(TAG, "savePreferences commit failed ?!");
 
         if(wearSender != null) {
             wearSender.store(clockFaceStub);
-            wearSender.sendNow(false);
+            wearSender.sendNow();
         } else
-            Log.e("WatchCalendarService", "no sender available to save preferences ?!");
+            Log.e(TAG, "no sender available to save preferences ?!");
     }
 
     public void loadPreferences() {
-        Log.v("WatchCalendarService", "loadPreferences");
+        Log.v(TAG, "loadPreferences");
 
         if(clockFaceStub == null) {
-            Log.v("WatchCalendarService", "loadPreferences has no clock to put them in");
+            Log.v(TAG, "loadPreferences has no clock to put them in");
             return;
         }
 
@@ -76,20 +82,20 @@ public class WatchCalendarService extends Service {
 
         SharedPreferences prefs = getSharedPreferences("org.dwallach.calwatch.prefs", MODE_PRIVATE);
         boolean showSeconds = prefs.getBoolean("showSeconds", true);
-        int faceMode = prefs.getInt("faceMode", ClockFaceStub.FACE_TOOL);
+        int faceMode = prefs.getInt("faceMode", ClockFace.FACE_TOOL);
 
         clockFaceStub.setFaceMode(faceMode);
         clockFaceStub.setShowSeconds(showSeconds);
 
         if(wearSender != null) {
             wearSender.store(clockFaceStub);
-            wearSender.sendNow(false);
+            wearSender.sendNow();
         } else
-            Log.e("WatchCalendarService", "no sender available to load preferences ?!");
+            Log.e(TAG, "no sender available to load preferences ?!");
 
         if(phoneActivity != null) {
             if (phoneActivity.toggle == null || phoneActivity.toolButton == null || phoneActivity.numbersButton == null || phoneActivity.liteButton == null) {
-                Log.v("WatchCalendarService", "loadPreferences has no widgets to update");
+                Log.v(TAG, "loadPreferences has no widgets to update");
                 return;
             }
 
@@ -102,12 +108,11 @@ public class WatchCalendarService extends Service {
     // on the calendar's thread, not the UI thread
     private void calHandler() {
         if(wearSender == null) {
-            Log.v("WatchCalendarService", "no wear sender?!");
+            Log.v(TAG, "no wear sender?!");
             return;
         }
-        wearSender.store(clockFaceStub);
-        wearSender.store(calendarFetcher.getContent().getWireEvents());
-        wearSender.sendNow(true);
+        wearSender.store(calendarFetcher.getContent().getWireEvents(), clockFaceStub);
+        wearSender.sendNow();
     }
 
 
@@ -119,7 +124,7 @@ public class WatchCalendarService extends Service {
 
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
-        Log.v("WatchCalendarService", "service starting!");
+        Log.v(TAG, "service starting!");
         // handleCommand(intent);
         // We want this service to continue running until it is explicitly
         // stopped, so return sticky.
@@ -128,12 +133,12 @@ public class WatchCalendarService extends Service {
 
     @Override
     public void onCreate() {
-        Log.v("WatchCalendarService", "service created!");
+        Log.v(TAG, "service created!");
     }
 
     @Override
     public void onDestroy() {
         // Cancel the persistent notification.
-        Log.v("WatchCalendarService", "service destroyed!");
+        Log.v(TAG, "service destroyed!");
     }
 }

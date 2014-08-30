@@ -7,6 +7,8 @@ import android.util.Log;
 import java.util.ArrayList;
 
 public class EventLayout {
+    private final static String TAG = "EventLayout";
+
     /**
      * Takes a list of calendar events and mutates their minLevel and maxLevel for calendar side-by-side
      * non-overlapping layout.
@@ -72,7 +74,7 @@ public class EventLayout {
                 }
             }
 
-            // Log.v("EventLayout", "inserting event "+i+" (" + e.title +
+            // Log.v(TAG, "inserting event "+i+" (" + e.title +
             //         "), fullLevels(" + String.valueOf(printLevelsFull) +
             //         "), maxLevelAnywhere (" + maxLevelAnywhere + ")");
 
@@ -106,9 +108,9 @@ public class EventLayout {
                 e.minLevel = holeStart;
                 e.maxLevel = holeEnd;
 
-                // Log.v("EventLayout", "--> hole found: (" + e.minLevel + "," + e.maxLevel + ")");
+                // Log.v(TAG, "--> hole found: (" + e.minLevel + "," + e.maxLevel + ")");
             } else {
-                // Log.v("EventLayout", "--> adding a level");
+                // Log.v(TAG, "--> adding a level");
                 e.minLevel = e.maxLevel = maxLevelAnywhere + 1;
 
                 // Sigh. Now we need to loop through all the previous events to see if
@@ -117,7 +119,7 @@ public class EventLayout {
                     CalendarResults.Event pe = events.get(j);
 
                     if(!e.overlaps(pe) && pe.maxLevel == maxLevelAnywhere) {
-                        // Log.v("EventLayout", "=== expanding event " + j);
+                        // Log.v(TAG, "=== expanding event " + j);
                         pe.maxLevel++;
                     }
                 }
@@ -130,8 +132,8 @@ public class EventLayout {
 
     public static void debugDump(Context ctx, ArrayList<CalendarResults.Event> events) {
         for(CalendarResults.Event e: events) {
-            Log.v("EventLayout", "Title(" + e.title + "), displayColor(" + Integer.toHexString(e.displayColor) + "), minLevel(" + e.minLevel + "), maxLevel(" + e.maxLevel + ")");
-            Log.v("EventLayout", "--> Start: " + DateUtils.formatDateTime(ctx, e.startTime, DateUtils.FORMAT_SHOW_DATE | DateUtils.FORMAT_SHOW_TIME) + ", End: " + DateUtils.formatDateTime(ctx, e.endTime, DateUtils.FORMAT_SHOW_TIME | DateUtils.FORMAT_SHOW_DATE));
+            Log.v(TAG, "Title(" + e.title + "), displayColor(" + Integer.toHexString(e.displayColor) + "), minLevel(" + e.minLevel + "), maxLevel(" + e.maxLevel + ")");
+            Log.v(TAG, "--> Start: " + DateUtils.formatDateTime(ctx, e.startTime, DateUtils.FORMAT_SHOW_DATE | DateUtils.FORMAT_SHOW_TIME) + ", End: " + DateUtils.formatDateTime(ctx, e.endTime, DateUtils.FORMAT_SHOW_TIME | DateUtils.FORMAT_SHOW_DATE));
         }
     }
 }

@@ -1,21 +1,19 @@
 package org.dwallach.calwatch;
 
+import android.content.Context;
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.util.Log;
 
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.api.GoogleApiClient;
-import com.google.android.gms.common.api.PendingResult;
-import com.google.android.gms.wearable.DataApi;
-import com.google.android.gms.wearable.DataMap;
+import com.google.android.gms.wearable.MessageApi;
 import com.google.android.gms.wearable.Node;
 import com.google.android.gms.wearable.NodeApi;
-import com.google.android.gms.wearable.PutDataMapRequest;
-import com.google.android.gms.wearable.PutDataRequest;
 import com.google.android.gms.wearable.Wearable;
 
 import org.dwallach.calwatch.proto.WireEvent;
-import org.dwallach.calwatch.proto.WireEventList;
+import org.dwallach.calwatch.proto.WireUpdate;
 
 import java.util.List;
 
@@ -23,44 +21,51 @@ import java.util.List;
  * Created by dwallach on 8/25/14.
  */
 public class WearSender implements GoogleApiClient.ConnectionCallbacks, GoogleApiClient.OnConnectionFailedListener {
-    /*
-     * Top half of this file: code for handling our watch / calendar data. Bottom half: boilerplate
-     * for dealing with PlayServices and the Wear API. Guess which is longer and uglier?
-     */
-    public void store(List<WireEvent> wireEvents) {
-        WireEventList wList = new WireEventList(wireEvents);
-        byte[] wBytes = wList.toByteArray();
+    private static final String TAG = "WearSender";
+    byte[] wireBytesToSend = null;
 
-        Log.v("WearSender", "preparing event list for transmission, length(" + wBytes.length + " bytes)");
+    private Context context;
+    private GoogleApiClient mGoogleApiClient;
 
-        makeMapRequest();
-        DataMap map = mapRequest.getDataMap();
-        map.putByteArray("Events", wBytes);
+    private void initGoogle() {
+        if(mGoogleApiClient == null)
+            mGoogleApiClient = new GoogleApiClient.Builder(context).
+                    addApi(Wearable.API).
+                    addConnectionCallbacks(this).
+                    addOnConnectionFailedListener(this).
+                    build();
+        if (!mGoogleApiClient.isConnected()) {
+            mGoogleApiClient.connect();
+        }
+        if (!mGoogleApiClient.isConnected()) {
+            Log.e(TAG, "not connected to GoogleAPI?");
+            readyToSend = false;
+        } else {
+            Log.e(TAG, "connected to GoogleAPI!");
+            readyToSend = true;
+        }
     }
 
     public void store(ClockFaceStub stub) {
-        boolean showSeconds = stub.getShowSeconds();
-        int faceMode = stub.getFaceMode();
+        WireUpdate wireUpdate = new WireUpdate(null, false, stub.getShowSeconds(), stub.getFaceMode());
+        wireBytesToSend = wireUpdate.toByteArray();
 
-        Log.v("WearSender", "preparing preferences for transmission");
-
-        makeMapRequest();
-        DataMap map = mapRequest.getDataMap();
-        map.putBoolean("ShowSeconds", showSeconds);
-        map.putInt("FaceMode", faceMode);
+        Log.v(TAG, "preparing event list for transmission, length(" + wireBytesToSend.length + " bytes)");
     }
 
-    private void makeMapRequest() {
-        if(mapRequest == null)
-            mapRequest = PutDataMapRequest.create("/calwatch");
+    public void store(List<WireEvent> wireEvents, ClockFaceStub stub) {
+        WireUpdate wireUpdate = new WireUpdate(wireEvents, true, stub.getShowSeconds(), stub.getFaceMode());
+        wireBytesToSend = wireUpdate.toByteArray();
+
+        Log.v(TAG, "preparing event list for transmission, length(" + wireBytesToSend.length + " bytes)");
     }
 
-    private PutDataMapRequest mapRequest;
-    private GoogleApiClient mGoogleApiClient;
     private String nodeId;
 
     private static WearSender singleton = null;
-    public WearSender() {
+    public WearSender(Context context) {
+        this.context = context;
+
         if(singleton == null)
             singleton = this;
         onCreate();
@@ -75,59 +80,60 @@ public class WearSender implements GoogleApiClient.ConnectionCallbacks, GoogleAp
      * Major source: https://developer.android.com/google/auth/api-client.html
      */
 
-    public void sendNow(boolean blocking) {
+    public void sendNow() {
         if(!isActiveConnection()) return;
-        if(mapRequest == null) return;
+        if(wireBytesToSend == null) return;
 
-        Log.v("WearSender", "ready to send request");
+        Log.v(TAG, "ready to send request");
 
-        // DataMap map = mapRequest.getDataMap();
-        PutDataRequest request = mapRequest.asPutDataRequest();
+        /*
+         * essential code borrowed from WearOngoingNotificationSample
+         */
+        if (mGoogleApiClient.isConnected()) {
+            new AsyncTask<Void, Void, Void>() {
+                @Override
+                protected Void doInBackground(Void... params) {
+                    NodeApi.GetConnectedNodesResult nodes =
+                            Wearable.NodeApi.getConnectedNodes(mGoogleApiClient).await();
+                    int failures = 0;
+                    for (Node node : nodes.getNodes()) {
+                        Log.v(TAG, "Sending to node: " + node.getDisplayName());
+                        MessageApi.SendMessageResult result = Wearable.MessageApi.sendMessage(
+                                mGoogleApiClient, node.getId(), Constants.WearDataSendPath, wireBytesToSend).await();
+                        if (!result.getStatus().isSuccess()) {
+                            Log.e(TAG, "ERROR: failed to send Message: " + result.getStatus());
+                            failures++;
+                        }
+                        if(failures == 0)
+                            wireBytesToSend = null; // we're done with sending this message
+                    }
 
-        PendingResult<DataApi.DataItemResult> pendingResult = Wearable.DataApi.putDataItem(mGoogleApiClient, request);
-        if(blocking)
-            pendingResult.await();
-
-        Log.v("WearSender", "sent!");
-
-        mapRequest = null;  // we've sent it, we can drop the reference
+                    return null;
+                }
+            }.execute();
+        }
     }
 
     private boolean isActiveConnection() {
         if(readyToSend) return true;
-        Log.v("WearSender", "connection inactive, retrying onCreate");
-        onCreate();   // won't complete immediately, so we'll return false here
+        Log.v(TAG, "connection inactive, retrying");
+        initGoogle();
         return false;
     }
 
     protected void onCreate() {
-        Log.v("WearSender", "onCreate!");
-        // Create a GoogleApiClient instance
-        // WatchCalendarService service = WatchCalendarService.getSingletonService();
-        PhoneActivity activity = PhoneActivity.getSingletonActivity();
-        if(activity == null) {
-            Log.v("WearSender", "no activity?!");
-            return;
-        }
-        GoogleApiClient tmp =  new GoogleApiClient.Builder(activity)
-                .addApi(Wearable.API)
-                .addConnectionCallbacks(this)
-                .addOnConnectionFailedListener(this)
-                .build();
-        tmp.connect();
-
-        mGoogleApiClient = tmp; // only assign after it works
+        Log.v(TAG, "onCreate!");
+        initGoogle();
     }
 
     private boolean readyToSend = false;
     @Override
     public void onConnected(Bundle connectionHint) {
-        Log.v("WearSender", "onConnected!");
+        Log.v(TAG, "onConnected!");
         // Connected to Google Play services!
         // The good stuff goes here.
-        readyToSend = true;
-        if(mapRequest != null)
-            sendNow(false);
+        initGoogle();
+        sendNow();
     }
 
     @Override
@@ -135,7 +141,7 @@ public class WearSender implements GoogleApiClient.ConnectionCallbacks, GoogleAp
         // The connection has been interrupted.
         // Disable any UI components that depend on Google APIs
         // until onConnected() is called.
-        Log.v("WearSender", "suspended connection!");
+        Log.v(TAG, "suspended connection!");
         readyToSend = false;
         mGoogleApiClient.disconnect();
     }
@@ -147,7 +153,7 @@ public class WearSender implements GoogleApiClient.ConnectionCallbacks, GoogleAp
         //
         // More about this in the next section.
 
-        Log.v("WearSender", "lost connection!");
+        Log.v(TAG, "lost connection!");
         readyToSend = false;
         mGoogleApiClient.disconnect();
     }

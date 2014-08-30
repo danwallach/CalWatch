@@ -14,9 +14,12 @@ import android.view.SurfaceHolder;
 import android.view.SurfaceView;
 
 public class MyViewAnim extends SurfaceView implements SurfaceHolder.Callback {
+    private static final String TAG = "MyViewAnim";
+
     private PanelThread drawThread;
     private ClockFace clockFace;
     private TimeAnimator animator;
+    private Context context;
 
     public MyViewAnim(Context context) {
         super(context);
@@ -29,11 +32,11 @@ public class MyViewAnim extends SurfaceView implements SurfaceHolder.Callback {
     }
 
     private void setup(Context ctx) {
-        WearActivity.textOut("MyViewAnim setup!");
+        Log.v(TAG, "setup!");
+        this.context = ctx;
         getHolder().addCallback(this);
         clockFace = new ClockFace(ctx);
-        WearActivity.getSingletonActivity().setClockFace(clockFace);
-        WearActivity.getSingletonActivity().loadPreferences();
+        WearActivity.setClockFace(clockFace);
     }
 
     @Override
@@ -47,7 +50,7 @@ public class MyViewAnim extends SurfaceView implements SurfaceHolder.Callback {
 
     @Override
     public void surfaceChanged(SurfaceHolder holder, int format, int width, int height) {
-        WearActivity.textOut("(MyViewAnim) Drawing surface changed!");
+        Log.v(TAG, "Drawing surface changed!");
         clockFace.setSize(width, height);
         resume();
 
@@ -55,31 +58,31 @@ public class MyViewAnim extends SurfaceView implements SurfaceHolder.Callback {
 
     @Override
     public void surfaceCreated(SurfaceHolder holder) {
-        WearActivity.textOut("Drawing surface created!");
+        Log.v(TAG, "Drawing surface created!");
         resume();
     }
 
 
     @Override
     public void surfaceDestroyed(SurfaceHolder holder) {
-        WearActivity.textOut("Drawing surface destroyed!");
+        Log.v(TAG, "Drawing surface destroyed!");
         stop();
     }
 
     public void pause() {
-        WearActivity.textOut("pausing animation");
+        Log.v(TAG, "pausing animation");
         // animator.pause();
         stop();
     }
 
     public void resume() {
         if(animator != null) {
-            WearActivity.textOut("resuming old animator!");
+            Log.v(TAG, "resuming old animator!");
             animator.resume();
         } else {
-            WearActivity.textOut("new animator starting");
+            Log.v(TAG, "new animator starting");
             animator = new TimeAnimator();
-            animator.setTimeListener(new MyTimeListener(getHolder(), this));
+            animator.setTimeListener(new MyTimeListener(getHolder(), context));
             // animator.setFrameDelay(1000);  // doesn't actually work?
 
             if(drawThread == null) {
@@ -98,15 +101,14 @@ public class MyViewAnim extends SurfaceView implements SurfaceHolder.Callback {
                 });
             }
         }
-        WearActivity.getSingletonActivity().loadPreferences();
     }
 
     public void stop() {
-        WearActivity.textOut("stopping animation!");
+        Log.v(TAG, "stopping animation!");
         if(animator != null) {
             // new experimental ways to maybe quit things
             if(drawThread == null) {
-                Log.v("MyViewAnim", "no draw thread around to kill ?!");
+                Log.v(TAG, "no draw thread around to kill ?!");
             } else {
                 // animator.start() needs to happen on the PanelThread, not this one
                 Handler handler = drawThread.getHandler();
@@ -131,12 +133,14 @@ public class MyViewAnim extends SurfaceView implements SurfaceHolder.Callback {
 
     class MyTimeListener implements TimeAnimator.TimeListener {
         private SurfaceHolder surfaceHolder;
+        private Context context;
         // private double fps = 0.0;
 
-        public MyTimeListener(SurfaceHolder surfaceHolder, MyViewAnim panel) {
+        public MyTimeListener(SurfaceHolder surfaceHolder, Context context) {
             this.surfaceHolder = surfaceHolder;
+            this.context = context;
 
-            Log.v("MyViewAnim", "Time listener is up!");
+            Log.v(TAG, "Time listener is up!");
         }
 
         private int ticks = 0;
@@ -193,7 +197,7 @@ public class MyViewAnim extends SurfaceView implements SurfaceHolder.Callback {
                 }
 
                 if(c == null) {
-                    if(ticks % 1000 == 0) Log.w("MyViewAnim", "Failed to get a canvas for drawing!");
+                    if(ticks % 1000 == 0) Log.w(TAG, "Failed to get a canvas for drawing!");
                     return;
                 }
 
@@ -245,9 +249,9 @@ public class MyViewAnim extends SurfaceView implements SurfaceHolder.Callback {
                 // quit() the looper (see below)
                 Looper.loop();
 
-                Log.v("MyViewAnim", "looper finished!");
+                Log.v(TAG, "looper finished!");
             } catch (Throwable t) {
-                Log.e("MyViewAnim", "looper halted due to an error", t);
+                Log.e(TAG, "looper halted due to an error", t);
             }
         }
     }

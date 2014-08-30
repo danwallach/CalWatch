@@ -10,6 +10,8 @@ import android.widget.TextView;
 import com.google.android.gms.common.api.GoogleApiClient;
 
 public class WearActivity extends Activity {
+    private static final String TAG = "WearActivity";
+    private static ClockFace clockFace;
 
     private static WearActivity singletonActivity = null;
 
@@ -22,10 +24,17 @@ public class WearActivity extends Activity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        textOut("starting onCreate");
+        Log.v(TAG, "starting onCreate");
 
         singletonActivity = this;
 
+        // start the calendar service, if it's not already running
+        if(WearReceiver.getSingleton() == null) {
+            Intent serviceIntent = new Intent(this, WearReceiver.class);
+            startService(serviceIntent);
+        }
+
+        // bring up the UI
         setContentView(R.layout.activity_wear);
         final WatchViewStub stub = (WatchViewStub) findViewById(R.id.watch_view_stub);
         stub.setOnLayoutInflatedListener(new WatchViewStub.OnLayoutInflatedListener() {
@@ -33,31 +42,16 @@ public class WearActivity extends Activity {
             public void onLayoutInflated(WatchViewStub stub) {
                 view = (MyViewAnim) stub.findViewById(R.id.surfaceView);
 
-                textOut("starting data API receiver");
+                Log.v(TAG, "starting data API receiver");
             }
         });
-
-        // start the calendar service, if it's not already running
-        WearReceiver receiver = WearReceiver.getSingleton();
-
-        if(receiver == null) {
-            Intent serviceIntent = new Intent(this, WearReceiver.class);
-            startService(serviceIntent);
-
-            // do it again; we should get something different this time
-            receiver = WearReceiver.getSingleton();
-        }
     }
 
-    public static void textOut(String text) {
-        Log.v("WearActivity", text);
+    public static void setClockFace(ClockFace face) {
+        WearActivity.clockFace = face;
     }
 
-    public void loadPreferences() {
-        // nothing, for now
-    }
-
-    public void setClockFace(ClockFace face) {
-        // nothing, for now
+    public static ClockFace getClockFace() {
+        return clockFace;
     }
 }
