@@ -65,4 +65,13 @@ TODO sort out how to compile protobufs automatically via Gradle (vs. known bugs 
 
 TODO fancier control panel: Material Layout cards
 
+TODO verify all the weird connect/disconnect corner cases -- GoogleAPI plus Wear pairings, killed phone app, fresh reboot of phone, etc.
 
+Subtasks:
+    TODO If we kill the phone app, this exception happens twice, then it finally gives up (two different PIDs)
+        08-30 22:15:57.169  17607-17620/org.dwallach.calwatch E/AndroidRuntime﹕ FATAL EXCEPTION: Thread-9585
+            Process: org.dwallach.calwatch, PID: 17607
+            java.lang.NullPointerException
+                    at org.dwallach.calwatch.CalendarFetcher.loadContent(CalendarFetcher.java:177)
+                    at org.dwallach.calwatch.CalendarFetcher.run(CalendarFetcher.java:86)
+                    at java.lang.Thread.run(Thread.java:841)

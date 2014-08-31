@@ -35,7 +35,7 @@ public class CalendarFetcher extends Observable implements Runnable {
     public CalendarFetcher() {
         Log.v(TAG, "starting fetcher thread");
 
-        this.ctx = PhoneActivity.getSingletonActivity();
+        this.ctx = WatchCalendarService.getSingletonService();
         this.conditionWait = new ConditionVariable();
         new Thread(this).start();
     }
@@ -52,7 +52,7 @@ public class CalendarFetcher extends Observable implements Runnable {
     private long lastQueryStartTime = 0;
 
     public void run() {
-        Log.v(TAG, "starting");
+        Log.v(TAG, "run: starting");
         running = true;
 
         //
@@ -174,6 +174,12 @@ public class CalendarFetcher extends Observable implements Runnable {
                         CalendarContract.Calendars.CALENDAR_COLOR_KEY,
                         CalendarContract.Calendars.VISIBLE
                 };
+
+        if(ctx == null) {
+            Log.e(TAG, "No query context!");
+            return null;
+        }
+
         Cursor calCursor = ctx.getContentResolver().
                 query(CalendarContract.Calendars.CONTENT_URI,
                         calProjection,
