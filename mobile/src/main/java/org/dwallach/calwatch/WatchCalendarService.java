@@ -55,7 +55,6 @@ public class WatchCalendarService extends Service implements MessageApi.MessageL
         // not work, for unknown reasons
         PhoneActivity phoneActivity = PhoneActivity.getSingletonActivity();
         if (phoneActivity != null) {
-            wearSender = new WearSender(phoneActivity);
             clockFaceStub = phoneActivity.getClockFace();
         } else {
             Log.v(TAG, "no clockface yet, hmm");
@@ -67,6 +66,7 @@ public class WatchCalendarService extends Service implements MessageApi.MessageL
         calendarFetcher.addObserver(new Observer() {
             @Override
             public void update(Observable observable, Object data) {
+                Log.v(TAG, "New calendar state to send to watch!");
                 sendAllToWatch();
             }
         });
@@ -149,6 +149,7 @@ public class WatchCalendarService extends Service implements MessageApi.MessageL
         Log.v(TAG, "Google API connected!");
 
         Wearable.MessageApi.addListener(mGoogleApiClient, this);
+        wearSender = new WearSender(this);
     }
 
     public void onConnectionSuspended(int cause) {
