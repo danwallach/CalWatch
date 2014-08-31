@@ -2,11 +2,13 @@ package org.dwallach.calwatch;
 
 import android.content.Intent;
 import android.os.AsyncTask;
+import android.os.Bundle;
 import android.util.Log;
 
 import org.dwallach.calwatch.proto.WireEvent;
 import org.dwallach.calwatch.proto.WireUpdate;
 
+import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.api.GoogleApiClient;
 import com.google.android.gms.wearable.MessageApi;
 import com.google.android.gms.wearable.MessageEvent;
@@ -18,14 +20,15 @@ import com.squareup.wire.Wire;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.concurrent.TimeUnit;
 
 /**
  * This class pairs up with WearSender
  * Created by dwallach on 8/25/14.
  *
  */
-public class WearReceiverService extends WearableListenerService {
-    private final static String TAG = "WearReceiver";
+public class WearReceiverService extends WearableListenerService implements GoogleApiClient.ConnectionCallbacks, GoogleApiClient.OnConnectionFailedListener {
+    private final static String TAG = "WearReceiverService";
 
     // private List<EventWrapper> eventList = null;
     // private int maxLevel = 0;
@@ -88,7 +91,7 @@ public class WearReceiverService extends WearableListenerService {
 
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
-        Log.v("WearReceiver", "service starting!");
+        Log.v(TAG, "service starting!");
         // handleCommand(intent);
         // We want this service to continue running until it is explicitly
         // stopped, so return sticky.
@@ -120,17 +123,14 @@ public class WearReceiverService extends WearableListenerService {
     }
 
     private void initGoogle() {
-        if(mGoogleApiClient == null)
+        Log.v(TAG, "Trying to connect to GoogleApi");
+        if(mGoogleApiClient == null) {
             mGoogleApiClient = new GoogleApiClient.Builder(this).
                     addApi(Wearable.API).
+                    addConnectionCallbacks(this).
+                    addOnConnectionFailedListener(this).
                     build();
-        if (!mGoogleApiClient.isConnected()) {
             mGoogleApiClient.connect();
-        }
-        if (!mGoogleApiClient.isConnected()) {
-            Log.e(TAG, "not connected to GoogleAPI?");
-        } else {
-            Log.e(TAG, "connected to GoogleAPI!");
         }
     }
 
@@ -142,11 +142,13 @@ public class WearReceiverService extends WearableListenerService {
         initGoogle();
     }
 
-    /*
     @Override
     public void onConnected(Bundle connectionHint) {
-        Log.v(TAG, "onConnected!");
+        Log.v(TAG, "Connected to Google Api Service");
+
+        pingPhone();
     }
+
 
     @Override
     public void onConnectionSuspended(int cause) {
@@ -169,7 +171,6 @@ public class WearReceiverService extends WearableListenerService {
         mGoogleApiClient.disconnect();
         mGoogleApiClient = null;
     }
-    */
 
     public void onPeerConnected(Node peer) {
         Log.v(TAG, "phone is connected!, "+peer.getDisplayName());
@@ -178,7 +179,7 @@ public class WearReceiverService extends WearableListenerService {
     }
 
     public void onPeerDisconnected(Node peer) {
-        Log.v(TAG, "phone is disconnected!, "+peer.getDisplayName());
+        Log.v(TAG, "phone is disconnected!, " + peer.getDisplayName());
     }
 
     public void pingPhone() {
@@ -207,6 +208,8 @@ public class WearReceiverService extends WearableListenerService {
                     return null;
                 }
             }.execute();
+        } else {
+            Log.e(TAG, "pingPhone: No GoogleAPI?!");
         }
     }
 }
