@@ -57,7 +57,13 @@ Subtasks:
            GoogleApi nonsense.
 
     TODO verify on round face
-    TODO deal with dimming (kill second hand? lower frame rate? all white?)
+    TODO support the "real" watchface API?
+        http://www.binpress.com/tutorial/how-to-create-a-custom-android-wear-watch-face/120
+        https://github.com/kentarosu/androidwear-myfirstwatchface
+
+        TODO "sample" face for selector
+        TODO deal with dimming (kill second hand? lower frame rate? all white?) "Ambient mode"
+
 
 TODO sort out how to compile protobufs automatically via Gradle (vs. known bugs lodged with Google)
 -- At least the Square protobuf runtime is automatically fetched and compiled
@@ -73,30 +79,33 @@ Subtasks:
     TODO fresh boot of watch / reconnect to old phone app
     TODO nothing running on phone / fresh watch wants data
 
+    TODO restart of app on phone breaks watch with bogus message (probably related to ClockFace vs. ClockFaceStub)
+        TODO need to carefully rethink lifecycle issues on these things; service shouldn't really have long-term pointers to the activity
+
+
+        08-30 22:35:50.566    2743-2758/org.dwallach.calwatch E/AndroidRuntime﹕ FATAL EXCEPTION: WearableListenerService
+            Process: org.dwallach.calwatch, PID: 2743
+            java.lang.IllegalStateException: Required fields not set:
+            faceMode
+            newEvents
+            showSeconds
+                    at com.squareup.wire.BuilderAdapter.checkRequiredFields(BuilderAdapter.java:89)
+                    at com.squareup.wire.Message$Builder.checkRequiredFields(Message.java:336)
+                    at org.dwallach.calwatch.proto.WireUpdate$Builder.build(WireUpdate.java:117)
+                    at org.dwallach.calwatch.proto.WireUpdate$Builder.build(WireUpdate.java:73)
+                    at com.squareup.wire.MessageAdapter.read(MessageAdapter.java:548)
+                    at com.squareup.wire.Wire.parseFrom(Wire.java:167)
+                    at com.squareup.wire.Wire.parseFrom(Wire.java:124)
+                    at org.dwallach.calwatch.WearReceiverService.newEventBytes(WearReceiverService.java:65)
+                    at org.dwallach.calwatch.WearReceiverService.onMessageReceived(WearReceiverService.java:119)
+                    at com.google.android.gms.wearable.WearableListenerService$a$2.run(Unknown Source)
+                    at android.os.Handler.handleCallback(Handler.java:733)
+                    at android.os.Handler.dispatchMessage(Handler.java:95)
+                    at android.os.Looper.loop(Looper.java:136)
+                    at android.os.HandlerThread.run(HandlerThread.java:61)
+
 TODO get a real app icon
 TODO slower refresh rate when second hand not being displayed
 TODO app signing
-TODO restart of app on phone breaks watch with bogus message (probably related to ClockFace vs. ClockFaceStub)
-    TODO need to carefully rethink lifecycle issues on these things; service shouldn't really have long-term pointers to the activity
 
-
-    08-30 22:35:50.566    2743-2758/org.dwallach.calwatch E/AndroidRuntime﹕ FATAL EXCEPTION: WearableListenerService
-        Process: org.dwallach.calwatch, PID: 2743
-        java.lang.IllegalStateException: Required fields not set:
-        faceMode
-        newEvents
-        showSeconds
-                at com.squareup.wire.BuilderAdapter.checkRequiredFields(BuilderAdapter.java:89)
-                at com.squareup.wire.Message$Builder.checkRequiredFields(Message.java:336)
-                at org.dwallach.calwatch.proto.WireUpdate$Builder.build(WireUpdate.java:117)
-                at org.dwallach.calwatch.proto.WireUpdate$Builder.build(WireUpdate.java:73)
-                at com.squareup.wire.MessageAdapter.read(MessageAdapter.java:548)
-                at com.squareup.wire.Wire.parseFrom(Wire.java:167)
-                at com.squareup.wire.Wire.parseFrom(Wire.java:124)
-                at org.dwallach.calwatch.WearReceiverService.newEventBytes(WearReceiverService.java:65)
-                at org.dwallach.calwatch.WearReceiverService.onMessageReceived(WearReceiverService.java:119)
-                at com.google.android.gms.wearable.WearableListenerService$a$2.run(Unknown Source)
-                at android.os.Handler.handleCallback(Handler.java:733)
-                at android.os.Handler.dispatchMessage(Handler.java:95)
-                at android.os.Looper.loop(Looper.java:136)
-                at android.os.HandlerThread.run(HandlerThread.java:61)
+TODO render battery life somewhere?
