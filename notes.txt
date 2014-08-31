@@ -68,9 +68,10 @@ TODO fancier control panel: Material Layout cards
 TODO verify all the weird connect/disconnect corner cases
 
 Subtasks:
-    TODO fresh boot of phone, make sure service is up
+    TODO fresh boot of phone, make sure service is up no matter what
     TODO disconnect / reconnect of phone from watch
-    TODO
+    TODO fresh boot of watch / reconnect to old phone app
+    TODO nothing running on phone / fresh watch wants data
 
 TODO get a real app icon
 TODO slower refresh rate when second hand not being displayed
