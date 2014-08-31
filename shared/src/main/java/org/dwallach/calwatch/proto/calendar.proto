@@ -13,7 +13,7 @@ package org.dwallach.calwatch.proto;
 message WireEvent {
     required int64 startTime = 1;
     required int64 endTime = 2;
-    required int32 eventColor = 3;
+    required int32 displayColor = 3;
     required int32 minLevel = 4;
     required int32 maxLevel = 5;
 }

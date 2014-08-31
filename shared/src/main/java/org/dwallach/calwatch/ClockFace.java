@@ -16,7 +16,7 @@ import java.util.List;
 import java.util.Locale;
 import java.util.TimeZone;
 
-public class ClockFace {
+public class ClockFace extends ClockFaceStub {
     private static final String TAG = "ClockFace";
     //
     // A couple performance notes:
@@ -43,7 +43,7 @@ public class ClockFace {
     private int cy;
     private int radius;
     private float shadow;
-    private boolean showSeconds = Constants.DefaultShowSeconds;
+
 
     private static final float freqUpdate = 5;  // 5 Hz, or 0.20sec for second hand
 
@@ -61,8 +61,6 @@ public class ClockFace {
     public final static int FACE_TOOL = 0;
     public final static int FACE_NUMBERS = 1;
     public final static int FACE_LITE = 2;
-
-    private volatile int faceMode = Constants.DefaultWatchFace;
 
     public void setFaceMode(int faceMode) {
         // warning: this might come in from another thread!
@@ -232,6 +230,7 @@ public class ClockFace {
          */
         Path p = pc.get();
         if(p == null) {
+            // Log.v(TAG, "new path!" + (long) secondsStart + " " + (long) secondsEnd + " " + startRadius + " " + endRadius);
             p = new Path();
             double dt = 0.2; // smaller numbers == closer to a proper arc
 
@@ -409,14 +408,22 @@ public class ClockFace {
     private Path stipplePathCache = null;
 
     private int maxLevel;
-    private List<EventWrapper> eventList;
 
     public void setMaxLevel(int maxLevel) {
         this.maxLevel = maxLevel;
     }
 
     public void setEventList(List<EventWrapper> eventList) {
-        this.eventList = eventList;
+        super.setEventList(eventList);
+        int maxLevel = 0;
+        for(EventWrapper eventWrapper : eventList) {
+            int eMaxLevel =  eventWrapper.getWireEvent().maxLevel;
+            if(eMaxLevel > maxLevel)
+                maxLevel = eMaxLevel;
+        }
+
+        this.maxLevel = maxLevel;
+        Log.v(TAG, "maxLevel for new events: " + this.maxLevel);
     }
 
     public void drawCalendar() {
@@ -434,7 +441,7 @@ public class ClockFace {
             double arcStart, arcEnd;
             WireEvent e = eventWrapper.getWireEvent();
             if(calendarTicker % 1000 == 0) {
-                Log.v(TAG, "rendering event: start "+ e.startTime + ", end " + e.endTime + ", minLevel " + e.minLevel + ", maxlevel " + e.maxLevel + ", color " + e.eventColor);
+                Log.v(TAG, "rendering event: start "+ e.startTime + ", end " + e.endTime + ", minLevel " + e.minLevel + ", maxlevel " + e.maxLevel + ", color " + Integer.toHexString(e.displayColor));
             }
             // this turns out to have a bug if the start/end straddle midnight; this whole
             // business was to deal with float having inadequate resolution to deal with

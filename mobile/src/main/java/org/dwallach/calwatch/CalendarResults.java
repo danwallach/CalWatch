@@ -104,6 +104,14 @@ public class CalendarResults {
         return wireList;
     }
 
+    public List<EventWrapper> getWrappedEvents() {
+        List<EventWrapper> wireList = new ArrayList<EventWrapper>();
+        for(Event e : events) {
+            wireList.add(new EventWrapper(new WireEvent(e.startTime, e.endTime, e.displayColor, e.minLevel, e.maxLevel)));
+        }
+        return wireList;
+    }
+
     // barebones constructor from the wire format; populates events and nothing else
     public CalendarResults(List<WireEvent> wireEvents) {
         calendars = null;
@@ -115,7 +123,7 @@ public class CalendarResults {
             Event e = new Event();
             e.startTime = wEvent.startTime;
             e.endTime = wEvent.endTime;
-            e.eventColor = wEvent.eventColor;
+            e.displayColor = wEvent.displayColor;
             e.minLevel = wEvent.minLevel;
             e.maxLevel = wEvent.maxLevel;
 

@@ -13,7 +13,7 @@ public final class WireEvent extends Message {
 
   public static final Long DEFAULT_STARTTIME = 0L;
   public static final Long DEFAULT_ENDTIME = 0L;
-  public static final Integer DEFAULT_EVENTCOLOR = 0;
+  public static final Integer DEFAULT_DISPLAYCOLOR = 0;
   public static final Integer DEFAULT_MINLEVEL = 0;
   public static final Integer DEFAULT_MAXLEVEL = 0;
 
@@ -24,7 +24,7 @@ public final class WireEvent extends Message {
   public final Long endTime;
 
   @ProtoField(tag = 3, type = INT32, label = REQUIRED)
-  public final Integer eventColor;
+  public final Integer displayColor;
 
   @ProtoField(tag = 4, type = INT32, label = REQUIRED)
   public final Integer minLevel;
@@ -32,16 +32,16 @@ public final class WireEvent extends Message {
   @ProtoField(tag = 5, type = INT32, label = REQUIRED)
   public final Integer maxLevel;
 
-  public WireEvent(Long startTime, Long endTime, Integer eventColor, Integer minLevel, Integer maxLevel) {
+  public WireEvent(Long startTime, Long endTime, Integer displayColor, Integer minLevel, Integer maxLevel) {
     this.startTime = startTime;
     this.endTime = endTime;
-    this.eventColor = eventColor;
+    this.displayColor = displayColor;
     this.minLevel = minLevel;
     this.maxLevel = maxLevel;
   }
 
   private WireEvent(Builder builder) {
-    this(builder.startTime, builder.endTime, builder.eventColor, builder.minLevel, builder.maxLevel);
+    this(builder.startTime, builder.endTime, builder.displayColor, builder.minLevel, builder.maxLevel);
     setBuilder(builder);
   }
 
@@ -52,7 +52,7 @@ public final class WireEvent extends Message {
     WireEvent o = (WireEvent) other;
     return equals(startTime, o.startTime)
         && equals(endTime, o.endTime)
-        && equals(eventColor, o.eventColor)
+        && equals(displayColor, o.displayColor)
         && equals(minLevel, o.minLevel)
         && equals(maxLevel, o.maxLevel);
   }
@@ -63,7 +63,7 @@ public final class WireEvent extends Message {
     if (result == 0) {
       result = startTime != null ? startTime.hashCode() : 0;
       result = result * 37 + (endTime != null ? endTime.hashCode() : 0);
-      result = result * 37 + (eventColor != null ? eventColor.hashCode() : 0);
+      result = result * 37 + (displayColor != null ? displayColor.hashCode() : 0);
       result = result * 37 + (minLevel != null ? minLevel.hashCode() : 0);
       result = result * 37 + (maxLevel != null ? maxLevel.hashCode() : 0);
       hashCode = result;
@@ -75,7 +75,7 @@ public final class WireEvent extends Message {
 
     public Long startTime;
     public Long endTime;
-    public Integer eventColor;
+    public Integer displayColor;
     public Integer minLevel;
     public Integer maxLevel;
 
@@ -87,7 +87,7 @@ public final class WireEvent extends Message {
       if (message == null) return;
       this.startTime = message.startTime;
       this.endTime = message.endTime;
-      this.eventColor = message.eventColor;
+      this.displayColor = message.displayColor;
       this.minLevel = message.minLevel;
       this.maxLevel = message.maxLevel;
     }
@@ -102,8 +102,8 @@ public final class WireEvent extends Message {
       return this;
     }
 
-    public Builder eventColor(Integer eventColor) {
-      this.eventColor = eventColor;
+    public Builder displayColor(Integer displayColor) {
+      this.displayColor = displayColor;
       return this;
     }
 

@@ -1,4 +1,4 @@
-TODO prerender background, only redraw it when screen changes; blt it to the screen all the time
+DONE?! prerender background, only redraw it when screen changes; blt it to the screen all the time
 -- Tried it and got a *lower* framerate; the cost of bitblt seems to really matter, at least at
    the high res on a Nexus 5. Revisit later on an actual Android Wear watch where the resolution
    is so much lower.
@@ -23,7 +23,7 @@ TODO prerender background, only redraw it when screen changes; blt it to the scr
    When running in the emulator on the MacPro, we're consistently getting >50FPS. Current tentative
    conclusion, we're GPU limited (dunno why) so it doesn't really matter any more.
 
-TODO deal with recurring events
+DONE?! deal with recurring events
 -- RecurrenceProcessor.expand() seems to do exactly what I want. Hypothetically, this is going to
    be a quick hack, if it work.
 
@@ -41,9 +41,9 @@ TODO port to Android Wear
    adb -d forward tcp:5601 tcp:5601
 
 Subtasks:
-    TODO and get things rendering locally and remotely?
-    TODO fix path caching / rendering (data is correctly available on the watch, at least!)
-    TODO new watch sends message to phone (hi! send data!)
+    DONE?! and get things rendering locally and remotely?
+    DONE?! fix path caching / rendering (data is correctly available on the watch, at least!)
+    DONE?! new watch sends message to phone (hi! send data!)
     TODO regular pings watch to phone (hi! not dead yet!)
     TODO verify on round face
     TODO deal with dimming (kill second hand? lower frame rate? all white?)
@@ -51,9 +51,5 @@ Subtasks:
 TODO sort out how to compile protobufs automatically via Gradle (vs. known bugs lodged with Google)
 -- At least the Square protobuf runtime is automatically fetched and compiled
 -- Seems to be compiling correctly, might even work on the first try (ha!)
-
-
-
-
 
 TODO fancier control panel: Material Layout cards

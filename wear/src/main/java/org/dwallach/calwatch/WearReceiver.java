@@ -48,9 +48,15 @@ public class WearReceiver extends WearableListenerService {
     public static WearReceiver getSingleton() { return singleton; }
 
     private void newEventBytes(byte[] eventBytes) {
-        ClockFace clockFace = WearActivity.getClockFace();
-        if(clockFace == null) {
-            Log.v(TAG, "nowhere to put new events!");
+        ClockFace clockFace;
+        try {
+            clockFace = WearActivity.getSingletonActivity().getViewAnim().getClockFace();
+            if(clockFace == null) {
+                Log.v(TAG, "nowhere to put new events!");
+                return;
+            }
+        } catch (NullPointerException e) {
+            Log.v(TAG, "something's not ready for a clock face: " + e.toString());
             return;
         }
 

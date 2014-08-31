@@ -1,6 +1,7 @@
 package org.dwallach.calwatch;
 
 import android.graphics.Paint;
+import android.util.Log;
 import android.util.SparseArray;
 
 /**
@@ -10,6 +11,7 @@ import android.util.SparseArray;
  */
 public class PaintCan {
     private static SparseArray<Paint> map = null;
+    private final static String TAG = "PaintCan";
 
     public static Paint getPaint(int argb) {
         Paint retPaint;
@@ -26,7 +28,9 @@ public class PaintCan {
             retPaint.setStyle(Paint.Style.FILL);
 
             map.put(argbInt, retPaint);
+
         }
+        // Log.v(TAG, "get paint: " + Integer.toHexString(argb));
 
         return retPaint;
     }

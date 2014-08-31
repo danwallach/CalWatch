@@ -7,6 +7,10 @@ import android.os.IBinder;
 import android.provider.ContactsContract;
 import android.util.Log;
 
+import org.dwallach.calwatch.proto.WireEvent;
+
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Observable;
 import java.util.Observer;
 
@@ -30,7 +34,14 @@ public class WatchCalendarService extends Service {
 
         // we'd much rather use the *service* than the *activity* here, but that seems
         // not work, for unknown reasons
-        wearSender = new WearSender(PhoneActivity.getSingletonActivity());
+        PhoneActivity phoneActivity = PhoneActivity.getSingletonActivity();
+        if(phoneActivity != null) {
+            wearSender = new WearSender(phoneActivity);
+            clockFaceStub = phoneActivity.getClockFace();
+        } else {
+            Log.v(TAG, "no clockface yet, hmm");
+            clockFaceStub = new ClockFaceStub();
+        }
 
         calendarFetcher = new CalendarFetcher(); // automatically allocates a thread and runs
 
@@ -40,8 +51,6 @@ public class WatchCalendarService extends Service {
                                             calHandler();
                                         }
                                     });
-
-        clockFaceStub = new ClockFaceStub();
     }
 
     public ClockFaceStub getClockFace() {
@@ -111,6 +120,15 @@ public class WatchCalendarService extends Service {
             Log.v(TAG, "no wear sender?!");
             return;
         }
+
+        // first, send the events to the local instance on the phone
+        ClockFaceStub clockFaceStub = getClockFace();
+        if(clockFaceStub == null)
+            Log.v(TAG, "nowhere to send updated calendar events, hmm");
+        else
+            clockFaceStub.setEventList(calendarFetcher.getContent().getWrappedEvents());
+
+        // and now, send on to the wear device
         wearSender.store(calendarFetcher.getContent().getWireEvents(), clockFaceStub);
         wearSender.sendNow();
     }

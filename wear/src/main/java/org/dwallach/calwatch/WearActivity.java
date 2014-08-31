@@ -11,7 +11,6 @@ import com.google.android.gms.common.api.GoogleApiClient;
 
 public class WearActivity extends Activity {
     private static final String TAG = "WearActivity";
-    private static ClockFace clockFace;
 
     private static WearActivity singletonActivity = null;
 
@@ -20,6 +19,8 @@ public class WearActivity extends Activity {
     }
 
     private MyViewAnim view;
+
+    public MyViewAnim getViewAnim() { return view; }
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -45,13 +46,5 @@ public class WearActivity extends Activity {
                 Log.v(TAG, "starting data API receiver");
             }
         });
-    }
-
-    public static void setClockFace(ClockFace face) {
-        WearActivity.clockFace = face;
-    }
-
-    public static ClockFace getClockFace() {
-        return clockFace;
     }
 }

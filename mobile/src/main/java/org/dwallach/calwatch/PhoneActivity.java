@@ -85,6 +85,17 @@ public class PhoneActivity extends Activity {
         }
     }
 
+    private void fetchClockFace() {
+        final MyViewAnim animView = (MyViewAnim) findViewById(R.id.surfaceView);
+        if(animView != null) {
+            Log.v(TAG, "Getting real clock face");
+            this.clockFace = animView.getClockFace();
+        } else {
+            Log.v(TAG, "No MyViewAnim -> fake clock face");
+            this.clockFace = new ClockFaceStub();
+        }
+    }
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -99,11 +110,9 @@ public class PhoneActivity extends Activity {
             service.savePreferences();
     }
 
-    public void setClockFace(ClockFaceStub clockFace) {
-        this.clockFace = clockFace;
-    }
-
     public ClockFaceStub getClockFace() {
+        if(clockFace == null)
+            fetchClockFace();
         return clockFace;
     }
 
@@ -157,9 +166,7 @@ public class PhoneActivity extends Activity {
             watchCalendarService = WatchCalendarService.getSingletonService();
         }
 
-
-        if(watchCalendarService != null)
-            setClockFace(watchCalendarService.getClockFace());
+        fetchClockFace();
     }
 
     protected void onStop() {
