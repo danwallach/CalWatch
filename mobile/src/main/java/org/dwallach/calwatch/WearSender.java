@@ -29,21 +29,14 @@ public class WearSender implements GoogleApiClient.ConnectionCallbacks, GoogleAp
     private GoogleApiClient mGoogleApiClient;
 
     private void initGoogle() {
-        if(mGoogleApiClient == null)
+        if(mGoogleApiClient == null) {
+            readyToSend = false;
             mGoogleApiClient = new GoogleApiClient.Builder(context).
                     addApi(Wearable.API).
                     addConnectionCallbacks(this).
                     addOnConnectionFailedListener(this).
                     build();
-        if (!mGoogleApiClient.isConnected()) {
             mGoogleApiClient.connect();
-        }
-        if (!mGoogleApiClient.isConnected()) {
-            Log.e(TAG, "not connected to GoogleAPI?");
-            readyToSend = false;
-        } else {
-            Log.e(TAG, "connected to GoogleAPI!");
-            readyToSend = true;
         }
     }
 
@@ -140,10 +133,10 @@ public class WearSender implements GoogleApiClient.ConnectionCallbacks, GoogleAp
     private boolean readyToSend = false;
     @Override
     public void onConnected(Bundle connectionHint) {
-        Log.v(TAG, "onConnected!");
+        Log.v(TAG, "connected to Google API!");
         // Connected to Google Play services!
         // The good stuff goes here.
-        initGoogle();
+        readyToSend = true;
         sendNow();
     }
 

@@ -158,4 +158,6 @@ public class WatchCalendarService extends WearableListenerService {
     public void onPeerDisconnected(Node peer) {
         Log.v(TAG, "phone is disconnected!, "+peer.getDisplayName());
     }
+
+
 }
