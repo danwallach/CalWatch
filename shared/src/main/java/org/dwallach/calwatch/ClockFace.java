@@ -441,7 +441,7 @@ public class ClockFace extends ClockFaceStub {
             double arcStart, arcEnd;
             WireEvent e = eventWrapper.getWireEvent();
             if(calendarTicker % 1000 == 0) {
-                Log.v(TAG, "rendering event: start "+ e.startTime + ", end " + e.endTime + ", minLevel " + e.minLevel + ", maxlevel " + e.maxLevel + ", color " + Integer.toHexString(e.displayColor));
+                Log.v(TAG, "rendering event: start "+ e.startTime + ", end " + e.endTime + ", minLevel " + e.minLevel + ", maxlevel " + e.maxLevel + ", displayColor " + Integer.toHexString(e.displayColor));
             }
             // this turns out to have a bug if the start/end straddle midnight; this whole
             // business was to deal with float having inadequate resolution to deal with

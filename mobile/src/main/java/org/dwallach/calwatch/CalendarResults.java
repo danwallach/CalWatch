@@ -99,7 +99,7 @@ public class CalendarResults {
     public List<WireEvent> getWireEvents() {
         List<WireEvent> wireList = new ArrayList<WireEvent>();
         for(Event e : events) {
-            wireList.add(new WireEvent(e.startTime, e.endTime, e.eventColor, e.minLevel, e.maxLevel));
+            wireList.add(new WireEvent(e.startTime, e.endTime, e.displayColor, e.minLevel, e.maxLevel));
         }
         return wireList;
     }
