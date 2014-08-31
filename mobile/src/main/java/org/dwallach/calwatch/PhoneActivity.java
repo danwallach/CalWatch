@@ -166,6 +166,9 @@ public class PhoneActivity extends Activity {
             watchCalendarService = WatchCalendarService.getSingletonService();
         }
 
+        if(watchCalendarService != null)
+            watchCalendarService.loadPreferences();
+
         fetchClockFace();
     }
 

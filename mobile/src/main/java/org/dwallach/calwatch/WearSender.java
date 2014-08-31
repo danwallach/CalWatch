@@ -23,6 +23,7 @@ import java.util.List;
 public class WearSender implements GoogleApiClient.ConnectionCallbacks, GoogleApiClient.OnConnectionFailedListener {
     private static final String TAG = "WearSender";
     byte[] wireBytesToSend = null;
+    byte[] lastMessage = null;
 
     private Context context;
     private GoogleApiClient mGoogleApiClient;
@@ -81,7 +82,15 @@ public class WearSender implements GoogleApiClient.ConnectionCallbacks, GoogleAp
      */
 
     public void sendNow() {
+        sendNow(false);
+    }
+
+    public void sendNow(boolean repeatDesired) {
         if(!isActiveConnection()) return;
+
+        if(wireBytesToSend == null && repeatDesired)
+            wireBytesToSend = lastMessage;
+
         if(wireBytesToSend == null) return;
 
         Log.v(TAG, "ready to send request");
@@ -104,8 +113,10 @@ public class WearSender implements GoogleApiClient.ConnectionCallbacks, GoogleAp
                             Log.e(TAG, "ERROR: failed to send Message: " + result.getStatus());
                             failures++;
                         }
-                        if(failures == 0)
+                        if(failures == 0) {
+                            lastMessage = wireBytesToSend;
                             wireBytesToSend = null; // we're done with sending this message
+                        }
                     }
 
                     return null;

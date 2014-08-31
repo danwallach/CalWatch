@@ -1,35 +1,30 @@
 package org.dwallach.calwatch;
 
 import android.content.Intent;
-import android.net.Uri;
-import android.os.Bundle;
-import android.os.IBinder;
+import android.os.AsyncTask;
 import android.util.Log;
 
 import org.dwallach.calwatch.proto.WireEvent;
 import org.dwallach.calwatch.proto.WireUpdate;
 
 import com.google.android.gms.common.api.GoogleApiClient;
+import com.google.android.gms.wearable.MessageApi;
 import com.google.android.gms.wearable.MessageEvent;
 import com.google.android.gms.wearable.Node;
+import com.google.android.gms.wearable.NodeApi;
 import com.google.android.gms.wearable.Wearable;
 import com.google.android.gms.wearable.WearableListenerService;
 import com.squareup.wire.Wire;
 
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.List;
-import java.util.concurrent.TimeUnit;
-
-import static com.google.android.gms.wearable.Wearable.API;
-import static com.google.android.gms.wearable.Wearable.DataApi;
 
 /**
  * This class pairs up with WearSender
  * Created by dwallach on 8/25/14.
  *
  */
-public class WearReceiver extends WearableListenerService {
+public class WearReceiverService extends WearableListenerService {
     private final static String TAG = "WearReceiver";
 
     // private List<EventWrapper> eventList = null;
@@ -37,15 +32,15 @@ public class WearReceiver extends WearableListenerService {
     // private boolean showSeconds = true;
     // private int faceMode = ClockFace.FACE_TOOL;
     private GoogleApiClient mGoogleApiClient = null;
-    private static WearReceiver singleton;
+    private static WearReceiverService singleton;
 
-    public WearReceiver() {
+    public WearReceiverService() {
         super();
         Log.v(TAG, "starting listening service");
         singleton = this;
     }
 
-    public static WearReceiver getSingleton() { return singleton; }
+    public static WearReceiverService getSingleton() { return singleton; }
 
     private void newEventBytes(byte[] eventBytes) {
         ClockFace clockFace;
@@ -97,6 +92,14 @@ public class WearReceiver extends WearableListenerService {
         // handleCommand(intent);
         // We want this service to continue running until it is explicitly
         // stopped, so return sticky.
+
+        // TODO: send message to wake up phone and update us here on the watch
+        // Note that we're doing is here and not in onCreate(). This seems
+        // to get called later on, and suggests that we'll be ready to receive
+        // a message in return from the phone, assuming it's alive and kicking.
+
+        pingPhone();
+
         return START_STICKY;
     }
 
@@ -170,9 +173,40 @@ public class WearReceiver extends WearableListenerService {
 
     public void onPeerConnected(Node peer) {
         Log.v(TAG, "phone is connected!, "+peer.getDisplayName());
+
+        pingPhone();
     }
 
     public void onPeerDisconnected(Node peer) {
         Log.v(TAG, "phone is disconnected!, "+peer.getDisplayName());
+    }
+
+    public void pingPhone() {
+        Log.v(TAG, "pinging phone for data");
+
+        if (mGoogleApiClient.isConnected()) {
+            new AsyncTask<Void, Void, Void>() {
+                @Override
+                protected Void doInBackground(Void... params) {
+                    NodeApi.GetConnectedNodesResult nodes =
+                            Wearable.NodeApi.getConnectedNodes(mGoogleApiClient).await();
+                    int failures = 0;
+                    for (Node node : nodes.getNodes()) {
+                        Log.v(TAG, "Sending to node: " + node.getDisplayName());
+                        MessageApi.SendMessageResult result = Wearable.MessageApi.sendMessage(
+                                mGoogleApiClient, node.getId(), Constants.WearDataReturnPath, null).await();
+                        if (!result.getStatus().isSuccess()) {
+                            Log.e(TAG, "ERROR: failed to send Message: " + result.getStatus());
+                            failures++;
+                        }
+                        if (failures == 0) {
+                            Log.v(TAG, "ping delivered!");
+                        }
+                    }
+
+                    return null;
+                }
+            }.execute();
+        }
     }
 }

@@ -7,6 +7,12 @@ import android.os.IBinder;
 import android.provider.ContactsContract;
 import android.util.Log;
 
+import com.google.android.gms.common.api.GoogleApiClient;
+import com.google.android.gms.wearable.MessageEvent;
+import com.google.android.gms.wearable.Node;
+import com.google.android.gms.wearable.Wearable;
+import com.google.android.gms.wearable.WearableListenerService;
+
 import org.dwallach.calwatch.proto.WireEvent;
 
 import java.util.ArrayList;
@@ -14,7 +20,7 @@ import java.util.List;
 import java.util.Observable;
 import java.util.Observer;
 
-public class WatchCalendarService extends Service {
+public class WatchCalendarService extends WearableListenerService {
     private final String TAG = "WatchCalendarService";
 
     private static WatchCalendarService singletonService;
@@ -23,6 +29,8 @@ public class WatchCalendarService extends Service {
     private CalendarFetcher calendarFetcher;
 
     public WatchCalendarService() {
+        super();
+
         Log.v(TAG, "starting calendar fetcher");
         if(singletonService != null) {
             Log.v(TAG, "whoa, multiple services!");
@@ -133,13 +141,6 @@ public class WatchCalendarService extends Service {
         wearSender.sendNow();
     }
 
-
-    @Override
-    public IBinder onBind(Intent intent) {
-        // TODO: Return the communication channel to the service.
-        throw new UnsupportedOperationException("Not yet implemented");
-    }
-
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
         Log.v(TAG, "service starting!");
@@ -158,5 +159,60 @@ public class WatchCalendarService extends Service {
     public void onDestroy() {
         // Cancel the persistent notification.
         Log.v(TAG, "service destroyed!");
+    }
+
+    //
+    // Official documentation: https://developer.android.com/training/wearables/data-layer/events.html
+    // Very, very helpful: http://www.doubleencore.com/2014/07/create-custom-ongoing-notification-android-wear/
+    //
+
+    @Override
+    public void onMessageReceived(MessageEvent messageEvent) {
+        Log.v(TAG, "message received!");
+
+        if (messageEvent.getPath().equals(Constants.WearDataReturnPath)) {
+            // the watch says "hi"; make sure we send it stuff
+            if(wearSender != null)
+                wearSender.sendNow(true); // resend previous message
+        } else {
+            Log.v(TAG, "received message on unexpected path: " + messageEvent.getPath());
+        }
+    }
+
+    /*
+    @Override
+    public void onConnected(Bundle connectionHint) {
+        Log.v(TAG, "onConnected!");
+    }
+
+    @Override
+    public void onConnectionSuspended(int cause) {
+        // The connection has been interrupted.
+        // Disable any UI components that depend on Google APIs
+        // until onConnected() is called.
+        Log.v(TAG, "suspended connection!");
+        mGoogleApiClient.disconnect();
+        mGoogleApiClient = null;
+    }
+
+    @Override
+    public void onConnectionFailed(ConnectionResult result) {
+        // This callback is important for handling errors that
+        // may occur while attempting to connect with Google.
+        //
+        // More about this in the next section.
+
+        Log.v(TAG, "lost connection!");
+        mGoogleApiClient.disconnect();
+        mGoogleApiClient = null;
+    }
+    */
+
+    public void onPeerConnected(Node peer) {
+        Log.v(TAG, "phone is connected!, "+peer.getDisplayName());
+    }
+
+    public void onPeerDisconnected(Node peer) {
+        Log.v(TAG, "phone is disconnected!, "+peer.getDisplayName());
     }
 }

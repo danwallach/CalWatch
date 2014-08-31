@@ -5,9 +5,6 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.support.wearable.view.WatchViewStub;
 import android.util.Log;
-import android.widget.TextView;
-
-import com.google.android.gms.common.api.GoogleApiClient;
 
 public class WearActivity extends Activity {
     private static final String TAG = "WearActivity";
@@ -30,8 +27,8 @@ public class WearActivity extends Activity {
         singletonActivity = this;
 
         // start the calendar service, if it's not already running
-        if(WearReceiver.getSingleton() == null) {
-            Intent serviceIntent = new Intent(this, WearReceiver.class);
+        if(WearReceiverService.getSingleton() == null) {
+            Intent serviceIntent = new Intent(this, WearReceiverService.class);
             startService(serviceIntent);
         }
 
