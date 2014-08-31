@@ -65,13 +65,37 @@ TODO sort out how to compile protobufs automatically via Gradle (vs. known bugs 
 
 TODO fancier control panel: Material Layout cards
 
-TODO verify all the weird connect/disconnect corner cases -- GoogleAPI plus Wear pairings, killed phone app, fresh reboot of phone, etc.
+TODO verify all the weird connect/disconnect corner cases
 
 Subtasks:
-    TODO If we kill the phone app, this exception happens twice, then it finally gives up (two different PIDs)
-        08-30 22:15:57.169  17607-17620/org.dwallach.calwatch E/AndroidRuntime﹕ FATAL EXCEPTION: Thread-9585
-            Process: org.dwallach.calwatch, PID: 17607
-            java.lang.NullPointerException
-                    at org.dwallach.calwatch.CalendarFetcher.loadContent(CalendarFetcher.java:177)
-                    at org.dwallach.calwatch.CalendarFetcher.run(CalendarFetcher.java:86)
-                    at java.lang.Thread.run(Thread.java:841)
+    TODO fresh boot of phone, make sure service is up
+    TODO disconnect / reconnect of phone from watch
+    TODO
+
+TODO get a real app icon
+TODO slower refresh rate when second hand not being displayed
+TODO app signing
+TODO restart of app on phone breaks watch with bogus message (probably related to ClockFace vs. ClockFaceStub)
+    TODO need to carefully rethink lifecycle issues on these things; service shouldn't really have long-term pointers to the activity
+
+
+    08-30 22:35:50.566    2743-2758/org.dwallach.calwatch E/AndroidRuntime﹕ FATAL EXCEPTION: WearableListenerService
+        Process: org.dwallach.calwatch, PID: 2743
+        java.lang.IllegalStateException: Required fields not set:
+        faceMode
+        newEvents
+        showSeconds
+                at com.squareup.wire.BuilderAdapter.checkRequiredFields(BuilderAdapter.java:89)
+                at com.squareup.wire.Message$Builder.checkRequiredFields(Message.java:336)
+                at org.dwallach.calwatch.proto.WireUpdate$Builder.build(WireUpdate.java:117)
+                at org.dwallach.calwatch.proto.WireUpdate$Builder.build(WireUpdate.java:73)
+                at com.squareup.wire.MessageAdapter.read(MessageAdapter.java:548)
+                at com.squareup.wire.Wire.parseFrom(Wire.java:167)
+                at com.squareup.wire.Wire.parseFrom(Wire.java:124)
+                at org.dwallach.calwatch.WearReceiverService.newEventBytes(WearReceiverService.java:65)
+                at org.dwallach.calwatch.WearReceiverService.onMessageReceived(WearReceiverService.java:119)
+                at com.google.android.gms.wearable.WearableListenerService$a$2.run(Unknown Source)
+                at android.os.Handler.handleCallback(Handler.java:733)
+                at android.os.Handler.dispatchMessage(Handler.java:95)
+                at android.os.Looper.loop(Looper.java:136)
+                at android.os.HandlerThread.run(HandlerThread.java:61)
