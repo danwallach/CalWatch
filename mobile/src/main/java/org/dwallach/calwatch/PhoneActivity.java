@@ -104,12 +104,6 @@ public class PhoneActivity extends Activity {
 
     }
 
-    public void savePreferences() {
-        WatchCalendarService service = WatchCalendarService.getSingletonService();
-        if(service != null)
-            service.savePreferences();
-    }
-
     public ClockFaceStub getClockFace() {
         if(clockFace == null)
             fetchClockFace();
@@ -166,10 +160,8 @@ public class PhoneActivity extends Activity {
             watchCalendarService = WatchCalendarService.getSingletonService();
         }
 
-        if(watchCalendarService != null)
-            watchCalendarService.loadPreferences();
-
         fetchClockFace();
+        loadPreferences();
     }
 
     protected void onStop() {
@@ -226,4 +218,59 @@ public class PhoneActivity extends Activity {
         }
         return super.onOptionsItemSelected(item);
     }
+
+    public void savePreferences() {
+        Log.v(TAG, "savePreferences");
+        SharedPreferences prefs = getSharedPreferences("org.dwallach.calwatch.prefs", MODE_PRIVATE);
+        SharedPreferences.Editor editor = prefs.edit();
+
+        editor.putBoolean("showSeconds", clockFace.getShowSeconds());
+        editor.putInt("faceMode", clockFace.getFaceMode());
+
+        if(!editor.commit())
+            Log.v(TAG, "savePreferences commit failed ?!");
+
+        try {
+            WatchCalendarService service = WatchCalendarService.getSingletonService();
+            service.sendAllToWatch();
+        } catch (NullPointerException ne) {
+            Log.e(TAG, "failure in SavePreferences sending update to watch: " + ne.toString());
+        }
+    }
+
+    public void loadPreferences() {
+        Log.v(TAG, "loadPreferences");
+
+        if(clockFace == null) {
+            Log.v(TAG, "loadPreferences has no clock to put them in");
+            return;
+        }
+
+        PhoneActivity phoneActivity = PhoneActivity.getSingletonActivity();
+
+        SharedPreferences prefs = getSharedPreferences("org.dwallach.calwatch.prefs", MODE_PRIVATE);
+        boolean showSeconds = prefs.getBoolean("showSeconds", true);
+        int faceMode = prefs.getInt("faceMode", ClockFace.FACE_TOOL);
+
+        clockFace.setFaceMode(faceMode);
+        clockFace.setShowSeconds(showSeconds);
+
+        try {
+            WatchCalendarService service = WatchCalendarService.getSingletonService();
+            service.sendAllToWatch();
+        } catch (NullPointerException ne) {
+            Log.e(TAG, "failure in loadPreferences sending update to watch: " + ne.toString());
+        }
+
+        if(phoneActivity != null) {
+            if (phoneActivity.toggle == null || phoneActivity.toolButton == null || phoneActivity.numbersButton == null || phoneActivity.liteButton == null) {
+                Log.v(TAG, "loadPreferences has no widgets to update");
+                return;
+            }
+
+            phoneActivity.toggle.setChecked(showSeconds);
+            phoneActivity.setFaceModeUI(faceMode);
+        }
+    }
+
 }

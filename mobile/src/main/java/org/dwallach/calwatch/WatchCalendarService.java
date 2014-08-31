@@ -1,22 +1,12 @@
 package org.dwallach.calwatch;
 
-import android.app.Service;
 import android.content.Intent;
-import android.content.SharedPreferences;
-import android.os.IBinder;
-import android.provider.ContactsContract;
 import android.util.Log;
 
-import com.google.android.gms.common.api.GoogleApiClient;
 import com.google.android.gms.wearable.MessageEvent;
 import com.google.android.gms.wearable.Node;
-import com.google.android.gms.wearable.Wearable;
 import com.google.android.gms.wearable.WearableListenerService;
 
-import org.dwallach.calwatch.proto.WireEvent;
-
-import java.util.ArrayList;
-import java.util.List;
 import java.util.Observable;
 import java.util.Observer;
 
@@ -56,7 +46,7 @@ public class WatchCalendarService extends WearableListenerService {
         calendarFetcher.addObserver(new Observer() {
                                         @Override
                                         public void update(Observable observable, Object data) {
-                                            calHandler();
+                                            sendAllToWatch();
                                         }
                                     });
     }
@@ -65,65 +55,18 @@ public class WatchCalendarService extends WearableListenerService {
         return clockFaceStub;
     }
 
+    public WearSender getWearSender() {
+        return wearSender;
+    }
+
     public static WatchCalendarService getSingletonService() {
         return singletonService;
     }
 
-    public void savePreferences() {
-        Log.v(TAG, "savePreferences");
-        SharedPreferences prefs = getSharedPreferences("org.dwallach.calwatch.prefs", MODE_PRIVATE);
-        SharedPreferences.Editor editor = prefs.edit();
-
-        editor.putBoolean("showSeconds", clockFaceStub.getShowSeconds());
-        editor.putInt("faceMode", clockFaceStub.getFaceMode());
-
-        if(!editor.commit())
-            Log.v(TAG, "savePreferences commit failed ?!");
-
-        if(wearSender != null) {
-            wearSender.store(clockFaceStub);
-            wearSender.sendNow();
-        } else
-            Log.e(TAG, "no sender available to save preferences ?!");
-    }
-
-    public void loadPreferences() {
-        Log.v(TAG, "loadPreferences");
-
-        if(clockFaceStub == null) {
-            Log.v(TAG, "loadPreferences has no clock to put them in");
-            return;
-        }
-
-        PhoneActivity phoneActivity = PhoneActivity.getSingletonActivity();
-
-        SharedPreferences prefs = getSharedPreferences("org.dwallach.calwatch.prefs", MODE_PRIVATE);
-        boolean showSeconds = prefs.getBoolean("showSeconds", true);
-        int faceMode = prefs.getInt("faceMode", ClockFace.FACE_TOOL);
-
-        clockFaceStub.setFaceMode(faceMode);
-        clockFaceStub.setShowSeconds(showSeconds);
-
-        if(wearSender != null) {
-            wearSender.store(clockFaceStub);
-            wearSender.sendNow();
-        } else
-            Log.e(TAG, "no sender available to load preferences ?!");
-
-        if(phoneActivity != null) {
-            if (phoneActivity.toggle == null || phoneActivity.toolButton == null || phoneActivity.numbersButton == null || phoneActivity.liteButton == null) {
-                Log.v(TAG, "loadPreferences has no widgets to update");
-                return;
-            }
-
-            phoneActivity.toggle.setChecked(showSeconds);
-            phoneActivity.setFaceModeUI(faceMode);
-        }
-    }
-
     // this is called when there's something new from the calendar DB; we'll be running
-    // on the calendar's thread, not the UI thread
-    private void calHandler() {
+    // on the calendar's thread, not the UI thread. It's also useful to call from elsewhere
+    // when we want to push data to the watch.
+    public void sendAllToWatch() {
         if(wearSender == null) {
             Log.v(TAG, "no wear sender?!");
             return;
@@ -172,8 +115,8 @@ public class WatchCalendarService extends WearableListenerService {
 
         if (messageEvent.getPath().equals(Constants.WearDataReturnPath)) {
             // the watch says "hi"; make sure we send it stuff
-            if(wearSender != null)
-                wearSender.sendNow(true); // resend previous message
+
+            sendAllToWatch(); // send the calendar and whatever else we have
         } else {
             Log.v(TAG, "received message on unexpected path: " + messageEvent.getPath());
         }
