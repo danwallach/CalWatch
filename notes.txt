@@ -44,7 +44,18 @@ Subtasks:
     DONE?! and get things rendering locally and remotely?
     DONE?! fix path caching / rendering (data is correctly available on the watch, at least!)
     DONE?! new watch sends message to phone (hi! send data!)
-    TODO regular pings watch to phone (hi! not dead yet!)
+    DONE?! regular pings watch to phone (hi! not dead yet!)
+
+           This one was super painful. This whole business of asking nicely for your GoogleApi
+           and wondering whether or not you got it is an epic disaster. It seems to be super
+           important to do this registration over and over again, and then you can make it work.
+           You can't register from one place and expect it to work elsewhere.
+
+           Also, it seems to really matter that you use the MessageApi to set up the listener to
+           receive a message on the phone, even though you *don't* need to do this on the watch.
+           Probably bugs or something, or maybe I just wasn't properly registered with the damn
+           GoogleApi nonsense.
+
     TODO verify on round face
     TODO deal with dimming (kill second hand? lower frame rate? all white?)
 
@@ -53,3 +64,5 @@ TODO sort out how to compile protobufs automatically via Gradle (vs. known bugs 
 -- Seems to be compiling correctly, might even work on the first try (ha!)
 
 TODO fancier control panel: Material Layout cards
+
+
