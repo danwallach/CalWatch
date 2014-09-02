@@ -102,6 +102,8 @@ public class WatchCalendarService extends Service implements MessageApi.MessageL
         super.onStartCommand(intent, flags, startId);
         Log.v(TAG, "service starting!");
 
+        BatteryMonitor.init(this);
+
         getClockState();
 
         // We want this service to continue running until it is explicitly

@@ -57,12 +57,16 @@ public class WearReceiverService extends WearableListenerService implements Goog
         // We want this service to continue running until it is explicitly
         // stopped, so return sticky.
 
-        // TODO: send message to wake up phone and update us here on the watch
+        // DONE!: send message to wake up phone and update us here on the watch
         // Note that we're doing is here and not in onCreate(). This seems
         // to get called later on, and suggests that we'll be ready to receive
         // a message in return from the phone, assuming it's alive and kicking.
 
         pingPhone();
+
+        // this also seems a reasonable place to set up the battery monitor
+
+        BatteryMonitor.init(this);
 
         return START_STICKY;
     }

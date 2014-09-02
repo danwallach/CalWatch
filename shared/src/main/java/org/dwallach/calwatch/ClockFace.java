@@ -1,10 +1,13 @@
 package org.dwallach.calwatch;
 
 import android.content.Context;
+import android.content.Intent;
+import android.content.IntentFilter;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
 import android.graphics.Path;
+import android.graphics.RectF;
 import android.text.format.DateUtils;
 import android.util.Log;
 
@@ -119,6 +122,9 @@ public class ClockFace implements Observer {
 
         // something a real watch can't do: float the text over the hands
         drawMonthBox(canvas);
+
+        // and lastly, the battery meter
+        drawBattery(canvas);
     }
 
     private void drawRadialLine(Canvas canvas, double seconds, float startRadius, float endRadius, Paint paint, Paint shadowPaint) {
@@ -476,6 +482,53 @@ public class ClockFace implements Observer {
             }
         }
         canvas.drawPath(stipplePathCache, black);
+    }
+
+    private Path batteryPathCache = null;
+    private boolean batteryLow = false;
+
+    private void drawBattery(Canvas canvas) {
+        BatteryMonitor batteryMonitor = BatteryMonitor.getSingleton();
+        float batteryPct;
+
+        // we don't want to poll *too* often; this translates to about once per minute
+        if(batteryPathCache == null || (showSeconds &&  calendarTicker % 60000 == 0) || (!showSeconds && calendarTicker % 60 == 0)) {
+            batteryMonitor.fetchStatus();
+            Log.v(TAG, "fetching new battery status");
+            batteryPct = batteryMonitor.getBatteryPct();
+            batteryPathCache = new Path();
+
+
+            //
+            // The idea: we want to draw a circle in the center of the watchface, where you might
+            // normally have the hands coming together and have a mechanical spindle or something.
+            // Instead, we're going to draw a white dot, a circle. But, we're going to shave off the
+            // top as the charge drops.
+            //
+            // We need to compute the angle, relative to the top. This calls for cos^{-1}. We need
+            // to rescale the batteryPct to +/- 1, then the inverse trig function will tell us the
+            // angle from 0 to PI, which we then have to rescale to 360 degrees.
+            //
+
+            double theta = 180 * Math.acos(batteryPct * 2.0 - 1.0) / Math.PI;
+
+            float drawRadius = .07f;
+
+            float x1=clockX(45, drawRadius),
+                  y1=clockY(0, drawRadius),
+                  x2=clockX(15, drawRadius),
+                  y2=clockY(30, drawRadius);
+
+            RectF circle = new RectF(x1, y1, x2, y2);
+            batteryPathCache.arcTo(circle, (float) (theta - 90), (float)(360 - 2*theta), true);
+            batteryPathCache.close();
+
+            batteryLow = (batteryPct <= 0.1f);
+        }
+
+        // note that we'll flip the color from white to red once the battery gets below 10%
+        // TODO except if we're in ambient mode?
+        canvas.drawPath(batteryPathCache, (batteryLow)?smRed:smWhite);
     }
 
     /**
