@@ -502,9 +502,11 @@ public class ClockFace implements Observer {
         float batteryPct;
 
         // we don't want to poll *too* often; this translates to about once per minute
-        if(batteryPathCache == null || (showSeconds &&  calendarTicker % 60000 == 0) || (!showSeconds && calendarTicker % 60 == 0)) {
+        if(batteryPathCache == null ||
+                (showSeconds &&  calendarTicker % 60000 == 0) ||
+                (!showSeconds && calendarTicker % 60 == 0)) {
             batteryMonitor.fetchStatus();
-            Log.v(TAG, "fetching new battery status");
+            Log.v(TAG, "fetching new battery status (" + calendarTicker + ")");
             batteryPct = batteryMonitor.getBatteryPct();
             batteryPathCache = new Path();
 
@@ -543,9 +545,9 @@ public class ClockFace implements Observer {
             //
 
             Log.v(TAG, "battery at " + batteryPct);
-            if(batteryPct > 0.5f)
-                batteryPathCache = null;
-            else {
+            if(batteryPct > 0.5f) {
+                // batteryPathCache = null;
+            } else {
                 float minRadius = 0.02f, maxRadius = 0.06f;
                 float dotRadius;
                 if(batteryPct < 0.1)
