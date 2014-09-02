@@ -495,7 +495,7 @@ public class ClockFace implements Observer {
     }
 
     private Path batteryPathCache = null;
-    private boolean batteryLow = false;
+    private boolean batteryCritical = false;
 
     private void drawBattery(Canvas canvas) {
         BatteryMonitor batteryMonitor = BatteryMonitor.getSingleton();
@@ -510,7 +510,7 @@ public class ClockFace implements Observer {
 
 
             //
-            // The idea: we want to draw a circle in the center of the watchface, where you might
+            // Old idea: we want to draw a circle in the center of the watchface, where you might
             // normally have the hands coming together and have a mechanical spindle or something.
             // Instead, we're going to draw a white dot, a circle. But, we're going to shave off the
             // top as the charge drops.
@@ -520,6 +520,7 @@ public class ClockFace implements Observer {
             // angle from 0 to PI, which we then have to rescale to 360 degrees.
             //
 
+            /*
             double theta = 180 * Math.acos(batteryPct * 2.0 - 1.0) / Math.PI;
 
             float drawRadius = .06f;
@@ -534,11 +535,35 @@ public class ClockFace implements Observer {
             batteryPathCache.close();
 
             batteryLow = (batteryPct <= 0.1f);
+            */
+
+            //
+            // New idea: draw nothing unless the battery is low. At 50%, we start a small yellow
+            // circle. This scales in radius until it hits max size at 10%, then it switches to red.
+            //
+
+            Log.v(TAG, "battery at " + batteryPct);
+            if(batteryPct > 0.5f)
+                batteryPathCache = null;
+            else {
+                float minRadius = 0.02f, maxRadius = 0.06f;
+                float dotRadius;
+                if(batteryPct < 0.1)
+                    dotRadius = maxRadius;
+                else
+                    dotRadius = maxRadius - ((maxRadius - minRadius) * (batteryPct - 0.1f) / 0.4f);
+
+                Log.v(TAG, "--> dot radius: " + dotRadius);
+                batteryPathCache.addCircle(cx, cy, radius * dotRadius, Path.Direction.CCW); // direction shouldn't matter
+
+                batteryCritical = batteryPct <= 0.1f;
+            }
         }
 
         // note that we'll flip the color from white to red once the battery gets below 10%
         // TODO except if we're in ambient mode?
-        canvas.drawPath(batteryPathCache, (batteryLow)?smRed:smWhite);
+        if(batteryPathCache != null)
+            canvas.drawPath(batteryPathCache, (batteryCritical)?smRed:smYellow);
     }
 
     /**
