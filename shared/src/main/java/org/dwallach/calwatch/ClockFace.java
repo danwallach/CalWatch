@@ -512,7 +512,7 @@ public class ClockFace implements Observer {
 
             double theta = 180 * Math.acos(batteryPct * 2.0 - 1.0) / Math.PI;
 
-            float drawRadius = .07f;
+            float drawRadius = .06f;
 
             float x1=clockX(45, drawRadius),
                   y1=clockY(0, drawRadius),
