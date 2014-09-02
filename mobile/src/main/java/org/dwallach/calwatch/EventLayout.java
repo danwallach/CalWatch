@@ -74,9 +74,9 @@ public class EventLayout {
             }
             levelsFull[maxLevelAnywhere+1] = true; // one extra one on the end to make the state machine below run cleanly
 
-            Log.v(TAG, "inserting event "+i+" (" + e.title +
-                    "), fullLevels(" + String.valueOf(printLevelsFull) +
-                    "), maxLevelAnywhere (" + maxLevelAnywhere + ")");
+            // Log.v(TAG, "inserting event "+i+" (" + e.title +
+            //        "), fullLevels(" + String.valueOf(printLevelsFull) +
+            //        "), maxLevelAnywhere (" + maxLevelAnywhere + ")");
 
 
             // now, discover the first open hole, from the lowest level, then expand to fill
@@ -90,7 +90,7 @@ public class EventLayout {
             for(k=0; k<= maxLevelAnywhere; k++) {
                 if(searching) {
                     if (!levelsFull[k]) {
-                        Log.v(TAG, "--> found start level: " + k);
+                        // Log.v(TAG, "--> found start level: " + k);
                         searching = false;
                         holeStart = k;
                         holeEnd = k;
@@ -101,11 +101,11 @@ public class EventLayout {
                     // onward we go!
                     if (!levelsFull[k]) {
                         holeEnd = k;
-                        Log.v(TAG, "--> expanded end level: "+ k);
+                        // Log.v(TAG, "--> expanded end level: "+ k);
                     }
                     // sad, this search is over
                     else {
-                        Log.v(TAG, "--> no further holes");
+                        // Log.v(TAG, "--> no further holes");
                         break;
                     }
                 }
@@ -115,9 +115,9 @@ public class EventLayout {
                 e.minLevel = holeStart;
                 e.maxLevel = holeEnd;
 
-                Log.v(TAG, "--> hole found: (" + e.minLevel + "," + e.maxLevel + ")");
+                // Log.v(TAG, "--> hole found: (" + e.minLevel + "," + e.maxLevel + ")");
             } else {
-                Log.v(TAG, "--> adding a level");
+                // Log.v(TAG, "--> adding a level");
                 e.minLevel = e.maxLevel = maxLevelAnywhere + 1;
 
                 // Sigh. Now we need to loop through all the previous events to see if
@@ -126,7 +126,7 @@ public class EventLayout {
                     CalendarResults.Event pe = events.get(j);
 
                     if(!e.overlaps(pe) && pe.maxLevel == maxLevelAnywhere) {
-                        Log.v(TAG, "=== expanding event " + j);
+                        // Log.v(TAG, "=== expanding event " + j);
                         pe.maxLevel++;
                     }
                 }
