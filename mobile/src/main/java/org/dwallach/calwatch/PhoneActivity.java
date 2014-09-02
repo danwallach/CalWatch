@@ -11,30 +11,29 @@ import android.widget.CompoundButton;
 import android.widget.RadioButton;
 import android.widget.Switch;
 
-
-import android.app.Activity;
-import android.content.SharedPreferences;
-import android.os.Bundle;
-import android.util.Log;
-import android.view.Menu;
-import android.view.MenuItem;
-import android.view.View;
-import android.widget.CompoundButton;
-import android.widget.RadioButton;
-import android.widget.Switch;
+import java.util.Observable;
+import java.util.Observer;
 
 
-public class PhoneActivity extends Activity {
+public class PhoneActivity extends Activity implements Observer {
     private final static String TAG = "PhoneActivity";
 
-    private static PhoneActivity theActivity;
+    private Switch toggle;
+    private RadioButton toolButton, numbersButton, liteButton;
 
-    Switch toggle;
-    RadioButton toolButton, numbersButton, liteButton;
-    private ClockFaceStub clockFace;
+    private ClockState clockState;
 
-    public static PhoneActivity getSingletonActivity() {
-        return theActivity;
+    private ClockState getClockState() {
+        if(clockState == null) {
+            clockState = ClockState.getSingleton();
+            clockState.addObserver(this);
+        }
+        return clockState;
+    }
+
+    public PhoneActivity() {
+        super();
+        getClockState(); // initialize our pointer to the clock state
     }
 
     //
@@ -48,13 +47,13 @@ public class PhoneActivity extends Activity {
         }
 
         switch(mode) {
-            case ClockFace.FACE_TOOL:
+            case ClockState.FACE_TOOL:
                 toolButton.performClick();
                 break;
-            case ClockFace.FACE_NUMBERS:
+            case ClockState.FACE_NUMBERS:
                 numbersButton.performClick();
                 break;
-            case ClockFace.FACE_LITE:
+            case ClockState.FACE_LITE:
                 liteButton.performClick();
                 break;
             default:
@@ -72,27 +71,15 @@ public class PhoneActivity extends Activity {
         }
 
         if(toolButton.isChecked())
-            mode = ClockFace.FACE_TOOL;
+            mode = ClockState.FACE_TOOL;
         else if(numbersButton.isChecked())
-            mode = ClockFace.FACE_NUMBERS;
+            mode = ClockState.FACE_NUMBERS;
         else if(liteButton.isChecked())
-            mode = ClockFace.FACE_LITE;
+            mode = ClockState.FACE_LITE;
         else Log.v(TAG, "no buttons are selected? weird.");
 
-        if(mode != -1 && clockFace != null) {
-            clockFace.setFaceMode(mode);
-            savePreferences();
-        }
-    }
-
-    private void fetchClockFace() {
-        final MyViewAnim animView = (MyViewAnim) findViewById(R.id.surfaceView);
-        if(animView != null) {
-            Log.v(TAG, "Getting real clock face");
-            this.clockFace = animView.getClockFace();
-        } else {
-            Log.v(TAG, "No MyViewAnim -> fake clock face");
-            this.clockFace = new ClockFaceStub();
+        if(mode != -1) {
+            getClockState().setFaceMode(mode);
         }
     }
 
@@ -104,15 +91,9 @@ public class PhoneActivity extends Activity {
 
     }
 
-    public ClockFaceStub getClockFace() {
-        if(clockFace == null)
-            fetchClockFace();
-        return clockFace;
-    }
-
     private void activitySetup() {
         Log.v(TAG, "And in the beginning ...");
-        theActivity = this;
+
 
         setContentView(R.layout.activity_phone);
 
@@ -155,18 +136,26 @@ public class PhoneActivity extends Activity {
         if(watchCalendarService == null) {
             Intent serviceIntent = new Intent(this, WatchCalendarService.class);
             startService(serviceIntent);
-
-            // do it again; we should get something different this time
-            watchCalendarService = WatchCalendarService.getSingletonService();
         }
 
-        fetchClockFace();
         loadPreferences();
     }
 
     protected void onStop() {
         super.onStop();
         Log.v(TAG, "Stop!");
+
+        // perhaps incorrect assumption: if our activity is being killed, onStop will happen beforehand,
+        // so we'll deregister our clockState observer, allowing this Activity object to become
+        // garbage. A new one will be created if the activity ever comes back to life, which
+        // will call getClockState(), which will in turn resurrect observer. Setting clockState=null
+        // means that, even if this specific Activity object is resurrected from the dead, we'll
+        // just reconnect it the next time somebody internally calls getClockState(). No harm, no foul.
+
+        // http://developer.android.com/reference/android/app/Activity.html
+
+        clockState.deleteObserver(this);
+        clockState = null;
     }
 
     protected void onStart() {
@@ -176,12 +165,6 @@ public class PhoneActivity extends Activity {
 
     protected void onResume() {
         super.onResume();
-
-        if(this != theActivity) {
-            Log.v(TAG, "Resuming on new activity!");
-            activitySetup();
-        }
-
         Log.v(TAG, "Resume!");
     }
 
@@ -194,10 +177,7 @@ public class PhoneActivity extends Activity {
     protected void showSecondsStateChange(boolean state) {
         Log.v(TAG, state?"Selected":"Unselected");
 
-        if(clockFace != null) {
-            clockFace.setShowSeconds(state);
-            savePreferences();
-        }
+        getClockState().setShowSeconds(state);
     }
 
     @Override
@@ -224,53 +204,39 @@ public class PhoneActivity extends Activity {
         SharedPreferences prefs = getSharedPreferences("org.dwallach.calwatch.prefs", MODE_PRIVATE);
         SharedPreferences.Editor editor = prefs.edit();
 
-        editor.putBoolean("showSeconds", clockFace.getShowSeconds());
-        editor.putInt("faceMode", clockFace.getFaceMode());
+        ClockState clockState = getClockState();
+        editor.putBoolean("showSeconds", clockState.getShowSeconds());
+        editor.putInt("faceMode", clockState.getFaceMode());
 
         if(!editor.commit())
             Log.v(TAG, "savePreferences commit failed ?!");
-
-        try {
-            WatchCalendarService service = WatchCalendarService.getSingletonService();
-            service.sendAllToWatch();
-        } catch (NullPointerException ne) {
-            Log.e(TAG, "failure in SavePreferences sending update to watch: " + ne.toString());
-        }
     }
 
     public void loadPreferences() {
         Log.v(TAG, "loadPreferences");
 
-        if(clockFace == null) {
-            Log.v(TAG, "loadPreferences has no clock to put them in");
-            return;
-        }
-
-        PhoneActivity phoneActivity = PhoneActivity.getSingletonActivity();
+        ClockState clockState = getClockState();
 
         SharedPreferences prefs = getSharedPreferences("org.dwallach.calwatch.prefs", MODE_PRIVATE);
         boolean showSeconds = prefs.getBoolean("showSeconds", true);
-        int faceMode = prefs.getInt("faceMode", ClockFace.FACE_TOOL);
+        int faceMode = prefs.getInt("faceMode", ClockState.FACE_TOOL);
 
-        clockFace.setFaceMode(faceMode);
-        clockFace.setShowSeconds(showSeconds);
+        clockState.setFaceMode(faceMode);
+        clockState.setShowSeconds(showSeconds);
 
-        try {
-            WatchCalendarService service = WatchCalendarService.getSingletonService();
-            service.sendAllToWatch();
-        } catch (NullPointerException ne) {
-            Log.e(TAG, "failure in loadPreferences sending update to watch: " + ne.toString());
+        if (toggle == null || toolButton == null || numbersButton == null || liteButton == null) {
+            Log.v(TAG, "loadPreferences has no widgets to update");
+            return;
         }
 
-        if(phoneActivity != null) {
-            if (phoneActivity.toggle == null || phoneActivity.toolButton == null || phoneActivity.numbersButton == null || phoneActivity.liteButton == null) {
-                Log.v(TAG, "loadPreferences has no widgets to update");
-                return;
-            }
-
-            phoneActivity.toggle.setChecked(showSeconds);
-            phoneActivity.setFaceModeUI(faceMode);
-        }
+        toggle.setChecked(showSeconds);
+        setFaceModeUI(faceMode);
     }
 
+    @Override
+    public void update(Observable observable, Object data) {
+        // somebody changed *something* in the ClockState, causing us to get called
+        Log.v(TAG, "Noticed a change in the clock state; saving preferences");
+        savePreferences();
+    }
 }

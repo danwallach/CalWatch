@@ -73,6 +73,8 @@ public class CalendarFetcher extends Observable implements Runnable {
         // reasonably current to display, despite waking things up properly to do another round of queries
         // against the calendar.
         //
+        // TODO: this could probably be replaced with a Looper, but hey, it works and it's modestly efficient
+        //
         for(;;) {
             // Log.v(TAG, "ping");
             long queryStartMillis = (long) (Math.floor(SystemClock.currentThreadTimeMillis() / 3600000.0) * 360000.0); // if it's currently 12:32pm, this value will be 12:00pm
@@ -84,6 +86,8 @@ public class CalendarFetcher extends Observable implements Runnable {
             // this boolean could have been made true in a number of ways: either because we hit a new hour (as above) or because our cursor on the calendar detected a change
             if(newContentAvailable) {
                 this.calendarResults = loadContent(); // lots of work happens here... which is why we're on a separate thread
+
+                // this incantation will make observers elsewhere aware that there's new content
                 setChanged();
                 notifyObservers();
                 clearChanged();

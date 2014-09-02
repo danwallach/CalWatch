@@ -78,6 +78,8 @@ Subtasks:
     TODO disconnect / reconnect of phone from watch
     TODO fresh boot of watch / reconnect to old phone app
     TODO nothing running on phone / fresh watch wants data
+    TODO centralized store (in /shared) for calendar data
+    TODO disconnect from activities & services
 
     TODO restart of app on phone breaks watch with bogus message (probably related to ClockFace vs. ClockFaceStub)
         TODO need to carefully rethink lifecycle issues on these things; service shouldn't really have long-term pointers to the activity
@@ -107,5 +109,6 @@ Subtasks:
 TODO get a real app icon
 TODO slower refresh rate when second hand not being displayed
 TODO app signing
+TODO smarter DrawArc
 
 TODO render battery life somewhere?

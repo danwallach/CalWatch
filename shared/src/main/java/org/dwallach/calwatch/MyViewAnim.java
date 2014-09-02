@@ -8,6 +8,7 @@ import android.graphics.Color;
 import android.graphics.PorterDuff;
 import android.os.Handler;
 import android.os.Looper;
+import android.os.SystemClock;
 import android.util.AttributeSet;
 import android.util.Log;
 import android.view.SurfaceHolder;
@@ -37,7 +38,7 @@ public class MyViewAnim extends SurfaceView implements SurfaceHolder.Callback {
         Log.v(TAG, "setup!");
         this.context = ctx;
         getHolder().addCallback(this);
-        clockFace = new ClockFace(ctx);
+        clockFace = new ClockFace();
     }
 
     @Override
@@ -52,8 +53,8 @@ public class MyViewAnim extends SurfaceView implements SurfaceHolder.Callback {
     @Override
     public void surfaceChanged(SurfaceHolder holder, int format, int width, int height) {
         Log.v(TAG, "Drawing surface changed!");
-        clockFace.setSize(width, height);
         resume();
+        clockFace.setSize(width, height);
 
     }
 
@@ -77,6 +78,9 @@ public class MyViewAnim extends SurfaceView implements SurfaceHolder.Callback {
     }
 
     public void resume() {
+        if(clockFace == null)
+            clockFace = new ClockFace();
+
         if(animator != null) {
             Log.v(TAG, "resuming old animator!");
             animator.resume();
@@ -128,6 +132,8 @@ public class MyViewAnim extends SurfaceView implements SurfaceHolder.Callback {
                     looper.quitSafely();
                 animator = null;
                 drawThread = null;
+                clockFace.destroy();
+                clockFace = null;
             }
         }
     }
@@ -205,7 +211,16 @@ public class MyViewAnim extends SurfaceView implements SurfaceHolder.Callback {
                 c.drawColor(Color.TRANSPARENT, PorterDuff.Mode.CLEAR);
                 clockFace.drawEverything(c);
 
+                ClockState clockState = ClockState.getSingleton();
 
+                // TODO add support for ambient mode, do the same thing
+                if(!clockState.getShowSeconds()) {
+                    // if we're not showing the second hand, then we don't need to refresh at 50+Hz
+                    // so instead we sleep one second; regardless, the minute hand will move
+                    // very, very smoothly.
+                    SystemClock.sleep(1000);
+
+                }
 
             } finally {
                 if (c != null) {

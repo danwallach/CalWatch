@@ -12,24 +12,34 @@ import com.google.android.gms.wearable.MessageApi;
 import com.google.android.gms.wearable.MessageEvent;
 import com.google.android.gms.wearable.Node;
 import com.google.android.gms.wearable.Wearable;
-import com.google.android.gms.wearable.WearableListenerService;
 
 import java.util.Observable;
 import java.util.Observer;
 
-public class WatchCalendarService extends Service implements MessageApi.MessageListener, GoogleApiClient.ConnectionCallbacks, GoogleApiClient.OnConnectionFailedListener {
+public class WatchCalendarService extends Service implements MessageApi.MessageListener, GoogleApiClient.ConnectionCallbacks, GoogleApiClient.OnConnectionFailedListener, Observer {
     private final String TAG = "WatchCalendarService";
 
     private static WatchCalendarService singletonService;
     private WearSender wearSender;
-    private ClockFaceStub clockFaceStub;
     private CalendarFetcher calendarFetcher;
 
     private GoogleApiClient mGoogleApiClient;
 
+    private ClockState clockState;
+
+    private ClockState getClockState() {
+        // more on the design of this particular contraption in the comments in PhoneActivity
+        if(clockState == null) {
+            clockState = ClockState.getSingleton();
+            clockState.addObserver(this);
+        }
+        return clockState;
+    }
+
+
     private void initGoogle() {
         if(mGoogleApiClient == null) {
-            mGoogleApiClient = new GoogleApiClient.Builder(this). // TODO probably need to change this to PhoneActivity
+            mGoogleApiClient = new GoogleApiClient.Builder(this).
                     addApi(Wearable.API).
                     addConnectionCallbacks(this).
                     addOnConnectionFailedListener(this).
@@ -51,33 +61,23 @@ public class WatchCalendarService extends Service implements MessageApi.MessageL
 
         singletonService = this;
 
-        // we'd much rather use the *service* than the *activity* here, but that seems
-        // not work, for unknown reasons
-        PhoneActivity phoneActivity = PhoneActivity.getSingletonActivity();
-        if (phoneActivity != null) {
-            clockFaceStub = phoneActivity.getClockFace();
-        } else {
-            Log.v(TAG, "no clockface yet, hmm");
-            clockFaceStub = new ClockFaceStub();
-        }
-
         calendarFetcher = new CalendarFetcher(); // automatically allocates a thread and runs
 
         calendarFetcher.addObserver(new Observer() {
             @Override
             public void update(Observable observable, Object data) {
                 Log.v(TAG, "New calendar state to send to watch!");
-                sendAllToWatch();
+
+                // the following line is important: this is where we bridge the output of the phone-side
+                // calendar fetcher (running as a separate thread inside the phone-side Service)
+                // into the ClockState central repo (shared by many things). This change will
+                // later on trigger a callback to the update method (below), which will
+                // then decide it's time to send everything to the watch
+
+                getClockState().setEventList(calendarFetcher.getContent().getWrappedEvents());
+                // sendAllToWatch();
             }
         });
-    }
-
-    public ClockFaceStub getClockFace() {
-        return clockFaceStub;
-    }
-
-    public WearSender getWearSender() {
-        return wearSender;
     }
 
     public static WatchCalendarService getSingletonService() {
@@ -93,22 +93,16 @@ public class WatchCalendarService extends Service implements MessageApi.MessageL
             return;
         }
 
-        // first, send the events to the local instance on the phone
-        ClockFaceStub clockFaceStub = getClockFace();
-        if (clockFaceStub == null)
-            Log.v(TAG, "nowhere to send updated calendar events, hmm");
-        else
-            clockFaceStub.setEventList(calendarFetcher.getContent().getWrappedEvents());
-
         // and now, send on to the wear device
-        wearSender.store(calendarFetcher.getContent().getWireEvents(), clockFaceStub);
-        wearSender.sendNow();
+        wearSender.sendAllToWatch();
     }
 
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
         super.onStartCommand(intent, flags, startId);
         Log.v(TAG, "service starting!");
+
+        getClockState();
 
         // We want this service to continue running until it is explicitly
         // stopped, so return sticky.
@@ -120,12 +114,17 @@ public class WatchCalendarService extends Service implements MessageApi.MessageL
         super.onCreate();
         Log.v(TAG, "service created!");
         initGoogle();
+
+        getClockState();
     }
 
     @Override
     public void onDestroy() {
         super.onDestroy();
         Log.v(TAG, "service destroyed!");
+
+        clockState.deleteObserver(this);
+        clockState = null;
     }
 
     //
@@ -187,5 +186,12 @@ public class WatchCalendarService extends Service implements MessageApi.MessageL
         // TODO: Return the communication channel to the service.
         Log.e(TAG, "onBind: we should support this");
         throw new UnsupportedOperationException("Not yet implemented");
+    }
+
+    @Override
+    public void update(Observable observable, Object data) {
+        // somebody updated something in the clock state (new events, new display options, etc.)
+        Log.v(TAG, "internal clock state changed: time to send all to the watch");
+        sendAllToWatch();
     }
 }

@@ -14,9 +14,11 @@ import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.List;
 import java.util.Locale;
+import java.util.Observable;
+import java.util.Observer;
 import java.util.TimeZone;
 
-public class ClockFace extends ClockFaceStub {
+public class ClockFace implements Observer {
     private static final String TAG = "ClockFace";
     //
     // A couple performance notes:
@@ -55,18 +57,7 @@ public class ClockFace extends ClockFaceStub {
 
     private Paint white, yellow, smWhite, smYellow, black, smBlack, smRed, gray, outlineBlack, superThinBlack;
 
-    Context context;
-    Canvas canvas;
-
-    public final static int FACE_TOOL = 0;
-    public final static int FACE_NUMBERS = 1;
-    public final static int FACE_LITE = 2;
-
-    public void setFaceMode(int faceMode) {
-        // warning: this might come in from another thread!
-        this.faceMode = faceMode;
-        this.facePathCache = null;
-    }
+    private ClockState clockState;
 
     public int getFaceMode() {
         return faceMode;
@@ -81,8 +72,9 @@ public class ClockFace extends ClockFaceStub {
         return p;
     }
 
-    public ClockFace(Context context) {
-        this.context = context;
+    public ClockFace() {
+        this.clockState = ClockState.getSingleton();
+        setupObserver();
 
         Log.v("ClockFace", "ClockFace setup!");
         white = newPaint();
@@ -115,65 +107,31 @@ public class ClockFace extends ClockFaceStub {
         superThinBlack.setStyle(Paint.Style.STROKE);
     }
 
-    public void setContext(Context context) {
-        this.context = context;
-    }
-
-    public void setCanvas(Canvas canvas) {
-        this.canvas = canvas;
-    }
-
-    public void setShowSeconds(boolean showSeconds) {
-        this.showSeconds = showSeconds;
-    }
-
-    /*
-     * sets whether the second hand should be aligned properly (only use in low FPS situations)
-     */
-    public void setClipSeconds(boolean clipSeconds) {
-        this.clipSeconds = clipSeconds;
-    }
-
-    public boolean getShowSeconds() {
-        return showSeconds;
-    }
-
     /*
      * the expectation is that you call this method *not* from the UI thread but instead
      * from a helper thread, elsewhere
      */
     public void drawEverything(Canvas canvas) {
-        // note that we're saving the main canvas in a class variable; some methods in the
-        // class don't take a canvas and will just draw into this class-canvas. Others take
-        // a canvas as an argument. Those ones, specifically, might be used elsewhere at some
-        // future time for rendering to off-screen bitmaps (wrapped in a Canvas).
-        this.canvas = canvas;
-
-        // background?
-
-        // canvas.drawCircle(cx, cy, radius, gray);
-        // canvas.drawCircle(cx, cy, radius * .95f, black);
-
         // draw the calendar wedges first, at the bottom of the stack, then the face indices
-        drawCalendar();
-        drawFace();
+        drawCalendar(canvas);
+        drawFace(canvas);
+        drawHands(canvas);
 
         // something a real watch can't do: float the text over the hands
-        drawHands();
-        drawMonthBox();
+        drawMonthBox(canvas);
     }
 
-    public void drawRadialLine(Canvas canvas, double seconds, float startRadius, float endRadius, Paint paint, Paint shadowPaint) {
+    private void drawRadialLine(Canvas canvas, double seconds, float startRadius, float endRadius, Paint paint, Paint shadowPaint) {
         drawRadialLine(canvas, seconds, startRadius, endRadius, paint, shadowPaint, false);
     }
 
-    public void drawRadialLine(Canvas canvas, double seconds, float startRadius, float endRadius, Paint paint, Paint shadowPaint, boolean forceVertical) {
+    private void drawRadialLine(Canvas canvas, double seconds, float startRadius, float endRadius, Paint paint, Paint shadowPaint, boolean forceVertical) {
         Path p = new Path();
         drawRadialLine(p, paint.getStrokeWidth(), seconds, startRadius, endRadius, forceVertical);
         canvas.drawPath(p, paint);
         canvas.drawPath(p, shadowPaint);
     }
-    public void drawRadialLine(Path path, float strokeWidth, double seconds, float startRadius, float endRadius, boolean forceVertical) {
+    private void drawRadialLine(Path path, float strokeWidth, double seconds, float startRadius, float endRadius, boolean forceVertical) {
         float x1, x2, y1, y2;
 
         x1 = clockX(seconds, startRadius);
@@ -196,7 +154,7 @@ public class ClockFace extends ClockFaceStub {
         path.close();
     }
 
-    public void drawRadialArc(Canvas canvas, PathCache pc, double secondsStart, double secondsEnd, float startRadius, float endRadius, Paint paint, Paint outlinePaint) {
+    private void drawRadialArc(Canvas canvas, PathCache pc, double secondsStart, double secondsEnd, float startRadius, float endRadius, Paint paint, Paint outlinePaint) {
         /*
          * Below is an attempt to do this "correctly" using the arc functionality supported natively
          * by Android's Path. This implementation totally didn't work. Rather than debugging it,
@@ -250,7 +208,7 @@ public class ClockFace extends ClockFaceStub {
         canvas.drawPath(p, outlinePaint);
     }
 
-    public void drawMonthBox() {
+    private void drawMonthBox(Canvas canvas) {
         // for now, hard-coded to the 9-oclock position
         String m = localMonthDay();
         String d = localDayOfWeek();
@@ -280,7 +238,7 @@ public class ClockFace extends ClockFaceStub {
     private volatile Path facePathCache = null;
     private volatile int facePathCacheMode = -1;
 
-    public void drawFace() {
+    private void drawFace(Canvas canvas) {
         Path p = facePathCache; // make a local copy, avoid concurrency crap
         // draw thin lines (indices)
 
@@ -289,14 +247,14 @@ public class ClockFace extends ClockFaceStub {
             p = new Path();
             Log.v("ClockFace", "rendering new face, faceMode(" + faceMode + ")");
 
-            if (faceMode == FACE_TOOL)
+            if (faceMode == ClockState.FACE_TOOL)
                 for (int i = 1; i < 60; i++)
                     if(i%5 != 0)
                         drawRadialLine(p, smWhite.getStrokeWidth(), i, .9f, 1.0f, false);
 
             float strokeWidth;
 
-            if (faceMode == FACE_LITE || faceMode == FACE_NUMBERS)
+            if (faceMode == ClockState.FACE_LITE || faceMode == ClockState.FACE_NUMBERS)
                 strokeWidth = smWhite.getStrokeWidth();
             else
                 strokeWidth = white.getStrokeWidth();
@@ -304,7 +262,7 @@ public class ClockFace extends ClockFaceStub {
 
             for (int i = 0; i < 60; i += 5) {
                 if (i == 0) { // top of watch: special
-                    if (faceMode != FACE_NUMBERS) {
+                    if (faceMode != ClockState.FACE_NUMBERS) {
                         drawRadialLine(p, strokeWidth, -0.4f, .8f, 1.0f, true);
                         drawRadialLine(p, strokeWidth, 0.4f, .8f, 1.0f, true);
                     }
@@ -312,7 +270,7 @@ public class ClockFace extends ClockFaceStub {
                     drawRadialLine(p, strokeWidth, i, 0.9f, 1.0f, false);
                 } else {
                     // we want lines for 1, 2, 4, 5, 7, 8, 10, and 11 no matter what
-                    if (faceMode != FACE_NUMBERS || !(i == 15 || i == 30))
+                    if (faceMode != ClockState.FACE_NUMBERS || !(i == 15 || i == 30))
                         drawRadialLine(p, strokeWidth, i, .8f, 1.0f, false);
                 }
             }
@@ -326,7 +284,7 @@ public class ClockFace extends ClockFaceStub {
         canvas.drawPath(p, smWhite);
         canvas.drawPath(p, superThinBlack);
 
-        if(faceMode == FACE_NUMBERS) {
+        if(faceMode == ClockState.FACE_NUMBERS) {
             // in this case, we'll draw "12", "3", and "6". No "9" because that's where the
             // month and day will go
             float x, y, r;
@@ -383,7 +341,7 @@ public class ClockFace extends ClockFaceStub {
         }
     }
 
-    public void drawHands() {
+    private void drawHands(Canvas canvas) {
         TimeZone tz = TimeZone.getDefault();
         int gmtOffset = tz.getRawOffset() + tz.getDSTSavings();
         long time = System.currentTimeMillis() + gmtOffset;
@@ -407,26 +365,7 @@ public class ClockFace extends ClockFaceStub {
     private long stippleTimeCache = -1;
     private Path stipplePathCache = null;
 
-    private int maxLevel;
-
-    public void setMaxLevel(int maxLevel) {
-        this.maxLevel = maxLevel;
-    }
-
-    public void setEventList(List<EventWrapper> eventList) {
-        super.setEventList(eventList);
-        int maxLevel = 0;
-        for(EventWrapper eventWrapper : eventList) {
-            int eMaxLevel =  eventWrapper.getWireEvent().maxLevel;
-            if(eMaxLevel > maxLevel)
-                maxLevel = eMaxLevel;
-        }
-
-        this.maxLevel = maxLevel;
-        Log.v(TAG, "maxLevel for new events: " + this.maxLevel);
-    }
-
-    public void drawCalendar() {
+    private void drawCalendar(Canvas canvas) {
         calendarTicker++;
 
         if(eventList == null) {
@@ -581,32 +520,60 @@ public class ClockFace extends ClockFaceStub {
 
         outlineBlack.setStrokeWidth(lineWidth /3);
         superThinBlack.setStrokeWidth(lineWidth / 8);
+
+        facePathCache = null;
     }
 
     // clock math
-    public float clockX(double seconds, float fractionFromCenter) {
+    private float clockX(double seconds, float fractionFromCenter) {
         double angleRadians = ((seconds - 15) * Math.PI * 2f) / 60.0;
         return (float)(cx + radius * fractionFromCenter * Math.cos(angleRadians));
     }
 
-    public float clockY(double seconds, float fractionFromCenter) {
+    private float clockY(double seconds, float fractionFromCenter) {
         double angleRadians = ((seconds - 15) * Math.PI * 2f) / 60.0;
         return (float)(cy + radius * fractionFromCenter * Math.sin(angleRadians));
     }
 
-    public static String localTimeString() {
+    private static String localTimeString() {
         String format = "HH:mm:ss.SSS";
         SimpleDateFormat sdf = new SimpleDateFormat(format, Locale.getDefault());
         return sdf.format(new Date());
     }
 
-    public static String localMonthDay() {
+    private static String localMonthDay() {
         return DateUtils.formatDateTime(null, System.currentTimeMillis(), DateUtils.FORMAT_ABBREV_MONTH | DateUtils.FORMAT_SHOW_DATE);
     }
 
-    public static String localDayOfWeek() {
+    private static String localDayOfWeek() {
         String format = "cccc";
         SimpleDateFormat sdf = new SimpleDateFormat(format, Locale.getDefault());
         return sdf.format(new Date());
+    }
+
+    private int faceMode;
+    private boolean showSeconds;
+    private List<EventWrapper> eventList;
+    private int maxLevel;
+
+
+    // call this if you want this instance to head to the garbage collector; this disconnects
+    // it from paying attention to changes in the ClockState
+    public void destroy() {
+        clockState.deleteObserver(this);
+    }
+
+    private void setupObserver() {
+        clockState.addObserver(this);
+    }
+
+    // this gets called when the clockState updates itself
+    @Override
+    public void update(Observable observable, Object data) {
+        this.maxLevel = clockState.getMaxLevel();
+        this.showSeconds = clockState.getShowSeconds();
+        this.eventList = clockState.getEventList();
+        this.faceMode = clockState.getFaceMode();
+        this.facePathCache = null;
     }
 }

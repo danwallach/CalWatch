@@ -46,47 +46,8 @@ public class WearReceiverService extends WearableListenerService implements Goog
     public static WearReceiverService getSingleton() { return singleton; }
 
     private void newEventBytes(byte[] eventBytes) {
-        ClockFace clockFace;
-        try {
-            clockFace = WearActivity.getSingletonActivity().getViewAnim().getClockFace();
-            if(clockFace == null) {
-                Log.v(TAG, "nowhere to put new events!");
-                return;
-            }
-        } catch (NullPointerException e) {
-            Log.v(TAG, "something's not ready for a clock face: " + e.toString());
-            return;
-        }
-
-        Wire wire = new Wire();
-        WireUpdate wireUpdate = null;
-
-        try {
-            wireUpdate = (WireUpdate) wire.parseFrom(eventBytes, WireUpdate.class);
-        } catch (IOException ioe) {
-            Log.e(TAG, "parse failure on protobuf: " + ioe.toString());
-            return;
-        }
-
-        if(wireUpdate.newEvents) {
-            ArrayList<EventWrapper> results = new ArrayList<EventWrapper>();
-
-            int maxLevel = -1;
-            for (WireEvent wireEvent : wireUpdate.events) {
-                results.add(new EventWrapper(wireEvent));
-
-                if (wireEvent.maxLevel > maxLevel)
-                    maxLevel = wireEvent.maxLevel;
-            }
-
-            clockFace.setMaxLevel(maxLevel);
-            clockFace.setEventList(results);
-            Log.v(TAG, "new calendar event list, " + results.size() + " entries");
-        }
-
-        clockFace.setFaceMode(wireUpdate.faceMode);
-        clockFace.setShowSeconds(wireUpdate.showSeconds);
-        Log.v(TAG, "event update complete");
+        ClockState clockState = ClockState.getSingleton();
+        clockState.setProtobuf(eventBytes);
     }
 
     @Override
