@@ -90,5 +90,7 @@ DONE?! slower refresh rate when second hand not being displayed
 TODO app signing
 TODO smarter DrawArc
 
-TODO make battery gauge pretty
+DONE! make battery gauge pretty
 TODO if we're coming back from being asleep, make sure we invalidate the batteryPathCache
+
+TODO fix regression: we're not clipping the events to the visible 12 hour window
