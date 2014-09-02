@@ -25,6 +25,7 @@ public class PhoneActivity extends Activity implements Observer {
 
     private ClockState getClockState() {
         if(clockState == null) {
+            Log.v(TAG, "reconnecting clock state");
             clockState = ClockState.getSingleton();
             clockState.addObserver(this);
         }
@@ -33,7 +34,6 @@ public class PhoneActivity extends Activity implements Observer {
 
     public PhoneActivity() {
         super();
-        getClockState(); // initialize our pointer to the clock state
     }
 
     //
@@ -86,14 +86,14 @@ public class PhoneActivity extends Activity implements Observer {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-
-        activitySetup();
+        Log.v(TAG, "Create!");
 
     }
 
     private void activitySetup() {
         Log.v(TAG, "And in the beginning ...");
 
+        getClockState(); // initialize it, if it's not already here
 
         setContentView(R.layout.activity_phone);
 
@@ -161,6 +161,8 @@ public class PhoneActivity extends Activity implements Observer {
     protected void onStart() {
         super.onStart();
         Log.v(TAG, "Start!");
+
+        activitySetup();
     }
 
     protected void onResume() {
