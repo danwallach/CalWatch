@@ -1,9 +1,13 @@
 package org.dwallach.calwatch;
 
+import android.app.AlarmManager;
+import android.app.PendingIntent;
 import android.app.Service;
+import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
 import android.os.IBinder;
+import android.os.SystemClock;
 import android.util.Log;
 
 import com.google.android.gms.common.ConnectionResult;
@@ -13,6 +17,7 @@ import com.google.android.gms.wearable.MessageEvent;
 import com.google.android.gms.wearable.Node;
 import com.google.android.gms.wearable.Wearable;
 
+import java.util.Calendar;
 import java.util.Observable;
 import java.util.Observer;
 
@@ -103,14 +108,12 @@ public class WatchCalendarService extends Service implements MessageApi.MessageL
         Log.v(TAG, "service starting!");
 
         BatteryMonitor.init(this);
-
         getClockState();
 
         // We want this service to continue running until it is explicitly
         // stopped, so return sticky.
         return START_STICKY;
     }
-
     @Override
     public void onCreate() {
         super.onCreate();
@@ -185,7 +188,6 @@ public class WatchCalendarService extends Service implements MessageApi.MessageL
 
     @Override
     public IBinder onBind(Intent intent) {
-        // TODO: Return the communication channel to the service.
         Log.e(TAG, "onBind: we should support this");
         throw new UnsupportedOperationException("Not yet implemented");
     }
