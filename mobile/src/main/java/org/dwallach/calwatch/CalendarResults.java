@@ -111,24 +111,4 @@ public class CalendarResults {
         }
         return wireList;
     }
-
-    // barebones constructor from the wire format; populates events and nothing else
-    public CalendarResults(List<WireEvent> wireEvents) {
-        calendars = null;
-        colors = null;
-
-        int maxLevel = 0;
-
-        for(WireEvent wEvent : wireEvents) {
-            Event e = new Event();
-            e.startTime = wEvent.startTime;
-            e.endTime = wEvent.endTime;
-            e.displayColor = wEvent.displayColor;
-            e.minLevel = wEvent.minLevel;
-            e.maxLevel = wEvent.maxLevel;
-
-            if(e.maxLevel > maxLevel)
-                maxLevel = e.maxLevel;
-        }
-    }
 }

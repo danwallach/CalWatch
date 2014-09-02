@@ -371,8 +371,11 @@ public class ClockFace implements Observer {
     private long stippleTimeCache = -1;
     private Path stipplePathCache = null;
 
+    private int oldCX = -1, oldCY = -1;
+
     private void drawCalendar(Canvas canvas) {
         calendarTicker++;
+
 
         if(eventList == null) {
             if (calendarTicker % 1000 == 0) Log.v(TAG, "drawCalendar starting, eventList is null");
@@ -382,18 +385,21 @@ public class ClockFace implements Observer {
         TimeZone tz = TimeZone.getDefault();
         int gmtOffset = tz.getRawOffset() + tz.getDSTSavings();
 
+        // try to determine if the screen size has changed since last time; if so, nuke the
+        // saved path caches
+        if(oldCX != cx || oldCY != cy) {
+            for(EventWrapper eventWrapper: eventList)
+                eventWrapper.getPathCache().set(null);
+        }
+        oldCX = cx;
+        oldCY = cy;
+
         for(EventWrapper eventWrapper: eventList) {
             double arcStart, arcEnd;
             WireEvent e = eventWrapper.getWireEvent();
             if(calendarTicker % 1000 == 0) {
                 Log.v(TAG, "rendering event: start "+ e.startTime + ", end " + e.endTime + ", minLevel " + e.minLevel + ", maxlevel " + e.maxLevel + ", displayColor " + Integer.toHexString(e.displayColor));
             }
-            // this turns out to have a bug if the start/end straddle midnight; this whole
-            // business was to deal with float having inadequate resolution to deal with
-            // milliseconds since the epoch. For now, we're leaving this out.
-
-            // arcStart = (secondsSinceMidnight(e.startTime)) / 720000.0;
-            // arcEnd = (secondsSinceMidnight(e.endTime)) / 720000.0;
             arcStart = (e.startTime + gmtOffset) / 720000.0;
             arcEnd = (e.endTime + gmtOffset) / 720000.0;
 
@@ -406,6 +412,10 @@ public class ClockFace implements Observer {
 
         // Lastly, draw a stippled pattern at the current hour mark to delineate where the
         // twelve-hour calendar rendering zone starts and ends.
+
+
+
+
 
         // integer division gets us the exact hour, then multiply by 5 to scale to our
         // 60-second circle
