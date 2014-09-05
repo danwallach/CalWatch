@@ -519,10 +519,10 @@ public class ClockFace implements Observer {
         BatteryMonitor batteryMonitor = BatteryMonitor.getSingleton();
         float batteryPct;
 
-        // we don't want to poll *too* often; this translates to about once per minute
+        // we don't want to poll *too* often; this translates to about once per five minute
         if(batteryPathCache == null ||
-                (showSeconds &&  calendarTicker % 60000 == 0) ||
-                (!showSeconds && calendarTicker % 60 == 0)) {
+                (showSeconds &&  calendarTicker % 300000 == 0) ||
+                (!showSeconds && calendarTicker % 300 == 0)) {
             batteryMonitor.fetchStatus();
             Log.v(TAG, "fetching new battery status (" + calendarTicker + ")");
             batteryPct = batteryMonitor.getBatteryPct();
