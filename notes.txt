@@ -93,7 +93,10 @@ TODO smarter DrawArc
 DONE! make battery gauge pretty
 TODO if we're coming back from being asleep, make sure we invalidate the batteryPathCache
 
-TODO fix regression: we're not clipping the events to the visible 12 hour window
+DONE! fix regression: we're not clipping the events to the visible 12 hour window
+  Also, we now send 24 hours of events at once and do all the clipping in the watch, meaning
+  that the watch will have something useful to show in the morning even if it's been disconnected
+  from the phone all night (e.g., if charging in different parts of the house)
 
 
 

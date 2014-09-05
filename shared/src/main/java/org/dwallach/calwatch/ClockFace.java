@@ -384,9 +384,6 @@ public class ClockFace implements Observer {
             return; // again, must not be ready yet
         }
 
-        TimeZone tz = TimeZone.getDefault();
-        int gmtOffset = tz.getRawOffset() + tz.getDSTSavings();
-
         // try to determine if the screen size has changed since last time; if so, nuke the
         // saved path caches
         if(oldCX != cx || oldCY != cy) {
@@ -396,14 +393,33 @@ public class ClockFace implements Observer {
         oldCX = cx;
         oldCY = cy;
 
+        TimeZone tz = TimeZone.getDefault();
+        int gmtOffset = tz.getRawOffset() + tz.getDSTSavings();
+        long time = System.currentTimeMillis() + gmtOffset;
+
+        long clipStartMillis = (long) (Math.floor(time / 3600000.0) * 3600000.0); // if it's currently 12:32pm, this value will be 12:00pm
+        long clipEndMillis = clipStartMillis + 43200000; // 12 hours later
+
         for(EventWrapper eventWrapper: eventList) {
             double arcStart, arcEnd;
             WireEvent e = eventWrapper.getWireEvent();
+
+            long startTime = e.startTime + gmtOffset;
+            long endTime = e.endTime + gmtOffset;
+
+            if (startTime < clipStartMillis) startTime = clipStartMillis;
+            if (endTime > clipEndMillis) endTime = clipEndMillis;
+
+            if(endTime < clipStartMillis || startTime > clipEndMillis)
+                continue; // this one is off-screen
+
+
             if(calendarTicker % 1000 == 0) {
-                Log.v(TAG, "rendering event: start "+ e.startTime + ", end " + e.endTime + ", minLevel " + e.minLevel + ", maxlevel " + e.maxLevel + ", displayColor " + Integer.toHexString(e.displayColor));
+                Log.v(TAG, "rendering event: start "+ e.startTime + ", clip " + clipStartMillis + ", end " + e.endTime + ", clipEnd " + clipEndMillis + ", minLevel " + e.minLevel + ", maxlevel " + e.maxLevel + ", displayColor " + Integer.toHexString(e.displayColor));
             }
-            arcStart = (e.startTime + gmtOffset) / 720000.0;
-            arcEnd = (e.endTime + gmtOffset) / 720000.0;
+
+            arcStart = startTime / 720000.0;
+            arcEnd = endTime / 720000.0;
 
             // path caching happens inside drawRadialArc
             drawRadialArc(canvas, eventWrapper.getPathCache(), arcStart, arcEnd,

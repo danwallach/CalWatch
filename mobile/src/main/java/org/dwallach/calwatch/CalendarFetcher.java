@@ -251,7 +251,7 @@ public class CalendarFetcher extends Observable implements Runnable {
 
         long time = System.currentTimeMillis();
         long queryStartMillis = (long) (Math.floor(time / 3600000.0) * 3600000.0); // if it's currently 12:32pm, this value will be 12:00pm
-        long queryEndMillis = queryStartMillis + 43200000; // twelve hours later
+        long queryEndMillis = queryStartMillis + 86400000; // 24 hours later
 
         Log.v(TAG, "Query times... Now: " + DateUtils.formatDateTime(ctx, time, DateUtils.FORMAT_SHOW_DATE | DateUtils.FORMAT_SHOW_TIME) + ", QueryStart: " + DateUtils.formatDateTime(ctx, queryStartMillis, DateUtils.FORMAT_SHOW_TIME | DateUtils.FORMAT_SHOW_DATE)  + ", QueryEnd: " + DateUtils.formatDateTime(ctx, queryEndMillis, DateUtils.FORMAT_SHOW_TIME | DateUtils.FORMAT_SHOW_DATE));
 
@@ -403,9 +403,15 @@ public class CalendarFetcher extends Observable implements Runnable {
         if (e.startTime < queryEndMillis && e.endTime > queryStartMillis && e.visible && !e.allDay) {
             // Log.v(TAG, "--> Match!");
 
-            // if we get here, the event is visible; we just need to clip it to fit the twelve hour window
+            // if we get here, the event is visible; we used to then clip it to the visible window,
+            // but this functionality has now moved to ClockFace, where we do it every time we refresh
+            // the screen, allowing the watch to hum along for hours, even if it's never getting updates
+            // from the phone
+
+            /*
             if (e.startTime < queryStartMillis) e.startTime = queryStartMillis;
             if (e.endTime > queryEndMillis) e.endTime = queryEndMillis;
+            */
 
             cr.events.add(e);
         }
