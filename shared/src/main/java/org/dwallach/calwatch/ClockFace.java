@@ -76,10 +76,12 @@ public class ClockFace implements Observer {
     }
 
     public ClockFace() {
+        Log.v("ClockFace", "ClockFace setup!");
+
         this.clockState = ClockState.getSingleton();
         setupObserver();
+        update(null, null); // initialize variables from initial constants, or whatever else is hanging out in ClockState
 
-        Log.v("ClockFace", "ClockFace setup!");
         white = newPaint();
         yellow = newPaint();
         smWhite = newPaint();
@@ -233,8 +235,8 @@ public class ClockFace implements Observer {
 
     private void drawShadowText(Canvas canvas, String text, float x, float y, Paint paint, Paint shadowPaint) {
         // TODO: sort out how to render the text as an outline and thus shrink this from 26 drawText calls to two of them
-        for(int sx=-2; sx<=2; sx++)
-            for(int sy=-2; sy<=2; sy++)
+        for(float sx=-2.8f; sx<=3.0f; sx += 1.4f)
+            for(float sy=-2.8f; sy<3.0; sy += 1.4f)
                 canvas.drawText(text, x - sx*shadow, y - sy*shadow, shadowPaint);
 
         canvas.drawText(text, x, y, paint);
@@ -585,7 +587,7 @@ public class ClockFace implements Observer {
         cy = height / 2;
         radius = (cx > cy) ? cy : cx; // minimum of the two
         float textSize = radius / 3f;
-        float smTextSize = radius / 8f;
+        float smTextSize = radius / 4f;
         float lineWidth = radius / 20f;
 
         shadow = lineWidth / 20f;  // for drop shadows

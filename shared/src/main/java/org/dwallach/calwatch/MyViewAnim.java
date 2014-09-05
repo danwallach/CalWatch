@@ -91,9 +91,11 @@ public class MyViewAnim extends SurfaceView implements SurfaceHolder.Callback {
             // animator.setFrameDelay(1000);  // doesn't actually work?
 
             if(drawThread == null) {
+                Log.v(TAG, "starting draw thread from scratch");
                 drawThread = new PanelThread(animator); // will start the animator
                 drawThread.start();
             } else {
+                Log.v(TAG, "asking previous draw thread to start a new animator");
                 // animator.start() needs to happen on the PanelThread, not this one
                 Handler handler = drawThread.getHandler();
                 final Animator fa = animator;
@@ -117,15 +119,6 @@ public class MyViewAnim extends SurfaceView implements SurfaceHolder.Callback {
             } else {
                 // animator.start() needs to happen on the PanelThread, not this one
                 Handler handler = drawThread.getHandler();
-
-                /*
-                handler.post(new Runnable() {
-                    @Override
-                    public void run() {
-                        fa.start();
-                    }
-                });
-                */
 
                 Looper looper = handler.getLooper();
                 if(looper != null)
@@ -178,23 +171,6 @@ public class MyViewAnim extends SurfaceView implements SurfaceHolder.Callback {
                         Log.v("FPS", Float.toString(fps));
                     }
                 }
-                /*
-                double currentFps;
-                if (deltaTime != 0)
-                    currentFps = 1000.0 / (double) deltaTime;
-                else
-                    currentFps = 0.9 * fps;
-                if (fps<0.0)
-                    fps = currentFps;
-                else
-                    fps = 0.9*fps + 0.1*currentFps;
-
-                if(ticks % 500 == 0)
-                    WearActivity.textOut("Fps: "+ Double.toString(fps));
-                */
-
-
-
 
                 try {
                     c = surfaceHolder.lockCanvas(null);

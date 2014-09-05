@@ -126,7 +126,10 @@ public class ClockState extends Observable {
             Log.e(TAG, "parse failure on protobuf: nbytes(" + eventBytes.length + "), error(" + ioe.toString() + ")");
             return;
         } catch (Exception e) {
-            Log.e(TAG, "some other weird failure on protobuf: nbytes(" + eventBytes.length + "), error(" + e.toString() + ")");
+            if(eventBytes.length == 0)
+                Log.e(TAG, "zero-length message received!");
+            else
+                Log.e(TAG, "some other weird failure on protobuf: nbytes(" + eventBytes.length + "), error(" + e.toString() + ")");
             return;
         }
 

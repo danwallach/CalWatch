@@ -5,6 +5,7 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.support.wearable.view.WatchViewStub;
 import android.util.Log;
+import android.view.WindowManager;
 
 public class WearActivity extends Activity {
     private static final String TAG = "WearActivity";
@@ -39,6 +40,10 @@ public class WearActivity extends Activity {
             @Override
             public void onLayoutInflated(WatchViewStub stub) {
                 view = (MyViewAnim) stub.findViewById(R.id.surfaceView);
+
+                // TODO: kill this and instead support the real watchface api
+                getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
+
 
                 Log.v(TAG, "starting data API receiver");
             }

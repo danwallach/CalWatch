@@ -81,15 +81,21 @@ public class WearReceiverService extends WearableListenerService implements Goog
         Log.v(TAG, "message received!");
         initGoogle();
         if (messageEvent.getPath().equals(Constants.WearDataSendPath)) {
-            newEventBytes(messageEvent.getData());
+            byte[] messageData = messageEvent.getData();
+            if(messageData.length == 0) {
+                Log.e(TAG, "zero-length message received from phone; asking for a retry");
+                pingPhone(); // something went awfully wrong here
+            } else {
+                newEventBytes(messageData);
+            }
         } else {
             Log.v(TAG, "received message on unexpected path: " + messageEvent.getPath());
         }
     }
 
     private void initGoogle() {
-        Log.v(TAG, "Trying to connect to GoogleApi");
         if(mGoogleApiClient == null) {
+            Log.v(TAG, "Trying to connect to GoogleApi");
             mGoogleApiClient = new GoogleApiClient.Builder(this).
                     addApi(Wearable.API).
                     addConnectionCallbacks(this).
