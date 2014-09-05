@@ -94,3 +94,29 @@ DONE! make battery gauge pretty
 TODO if we're coming back from being asleep, make sure we invalidate the batteryPathCache
 
 TODO fix regression: we're not clipping the events to the visible 12 hour window
+
+
+
+Notes on supporting a "real" watch face (via reading over:
+https://github.com/twotoasters/watchface-template/tree/master/submodules
+
+ Gears library:
+    Activity.java: nothing interesting at all
+    DeviceUtils.java: totally cheesy way of determining AMOLED: lookup
+      table based on device type
+    Watch.java:
+      - an intent called KEEP_WATCHFACE_AWAKE
+      - logic to deal with changing timezones
+      - onTimeChanged() via alarm manager when seconds are turned off (do we care?)
+
+  mobile/src/main/AndroidMainfest.xml:
+    uses-permission for background
+    preview.png
+
+  wear/src/main/AndroidManifest.xml:
+    more permission usage
+    some funkiness about how the activity is set up (providing background, etc.)
+
+  Meanwhile, there's all this business about Square's various testing
+  and code injection libraries. Probably not worth bothering
+  now. Maybe later.
