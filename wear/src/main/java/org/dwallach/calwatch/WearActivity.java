@@ -49,4 +49,17 @@ public class WearActivity extends Activity {
             }
         });
     }
+
+    protected void onResume() {
+        super.onResume();
+        Log.v(TAG, "Resume!");
+        if(view != null) view.resume(); // shouldn't be necessary, but isn't happening on its own
+    }
+
+    protected void onPause() {
+        super.onPause();
+        Log.v(TAG, "Pause!");
+        if(view != null) view.pause(); // shouldn't be necessary, but isn't happening on its own
+    }
+
 }
