@@ -224,12 +224,12 @@ public class ClockFace implements Observer {
         x1 = clockX(45, .85f);
         y1 = clockY(45, .85f);
 
-        Paint.FontMetrics metrics = smWhite.getFontMetrics();
+        Paint.FontMetrics metrics = smYellow.getFontMetrics();
         float dybottom = -metrics.ascent-metrics.leading; // smidge it up a bunch
         float dytop = -metrics.descent; // smidge it down a little
 
-        drawShadowText(canvas, d, x1, y1+dybottom, smWhite, smBlack);
-        drawShadowText(canvas, m, x1, y1+dytop, smWhite, smBlack);
+        drawShadowText(canvas, d, x1, y1+dybottom, smYellow, smBlack);
+        drawShadowText(canvas, m, x1, y1+dytop, smYellow, smBlack);
 
     }
 
@@ -603,7 +603,7 @@ public class ClockFace implements Observer {
         cy = height / 2;
         radius = (cx > cy) ? cy : cx; // minimum of the two
         float textSize = radius / 3f;
-        float smTextSize = radius / 4f;
+        float smTextSize = radius / 5f;
         float lineWidth = radius / 20f;
 
         shadow = lineWidth / 20f;  // for drop shadows
