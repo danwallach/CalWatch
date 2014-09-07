@@ -291,6 +291,8 @@ public class CalendarFetcher extends Observable implements Runnable {
                 CalendarContract.Events.EXDATE,
                 CalendarContract.Events.EXRULE,
                 CalendarContract.Events.DURATION,
+                CalendarContract.Events.ORIGINAL_ID,
+                "_id"
         };
 
         // now, get the list of events
@@ -318,6 +320,8 @@ public class CalendarFetcher extends Observable implements Runnable {
                 e.exDate = mCursor.getString(i++);
                 e.exRule = mCursor.getString(i++);
                 e.duration = mCursor.getString(i++);
+                e.originalID = mCursor.getString(i++);
+                e.ID = mCursor.getString(i++);
 
                 e.paint = PaintCan.getPaint(e.displayColor); // at least on my phone, this tells you everything you need to know
 
@@ -335,6 +339,9 @@ public class CalendarFetcher extends Observable implements Runnable {
                         Time startTime = new Time();
                         startTime.set(ce.startTime);
                         long startTimes[] = rprocessor.expand(startTime, rset, queryStartMillis, queryEndMillis);
+
+                        if(startTimes.length != 0)
+                            Log.v(TAG, "recurring event: " + e.title + " -- " + startTimes.length + " instances found");
 
                         for (long st : startTimes) {
                             ce.startTime = st;
@@ -388,14 +395,19 @@ public class CalendarFetcher extends Observable implements Runnable {
     }
 
     private void addEvent(CalendarResults cr, CalendarResults.Event e, long queryStartMillis, long queryEndMillis) {
-//        if(e.title != null && e.title.contains("DBG")) {
-//            Log.v(TAG, "Found visible event. Title(" + e.title + "), calID(" + e.calendarID + "), eventColor(" + Integer.toHexString(e.eventColor) + "), eventColorKey(" + e.eventColorKey + "), displayColor(" + Integer.toHexString(e.displayColor) + ")");
-//            Log.v(TAG, "--> Start: " + DateUtils.formatDateTime(ctx, e.startTime, DateUtils.FORMAT_SHOW_DATE | DateUtils.FORMAT_SHOW_TIME) + ", End: " + DateUtils.formatDateTime(ctx, e.endTime, DateUtils.FORMAT_SHOW_TIME | DateUtils.FORMAT_SHOW_DATE));
-//            Log.v(TAG, "--> Clip: " + DateUtils.formatDateTime(ctx, queryStartMillis, DateUtils.FORMAT_SHOW_DATE | DateUtils.FORMAT_SHOW_TIME) + ", End: " + DateUtils.formatDateTime(ctx, queryEndMillis, DateUtils.FORMAT_SHOW_TIME | DateUtils.FORMAT_SHOW_DATE));
-//        }
-
         if (e.startTime < queryEndMillis && e.endTime > queryStartMillis && e.visible && !e.allDay) {
-            cr.events.add(e);
+            if(e.title != null) {
+                Log.v(TAG, "Found visible event. Title(" + e.title + "), calID(" + e.calendarID + "), eventColor(" + Integer.toHexString(e.eventColor) + "), eventColorKey(" + e.eventColorKey + "), displayColor(" + Integer.toHexString(e.displayColor) + "), ID(" + e.ID + "), originalID( " + e.originalID + ")");
+                Log.v(TAG, "--> Start: " + DateUtils.formatDateTime(ctx, e.startTime, DateUtils.FORMAT_SHOW_DATE | DateUtils.FORMAT_SHOW_TIME) + ", End: " + DateUtils.formatDateTime(ctx, e.endTime, DateUtils.FORMAT_SHOW_TIME | DateUtils.FORMAT_SHOW_DATE));
+                Log.v(TAG, "--> Clip: " + DateUtils.formatDateTime(ctx, queryStartMillis, DateUtils.FORMAT_SHOW_DATE | DateUtils.FORMAT_SHOW_TIME) + ", End: " + DateUtils.formatDateTime(ctx, queryEndMillis, DateUtils.FORMAT_SHOW_TIME | DateUtils.FORMAT_SHOW_DATE));
+            }
+
+            // Hypothesis: if e.originalID is set, then this event is "an exception" to another event.
+            // The one time I've seen this occur, it appears to be superfluous (regular Google Calendar
+            // doesn't render it). So... for now... we're going to ignore it.
+            // TODO: validate what this field really means
+            if(e.originalID == null)
+                cr.events.add(e);
         }
     }
 

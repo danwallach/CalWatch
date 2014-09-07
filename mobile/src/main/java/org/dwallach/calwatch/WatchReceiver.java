@@ -3,9 +3,14 @@ package org.dwallach.calwatch;
 import android.app.AlarmManager;
 import android.app.PendingIntent;
 import android.content.BroadcastReceiver;
+import android.content.ContentResolver;
 import android.content.Context;
 import android.content.Intent;
+import android.os.PowerManager;
 import android.util.Log;
+
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 /*
  * This sad and pathetic class serves one function: to continually kick the WatchCalendarService
@@ -22,28 +27,21 @@ public class WatchReceiver extends BroadcastReceiver {
         long currentTime = System.currentTimeMillis();
         lastTime = currentTime;
 
+        Log.v(TAG, "received intent: " + intent.toString());
+
         // This is how we wake up at boot time. All we're going to do from here is kick
         // the service into gear.
 
-        Log.v(TAG, "boot-time: starting the calendar service");
 
-        WatchCalendarService.kickStart(context); // launch it, if it's not already running
 
         if(firstTime) {
             Log.v(TAG, "boot-time: set up alarm intent");
-            // code pilfered in part from: http://www.vogella.com/tutorials/AndroidServices/article.html
-
-            // goal: the onReceive method will get kicked once every 15 minutes or so, which will then
-            // in turn kick the calendar service. We really, really don't want the service to stay dead
-            // for very long, if ever.
-            Intent alarmIntent = new Intent(context, WatchReceiver.class);
-            PendingIntent pending = PendingIntent.getBroadcast(context, 0, alarmIntent, PendingIntent.FLAG_CANCEL_CURRENT);
-
-
-            AlarmManager alarm = (AlarmManager) context.getSystemService(Context.ALARM_SERVICE);
-            alarm.setInexactRepeating(AlarmManager.RTC_WAKEUP, currentTime, AlarmManager.INTERVAL_FIFTEEN_MINUTES, pending);
+            onReceiveFancy(context, intent);
 
             firstTime = false;
+        } else {
+            Log.v(TAG, "attempting to kickstart the watch calendar service");
+            WatchCalendarService.kickStart(context); // launch it, if it's not already running
         }
     }
 
@@ -65,4 +63,57 @@ public class WatchReceiver extends BroadcastReceiver {
             ctx.sendBroadcast(intent);
         }
     }
+
+    // code that does this in a much fancier way
+    // https://android.googlesource.com/platform/packages/providers/CalendarProvider/+/master/src/com/android/providers/calendar/CalendarReceiver.java
+
+//    static final String SCHEDULE = "com.android.providers.calendar.SCHEDULE_ALARM";
+    private final ExecutorService executor = Executors.newCachedThreadPool();
+    private PowerManager.WakeLock mWakeLock;
+
+    private void onReceiveFancy(Context xcontext, Intent intent) {
+        final Context context = xcontext; // foolishness to make the inner class work
+
+        if (mWakeLock == null) {
+            PowerManager pm = (PowerManager) context.getSystemService(Context.POWER_SERVICE);
+            mWakeLock = pm.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, "CalendarReceiver_Provider");
+            mWakeLock.setReferenceCounted(true);
+        }
+        mWakeLock.acquire();
+//        final String action = intent.getAction();
+//        final ContentResolver cr = context.getContentResolver();
+        final PendingResult result = goAsync();
+        executor.submit(new Runnable() {
+            @Override
+            public void run() {
+                Log.v(TAG, "setting up alarm service");
+                // code pilfered in part from: http://www.vogella.com/tutorials/AndroidServices/article.html
+
+                // goal: the onReceive method will get kicked once every 15 minutes or so, which will then
+                // in turn kick the calendar service. We really, really don't want the service to stay dead
+                // for very long, if ever.
+                Intent alarmIntent = new Intent(context, WatchReceiver.class);
+                PendingIntent pending = PendingIntent.getBroadcast(context, 0, alarmIntent, PendingIntent.FLAG_CANCEL_CURRENT);
+
+
+                AlarmManager alarm = (AlarmManager) context.getSystemService(Context.ALARM_SERVICE);
+                alarm.setInexactRepeating(AlarmManager.RTC_WAKEUP, 0, AlarmManager.INTERVAL_FIFTEEN_MINUTES, pending);
+
+                WatchCalendarService.kickStart(context);
+
+                //
+                //  original code from Google example
+                //
+//                if (action.equals(SCHEDULE)) {
+//                    cr.update(CalendarAlarmManager.SCHEDULE_ALARM_URI, null /* values */,
+//                            null /* where */, null /* selectionArgs */);
+//                } else if (action.equals(Intent.ACTION_BOOT_COMPLETED)) {
+//                    removeScheduledAlarms(cr);
+//                }
+                result.finish();
+                mWakeLock.release();
+            }
+        });
+    }
+
 }

@@ -48,6 +48,8 @@ public class CalendarResults {
         public String exDate;
         public String exRule;
         public String duration;
+        public String originalID;
+        public String ID;
         public Paint paint;
         public Path path;
 
@@ -72,12 +74,14 @@ public class CalendarResults {
             this.exDate = e.exDate;
             this.exRule = e.exRule;
             this.duration = e.duration;
+            this.originalID = e.originalID;
+            this.ID = e.ID;
             this.paint = e.paint;
             this.path = e.path;
         }
 
         public String toString() {
-            return "Title(" + title + "), dtStart(" + startTime + "), dtEnd(" + endTime + "), rRule(" + rRule + "), rDate(" + rDate + "), exRule(" + exRule + "), exDate(" + exDate + "), duration(" + duration + ")";
+            return "Title(" + title + "), dtStart(" + startTime + "), dtEnd(" + endTime + "), rRule(" + rRule + "), rDate(" + rDate + "), exRule(" + exRule + "), exDate(" + exDate + "), duration(" + duration + "), ID(" + ID + "), originalID(" + originalID + ")";
         }
     }
 
