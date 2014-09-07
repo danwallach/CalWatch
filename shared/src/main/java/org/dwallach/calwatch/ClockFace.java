@@ -390,37 +390,37 @@ public class ClockFace implements Observer {
 
         long time = TimeWrapper.getLocalTime();
 
-        long clipStartMillis = (long) (Math.floor(time / 3600000.0) * 3600000.0); // if it's currently 12:32pm, this value will be 12:00pm
-        long clipEndMillis = clipStartMillis + 43200000; // 12 hours later
+//        long clipStartMillis = (long) (Math.floor(time / 3600000.0) * 3600000.0); // if it's currently 12:32pm, this value will be 12:00pm
+//        long clipEndMillis = clipStartMillis + 43200000; // 12 hours later
 
         for(EventWrapper eventWrapper: eventList) {
             double arcStart, arcEnd;
             WireEvent e = eventWrapper.getWireEvent();
-            int minLevel = eventWrapper.getMinLevel();
-            int maxLevel = eventWrapper.getMaxLevel();
+            int evMinLevel = eventWrapper.getMinLevel();
+            int evMaxLevel = eventWrapper.getMaxLevel();
 
             long startTime = e.startTime;
             long endTime = e.endTime;
 
             // this clipping is hopefully unnecessary as we've moved it into ClockState
-            if (startTime < clipStartMillis) startTime = clipStartMillis;
-            if (endTime > clipEndMillis) endTime = clipEndMillis;
+//            if (startTime < clipStartMillis) startTime = clipStartMillis;
+//            if (endTime > clipEndMillis) endTime = clipEndMillis;
 
-            if(endTime < clipStartMillis || startTime > clipEndMillis)
-                continue; // this one is off-screen
+//            if(endTime < clipStartMillis || startTime > clipEndMillis)
+//               continue; // this one is off-screen
 
 
-            if(calendarTicker % 1000 == 0) {
-                Log.v(TAG, "rendering event: start "+ e.startTime + ", clip " + clipStartMillis + ", end " + e.endTime + ", clipEnd " + clipEndMillis + ", minLevel " + minLevel + ", maxlevel " + maxLevel + ", displayColor " + Integer.toHexString(e.displayColor));
-            }
+//            if(calendarTicker % 1000 == 0) {
+//                Log.v(TAG, "rendering event: start "+ e.startTime + ", clip " + clipStartMillis + ", end " + e.endTime + ", clipEnd " + clipEndMillis + ", minLevel " + minLevel + ", maxlevel " + maxLevel + ", displayColor " + Integer.toHexString(e.displayColor));
+//            }
 
             arcStart = startTime / 720000.0;
             arcEnd = endTime / 720000.0;
 
             // path caching happens inside drawRadialArc
             drawRadialArc(canvas, eventWrapper.getPathCache(), arcStart, arcEnd,
-                    calendarRingMaxRadius - minLevel * calendarRingWidth / (maxLevel+1),
-                    calendarRingMaxRadius - (maxLevel+1) * calendarRingWidth / (maxLevel+1),
+                    calendarRingMaxRadius - evMinLevel * calendarRingWidth / (maxLevel+1),
+                    calendarRingMaxRadius - (evMaxLevel+1) * calendarRingWidth / (maxLevel+1),
                     eventWrapper.getPaint(), outlineBlack);
         }
 

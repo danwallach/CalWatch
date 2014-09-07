@@ -149,7 +149,7 @@ public class ClockState extends Observable {
         Log.v(TAG, "maxLevel for new events: " + this.maxLevel);
         Log.v(TAG, "number of new events: " + visibleEventList.size());
 
-        debugDump();
+//        debugDump();
     }
 
     /**
