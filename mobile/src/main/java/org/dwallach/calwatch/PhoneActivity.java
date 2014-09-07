@@ -130,13 +130,8 @@ public class PhoneActivity extends Activity implements Observer {
             }
         });
 
-        // start the calendar service, if it's not already running
-        WatchCalendarService watchCalendarService = WatchCalendarService.getSingletonService();
-
-        if(watchCalendarService == null) {
-            Intent serviceIntent = new Intent(this, WatchCalendarService.class);
-            startService(serviceIntent);
-        }
+        WatchReceiver.kickStart(this);        // bring it up, if it's not already up
+        WatchCalendarService.kickStart(this); // bring it up, if it's not already up
 
         loadPreferences();
     }

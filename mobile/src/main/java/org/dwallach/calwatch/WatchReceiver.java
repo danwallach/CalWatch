@@ -7,31 +7,28 @@ import android.content.Context;
 import android.content.Intent;
 import android.util.Log;
 
+/*
+ * This sad and pathetic class serves one function: to continually kick the WatchCalendarService
+ * back to life if it's somehow managed to die
+ */
 public class WatchReceiver extends BroadcastReceiver {
     private final static String TAG = "WatchReceiver";
-    private boolean firstTime = true;
+
+    private static volatile boolean firstTime = true;
+    private static volatile long lastTime = -1;
 
     @Override
     public void onReceive(Context context, Intent intent) {
+        long currentTime = System.currentTimeMillis();
+        lastTime = currentTime;
+
         // This is how we wake up at boot time. All we're going to do from here is kick
         // the service into gear.
 
         Log.v(TAG, "boot-time: starting the calendar service");
 
-        WatchCalendarService watchCalendarService = WatchCalendarService.getSingletonService();
+        WatchCalendarService.kickStart(context); // launch it, if it's not already running
 
-        if (watchCalendarService == null) {
-            Intent serviceIntent = new Intent(context, WatchCalendarService.class);
-            context.startService(serviceIntent);
-        }
-
-        // Maybe this belongs better in WatchCalendarService rather than here. Keeping it here
-        // makes some sense, since we want to set this up from the very beginning. The only
-        // case where this won't happen is when the app is being started right after install,
-        // so the boot-time action will never happen. That suggests that we only really need
-        // to fire an intent from the service to the receiver when the receiver starts up.
-        // That will, in turn, fire back as above.
-        // TODO add a broadcast intent to WatchCalendarService to kickstart WatchReceiver if it's dead
         if(firstTime) {
             Log.v(TAG, "boot-time: set up alarm intent");
             // code pilfered in part from: http://www.vogella.com/tutorials/AndroidServices/article.html
@@ -44,9 +41,28 @@ public class WatchReceiver extends BroadcastReceiver {
 
 
             AlarmManager alarm = (AlarmManager) context.getSystemService(Context.ALARM_SERVICE);
-            alarm.setInexactRepeating(AlarmManager.RTC_WAKEUP, System.currentTimeMillis(), AlarmManager.INTERVAL_FIFTEEN_MINUTES, pending);
+            alarm.setInexactRepeating(AlarmManager.RTC_WAKEUP, currentTime, AlarmManager.INTERVAL_FIFTEEN_MINUTES, pending);
 
             firstTime = false;
+        }
+    }
+
+    /**
+     * to be used by the PhoneActivity to try to get the receiver running
+     */
+    public static void kickStart(Context ctx) {
+        long currentTime = System.currentTimeMillis();
+
+        if(lastTime == -1 || currentTime - lastTime > 20 * 60 * 1000) {
+            Log.v(TAG, "Kickstart launching intent");
+            // we're supposed to receive this intent roughly once every 15 minutes; if it's been
+            // longer than that, or if we've just never run before, then we need to bring out some
+            // bigger guns
+
+            Intent intent = new Intent();
+            intent.addFlags(Intent.FLAG_INCLUDE_STOPPED_PACKAGES);
+            intent.setAction("org.dwallach.calwatch.WAKE");
+            ctx.sendBroadcast(intent);
         }
     }
 }

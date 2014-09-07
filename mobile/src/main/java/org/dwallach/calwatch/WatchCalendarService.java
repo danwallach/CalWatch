@@ -22,7 +22,7 @@ import java.util.Observable;
 import java.util.Observer;
 
 public class WatchCalendarService extends Service implements MessageApi.MessageListener, GoogleApiClient.ConnectionCallbacks, GoogleApiClient.OnConnectionFailedListener, Observer {
-    private final String TAG = "WatchCalendarService";
+    private static final String TAG = "WatchCalendarService";
 
     private static WatchCalendarService singletonService;
     private WearSender wearSender;
@@ -197,5 +197,17 @@ public class WatchCalendarService extends Service implements MessageApi.MessageL
         // somebody updated something in the clock state (new events, new display options, etc.)
         Log.v(TAG, "internal clock state changed: time to send all to the watch");
         sendAllToWatch();
+    }
+
+    public static void kickStart(Context ctx) {
+        // start the calendar service, if it's not already running
+        WatchCalendarService watchCalendarService = WatchCalendarService.getSingletonService();
+
+        if(watchCalendarService == null) {
+            Log.v(TAG, "launching watch calendar service");
+            Intent serviceIntent = new Intent(ctx, WatchCalendarService.class);
+            ctx.startService(serviceIntent);
+        }
+
     }
 }
