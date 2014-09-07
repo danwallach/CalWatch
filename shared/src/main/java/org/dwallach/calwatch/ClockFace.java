@@ -1,13 +1,9 @@
 package org.dwallach.calwatch;
 
-import android.content.Context;
-import android.content.Intent;
-import android.content.IntentFilter;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
 import android.graphics.Path;
-import android.graphics.RectF;
 import android.text.format.DateUtils;
 import android.util.Log;
 
@@ -351,7 +347,7 @@ public class ClockFace implements Observer {
     }
 
     private void drawHands(Canvas canvas) {
-        long time = TimeWrapper.getTime();
+        long time = TimeWrapper.getLocalTime();
 
         double seconds = time / 1000.0;
         double minutes = seconds / 60.0;
@@ -392,8 +388,7 @@ public class ClockFace implements Observer {
         oldCX = cx;
         oldCY = cy;
 
-        int gmtOffset = TimeWrapper.getGmtOffset();
-        long time = TimeWrapper.getTime();
+        long time = TimeWrapper.getLocalTime();
 
         long clipStartMillis = (long) (Math.floor(time / 3600000.0) * 3600000.0); // if it's currently 12:32pm, this value will be 12:00pm
         long clipEndMillis = clipStartMillis + 43200000; // 12 hours later
@@ -404,8 +399,8 @@ public class ClockFace implements Observer {
             int minLevel = eventWrapper.getMinLevel();
             int maxLevel = eventWrapper.getMaxLevel();
 
-            long startTime = e.startTime + gmtOffset;
-            long endTime = e.endTime + gmtOffset;
+            long startTime = e.startTime;
+            long endTime = e.endTime;
 
             // this clipping is hopefully unnecessary as we've moved it into ClockState
             if (startTime < clipStartMillis) startTime = clipStartMillis;
@@ -438,7 +433,7 @@ public class ClockFace implements Observer {
 
         // integer division gets us the exact hour, then multiply by 5 to scale to our
         // 60-second circle
-        long stippleTime = (System.currentTimeMillis() + gmtOffset) / (1000 * 60 * 60);
+        long stippleTime = (time) / (1000 * 60 * 60);
         stippleTime *= 5;
 
         // we might want to rejigger this to be paranoid about concurrency smashing stipplePathCache,
@@ -450,7 +445,7 @@ public class ClockFace implements Observer {
 
             if(calendarTicker % 1000 == 0)
                 Log.v("ClockFace", "StippleTime(" + stippleTime +
-                        "),  currentTime(" + Float.toString((System.currentTimeMillis() + gmtOffset) / 720000f) + ")");
+                        "),  currentTime(" + Float.toString((time) / 720000f) + ")");
 
             float r1=calendarRingMinRadius, r2;
 
@@ -669,7 +664,7 @@ public class ClockFace implements Observer {
     public void update(Observable observable, Object data) {
         this.maxLevel = clockState.getMaxLevel();
         this.showSeconds = clockState.getShowSeconds();
-        this.eventList = clockState.getEventList();
+        this.eventList = clockState.getVisibleLocalEventList();
         this.faceMode = clockState.getFaceMode();
         this.facePathCache = null;
     }

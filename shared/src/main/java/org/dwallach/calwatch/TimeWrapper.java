@@ -15,14 +15,15 @@ public class TimeWrapper {
     public static void update() {
         tz=TimeZone.getDefault();
         gmtOffset=tz.getRawOffset()+tz.getDSTSavings();
-        time=System.currentTimeMillis()+gmtOffset;
+        time=System.currentTimeMillis();
     }
     
     public static TimeZone getTz() { return tz; }
 
     public static int getGmtOffset() { return gmtOffset; }
 
-    public static long getTime() { return time; }
+    public static long getGMTTime() { return time; }
+    public static long getLocalTime() { return time + gmtOffset; }
 
     static {
         // do this once at startup because why not?

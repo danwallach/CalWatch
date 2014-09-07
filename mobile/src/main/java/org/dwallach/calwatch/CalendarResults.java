@@ -75,6 +75,10 @@ public class CalendarResults {
             this.paint = e.paint;
             this.path = e.path;
         }
+
+        public String toString() {
+            return "Title(" + title + "), dtStart(" + startTime + "), dtEnd(" + endTime + "), rRule(" + rRule + "), rDate(" + rDate + "), exRule(" + exRule + "), exDate(" + exDate + "), duration(" + duration + ")";
+        }
     }
 
     public SparseArray<Calendar> calendars;

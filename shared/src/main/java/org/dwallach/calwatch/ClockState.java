@@ -1,5 +1,7 @@
 package org.dwallach.calwatch;
 
+import android.content.Context;
+import android.text.format.DateUtils;
 import android.util.Log;
 
 import com.squareup.wire.Wire;
@@ -99,7 +101,10 @@ public class ClockState extends Observable {
     private long lastClipStartTime = 0;
 
     private void computeVisibleEvents() {
-        if(eventList == null) return; // nothing to do yet
+        if(eventList == null) {
+            Log.v(TAG, "no events to compute visibility over");
+            return;
+        }
 
         // This is going to be called on every screen refresh, so it needs to be fast in the common case.
         // The current solution is to measure the time and try to figure out whether we've ticked onto
@@ -107,11 +112,15 @@ public class ClockState extends Observable {
         // showed up for whatever other reason, then that would have nuked visibleEventList, so we'll
         // recompute that here as well.
 
+        Log.v(TAG, "starting event pool: " + eventList.size());
+
+        long time = TimeWrapper.getLocalTime();
         int gmtOffset = TimeWrapper.getGmtOffset();
-        long time = TimeWrapper.getTime();
 
         long clipStartMillis = (long) (Math.floor(time / 3600000.0) * 3600000.0); // if it's currently 12:32pm, this value will be 12:00pm
         long clipEndMillis = clipStartMillis + 43200000; // 12 hours later
+
+        Log.v(TAG, "clipStart: " + clipStartMillis + " clipEnd: " + clipEndMillis);
 
         if(lastClipStartTime == clipStartMillis && visibleEventList != null)
             return; // we've already done it, and we've got a cache of the results
@@ -138,12 +147,15 @@ public class ClockState extends Observable {
         // now, we run off and do our greedy algorithm to fill out the minLevel / maxLevel on each event
         this.maxLevel = EventLayout.go(visibleEventList);
         Log.v(TAG, "maxLevel for new events: " + this.maxLevel);
+        Log.v(TAG, "number of new events: " + visibleEventList.size());
+
+        debugDump();
     }
 
     /**
      * This returns a list of *visible* events on the watchface, cropped to size
      */
-    public synchronized List<EventWrapper> getEventList() {
+    public synchronized List<EventWrapper> getVisibleLocalEventList() {
         computeVisibleEvents(); // should be fast, since mostly it will detect that nothing has changed
         return visibleEventList;
     }
@@ -198,5 +210,17 @@ public class ClockState extends Observable {
 
     public synchronized int getMaxLevel() {
         return maxLevel;
+    }
+
+    private void debugDump() {
+        Log.v(TAG, "All events in the DB:");
+        for(EventWrapper e: eventList) {
+            Log.v(TAG, "--> displayColor(" + Integer.toHexString(e.getWireEvent().displayColor) + "), minLevel(" + e.getMinLevel() + "), maxLevel(" + e.getMaxLevel() + "), startTime(" + e.getWireEvent().startTime + "), endTime(" + e.getWireEvent().endTime + ")");
+        }
+
+        Log.v(TAG, "Visible:");
+        for(EventWrapper e: visibleEventList) {
+            Log.v(TAG, "--> displayColor(" + Integer.toHexString(e.getWireEvent().displayColor) + "), minLevel(" + e.getMinLevel() + "), maxLevel(" + e.getMaxLevel() + "), startTime(" + e.getWireEvent().startTime + "), endTime(" + e.getWireEvent().endTime + ")");
+        }
     }
 }

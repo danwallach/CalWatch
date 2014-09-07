@@ -162,10 +162,10 @@ public class MyViewAnim extends SurfaceView implements SurfaceHolder.Callback {
                 // we'll just comment this out altogether or stretch it out to a much
                 // longer time interval.
                 if(lastFPSTime == 0)
-                    lastFPSTime = System.currentTimeMillis();
+                    lastFPSTime = TimeWrapper.getGMTTime();
                 else {
                     if(ticks % 500 == 0) {
-                        long currentTime = System.currentTimeMillis();
+                        long currentTime = TimeWrapper.getGMTTime();
                         float fps = 500000.0f / (currentTime - lastFPSTime); // 500 frame * 1000 ms/s / elapsed ms
                         lastFPSTime = currentTime;
                         Log.v("FPS", Float.toString(fps));

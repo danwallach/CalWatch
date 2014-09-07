@@ -321,6 +321,8 @@ public class CalendarFetcher extends Observable implements Runnable {
 
                 e.paint = PaintCan.getPaint(e.displayColor); // at least on my phone, this tells you everything you need to know
 
+                // Log.v(TAG, "Found event: " + e.toString());
+
                 if(e.rDate != null || e.rRule != null || e.exDate != null || e.exRule != null) {
                     // holy crap, it's a recurring event
                     try {
@@ -348,15 +350,7 @@ public class CalendarFetcher extends Observable implements Runnable {
                         Log.v(TAG, "DateException: " + de.toString());
                     } catch (EventRecurrence.InvalidFormatException ie) {
                         // this shouldn't really happen, but at least it doesn't happen often!
-                        Log.v(TAG, "InvalidFormatException: Title(" + e.title +
-                                "), dtStart(" + e.startTime +
-                                "), dtEnd(" + e.endTime +
-                                "), rRule(" + e.rRule +
-                                "), rDate(" + e.rDate +
-                                "), exRule(" + e.exRule +
-                                "), exDate(" + e.exDate +
-                                "), duration(" + e.duration +
-                                "), " + ie.toString());
+                        Log.v(TAG, "InvalidFormatException: " + e.toString() +  ie.toString());
 
                     }
                 } else addEvent(cr, e, queryStartMillis, queryEndMillis);
@@ -394,10 +388,9 @@ public class CalendarFetcher extends Observable implements Runnable {
     }
 
     private void addEvent(CalendarResults cr, CalendarResults.Event e, long queryStartMillis, long queryEndMillis) {
-        // Log.v(TAG, "Found visible event. Title(" + e.title + "), calID(" + e.calendarID + "), eventColor(" + Integer.toHexString(e.eventColor) + "), eventColorKey(" + e.eventColorKey + "), displayColor(" + Integer.toHexString(e.displayColor) + ")");
-        // Log.v(TAG, "--> Start: " + DateUtils.formatDateTime(ctx, e.startTime, DateUtils.FORMAT_SHOW_DATE | DateUtils.FORMAT_SHOW_TIME) + ", End: " + DateUtils.formatDateTime(ctx, e.endTime, DateUtils.FORMAT_SHOW_TIME | DateUtils.FORMAT_SHOW_DATE));
         if (e.startTime < queryEndMillis && e.endTime > queryStartMillis && e.visible && !e.allDay) {
-            // Log.v(TAG, "--> Match!");
+            // Log.v(TAG, "Found visible event. Title(" + e.title + "), calID(" + e.calendarID + "), eventColor(" + Integer.toHexString(e.eventColor) + "), eventColorKey(" + e.eventColorKey + "), displayColor(" + Integer.toHexString(e.displayColor) + ")");
+            // Log.v(TAG, "--> Start: " + DateUtils.formatDateTime(ctx, e.startTime, DateUtils.FORMAT_SHOW_DATE | DateUtils.FORMAT_SHOW_TIME) + ", End: " + DateUtils.formatDateTime(ctx, e.endTime, DateUtils.FORMAT_SHOW_TIME | DateUtils.FORMAT_SHOW_DATE));
 
             // if we get here, the event is visible; we used to then clip it to the visible window,
             // but this functionality has now moved to ClockFace, where we do it every time we refresh
