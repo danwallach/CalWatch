@@ -20,6 +20,7 @@ public class PhoneActivity extends Activity implements Observer {
 
     private Switch toggle;
     private RadioButton toolButton, numbersButton, liteButton;
+    private MyViewAnim clockView;
 
     private ClockState clockState;
 
@@ -102,6 +103,7 @@ public class PhoneActivity extends Activity implements Observer {
         liteButton = (RadioButton) findViewById(R.id.liteButton);
         toolButton = (RadioButton) findViewById(R.id.toolButton);
         numbersButton = (RadioButton) findViewById(R.id.numbersButton);
+        clockView = (MyViewAnim) findViewById(R.id.surfaceView);
 
         Log.v(TAG, "registering callback");
 
@@ -163,11 +165,13 @@ public class PhoneActivity extends Activity implements Observer {
     protected void onResume() {
         super.onResume();
         Log.v(TAG, "Resume!");
+        if(clockView != null) clockView.resume(); // shouldn't be necessary, but isn't happening on its own
     }
 
     protected void onPause() {
         super.onPause();
         Log.v(TAG, "Pause!");
+        if(clockView != null) clockView.pause(); // shouldn't be necessary, but isn't happening on its own
     }
 
     // when the user clicks the button
