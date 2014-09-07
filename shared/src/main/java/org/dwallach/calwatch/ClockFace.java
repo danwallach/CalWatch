@@ -19,7 +19,6 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Observable;
 import java.util.Observer;
-import java.util.TimeZone;
 
 public class ClockFace implements Observer {
     private static final String TAG = "ClockFace";
@@ -117,6 +116,8 @@ public class ClockFace implements Observer {
      * from a helper thread, elsewhere
      */
     public void drawEverything(Canvas canvas) {
+        TimeWrapper.update();  // load up the latest time
+
         // draw the calendar wedges first, at the bottom of the stack, then the face indices
         drawCalendar(canvas);
         drawFace(canvas);
@@ -350,9 +351,7 @@ public class ClockFace implements Observer {
     }
 
     private void drawHands(Canvas canvas) {
-        TimeZone tz = TimeZone.getDefault();
-        int gmtOffset = tz.getRawOffset() + tz.getDSTSavings();
-        long time = System.currentTimeMillis() + gmtOffset;
+        long time = TimeWrapper.getTime();
 
         double seconds = time / 1000.0;
         double minutes = seconds / 60.0;
@@ -393,9 +392,8 @@ public class ClockFace implements Observer {
         oldCX = cx;
         oldCY = cy;
 
-        TimeZone tz = TimeZone.getDefault();
-        int gmtOffset = tz.getRawOffset() + tz.getDSTSavings();
-        long time = System.currentTimeMillis() + gmtOffset;
+        int gmtOffset = TimeWrapper.getGmtOffset();
+        long time = TimeWrapper.getTime();
 
         long clipStartMillis = (long) (Math.floor(time / 3600000.0) * 3600000.0); // if it's currently 12:32pm, this value will be 12:00pm
         long clipEndMillis = clipStartMillis + 43200000; // 12 hours later
@@ -403,10 +401,13 @@ public class ClockFace implements Observer {
         for(EventWrapper eventWrapper: eventList) {
             double arcStart, arcEnd;
             WireEvent e = eventWrapper.getWireEvent();
+            int minLevel = eventWrapper.getMinLevel();
+            int maxLevel = eventWrapper.getMaxLevel();
 
             long startTime = e.startTime + gmtOffset;
             long endTime = e.endTime + gmtOffset;
 
+            // this clipping is hopefully unnecessary as we've moved it into ClockState
             if (startTime < clipStartMillis) startTime = clipStartMillis;
             if (endTime > clipEndMillis) endTime = clipEndMillis;
 
@@ -415,7 +416,7 @@ public class ClockFace implements Observer {
 
 
             if(calendarTicker % 1000 == 0) {
-                Log.v(TAG, "rendering event: start "+ e.startTime + ", clip " + clipStartMillis + ", end " + e.endTime + ", clipEnd " + clipEndMillis + ", minLevel " + e.minLevel + ", maxlevel " + e.maxLevel + ", displayColor " + Integer.toHexString(e.displayColor));
+                Log.v(TAG, "rendering event: start "+ e.startTime + ", clip " + clipStartMillis + ", end " + e.endTime + ", clipEnd " + clipEndMillis + ", minLevel " + minLevel + ", maxlevel " + maxLevel + ", displayColor " + Integer.toHexString(e.displayColor));
             }
 
             arcStart = startTime / 720000.0;
@@ -423,8 +424,8 @@ public class ClockFace implements Observer {
 
             // path caching happens inside drawRadialArc
             drawRadialArc(canvas, eventWrapper.getPathCache(), arcStart, arcEnd,
-                    calendarRingMaxRadius - e.minLevel * calendarRingWidth / (maxLevel+1),
-                    calendarRingMaxRadius - (e.maxLevel+1) * calendarRingWidth / (maxLevel+1),
+                    calendarRingMaxRadius - minLevel * calendarRingWidth / (maxLevel+1),
+                    calendarRingMaxRadius - (maxLevel+1) * calendarRingWidth / (maxLevel+1),
                     eventWrapper.getPaint(), outlineBlack);
         }
 
@@ -584,18 +585,6 @@ public class ClockFace implements Observer {
         // TODO except if we're in ambient mode?
         if(batteryPathCache != null)
             canvas.drawPath(batteryPathCache, (batteryCritical)?smRed:smYellow);
-    }
-
-    /**
-     * Given an absolute time (i.e., msec since the epoch), adjust for time zone and DST,
-     * and return msec since midnight -- a much smaller number suitable for representation without
-     * a full 64 bits
-     */
-    public long secondsSinceMidnight(long time) {
-        TimeZone tz = TimeZone.getDefault();
-        int gmtOffset = tz.getRawOffset() + tz.getDSTSavings();
-
-        return (time + gmtOffset) % (24*60*60*1000);
     }
 
     public void setSize(int width, int height) {

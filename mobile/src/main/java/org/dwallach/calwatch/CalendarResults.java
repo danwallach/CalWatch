@@ -51,8 +51,6 @@ public class CalendarResults {
         public Paint paint;
         public Path path;
 
-        public int minLevel, maxLevel; // filled in by the layout algorithm
-
          // standard constructor
         public Event() { }
 
@@ -77,10 +75,6 @@ public class CalendarResults {
             this.paint = e.paint;
             this.path = e.path;
         }
-
-        public boolean overlaps(Event e) {
-            return this.startTime < e.endTime && e.startTime < this.endTime;
-        }
     }
 
     public SparseArray<Calendar> calendars;
@@ -99,7 +93,7 @@ public class CalendarResults {
     public List<WireEvent> getWireEvents() {
         List<WireEvent> wireList = new ArrayList<WireEvent>();
         for(Event e : events) {
-            wireList.add(new WireEvent(e.startTime, e.endTime, e.displayColor, e.minLevel, e.maxLevel));
+            wireList.add(new WireEvent(e.startTime, e.endTime, e.displayColor));
         }
         return wireList;
     }
@@ -107,7 +101,7 @@ public class CalendarResults {
     public List<EventWrapper> getWrappedEvents() {
         List<EventWrapper> wireList = new ArrayList<EventWrapper>();
         for(Event e : events) {
-            wireList.add(new EventWrapper(new WireEvent(e.startTime, e.endTime, e.displayColor, e.minLevel, e.maxLevel)));
+            wireList.add(new EventWrapper(new WireEvent(e.startTime, e.endTime, e.displayColor)));
         }
         return wireList;
     }

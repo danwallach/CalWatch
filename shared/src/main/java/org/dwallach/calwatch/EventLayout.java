@@ -5,6 +5,7 @@ import android.text.format.DateUtils;
 import android.util.Log;
 
 import java.util.ArrayList;
+import java.util.List;
 
 public class EventLayout {
     private final static String TAG = "EventLayout";
@@ -15,7 +16,7 @@ public class EventLayout {
      * @param events list of events
      * @return maximum level of any calendar event
      */
-    public static int go(ArrayList<CalendarResults.Event> events) {
+    public static int go(List<EventWrapper> events) {
         // We're going to execute a greedy O(n^2) algorithm that runs like this:
 
         // Levels go from 0 to MAXINT. Every event will have a minLevel and maxLevelAnywhere. In the
@@ -43,10 +44,11 @@ public class EventLayout {
         nEvents = events.size();
         if(nEvents == 0) return 0;    // another degnerate case
 
-        CalendarResults.Event e = events.get(0); // first event
+        EventWrapper e = events.get(0); // first event
         boolean levelsFull[] = new boolean[nEvents+1];
         char printLevelsFull[] = new char[nEvents+1];
-        e.minLevel = e.maxLevel = 0;
+        e.setMinLevel(0);
+        e.setMaxLevel(0);
 
         for(i=1; i<nEvents; i++) {
             e = events.get(i);
@@ -59,14 +61,15 @@ public class EventLayout {
 
             // now fill out the levels based on events from [0, N-1]
             for(j=0; j<i; j++) {
-                CalendarResults.Event pe = events.get(j);
+                EventWrapper pe = events.get(j);
 
                 // note: all of these loops for bit manipulation seem gratuitously inefficient and
                 // if we really cared, we could probably just limit the world to 64 levels and do everything
                 // with masked 64-bit bitvectors or something. As they say, premature optimization is
                 // the root of all evil. So maybe later. Probably never.
                 if(e.overlaps(pe)) {
-                    for (k = pe.minLevel; k <= pe.maxLevel; k++) {
+                    int peMaxLevel = pe.getMaxLevel();
+                    for (k = pe.getMinLevel(); k <= peMaxLevel; k++) {
                         levelsFull[k] = true;
                         printLevelsFull[k] = '@';
                     }
@@ -112,22 +115,24 @@ public class EventLayout {
             }
             if(holeStart != -1) {
                 // okay, we found a hole for the new event
-                e.minLevel = holeStart;
-                e.maxLevel = holeEnd;
+                e.setMinLevel(holeStart);
+                e.setMaxLevel(holeEnd);
 
                 // Log.v(TAG, "--> hole found: (" + e.minLevel + "," + e.maxLevel + ")");
             } else {
                 // Log.v(TAG, "--> adding a level");
-                e.minLevel = e.maxLevel = maxLevelAnywhere + 1;
+                e.setMinLevel(maxLevelAnywhere + 1);
+                e.setMaxLevel(maxLevelAnywhere + 1);
 
                 // Sigh. Now we need to loop through all the previous events to see if
                 // anybody else can expand out to occupy the new level
                 for(j=0; j<i; j++) {
-                    CalendarResults.Event pe = events.get(j);
+                    EventWrapper pe = events.get(j);
+                    int peMaxLevel = pe.getMaxLevel();
 
-                    if(!e.overlaps(pe) && pe.maxLevel == maxLevelAnywhere) {
+                    if(!e.overlaps(pe) && peMaxLevel == maxLevelAnywhere) {
                         // Log.v(TAG, "=== expanding event " + j);
-                        pe.maxLevel++;
+                        pe.setMaxLevel(peMaxLevel+1);
                     }
                 }
 
@@ -135,12 +140,5 @@ public class EventLayout {
             }
         }
         return maxLevelAnywhere;
-    }
-
-    public static void debugDump(Context ctx, ArrayList<CalendarResults.Event> events) {
-        for(CalendarResults.Event e: events) {
-            Log.v(TAG, "Title(" + e.title + "), displayColor(" + Integer.toHexString(e.displayColor) + "), minLevel(" + e.minLevel + "), maxLevel(" + e.maxLevel + ")");
-            Log.v(TAG, "--> Start: " + DateUtils.formatDateTime(ctx, e.startTime, DateUtils.FORMAT_SHOW_DATE | DateUtils.FORMAT_SHOW_TIME) + ", End: " + DateUtils.formatDateTime(ctx, e.endTime, DateUtils.FORMAT_SHOW_TIME | DateUtils.FORMAT_SHOW_DATE));
-        }
     }
 }

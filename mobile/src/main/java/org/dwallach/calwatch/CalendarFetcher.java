@@ -320,7 +320,6 @@ public class CalendarFetcher extends Observable implements Runnable {
                 e.duration = mCursor.getString(i++);
 
                 e.paint = PaintCan.getPaint(e.displayColor); // at least on my phone, this tells you everything you need to know
-                e.minLevel = e.maxLevel = -1;  // these are filled in later on by the EventLayout engine
 
                 if(e.rDate != null || e.rRule != null || e.exDate != null || e.exRule != null) {
                     // holy crap, it's a recurring event
@@ -377,9 +376,6 @@ public class CalendarFetcher extends Observable implements Runnable {
 
         // curious open-source scanning contraption:
         // http://www.programcreek.com/java-api-examples/index.php?api=android.provider.CalendarContract
-
-        // sort out the overlapping calendar layers
-        cr.maxLevel = EventLayout.go(cr.events);
 
         Log.v(TAG, "database found events(" + cr.events.size() + ")");
 

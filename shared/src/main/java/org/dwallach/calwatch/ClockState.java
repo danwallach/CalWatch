@@ -22,6 +22,7 @@ public class ClockState extends Observable {
     private int faceMode = Constants.DefaultWatchFace;
     private boolean showSeconds = Constants.DefaultShowSeconds;
     private List<EventWrapper> eventList = null;
+    private List<EventWrapper> visibleEventList = null;
     private int maxLevel = 0;
 
     private static ClockState singleton = null;
@@ -65,7 +66,8 @@ public class ClockState extends Observable {
 
     public synchronized void setEventList(List<EventWrapper> eventList) {
         this.eventList = eventList;
-        recomputeMaxLevel();
+        this.visibleEventList = null;
+        computeVisibleEvents();
         pingObservers();
     }
 
@@ -76,12 +78,17 @@ public class ClockState extends Observable {
             results.add(new EventWrapper(wireEvent));
 
         setEventList(results);
-        recomputeMaxLevel();
         Log.v(TAG, "new calendar event list, " + results.size() + " entries");
     }
 
+    /**
+     * This fetches *every* event present in the ClockState (typically 24 hours worth),
+     * and does it *without* clipping to the visible watchface.
+     */
     public List<WireEvent> getWireEventList() {
         List<WireEvent> output = new ArrayList<WireEvent>();
+
+        if(eventList == null) return null;
 
         for(EventWrapper event: eventList)
             output.add(event.getWireEvent());
@@ -89,27 +96,56 @@ public class ClockState extends Observable {
         return output;
     }
 
-    public synchronized void setWireEventList(List<WireEvent> wireEventList) {
-        setWireEventListHelper(wireEventList);
-        recomputeMaxLevel();
-        pingObservers();
-    }
+    private long lastClipStartTime = 0;
 
+    private void computeVisibleEvents() {
+        if(eventList == null) return; // nothing to do yet
 
-    private void recomputeMaxLevel() {
-        int maxLevel = 0;
-        for(EventWrapper eventWrapper : eventList) {
-            int eMaxLevel =  eventWrapper.getWireEvent().maxLevel;
-            if(eMaxLevel > maxLevel)
-                maxLevel = eMaxLevel;
+        // This is going to be called on every screen refresh, so it needs to be fast in the common case.
+        // The current solution is to measure the time and try to figure out whether we've ticked onto
+        // a new hour, which would mean that it's time to redo the visibility calculation. If new events
+        // showed up for whatever other reason, then that would have nuked visibleEventList, so we'll
+        // recompute that here as well.
+
+        int gmtOffset = TimeWrapper.getGmtOffset();
+        long time = TimeWrapper.getTime();
+
+        long clipStartMillis = (long) (Math.floor(time / 3600000.0) * 3600000.0); // if it's currently 12:32pm, this value will be 12:00pm
+        long clipEndMillis = clipStartMillis + 43200000; // 12 hours later
+
+        if(lastClipStartTime == clipStartMillis && visibleEventList != null)
+            return; // we've already done it, and we've got a cache of the results
+
+        lastClipStartTime = clipStartMillis;
+        visibleEventList = new ArrayList<EventWrapper>();
+
+        for(EventWrapper eventWrapper: eventList) {
+            WireEvent e = eventWrapper.getWireEvent();
+
+            long startTime = e.startTime + gmtOffset;
+            long endTime = e.endTime + gmtOffset;
+
+            // this clipping is hopefully unnecessary as we've moved it into ClockState
+            if (startTime < clipStartMillis) startTime = clipStartMillis;
+            if (endTime > clipEndMillis) endTime = clipEndMillis;
+
+            if (endTime < clipStartMillis || startTime > clipEndMillis)
+                continue; // this one is off-screen
+
+            visibleEventList.add((new EventWrapper(new WireEvent(startTime, endTime, e.displayColor))));
         }
 
-        this.maxLevel = maxLevel;
+        // now, we run off and do our greedy algorithm to fill out the minLevel / maxLevel on each event
+        this.maxLevel = EventLayout.go(visibleEventList);
         Log.v(TAG, "maxLevel for new events: " + this.maxLevel);
     }
 
+    /**
+     * This returns a list of *visible* events on the watchface, cropped to size
+     */
     public synchronized List<EventWrapper> getEventList() {
-        return eventList;
+        computeVisibleEvents(); // should be fast, since mostly it will detect that nothing has changed
+        return visibleEventList;
     }
 
     /**
