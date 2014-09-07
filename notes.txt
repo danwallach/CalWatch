@@ -1,27 +1,5 @@
-DONE?! prerender background, only redraw it when screen changes; blt it to the screen all the time
--- Tried it and got a *lower* framerate; the cost of bitblt seems to really matter, at least at
-   the high res on a Nexus 5. Revisit later on an actual Android Wear watch where the resolution
-   is so much lower.
-
-   Git note: preliminary code 'stashed' on my laptop.
-   Root: c5e2c9851167e2221ec55b4f7f00291887ac8e89
-   Branch: b3a5c0b1485751235dd36564e5900f78379b942e (branchBackground)
-
-   New idea: cache *paths* rather than bitmaps. This will avoid a lot of trig, and the paths will
-   probably be loaded into the GPU, avoiding some bus bandwidth.
-
--- The cache is implemented. No real performance bump. Some N7 numbers: 47-53 FPS when in landscape,
-   28-29 FPS when in portrait. This implies that the essential difference is simply the cost of pushing
-   more pixels to the bigger screen, since it's the same exact CPU usage; just different GPU load.
-
-   Also tried breaking the complex path with 60 ticks into 60 little paths. Zero difference.
-
-   Curiously, switching from "tool" to "lite" mode changes FPS from 29 to 42-51FPS. It's hard to believe
-   that just a few tick marks makes such a big performance difference, but then there you go. Hopefully,
-   all of this will be irrelevant when we get to the phone, with its insanely low-res screen.
-
-   When running in the emulator on the MacPro, we're consistently getting >50FPS. Current tentative
-   conclusion, we're GPU limited (dunno why) so it doesn't really matter any more.
+Performance
+   TODO do we have a performance problem? we're getting 30fps on LG watch, 55+ FPS on N5 with small face
 
 DONE?! deal with recurring events
 -- RecurrenceProcessor.expand() seems to do exactly what I want. Hypothetically, this is going to
@@ -35,26 +13,10 @@ DONE?! deal with recurring events
 
    The claim is that there's a "missing LHS" in the timezone part. Hrmm.
 
-TODO port to Android Wear
+Port to Android Wear
 -- Useful article including sample code: http://toastdroid.com/2014/07/18/developing-watchfaces-for-android-wear/
 -- How to set up the damn emulator: http://www.tech-recipes.com/rx/49586/how-do-i-connect-an-android-wear-emulator-to-a-real-phone/
    adb -d forward tcp:5601 tcp:5601
-
-Subtasks:
-    DONE?! and get things rendering locally and remotely?
-    DONE?! fix path caching / rendering (data is correctly available on the watch, at least!)
-    DONE?! new watch sends message to phone (hi! send data!)
-    DONE?! regular pings watch to phone (hi! not dead yet!)
-
-           This one was super painful. This whole business of asking nicely for your GoogleApi
-           and wondering whether or not you got it is an epic disaster. It seems to be super
-           important to do this registration over and over again, and then you can make it work.
-           You can't register from one place and expect it to work elsewhere.
-
-           Also, it seems to really matter that you use the MessageApi to set up the listener to
-           receive a message on the phone, even though you *don't* need to do this on the watch.
-           Probably bugs or something, or maybe I just wasn't properly registered with the damn
-           GoogleApi nonsense.
 
     TODO verify on round face
     TODO support the "real" watchface API?
@@ -71,19 +33,12 @@ TODO sort out how to compile protobufs automatically via Gradle (vs. known bugs 
 
 TODO fancier control panel: Material Layout cards
 
-TODO verify all the weird connect/disconnect corner cases
-
-Subtasks:
+Verify all the weird connect/disconnect corner cases
     TODO fresh boot of phone, make sure service is up no matter what
     TODO disconnect / reconnect of phone from watch
     TODO fresh boot of watch / reconnect to old phone app
     TODO nothing running on phone / fresh watch wants data
-    DONE! centralized store (in /shared) for calendar data
-    DONE! disconnect from activities & services
-
-    DONE! restart of app on phone breaks watch with bogus message (probably related to ClockFace vs. ClockFaceStub)
-        DONE! need to carefully rethink lifecycle issues on these things; service shouldn't really have long-term pointers to the activity
-
+    TODO are we recovering properly if the phone kills the service after a long hiatus?
 
 TODO get a real app icon
 DONE?! slower refresh rate when second hand not being displayed

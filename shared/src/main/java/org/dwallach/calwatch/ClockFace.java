@@ -115,7 +115,7 @@ public class ClockFace implements Observer {
         TimeWrapper.update();  // load up the latest time
 
         // draw the calendar wedges first, at the bottom of the stack, then the face indices
-        drawCalendar(canvas);
+        if(!ambientMode) drawCalendar(canvas);
         drawFace(canvas);
         drawHands(canvas);
 
@@ -221,12 +221,14 @@ public class ClockFace implements Observer {
         x1 = clockX(45, .85f);
         y1 = clockY(45, .85f);
 
-        Paint.FontMetrics metrics = smYellow.getFontMetrics();
+        Paint paint = (ambientMode)? smWhite : smYellow;
+
+        Paint.FontMetrics metrics = paint.getFontMetrics();
         float dybottom = -metrics.ascent-metrics.leading; // smidge it up a bunch
         float dytop = -metrics.descent; // smidge it down a little
 
-        drawShadowText(canvas, d, x1, y1+dybottom, smYellow, smBlack);
-        drawShadowText(canvas, m, x1, y1+dytop, smYellow, smBlack);
+        drawShadowText(canvas, d, x1, y1+dybottom, paint, smBlack);
+        drawShadowText(canvas, m, x1, y1+dytop, paint, smBlack);
 
     }
 
@@ -356,7 +358,7 @@ public class ClockFace implements Observer {
         drawRadialLine(canvas, minutes, 0.1f, 0.9f, white, superThinBlack);
         drawRadialLine(canvas, hours, 0.1f, 0.6f, white, superThinBlack);
 
-        if(showSeconds) {
+        if(showSeconds && !ambientMode) {
             // ugly details: we might run 10% or more away from our targets at 4Hz, making the second
             // hand miss the indices. Ugly. Thus, some hackery.
             if(clipSeconds) seconds = Math.floor(seconds * freqUpdate) / freqUpdate;
@@ -578,8 +580,19 @@ public class ClockFace implements Observer {
 
         // note that we'll flip the color from white to red once the battery gets below 10%
         // TODO except if we're in ambient mode?
-        if(batteryPathCache != null)
-            canvas.drawPath(batteryPathCache, (batteryCritical)?smRed:smYellow);
+        if(batteryPathCache != null) {
+            Paint paint;
+
+            if(batteryCritical)
+                paint = smRed;
+            else
+                paint = smYellow;
+
+            if(ambientMode)
+                paint = smWhite;
+
+            canvas.drawPath(batteryPathCache, paint);
+        }
     }
 
     public void setSize(int width, int height) {
@@ -587,7 +600,7 @@ public class ClockFace implements Observer {
         cy = height / 2;
         radius = (cx > cy) ? cy : cx; // minimum of the two
         float textSize = radius / 3f;
-        float smTextSize = radius / 5f;
+        float smTextSize = radius / 6f;
         float lineWidth = radius / 20f;
 
         shadow = lineWidth / 20f;  // for drop shadows
@@ -645,6 +658,7 @@ public class ClockFace implements Observer {
 
     private int faceMode;
     private boolean showSeconds;
+    private boolean ambientMode;
     private List<EventWrapper> eventList;
     private int maxLevel;
 
@@ -664,6 +678,7 @@ public class ClockFace implements Observer {
     public void update(Observable observable, Object data) {
         this.maxLevel = clockState.getMaxLevel();
         this.showSeconds = clockState.getShowSeconds();
+        this.ambientMode = !this.showSeconds; // kludge for now
         this.eventList = clockState.getVisibleLocalEventList();
         this.faceMode = clockState.getFaceMode();
         this.facePathCache = null;
