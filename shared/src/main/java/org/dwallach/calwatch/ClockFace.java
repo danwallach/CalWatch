@@ -112,8 +112,6 @@ public class ClockFace implements Observer {
      * from a helper thread, elsewhere
      */
     public void drawEverything(Canvas canvas) {
-        TimeWrapper.update();  // load up the latest time
-
         // draw the calendar wedges first, at the bottom of the stack, then the face indices
         if(!ambientMode) drawCalendar(canvas);
         drawFace(canvas);

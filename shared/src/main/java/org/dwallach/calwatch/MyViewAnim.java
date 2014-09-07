@@ -148,6 +148,8 @@ public class MyViewAnim extends SurfaceView implements SurfaceHolder.Callback {
 
         @Override
         public void onTimeUpdate(TimeAnimator animation, long totalTime, long deltaTime) {
+            TimeWrapper.update();
+
             Canvas c = null;
 
             ticks++;
