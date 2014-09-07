@@ -388,10 +388,12 @@ public class CalendarFetcher extends Observable implements Runnable {
     }
 
     private void addEvent(CalendarResults cr, CalendarResults.Event e, long queryStartMillis, long queryEndMillis) {
+        if(e.title != null && e.title.contains("DBG")) {
+            Log.v(TAG, "Found visible event. Title(" + e.title + "), calID(" + e.calendarID + "), eventColor(" + Integer.toHexString(e.eventColor) + "), eventColorKey(" + e.eventColorKey + "), displayColor(" + Integer.toHexString(e.displayColor) + ")");
+            Log.v(TAG, "--> Start: " + DateUtils.formatDateTime(ctx, e.startTime, DateUtils.FORMAT_SHOW_DATE | DateUtils.FORMAT_SHOW_TIME) + ", End: " + DateUtils.formatDateTime(ctx, e.endTime, DateUtils.FORMAT_SHOW_TIME | DateUtils.FORMAT_SHOW_DATE));
+            Log.v(TAG, "--> Clip: " + DateUtils.formatDateTime(ctx, queryStartMillis, DateUtils.FORMAT_SHOW_DATE | DateUtils.FORMAT_SHOW_TIME) + ", End: " + DateUtils.formatDateTime(ctx, queryEndMillis, DateUtils.FORMAT_SHOW_TIME | DateUtils.FORMAT_SHOW_DATE));
+        }
         if (e.startTime < queryEndMillis && e.endTime > queryStartMillis && e.visible && !e.allDay) {
-            // Log.v(TAG, "Found visible event. Title(" + e.title + "), calID(" + e.calendarID + "), eventColor(" + Integer.toHexString(e.eventColor) + "), eventColorKey(" + e.eventColorKey + "), displayColor(" + Integer.toHexString(e.displayColor) + ")");
-            // Log.v(TAG, "--> Start: " + DateUtils.formatDateTime(ctx, e.startTime, DateUtils.FORMAT_SHOW_DATE | DateUtils.FORMAT_SHOW_TIME) + ", End: " + DateUtils.formatDateTime(ctx, e.endTime, DateUtils.FORMAT_SHOW_TIME | DateUtils.FORMAT_SHOW_DATE));
-
             // if we get here, the event is visible; we used to then clip it to the visible window,
             // but this functionality has now moved to ClockFace, where we do it every time we refresh
             // the screen, allowing the watch to hum along for hours, even if it's never getting updates
