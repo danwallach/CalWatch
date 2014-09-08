@@ -86,6 +86,8 @@ public class MyViewAnim extends SurfaceView implements SurfaceHolder.Callback {
         if(clockFace == null)
             clockFace = new ClockFace();
 
+	clockFace.wipeCaches();
+
         if(animator != null) {
             Log.v(TAG, "resuming old animator!");
             animator.resume();
