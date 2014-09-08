@@ -219,15 +219,15 @@ public class ClockFace implements Observer {
         x1 = clockX(45, .85f);
         y1 = clockY(45, .85f);
 
-        Paint paint = (ambientMode)? smWhite : smYellow;
+//        Paint paint = (ambientMode)? smWhite : smYellow;
+	Paint paint = smWhite; // yellow just doesn't look right, so we'll keep it monochromatic
 
         Paint.FontMetrics metrics = paint.getFontMetrics();
         float dybottom = -metrics.ascent-metrics.leading; // smidge it up a bunch
         float dytop = -metrics.descent; // smidge it down a little
 
-        drawShadowText(canvas, d, x1, y1+dybottom, paint, smBlack);
+	drawShadowText(canvas, d, x1, y1+dybottom, paint, smBlack);
         drawShadowText(canvas, m, x1, y1+dytop, paint, smBlack);
-
     }
 
     private void drawShadowText(Canvas canvas, String text, float x, float y, Paint paint, Paint shadowPaint) {
