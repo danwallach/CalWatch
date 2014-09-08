@@ -26,6 +26,8 @@ Port to Android Wear
         TODO "sample" face for selector
         TODO deal with dimming (kill second hand? lower frame rate? all white?) "Ambient mode"
 
+    TODO better ambient mode detection? https://gist.github.com/PomepuyN/cdd821eca163a3279de2 (pasted at bottom)
+
 
 TODO sort out how to compile protobufs automatically via Gradle (vs. known bugs lodged with Google)
 -- At least the Square protobuf runtime is automatically fetched and compiled
@@ -82,3 +84,56 @@ https://github.com/twotoasters/watchface-template/tree/master/submodules
   Meanwhile, there's all this business about Square's various testing
   and code injection libraries. Probably not worth bothering
   now. Maybe later.
+
+
+
+DisplayManager variant for detecting ambient mode (probably better than onPause / onResume):
+
+
+  Handler handler = new Handler(Looper.getMainLooper());
+
+  final DisplayManager displayManager = (DisplayManager) getSystemService(Context.DISPLAY_SERVICE);
+  displayManager.registerDisplayListener(new DisplayManager.DisplayListener() {
+      @Override
+      public void onDisplayAdded(int displayId) {
+
+      }
+
+      @Override
+      public void onDisplayRemoved(int displayId) {
+
+      }
+
+      @Override
+      public void onDisplayChanged(int displayId) {
+	  try {
+	      if (displayManager.getDisplay(displayId).getState() == Display.STATE_DOZING) {
+		  updateFaceDisplay(true);
+		  Log.d(TAG, "onDisplayChanged: dozing");
+	      } else {
+		  updateFaceDisplay(false);
+		  Log.d(TAG, "onDisplayChanged: not dozing");
+
+	      }
+	  } catch (NullPointerException exception) {
+	  }
+      }
+  }, handler);
+
+Alternate variant (from: https://gist.github.com/kentarosu/52fb21eb92181716b0ce)
+
+  switch(displayManager.getDisplay(displayId).getState()){
+      case Display.STATE_DOZING:
+	  onScreenDim();
+	  break;
+      case Display.STATE_OFF:
+	  onScreenOff();
+	  break;
+      default:
+	  //  Not really sure what to so about Display.STATE_UNKNOWN, so
+	  //  we'll treat it as if the screen is normal.
+	  onScreenAwake();
+	  break;
+  }
+
+
