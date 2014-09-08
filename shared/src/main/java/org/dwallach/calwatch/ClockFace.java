@@ -367,6 +367,22 @@ public class ClockFace implements Observer {
         }
     }
 
+    /**
+     * call this if external forces at play may have invalidated state
+     * being saved inside ClockFace
+     */
+    public void wipeCaches() {
+	facePathCache = null;
+	stipplePathCache = null;
+	stippleTimeCache = -1;
+
+	if(eventList != null) 
+	    for(EventWrapper eventWrapper: eventList) {
+		PathCache pc = eventWrapper.getPathCache();
+		if(pc != null) pc.set(null);
+	    }
+    }
+
     private static int calendarTicker = 0;
     private long stippleTimeCache = -1;
     private Path stipplePathCache = null;
@@ -379,14 +395,19 @@ public class ClockFace implements Observer {
 
         if(eventList == null) {
             if (calendarTicker % 1000 == 0) Log.v(TAG, "drawCalendar starting, eventList is null");
-            return; // again, must not be ready yet
+	    update(null, null);
+
+	    if(eventList == null) {
+		Log.v(TAG, "eventList still null after update; giving up");
+		return; // again, must not be ready yet
+	    }
+
         }
 
         // try to determine if the screen size has changed since last time; if so, nuke the
         // saved path caches
         if(oldCX != cx || oldCY != cy) {
-            for(EventWrapper eventWrapper: eventList)
-                eventWrapper.getPathCache().set(null);
+	    wipeCaches();
         }
         oldCX = cx;
         oldCY = cy;
@@ -631,7 +652,7 @@ public class ClockFace implements Observer {
         outlineBlack.setStrokeWidth(lineWidth /3);
         superThinBlack.setStrokeWidth(lineWidth / 8);
 
-        facePathCache = null;
+        wipeCaches();
     }
 
     // clock math
@@ -681,11 +702,11 @@ public class ClockFace implements Observer {
     // this gets called when the clockState updates itself
     @Override
     public void update(Observable observable, Object data) {
+        wipeCaches();
         this.maxLevel = clockState.getMaxLevel();
         this.showSeconds = clockState.getShowSeconds();
         this.ambientMode = !this.showSeconds; // kludge for now
         this.eventList = clockState.getVisibleLocalEventList();
         this.faceMode = clockState.getFaceMode();
-        this.facePathCache = null;
     }
 }
