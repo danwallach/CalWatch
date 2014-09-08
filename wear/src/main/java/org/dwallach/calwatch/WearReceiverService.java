@@ -1,5 +1,6 @@
 package org.dwallach.calwatch;
 
+import android.content.Context;
 import android.content.Intent;
 import android.os.AsyncTask;
 import android.os.Bundle;
@@ -182,5 +183,14 @@ public class WearReceiverService extends WearableListenerService implements Goog
         } else {
             Log.e(TAG, "pingPhone: No GoogleAPI?!");
         }
+    }
+
+    public static void kickStart(Context context) {
+        // start the calendar service, if it's not already running
+        if(getSingleton() == null) {
+            Intent serviceIntent = new Intent(context, WearReceiverService.class);
+            context.startService(serviceIntent);
+        }
+
     }
 }

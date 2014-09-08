@@ -27,11 +27,8 @@ public class WearActivity extends Activity {
 
         singletonActivity = this;
 
-        // start the calendar service, if it's not already running
-        if(WearReceiverService.getSingleton() == null) {
-            Intent serviceIntent = new Intent(this, WearReceiverService.class);
-            startService(serviceIntent);
-        }
+        // start the background service, if it's not already running
+        WearReceiverService.kickStart(this);
 
         // bring up the UI
         setContentView(R.layout.activity_wear);

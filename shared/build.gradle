@@ -1,13 +1,13 @@
-apply plugin: 'android-library'
+apply plugin: 'com.android.library'
 
 android {
-    compileSdkVersion 19
+    compileSdkVersion 18
     buildToolsVersion "20.0.0"
 
     defaultConfig {
         applicationId "org.dwallach.calwatch.shared"
-        minSdkVersion 19
-        targetSdkVersion 19
+        minSdkVersion 18
+        targetSdkVersion 18
         versionCode 1
         versionName "1.0"
     }
