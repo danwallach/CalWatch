@@ -71,9 +71,13 @@ https://github.com/twotoasters/watchface-template/tree/master/submodules
     uses-permission for background
     preview.png
 
+    (BOTH DONE! -- but need to redo the preview image once the face graphics settles down)
+
   wear/src/main/AndroidManifest.xml:
     more permission usage
     some funkiness about how the activity is set up (providing background, etc.)
+
+    (BOTH DONE!)
 
   Meanwhile, there's all this business about Square's various testing
   and code injection libraries. Probably not worth bothering

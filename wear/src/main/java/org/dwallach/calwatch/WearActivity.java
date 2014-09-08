@@ -41,8 +41,9 @@ public class WearActivity extends Activity {
             public void onLayoutInflated(WatchViewStub stub) {
                 view = (MyViewAnim) stub.findViewById(R.id.surfaceView);
 
-                // TODO: kill this and instead support the real watchface api
-                getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
+                // this would keep the screen on: useful for testing but not something
+		// we want for production use
+                // getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
 
 
                 Log.v(TAG, "starting data API receiver");
@@ -53,13 +54,13 @@ public class WearActivity extends Activity {
     protected void onResume() {
         super.onResume();
         Log.v(TAG, "Resume!");
-        if(view != null) view.resume(); // shouldn't be necessary, but isn't happening on its own
+        if(view != null) view.resume();
     }
 
     protected void onPause() {
         super.onPause();
         Log.v(TAG, "Pause!");
-        if(view != null) view.pause(); // shouldn't be necessary, but isn't happening on its own
+        if(view != null) view.pause();
     }
 
 }
