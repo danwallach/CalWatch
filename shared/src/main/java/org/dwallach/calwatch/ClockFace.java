@@ -179,6 +179,9 @@ public class ClockFace implements Observer {
                 clockY(15,endRadius), // right
                 clockY(0,endRadius)); // top
 
+		// TODO hypothesis: this was originally assuming 2*PI rather than the correct 360 degrees,
+		// so the fix should be straightforward: multiply by 6, then maybe subtract 90
+
         p.addArc(startOval, (float)(secondsStart * Math.PI / 30.0 + Math.PI / 2.0), (float)((secondsEnd - secondsStart) * Math.PI / 30.0 + Math.PI / 2.0));
         p.lineTo(clockX(secondsEnd,endRadius), clockY(secondsEnd, endRadius));
         p.arcTo(endOval, (float)(secondsEnd * Math.PI / 30.0 + Math.PI / 2.0), (float)(-(secondsEnd - secondsStart) * Math.PI / 30.0 + Math.PI / 2.0));

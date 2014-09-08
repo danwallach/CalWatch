@@ -63,7 +63,7 @@ https://github.com/twotoasters/watchface-template/tree/master/submodules
     DeviceUtils.java: totally cheesy way of determining AMOLED: lookup
       table based on device type
     Watch.java:
-      - an intent called KEEP_WATCHFACE_AWAKE
+      TODO- an intent called KEEP_WATCHFACE_AWAKE
       - logic to deal with changing timezones
       - onTimeChanged() via alarm manager when seconds are turned off (do we care?)
 
