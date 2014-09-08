@@ -151,6 +151,8 @@ public class PhoneActivity extends Activity implements Observer {
 
         // http://developer.android.com/reference/android/app/Activity.html
 
+        if(clockView != null) clockView.stop();
+
         clockState.deleteObserver(this);
         clockState = null;
     }

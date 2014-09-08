@@ -48,16 +48,24 @@ public class WearActivity extends Activity {
         });
     }
 
+    @Override
     protected void onResume() {
         super.onResume();
         Log.v(TAG, "Resume!");
         if(view != null) view.resume();
     }
 
+    @Override
     protected void onPause() {
         super.onPause();
         Log.v(TAG, "Pause!");
         if(view != null) view.pause();
     }
 
+    @Override
+    protected void onStop() {
+        super.onStop();
+        Log.v(TAG, "Pause!");
+        if(view != null) view.stop();
+    }
 }
