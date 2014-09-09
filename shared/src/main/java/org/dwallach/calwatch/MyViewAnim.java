@@ -147,7 +147,6 @@ public class MyViewAnim extends SurfaceView implements SurfaceHolder.Callback {
         }
 
         private int ticks = 0;
-        private long lastFPSTime = 0;
 
         @Override
         public void onTimeUpdate(TimeAnimator animation, long totalTime, long deltaTime) {
@@ -158,34 +157,13 @@ public class MyViewAnim extends SurfaceView implements SurfaceHolder.Callback {
             ticks++;
 
             try {
-                // Old technique: deriving FPS from totalTime and deltaTime
-                // http://cogitolearning.co.uk/?p=1555
-
-                // New technique: measure the system clock every 500 frames, compute
-                // average FPS over the interval. Assuming we're blazing away at 50Hz,
-                // this should log/print something every ten seconds. Eventually,
-                // we'll just comment this out altogether or stretch it out to a much
-                // longer time interval.
-                if(lastFPSTime == 0)
-                    lastFPSTime = TimeWrapper.getGMTTime();
-                else {
-                    if(ticks % 500 == 0) {
-                        long currentTime = TimeWrapper.getGMTTime();
-                        float fps = 500000.0f / (currentTime - lastFPSTime); // 500 frame * 1000 ms/s / elapsed ms
-                        lastFPSTime = currentTime;
-                        Log.v("FPS", Float.toString(fps));
-                    }
-                }
-
                 try {
                     c = surfaceHolder.lockCanvas(null);
                 } catch (IllegalStateException e) {
-                    c = null;
-                    // the canvas is gone; we can't draw anything; bail!
-                }
-
-                if(c == null) {
                     if(ticks % 1000 == 0) Log.w(TAG, "Failed to get a canvas for drawing!");
+                    c = null;
+
+                    // the canvas is gone; we can't draw anything; bail!
                     return;
                 }
 
@@ -202,7 +180,6 @@ public class MyViewAnim extends SurfaceView implements SurfaceHolder.Callback {
                     SystemClock.sleep(1000);
 
                 }
-
             } finally {
                 if (c != null) {
                     surfaceHolder.unlockCanvasAndPost(c);

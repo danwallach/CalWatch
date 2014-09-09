@@ -112,6 +112,8 @@ public class ClockFace implements Observer {
      * from a helper thread, elsewhere
      */
     public void drawEverything(Canvas canvas) {
+        TimeWrapper.frameStart();
+
         // draw the calendar wedges first, at the bottom of the stack, then the face indices
         if(!ambientMode) drawCalendar(canvas);
         drawFace(canvas);
@@ -122,6 +124,8 @@ public class ClockFace implements Observer {
 
         // and lastly, the battery meter
         drawBattery(canvas);
+
+        TimeWrapper.frameEnd();
     }
 
     private void drawRadialLine(Canvas canvas, double seconds, float startRadius, float endRadius, Paint paint, Paint shadowPaint) {
@@ -621,6 +625,7 @@ public class ClockFace implements Observer {
     }
 
     public void setAmbientMode(boolean mode) {
+        Log.i(TAG, "Ambient mode: " + mode);
         ambientMode = mode;
     }
 

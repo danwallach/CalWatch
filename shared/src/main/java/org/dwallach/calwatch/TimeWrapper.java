@@ -29,7 +29,12 @@ public class TimeWrapper {
     public static long getGMTTime() { return time; }
     public static long getLocalTime() { return time + gmtOffset; }
 
-    private static long frameStartTime;
+    private static long frameStartTime = 0;
+    private static long lastFPSTime = 0;
+    private static int samples = 0;
+    private static long minRuntime = 0;
+    private static long maxRuntime = 0;
+    private static long avgRuntimeAccumulator = 0;
 
     /**
      * for performance monitoring: call this at the beginning of every screen refresh
@@ -41,28 +46,48 @@ public class TimeWrapper {
     /**
      * for performance monitoring: call this at the end of every screen refresh
      */
-    private static long lastFPSTime = 0;
-    private static int ticks = 0;
-
     public static void frameEnd() {
-        ticks++;
-
         long frameEndTime = SystemClock.elapsedRealtimeNanos();
 
-        // first, let's sort out the average frames per second
         if(lastFPSTime == 0)
             lastFPSTime = frameEndTime;
 
-        long elapsedTime = frameEndTime - frameStartTime;
+        long elapsedTime = frameEndTime - lastFPSTime; // ns since last time we printed something
+        long runtime = frameEndTime - frameStartTime;  // ns since frameStart() called
 
-        // work in progress: compute statistics
+        if(samples == 0) {
+           avgRuntimeAccumulator = minRuntime = maxRuntime = runtime;
+        } else {
+            if(runtime < minRuntime)
+                minRuntime = runtime;
+            if(runtime > maxRuntime)
+                maxRuntime = runtime;
+            avgRuntimeAccumulator += runtime;
+        }
+
+        samples++;
+
 
         // if at least five minutes have elapsed, then it's time to print all the things
-        if(frameEndTime - lastFPSTime > 300000000000L) { // 5 * 60 * 10^9
-            float fps = (ticks * 1000000000f) / (frameEndTime - lastFPSTime); // 500 frame * 1000 ms/s / elapsed ms
+        if(elapsedTime > 60000000000L) { // 60 * 10^9 nanoseconds: one minute
+            float fps = (samples * 1000000000f) / elapsedTime;  // * 10^9 so we're not just computing frames per nanosecond
+            Log.i(TAG, "FPS: " + Float.toString(fps));
+
+            Log.i(TAG, "Min/Avg/Max frame render speed (ms): "
+                    + minRuntime / 1000000f + " / "
+                    + (avgRuntimeAccumulator/samples)/1000000f + " / "
+                    + maxRuntime / 1000000f);
+
+            // this waketime percentage is really a lower bound; it's not counting work in the render thread
+            // thread that's outside of the ClockFace rendering methods, and it's also not counting
+            // work that happens on other threads
+            Log.i(TAG, "Waketime: " + (100f * (avgRuntimeAccumulator - runtime) / elapsedTime) + "%");
+
             lastFPSTime = frameEndTime;
-            ticks = 0;
-            Log.v(TAG, "FPS: " + Float.toString(fps));
+            samples = 0;
+            minRuntime = 0;
+            maxRuntime = 0;
+            avgRuntimeAccumulator = 0;
         }
     }
 
