@@ -162,8 +162,10 @@ public class MyViewAnim extends SurfaceView implements SurfaceHolder.Callback {
                 } catch (IllegalStateException e) {
                     if(ticks % 1000 == 0) Log.w(TAG, "Failed to get a canvas for drawing!");
                     c = null;
+                }
 
-                    // the canvas is gone; we can't draw anything; bail!
+                if(c == null) {
+                    Log.w(TAG, "no canvas yet?");
                     return;
                 }
 
