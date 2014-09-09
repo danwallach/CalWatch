@@ -18,9 +18,10 @@ public class MyViewAnim extends SurfaceView implements SurfaceHolder.Callback {
     private static final String TAG = "MyViewAnim";
 
     private PanelThread drawThread;
-    private ClockFace clockFace;
-    private TimeAnimator animator;
+    private volatile ClockFace clockFace;
+    private volatile TimeAnimator animator;
     private Context context;
+    private volatile boolean activeDrawing = false;
 
     public ClockFace getClockFace() { return clockFace; }
 
@@ -73,7 +74,7 @@ public class MyViewAnim extends SurfaceView implements SurfaceHolder.Callback {
 
     public void pause() {
         Log.v(TAG, "pausing animation");
-//        animator.pause();
+        animator.pause();
 //        clockFace.setAmbientMode(true);
     }
 
@@ -83,6 +84,7 @@ public class MyViewAnim extends SurfaceView implements SurfaceHolder.Callback {
 
 //        clockFace.setAmbientMode(false);
         clockFace.wipeCaches();
+        activeDrawing = true;
 
         if(animator != null) {
             Log.v(TAG, "resuming old animator!");
@@ -115,6 +117,8 @@ public class MyViewAnim extends SurfaceView implements SurfaceHolder.Callback {
 
     public void stop() {
         Log.v(TAG, "stopping animation!");
+
+        activeDrawing = false;
         if(animator != null) {
             // new experimental ways to maybe quit things
             if(drawThread == null) {
@@ -126,6 +130,11 @@ public class MyViewAnim extends SurfaceView implements SurfaceHolder.Callback {
                 Looper looper = handler.getLooper();
                 if(looper != null)
                     looper.quitSafely();
+
+                // maybe these will do something; it's unclear
+                animator.end();
+                animator.cancel();
+
                 animator = null;
                 drawThread = null;
                 clockFace.destroy();
@@ -150,16 +159,23 @@ public class MyViewAnim extends SurfaceView implements SurfaceHolder.Callback {
 
         @Override
         public void onTimeUpdate(TimeAnimator animation, long totalTime, long deltaTime) {
-            TimeWrapper.update();
-
-            Canvas c = null;
-
             ticks++;
+
+            // we have a weird race condition when the screen turns off and blanks out
+            if(!activeDrawing) {
+                if(ticks % 1000 == 0)
+                    Log.v(TAG, "onTimeUpdate being called while we're not needing it");
+                return;
+            }
+
+            ClockFace localClockFace = clockFace; // local cached copy, to deal with concurrency issues
+            TimeWrapper.update();
+            Canvas c = null;
 
             try {
                 try {
                     c = surfaceHolder.lockCanvas(null);
-                } catch (IllegalStateException e) {
+                } catch (java.lang.IllegalStateException e) {
                     if(ticks % 1000 == 0) Log.w(TAG, "Failed to get a canvas for drawing!");
                     c = null;
                 }
@@ -170,7 +186,7 @@ public class MyViewAnim extends SurfaceView implements SurfaceHolder.Callback {
                 }
 
                 c.drawColor(Color.TRANSPARENT, PorterDuff.Mode.CLEAR);
-                clockFace.drawEverything(c);
+                localClockFace.drawEverything(c);
 
                 ClockState clockState = ClockState.getSingleton();
 
@@ -179,7 +195,7 @@ public class MyViewAnim extends SurfaceView implements SurfaceHolder.Callback {
                     Log.e(TAG, "whoa, no clock state?!");
                     return;
                 }
-                if(!clockState.getShowSeconds() || clockFace.getAmbientMode()) {
+                if(!clockState.getShowSeconds() || localClockFace.getAmbientMode()) {
                     // if we're not showing the second hand, then we don't need to refresh at 50+Hz
                     // so instead we sleep one second; regardless, the minute hand will move
                     // very, very smoothly.

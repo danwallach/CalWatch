@@ -86,3 +86,31 @@ https://github.com/twotoasters/watchface-template/tree/master/submodules
   Meanwhile, there's all this business about Square's various testing
   and code injection libraries. Probably not worth bothering
   now. Maybe later.
+
+
+Lifecycle madness:
+
+Here's what happens when I hit the home button on the phone:
+
+09-09 16:36:18.176  25448-25448/org.dwallach.calwatch V/PhoneActivity﹕ Pause!
+09-09 16:36:18.176  25448-25448/org.dwallach.calwatch V/MyViewAnim﹕ pausing animation
+09-09 16:36:18.576  25448-25448/org.dwallach.calwatch V/MyViewAnim﹕ Drawing surface destroyed!
+09-09 16:36:18.576  25448-25448/org.dwallach.calwatch V/MyViewAnim﹕ stopping animation!
+09-09 16:36:18.576  25448-10110/org.dwallach.calwatch V/MyViewAnim﹕ looper finished!
+09-09 16:36:18.976  25448-25448/org.dwallach.calwatch V/PhoneActivity﹕ Stop!
+09-09 16:36:18.976  25448-25448/org.dwallach.calwatch V/MyViewAnim﹕ stopping animation!
+
+Versus, here's what happens, *sometimes* when the screen goes off by itself:
+
+09-09 16:27:00.676  25448-25448/org.dwallach.calwatch V/PhoneActivity﹕ Pause!
+09-09 16:27:00.676  25448-25448/org.dwallach.calwatch V/MyViewAnim﹕ pausing animation
+09-09 16:27:00.686  25448-25448/org.dwallach.calwatch V/PhoneActivity﹕ Stop!
+09-09 16:27:00.686  25448-25448/org.dwallach.calwatch V/MyViewAnim﹕ stopping animation!
+09-09 16:27:00.686   25448-9866/org.dwallach.calwatch V/MyViewAnim﹕ looper finished!
+09-09 16:27:06.106  25448-25448/org.dwallach.calwatch V/MyViewAnim﹕ Drawing surface destroyed!
+09-09 16:27:06.106  25448-25448/org.dwallach.calwatch V/MyViewAnim﹕ stopping animation!
+TODO: where the hell did this come from and why is the phone activity restarting itself?
+09-09 16:27:06.126  25448-25448/org.dwallach.calwatch V/PhoneActivity﹕ Create!
+09-09 16:27:06.126  25448-25448/org.dwallach.calwatch V/PhoneActivity﹕ Start!
+09-09 16:27:06.126  25448-25448/org.dwallach.calwatch V/PhoneActivity﹕ And in the beginning ...
+09-09 16:27:06.126  25448-25448/org.dwallach.calwatch V/PhoneActivity﹕ reconnecting clock state
