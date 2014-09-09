@@ -73,15 +73,15 @@ public class MyViewAnim extends SurfaceView implements SurfaceHolder.Callback {
 
     public void pause() {
         Log.v(TAG, "pausing animation");
-        // animator.pause();
-        clockFace.setAmbientMode(true);
+//        animator.pause();
+//        clockFace.setAmbientMode(true);
     }
 
     public void resume() {
         if(clockFace == null)
             clockFace = new ClockFace();
 
-        clockFace.setAmbientMode(false);
+//        clockFace.setAmbientMode(false);
         clockFace.wipeCaches();
 
         if(animator != null) {
