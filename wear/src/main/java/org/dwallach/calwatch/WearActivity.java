@@ -1,10 +1,15 @@
 package org.dwallach.calwatch;
 
 import android.app.Activity;
+import android.content.Context;
 import android.content.Intent;
+import android.hardware.display.DisplayManager;
 import android.os.Bundle;
+import android.os.Handler;
+import android.os.Looper;
 import android.support.wearable.view.WatchViewStub;
 import android.util.Log;
+import android.view.Display;
 import android.view.WindowManager;
 
 public class WearActivity extends Activity {
@@ -47,6 +52,8 @@ public class WearActivity extends Activity {
                 Log.v(TAG, "starting data API receiver");
             }
         });
+
+        initAmbientWatcher();
     }
 
     @Override
@@ -54,6 +61,7 @@ public class WearActivity extends Activity {
         super.onResume();
         Log.v(TAG, "Resume!");
         if(view != null) view.resume();
+        initAmbientWatcher();
     }
 
     @Override
@@ -68,5 +76,73 @@ public class WearActivity extends Activity {
         super.onStop();
         Log.v(TAG, "Pause!");
         if(view != null) view.stop();
+        killAmbientWatcher();
+    }
+
+    private DisplayManager.DisplayListener displayListener = null;
+
+    private void killAmbientWatcher() {
+        Log.v(TAG, "killing ambient watcher");
+        if(displayListener != null) {
+            final DisplayManager displayManager = (DisplayManager) getSystemService(Context.DISPLAY_SERVICE);
+            displayManager.unregisterDisplayListener(displayListener);
+            displayListener = null;
+        }
+    }
+
+    private void initAmbientWatcher() {
+        Log.v(TAG, "initializing ambient watcher");
+
+        Handler handler = new Handler(Looper.getMainLooper());
+
+        final DisplayManager displayManager = (DisplayManager) getSystemService(Context.DISPLAY_SERVICE);
+
+        if(this.displayListener == null) {
+            this.displayListener = new DisplayManager.DisplayListener() {
+                @Override
+                public void onDisplayAdded(int displayId) {
+                }
+
+                @Override
+                public void onDisplayRemoved(int displayId) {
+                }
+
+                @Override
+                public void onDisplayChanged(int displayId) {
+                    int newState = displayManager.getDisplay(displayId).getState();
+                    Log.v(TAG, "display changed: " + displayId + ", new state: " + newState);
+
+                    ClockFace clockFace = view.getClockFace();
+
+                    if (clockFace == null) {
+                        Log.v(TAG, "no clockFace! not good");
+                        return;
+                    }
+
+                    // inspiration: https://gist.github.com/kentarosu/52fb21eb92181716b0ce
+
+                    switch (newState) {
+                        case Display.STATE_DOZING:
+                            clockFace.setAmbientMode(true);
+                            Log.v(TAG, "onDisplayChanged: dozing");
+                            break;
+                        case Display.STATE_OFF:
+                            clockFace.setAmbientMode(true);
+                            Log.v(TAG, "onDisplayChanged: off!"); // presumably this event will be accompanied by other things that shut us down
+                            break;
+                        case Display.STATE_ON:
+                            clockFace.setAmbientMode(false);
+                            Log.v(TAG, "onDisplayChanged: on!");
+                            break;
+                        default:
+                            clockFace.setAmbientMode(false);
+                            Log.v(TAG, "onDisplayChanged: unknown state, defaulting to non-ambient mode");
+                            break;
+                    }
+                }
+            };
+        }
+
+        displayManager.registerDisplayListener(displayListener, handler);
     }
 }

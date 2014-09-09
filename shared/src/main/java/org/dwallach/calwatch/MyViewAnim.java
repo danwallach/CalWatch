@@ -195,7 +195,7 @@ public class MyViewAnim extends SurfaceView implements SurfaceHolder.Callback {
                 ClockState clockState = ClockState.getSingleton();
 
                 // TODO add support for ambient mode, do the same thing
-                if(!clockState.getShowSeconds()) {
+                if(!clockState.getShowSeconds() || getClockFace().getAmbientMode()) {
                     // if we're not showing the second hand, then we don't need to refresh at 50+Hz
                     // so instead we sleep one second; regardless, the minute hand will move
                     // very, very smoothly.

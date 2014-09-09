@@ -621,7 +621,11 @@ public class ClockFace implements Observer {
     }
 
     public void setAmbientMode(boolean mode) {
-	ambientMode = mode;
+        ambientMode = mode;
+    }
+
+    public boolean getAmbientMode() {
+        return ambientMode;
     }
 
     public void setSize(int width, int height) {
