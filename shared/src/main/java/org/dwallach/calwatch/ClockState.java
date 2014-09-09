@@ -112,7 +112,7 @@ public class ClockState extends Observable {
         // showed up for whatever other reason, then that would have nuked visibleEventList, so we'll
         // recompute that here as well.
 
-        Log.v(TAG, "starting event pool: " + eventList.size());
+//        Log.v(TAG, "starting event pool: " + eventList.size());
 
         long time = TimeWrapper.getLocalTime();
         int gmtOffset = TimeWrapper.getGmtOffset();
@@ -120,10 +120,11 @@ public class ClockState extends Observable {
         long clipStartMillis = (long) (Math.floor(time / 3600000.0) * 3600000.0); // if it's currently 12:32pm, this value will be 12:00pm
         long clipEndMillis = clipStartMillis + 43200000; // 12 hours later
 
-        Log.v(TAG, "clipStart: " + clipStartMillis + " clipEnd: " + clipEndMillis);
 
         if(lastClipStartTime == clipStartMillis && visibleEventList != null)
             return; // we've already done it, and we've got a cache of the results
+
+        Log.v(TAG, "clipStart: " + clipStartMillis + " clipEnd: " + clipEndMillis);
 
         lastClipStartTime = clipStartMillis;
         visibleEventList = new ArrayList<EventWrapper>();
