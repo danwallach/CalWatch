@@ -25,6 +25,7 @@ Port to Android Wear
 
         TODO "sample" face for selector
         TODO deal with dimming (kill second hand? lower frame rate? all white?) "Ambient mode"
+        -- untested ambient mode code now in place, 1Hz updates for minute hand, no second hand, no calendar; may want to go more slowly
 
     TODO better ambient mode detection? https://gist.github.com/PomepuyN/cdd821eca163a3279de2 (pasted at bottom)
 
@@ -48,7 +49,7 @@ TODO app signing
 TODO smarter DrawArc
 
 DONE! make battery gauge pretty
-TODO if we're coming back from being asleep, make sure we invalidate the batteryPathCache
+DONE?! if we're coming back from being asleep, make sure we invalidate the batteryPathCache
 
 DONE! fix regression: we're not clipping the events to the visible 12 hour window
   Also, we now send 24 hours of events at once and do all the clipping in the watch, meaning
