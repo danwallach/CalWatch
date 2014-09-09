@@ -39,7 +39,8 @@ public class WearActivity extends Activity {
                 view = (MyViewAnim) stub.findViewById(R.id.surfaceView);
 
                 // this would keep the screen on: useful for testing but not something
-		// we want for production use
+                // we want for production use
+
                 // getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
 
 
