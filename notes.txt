@@ -68,6 +68,7 @@ https://github.com/twotoasters/watchface-template/tree/master/submodules
       TODO- an intent called KEEP_WATCHFACE_AWAKE
       - logic to deal with changing timezones
       - onTimeChanged() via alarm manager when seconds are turned off (do we care?)
+      - unclear if any of this is necessary
 
   mobile/src/main/AndroidMainfest.xml:
     uses-permission for background

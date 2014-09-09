@@ -376,22 +376,23 @@ public class ClockFace implements Observer {
      * being saved inside ClockFace
      */
     public void wipeCaches() {
-	facePathCache = null;
-	stipplePathCache = null;
-	stippleTimeCache = -1;
+        Log.v(TAG, "clearing caches");
 
-	if(eventList != null) 
-	    for(EventWrapper eventWrapper: eventList) {
-		PathCache pc = eventWrapper.getPathCache();
-		if(pc != null) pc.set(null);
-	    }
+        facePathCache = null;
+        batteryPathCache = null;
+        stipplePathCache = null;
+        stippleTimeCache = -1;
+
+        if(eventList != null)
+            for(EventWrapper eventWrapper: eventList) {
+                PathCache pc = eventWrapper.getPathCache();
+                if(pc != null) pc.set(null);
+            }
     }
 
     private static int calendarTicker = 0;
     private long stippleTimeCache = -1;
     private Path stipplePathCache = null;
-
-    private int oldCX = -1, oldCY = -1;
 
     private void drawCalendar(Canvas canvas) {
         calendarTicker++;
@@ -410,14 +411,6 @@ public class ClockFace implements Observer {
                 return; // again, must not be ready yet
             }
         }
-
-        // try to determine if the screen size has changed since last time; if so, nuke the
-        // saved path caches
-        if(oldCX != cx || oldCY != cy) {
-            wipeCaches();
-        }
-        oldCX = cx;
-        oldCY = cy;
 
         long time = TimeWrapper.getLocalTime();
 

@@ -31,11 +31,11 @@ public class BatteryMonitor {
     public static void init(Context context) {
         if(singleton == null) {
             singleton = new BatteryMonitor(context);
-            singleton.fetchStatus();
         } else if (context != singleton.context) {
             Log.v(TAG, "Hmm, a new context");
             singleton.context = context;
         }
+        singleton.fetchStatus();
     }
 
     public static BatteryMonitor getSingleton() {
@@ -45,7 +45,7 @@ public class BatteryMonitor {
         return singleton;
     }
 
-    void fetchStatus() {
+    public void fetchStatus() {
         // and now, some code for battery measurement, largely stolen from the
         // official docs.
         // http://developer.android.com/training/monitoring-device-state/battery-monitoring.html
