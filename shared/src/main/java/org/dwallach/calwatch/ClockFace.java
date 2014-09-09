@@ -392,22 +392,25 @@ public class ClockFace implements Observer {
     private void drawCalendar(Canvas canvas) {
         calendarTicker++;
 
+        // this line represents a big change; we're still an observer of the clock state, but now
+        // we're also polling it; it promises to support this polling efficiently, and in return,
+        // we know we've always got an up to date set of calendar wedges
+        updateEventList();
 
         if(eventList == null) {
             if (calendarTicker % 1000 == 0) Log.v(TAG, "drawCalendar starting, eventList is null");
-	    update(null, null);
+            update(null, null); // probably won't accomplish any more than the updateEventList above...
 
-	    if(eventList == null) {
-		Log.v(TAG, "eventList still null after update; giving up");
-		return; // again, must not be ready yet
-	    }
-
+            if(eventList == null) {
+                Log.v(TAG, "eventList still null after update; giving up");
+                return; // again, must not be ready yet
+            }
         }
 
         // try to determine if the screen size has changed since last time; if so, nuke the
         // saved path caches
         if(oldCX != cx || oldCY != cy) {
-	    wipeCaches();
+            wipeCaches();
         }
         oldCX = cx;
         oldCY = cy;
@@ -684,7 +687,7 @@ public class ClockFace implements Observer {
 
     private int faceMode;
     private boolean showSeconds;
-    private boolean ambientMode;
+    private boolean ambientMode = false;
     private List<EventWrapper> eventList;
     private int maxLevel;
 
@@ -703,10 +706,14 @@ public class ClockFace implements Observer {
     @Override
     public void update(Observable observable, Object data) {
         wipeCaches();
-        this.maxLevel = clockState.getMaxLevel();
         this.showSeconds = clockState.getShowSeconds();
-        this.ambientMode = !this.showSeconds; // kludge for now
-        this.eventList = clockState.getVisibleLocalEventList();
         this.faceMode = clockState.getFaceMode();
+        updateEventList();
+    }
+
+    private void updateEventList() {
+        // this is cheap enough that we can afford to do it at 60Hz
+        this.maxLevel = clockState.getMaxLevel();
+        this.eventList = clockState.getVisibleLocalEventList();
     }
 }
