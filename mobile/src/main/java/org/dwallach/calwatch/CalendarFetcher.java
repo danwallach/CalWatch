@@ -50,6 +50,7 @@ public class CalendarFetcher extends Observable implements Runnable {
     private volatile CalendarResults calendarResults = null;
 
     private long lastQueryStartTime = 0;
+    private long lastGMTOffset = 0;
 
     public void run() {
         Log.v(TAG, "run: starting");
@@ -77,10 +78,13 @@ public class CalendarFetcher extends Observable implements Runnable {
         //
         for(;;) {
             // Log.v(TAG, "ping");
-            long queryStartMillis = (long) (Math.floor(SystemClock.currentThreadTimeMillis() / 3600000.0) * 360000.0); // if it's currently 12:32pm, this value will be 12:00pm
-            if(queryStartMillis > lastQueryStartTime) { // we've rolled to a new hour, so it's time to reload!
+            TimeWrapper.update();
+            long queryStartMillis = (long) (Math.floor(TimeWrapper.getLocalTime() / 3600000.0) * 360000.0); // if it's currently 12:32pm, this value will be 12:00pm
+            long currentGMTOffset = TimeWrapper.getGmtOffset();
+            if(queryStartMillis > lastQueryStartTime || lastGMTOffset != currentGMTOffset) { // we've rolled to a new hour, or the timezone changed, so it's time to reload!
                 newContentAvailable = true;
                 lastQueryStartTime = queryStartMillis;
+                lastGMTOffset = currentGMTOffset;
             }
 
             // this boolean could have been made true in a number of ways: either because we hit a new hour (as above) or because our cursor on the calendar detected a change
@@ -249,8 +253,10 @@ public class CalendarFetcher extends Observable implements Runnable {
         // http://www.techrepublic.com/blog/software-engineer/programming-with-the-android-40-calendar-api-the-good-the-bad-and-the-ugly/
 
 
-        long time = System.currentTimeMillis();
+        TimeWrapper.update();
+        long time = TimeWrapper.getGMTTime() + TimeWrapper.getGmtOffset();
         long queryStartMillis = (long) (Math.floor(time / 3600000.0) * 3600000.0); // if it's currently 12:32pm, this value will be 12:00pm
+        queryStartMillis -= TimeWrapper.getGmtOffset(); // undo the correction -- this bit of crazy to hopefully deal correctly with weird timezones that are 30 minutes off
         long queryEndMillis = queryStartMillis + 86400000; // 24 hours later
 
         Log.v(TAG, "Query times... Now: " + DateUtils.formatDateTime(ctx, time, DateUtils.FORMAT_SHOW_DATE | DateUtils.FORMAT_SHOW_TIME) + ", QueryStart: " + DateUtils.formatDateTime(ctx, queryStartMillis, DateUtils.FORMAT_SHOW_TIME | DateUtils.FORMAT_SHOW_DATE)  + ", QueryEnd: " + DateUtils.formatDateTime(ctx, queryEndMillis, DateUtils.FORMAT_SHOW_TIME | DateUtils.FORMAT_SHOW_DATE));

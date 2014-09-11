@@ -69,7 +69,6 @@ public class ClockState extends Observable {
     public synchronized void setEventList(List<EventWrapper> eventList) {
         this.eventList = eventList;
         this.visibleEventList = null;
-        computeVisibleEvents();
         pingObservers();
     }
 

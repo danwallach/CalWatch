@@ -16,10 +16,12 @@ public class TimeWrapper {
     private static int gmtOffset;
     private static long time;
 
+    private static final long magicOffset = -13 * 60 * 60 * 1000; // twelve hours earlier, for debugging
+
     public static void update() {
         tz=TimeZone.getDefault();
         gmtOffset=tz.getRawOffset()+tz.getDSTSavings();
-        time=System.currentTimeMillis();
+        time=System.currentTimeMillis() + magicOffset;
     }
     
     public static TimeZone getTz() { return tz; }

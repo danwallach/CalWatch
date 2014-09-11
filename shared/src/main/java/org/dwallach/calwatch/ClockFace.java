@@ -708,6 +708,7 @@ public class ClockFace implements Observer {
     @Override
     public void update(Observable observable, Object data) {
         wipeCaches();
+        TimeWrapper.update();
         this.showSeconds = clockState.getShowSeconds();
         this.faceMode = clockState.getFaceMode();
         updateEventList();
