@@ -127,10 +127,15 @@ public class ClockFace implements Observer {
         drawHands(canvas);
 
         // something a real watch can't do: float the text over the hands
-        drawMonthBox(canvas);
+        // this visually conflicts with other notifications, drawn as text above the hands,
+        // so it's easiest to just cut it during ambient mode
+        if(!ambientMode) drawMonthBox(canvas);
 
         // and lastly, the battery meter
-        drawBattery(canvas);
+        // -- note that the watch draws its own battery meter, so this is really just window
+        //    dressing, unnecessary in ambient mode
+        if(!ambientMode) drawBattery(canvas);
+
 
         TimeWrapper.frameEnd();
     }

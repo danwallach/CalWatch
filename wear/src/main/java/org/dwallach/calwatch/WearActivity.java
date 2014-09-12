@@ -60,7 +60,7 @@ public class WearActivity extends Activity {
     protected void onResume() {
         super.onResume();
         Log.v(TAG, "Resume!");
-        if(view != null) view.resume();
+//        if(view != null) view.resume();
         initAmbientWatcher();
     }
 
@@ -68,15 +68,15 @@ public class WearActivity extends Activity {
     protected void onPause() {
         super.onPause();
         Log.v(TAG, "Pause!");
-        if(view != null) view.pause();
+//        if(view != null) view.pause();
     }
 
     @Override
     protected void onStop() {
         super.onStop();
-        Log.v(TAG, "Pause!");
-        if(view != null) view.stop();
-        killAmbientWatcher();
+        Log.v(TAG, "Stop!");
+//        if(view != null) view.stop();
+//        killAmbientWatcher();
     }
 
     private DisplayManager.DisplayListener displayListener = null;

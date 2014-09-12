@@ -101,8 +101,7 @@ public class ClockState extends Observable {
 
     private void computeVisibleEvents() {
         if(eventList == null) {
-            Log.v(TAG, "no events to compute visibility over");
-            return;
+            Log.v(TAG, "no events to compute visibility over, going with empty list for now");
         }
 
         // This is going to be called on every screen refresh, so it needs to be fast in the common case.
@@ -128,24 +127,29 @@ public class ClockState extends Observable {
         lastClipStartTime = clipStartMillis;
         visibleEventList = new ArrayList<EventWrapper>();
 
-        for(EventWrapper eventWrapper: eventList) {
-            WireEvent e = eventWrapper.getWireEvent();
+        if(eventList != null)
+            for(EventWrapper eventWrapper: eventList) {
+                WireEvent e = eventWrapper.getWireEvent();
 
-            long startTime = e.startTime + gmtOffset;
-            long endTime = e.endTime + gmtOffset;
+                long startTime = e.startTime + gmtOffset;
+                long endTime = e.endTime + gmtOffset;
 
-            // this clipping is hopefully unnecessary as we've moved it into ClockState
-            if (startTime < clipStartMillis) startTime = clipStartMillis;
-            if (endTime > clipEndMillis) endTime = clipEndMillis;
+                // this clipping is hopefully unnecessary as we've moved it into ClockState
+                if (startTime < clipStartMillis) startTime = clipStartMillis;
+                if (endTime > clipEndMillis) endTime = clipEndMillis;
 
-            if (endTime < clipStartMillis || startTime > clipEndMillis)
-                continue; // this one is off-screen
+                if (endTime < clipStartMillis || startTime > clipEndMillis)
+                    continue; // this one is off-screen
 
-            visibleEventList.add((new EventWrapper(new WireEvent(startTime, endTime, e.displayColor))));
-        }
+                visibleEventList.add((new EventWrapper(new WireEvent(startTime, endTime, e.displayColor))));
+            }
 
         // now, we run off and do our greedy algorithm to fill out the minLevel / maxLevel on each event
-        this.maxLevel = EventLayout.go(visibleEventList);
+        if(eventList != null)
+            this.maxLevel = EventLayout.go(visibleEventList);
+        else
+            this.maxLevel = 0;
+
         Log.v(TAG, "maxLevel for new events: " + this.maxLevel);
         Log.v(TAG, "number of new events: " + visibleEventList.size());
 
