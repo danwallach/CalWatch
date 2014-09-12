@@ -43,4 +43,8 @@ public class EventWrapper {
     public boolean overlaps(EventWrapper e) {
         return this.wireEvent.startTime < e.wireEvent.endTime && e.wireEvent.startTime < this.wireEvent.endTime;
     }
+
+    public String toString() {
+        return wireEvent.startTime + "->" + wireEvent.endTime + " color(" + Integer.toHexString(wireEvent.displayColor) + "), levels(" + minLevel + "," + maxLevel + ")";
+    }
 }
