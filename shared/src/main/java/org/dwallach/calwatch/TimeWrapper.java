@@ -31,6 +31,12 @@ public class TimeWrapper {
     public static long getGMTTime() { return time; }
     public static long getLocalTime() { return time + gmtOffset; }
 
+    public static long getLocalFloorHour() {
+        // 1000 * 60 * 60 = 3600000 -- the number of msec in an hour
+        // if it's currently 12:32pm, this value returned will be 12:00pm
+        return (long) (Math.floor(getLocalTime() / 3600000.0) * 3600000.0);
+    }
+
     private static long frameStartTime = 0;
     private static long lastFPSTime = 0;
     private static int samples = 0;

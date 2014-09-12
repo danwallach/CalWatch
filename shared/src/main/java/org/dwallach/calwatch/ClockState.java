@@ -115,7 +115,7 @@ public class ClockState extends Observable {
         long time = TimeWrapper.getLocalTime();
         int gmtOffset = TimeWrapper.getGmtOffset();
 
-        long clipStartMillis = (long) (Math.floor(time / 3600000.0) * 3600000.0); // if it's currently 12:32pm, this value will be 12:00pm
+        long clipStartMillis = TimeWrapper.getLocalFloorHour() - gmtOffset; // convert from localtime back to GMT time for looking at events
         long clipEndMillis = clipStartMillis + 43200000; // 12 hours later
 
         if(visibleEventList != null)
