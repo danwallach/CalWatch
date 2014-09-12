@@ -133,4 +133,4 @@ Further improvements:
     http://www.constraintsolving.com/solvers/java-based-solvers
 
   Moto 360:
-    TODO pull back the radius along the bottom to fit the cropped ~30 pixels -- maybe an extension to drawRadialLine that knows about the bounding box and projects the line backward
+    DONE!! pull back the radius along the bottom to fit the cropped ~30 pixels -- maybe an extension to drawRadialLine that knows about the bounding box and projects the line backward

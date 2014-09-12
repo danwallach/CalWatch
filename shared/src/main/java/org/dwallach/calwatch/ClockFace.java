@@ -53,12 +53,19 @@ public class ClockFace implements Observer {
 
     private boolean clipSeconds = false; // force second hand to align with FPS boundaries (good for low-FPS drawing)
 
+    private int missingBottomPixels = 0; // Moto 360 hack; set to non-zero number to pull up the indicia
+
     private Paint white, yellow, smWhite, smYellow, black, smBlack, smRed, gray, outlineBlack, superThinBlack;
 
     private ClockState clockState;
 
     public int getFaceMode() {
         return faceMode;
+    }
+
+    // set for Moto 360
+    public void setMissingBottomPixels(int missingBottomPixels) {
+        this.missingBottomPixels = missingBottomPixels;
     }
 
     private Paint newPaint() {
@@ -134,12 +141,21 @@ public class ClockFace implements Observer {
 
     private void drawRadialLine(Canvas canvas, double seconds, float startRadius, float endRadius, Paint paint, Paint shadowPaint, boolean forceVertical) {
         Path p = new Path();
-        drawRadialLine(p, paint.getStrokeWidth(), seconds, startRadius, endRadius, forceVertical);
+        drawRadialLine(p, paint.getStrokeWidth(), seconds, startRadius, endRadius, forceVertical, false);
         canvas.drawPath(p, paint);
         canvas.drawPath(p, shadowPaint);
     }
-    private void drawRadialLine(Path path, float strokeWidth, double seconds, float startRadius, float endRadius, boolean forceVertical) {
+    private void drawRadialLine(Path path, float strokeWidth, double seconds, float startRadius, float endRadius, boolean forceVertical, boolean flatBottomHack) {
         float x1, x2, y1, y2;
+
+        if(flatBottomHack) {
+            float clipRadius = radiusToEdge(seconds);
+            if(endRadius > clipRadius) {
+                float dr = endRadius - clipRadius;
+                startRadius -= dr;
+                endRadius -= dr;
+            }
+        }
 
         x1 = clockX(seconds, startRadius);
         y1 = clockY(seconds, startRadius);
@@ -254,6 +270,8 @@ public class ClockFace implements Observer {
         Path p = facePathCache; // make a local copy, avoid concurrency crap
         // draw thin lines (indices)
 
+        boolean bottomHack = (missingBottomPixels > 0);
+
         // check if we've already rendered the face
         if(faceMode != facePathCacheMode || p == null) {
             p = new Path();
@@ -262,7 +280,7 @@ public class ClockFace implements Observer {
             if (faceMode == ClockState.FACE_TOOL)
                 for (int i = 1; i < 60; i++)
                     if(i%5 != 0)
-                        drawRadialLine(p, smWhite.getStrokeWidth(), i, .9f, 1.0f, false);
+                        drawRadialLine(p, smWhite.getStrokeWidth(), i, .9f, 1.0f, false, bottomHack);
 
             float strokeWidth;
 
@@ -275,15 +293,15 @@ public class ClockFace implements Observer {
             for (int i = 0; i < 60; i += 5) {
                 if (i == 0) { // top of watch: special
                     if (faceMode != ClockState.FACE_NUMBERS) {
-                        drawRadialLine(p, strokeWidth, -0.4f, .8f, 1.0f, true);
-                        drawRadialLine(p, strokeWidth, 0.4f, .8f, 1.0f, true);
+                        drawRadialLine(p, strokeWidth, -0.4f, .8f, 1.0f, true, false);
+                        drawRadialLine(p, strokeWidth, 0.4f, .8f, 1.0f, true, false);
                     }
                 } else if (i == 45) { // 9 o'clock, don't extend into the inside
-                    drawRadialLine(p, strokeWidth, i, 0.9f, 1.0f, false);
+                    drawRadialLine(p, strokeWidth, i, 0.9f, 1.0f, false, false);
                 } else {
                     // we want lines for 1, 2, 4, 5, 7, 8, 10, and 11 no matter what
                     if (faceMode != ClockState.FACE_NUMBERS || !(i == 15 || i == 30))
-                        drawRadialLine(p, strokeWidth, i, .8f, 1.0f, false);
+                        drawRadialLine(p, strokeWidth, i, .8f, 1.0f, false, bottomHack);
                 }
             }
 
@@ -345,7 +363,7 @@ public class ClockFace implements Observer {
             r = 0.9f;
 
             x = clockX(30, r);
-            y = clockY(30, r) + metrics.descent;
+            y = clockY(30, r) + metrics.descent - (missingBottomPixels / 2); // another hack for Moto 360
 
             white.setTextAlign(Paint.Align.CENTER);
             black.setTextAlign(Paint.Align.CENTER);
@@ -669,6 +687,29 @@ public class ClockFace implements Observer {
     private float clockY(double seconds, float fractionFromCenter) {
         double angleRadians = ((seconds - 15) * Math.PI * 2f) / 60.0;
         return (float)(cy + radius * fractionFromCenter * Math.sin(angleRadians));
+    }
+
+    // hack for Moto360: given the location on the dial (seconds), and the originally
+    // desired radius, this returns your new radius that will touch the flat bottom
+    private float radiusToEdge(double seconds) {
+        float yOrig = clockY(seconds, 1f);
+        if(yOrig > cy*2 - missingBottomPixels) {
+            // given:
+            //   yOrig = cy + radius * fractionFromCenter * sin(angle)
+            // substitute the desired Y, i.e.,
+            //   cy*2 - missingBottomPixels = cy + radius * fractionFromCenter * sin(angle)
+            // and now solve for fractionFromCenter:
+            //   (cy - missingBottomPixels) / (radius * sin(angle)) = fractionFromCenter
+            double angleRadians = ((seconds - 15) * Math.PI * 2f) / 60.0;
+            try {
+                float newRadius = (float) ((cy - missingBottomPixels) / (radius * Math.sin(angleRadians)));
+                return newRadius;
+            } catch (ArithmeticException e) {
+                // division by zero, weird, so fall back to the default
+                return 1f;
+            }
+        } else
+            return 1f;
     }
 
     private static String localTimeString() {
