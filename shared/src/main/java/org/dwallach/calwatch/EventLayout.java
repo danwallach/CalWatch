@@ -53,6 +53,11 @@ public class EventLayout {
         for(i=1; i<nEvents; i++) {
             e = events.get(i);
 
+            // not sure this is necessary but it can't hurt
+            e.setMinLevel(0);
+            e.setMaxLevel(0);
+            e.getPathCache().set(null);
+
             // clear the levels used mask
             for(j=0; j<= nEvents; j++) {
                 levelsFull[j] = false;
@@ -140,5 +145,16 @@ public class EventLayout {
             }
         }
         return maxLevelAnywhere;
+    }
+
+    public static void sanityTest(List<EventWrapper> events, int maxLevel, String blurb) {
+        int  nEvents = events.size();
+
+        for(int i=0; i<nEvents; i++) {
+            EventWrapper e = events.get(i);
+            if (e.getMinLevel() < 0 || e.getMaxLevel() > maxLevel) {
+                Log.e(TAG, "malformed eventwrapper (" + blurb + "): " + e.toString());
+            }
+        }
     }
 }
