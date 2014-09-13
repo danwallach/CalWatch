@@ -185,10 +185,10 @@ public class ClockFace implements Observer {
 
     private RectF getRectRadius(float radius) {
         return new RectF(
-                clockX(45,radius), // bottom
-                clockY(30,radius), // left
-                clockY(15,radius), // right
-                clockY(0,radius)); // top
+                clockX(45,radius), // left
+                clockY(0,radius),  // top
+                clockX(15,radius), // right
+                clockY(30,radius));// bottom
     }
 
     private void drawRadialArc(Canvas canvas, PathCache pc, double secondsStart, double secondsEnd, float startRadius, float endRadius, Paint paint, Paint outlinePaint) {
@@ -213,6 +213,13 @@ public class ClockFace implements Observer {
             RectF startOval = getRectRadius(startRadius);
             RectF endOval = getRectRadius(endRadius);
 
+            /*
+            double timeDelta = TimeWrapper.getLocalFloorHour() / 720000.0; // 1000 * 60 * 60 * 2
+
+            secondsStart -= timeDelta;
+            secondsEnd -= timeDelta;
+            */
+
             // TODO hypothesis: this was originally assuming 2*PI rather than the correct 360 degrees,
             // so the fix should be straightforward: multiply by 6, then maybe subtract 90
 
@@ -220,8 +227,10 @@ public class ClockFace implements Observer {
                     "), seconds(" + Float.toString((float) secondsStart) + "," + Float.toString((float) secondsEnd) + ")");
 
             p.arcTo(startOval, (float) (secondsStart * 6 - 90), (float) ((secondsEnd - secondsStart) * 6), true);
+            Log.e(TAG, "--> arcTo: startOval, " + Float.toString((float) (secondsStart * 6 - 90)) + ", " +  Float.toString((float) ((secondsEnd - secondsStart) * 6)));
             // p.lineTo(clockX(secondsEnd, endRadius), clockY(secondsEnd, endRadius));
             p.arcTo(endOval, (float) (secondsEnd * 6 - 90), (float) (-(secondsEnd - secondsStart) * 6));
+            Log.e(TAG, "--> arcTo: endOval, " + Float.toString((float) (secondsEnd * 6 - 90)) + ", " +  Float.toString((float) (-(secondsEnd - secondsStart) * 6)));
             // p.lineTo(clockX(secondsStart,startRadius), clockY(secondsStart, startRadius));
             p.close();
 
