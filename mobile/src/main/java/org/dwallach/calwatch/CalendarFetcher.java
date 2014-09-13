@@ -255,11 +255,13 @@ public class CalendarFetcher extends Observable implements Runnable {
 
 
         TimeWrapper.update();
-        long time = TimeWrapper.getGMTTime() + TimeWrapper.getGmtOffset();
+        long time = TimeWrapper.getGMTTime();
         long queryStartMillis = TimeWrapper.getLocalFloorHour() - TimeWrapper.getGmtOffset();
         long queryEndMillis = queryStartMillis + 86400000; // 24 hours later
 
-        Log.v(TAG, "Query times... Now: " + DateUtils.formatDateTime(ctx, time, DateUtils.FORMAT_SHOW_DATE | DateUtils.FORMAT_SHOW_TIME) + ", QueryStart: " + DateUtils.formatDateTime(ctx, queryStartMillis, DateUtils.FORMAT_SHOW_TIME | DateUtils.FORMAT_SHOW_DATE)  + ", QueryEnd: " + DateUtils.formatDateTime(ctx, queryEndMillis, DateUtils.FORMAT_SHOW_TIME | DateUtils.FORMAT_SHOW_DATE));
+        Log.v(TAG, "Query times... Now: " + DateUtils.formatDateTime(ctx, time, DateUtils.FORMAT_SHOW_DATE | DateUtils.FORMAT_SHOW_TIME) +
+                ", QueryStart: " + DateUtils.formatDateTime(ctx, queryStartMillis, DateUtils.FORMAT_SHOW_TIME | DateUtils.FORMAT_SHOW_DATE)  +
+                ", QueryEnd: " + DateUtils.formatDateTime(ctx, queryEndMillis, DateUtils.FORMAT_SHOW_TIME | DateUtils.FORMAT_SHOW_DATE));
 
         // select events that end after the start of our window AND start before the end of our window,
         // filtering out any all-day events and any events that aren't visible

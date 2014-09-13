@@ -3,6 +3,8 @@ package org.dwallach.calwatch;
 import android.os.SystemClock;
 import android.util.Log;
 
+import java.text.DateFormat;
+import java.util.Date;
 import java.util.TimeZone;
 
 /**
@@ -35,6 +37,13 @@ public class TimeWrapper {
         // 1000 * 60 * 60 = 3600000 -- the number of msec in an hour
         // if it's currently 12:32pm, this value returned will be 12:00pm
         return (long) (Math.floor(getLocalTime() / 3600000.0) * 3600000.0);
+    }
+
+    public static String formatGMTTime(long millis) {
+        DateFormat df = DateFormat.getDateTimeInstance();
+        df.setTimeZone(TimeZone.getDefault());
+
+        return df.format(new Date(millis));
     }
 
     private static long frameStartTime = 0;

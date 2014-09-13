@@ -66,6 +66,11 @@ public class ClockState extends Observable {
         return showSeconds;
     }
 
+    /**
+     * Load the eventlist. This is meant to consume the output of the calendarFetcher,
+     * which is in GMT time, *not* local time.
+     * @param eventList list of events (GMT time)
+     */
     public synchronized void setEventList(List<EventWrapper> eventList) {
         this.eventList = eventList;
         this.visibleEventList = null;
@@ -84,7 +89,7 @@ public class ClockState extends Observable {
 
     /**
      * This fetches *every* event present in the ClockState (typically 24 hours worth),
-     * and does it *without* clipping to the visible watchface.
+     * and does it *without* clipping to the visible watchface. These will be in GMT time.
      */
     public List<WireEvent> getWireEventList() {
         List<WireEvent> output = new ArrayList<WireEvent>();
@@ -100,9 +105,9 @@ public class ClockState extends Observable {
     private long lastClipStartTime = 0;
 
     private void computeVisibleEvents() {
-        if(eventList == null) {
-            Log.v(TAG, "no events to compute visibility over, going with empty list for now");
-        }
+//        if(eventList == null) {
+//            Log.v(TAG, "no events to compute visibility over, going with empty list for now");
+//        }
 
         // This is going to be called on every screen refresh, so it needs to be fast in the common case.
         // The current solution is to measure the time and try to figure out whether we've ticked onto
@@ -124,27 +129,38 @@ public class ClockState extends Observable {
         if(lastClipStartTime == clipStartMillis && visibleEventList != null)
             return; // we've already done it, and we've got a cache of the results
 
-        Log.v(TAG, "clipStart: " + clipStartMillis + " clipEnd: " + clipEndMillis);
+//        Log.v(TAG, "clipStart: " + TimeWrapper.formatGMTTime(clipStartMillis) + " (" + clipStartMillis +
+//                "), clipEnd: " + TimeWrapper.formatGMTTime(clipEndMillis) + " (" + clipEndMillis + ")");
 
         lastClipStartTime = clipStartMillis;
         visibleEventList = new ArrayList<EventWrapper>();
 
-        if(eventList != null)
-            for(EventWrapper eventWrapper: eventList) {
+        if(eventList != null) {
+            Log.v(TAG, "clipping " + eventList.size() + " raw events to fit the screen");
+            for (EventWrapper eventWrapper : eventList) {
                 WireEvent e = eventWrapper.getWireEvent();
 
-                long startTime = e.startTime + gmtOffset;
-                long endTime = e.endTime + gmtOffset;
+                long startTime = e.startTime;
+                long endTime = e.endTime;
+
+//                Log.v(TAG, "New event: startTime: " + TimeWrapper.formatGMTTime(startTime) +
+//                        ", endTime: " + TimeWrapper.formatGMTTime(endTime));
 
                 // this clipping is hopefully unnecessary as we've moved it into ClockState
                 if (startTime < clipStartMillis) startTime = clipStartMillis;
                 if (endTime > clipEndMillis) endTime = clipEndMillis;
 
+
+//                Log.v(TAG, "-- Clipped: startTime: " + TimeWrapper.formatGMTTime(startTime) +
+//                        ", endTime: " + TimeWrapper.formatGMTTime(endTime));
+
+
                 if (endTime < clipStartMillis || startTime > clipEndMillis)
                     continue; // this one is off-screen
 
-                visibleEventList.add((new EventWrapper(new WireEvent(startTime, endTime, e.displayColor))));
+                visibleEventList.add((new EventWrapper(new WireEvent(startTime + gmtOffset, endTime + gmtOffset, e.displayColor))));
             }
+        }
 
         // now, we run off and do our greedy algorithm to fill out the minLevel / maxLevel on each event
         if(eventList != null)
@@ -160,7 +176,9 @@ public class ClockState extends Observable {
     }
 
     /**
-     * This returns a list of *visible* events on the watchface, cropped to size
+     * This returns a list of *visible* events on the watchface, cropped to size, and adjusted to
+     * the *local* timezone. If you want GMT events, which will not have been clipped, then use
+     * getWireEventList().
      */
     public synchronized List<EventWrapper> getVisibleLocalEventList() {
         computeVisibleEvents(); // should be fast, since mostly it will detect that nothing has changed
