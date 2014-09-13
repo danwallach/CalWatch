@@ -194,12 +194,7 @@ public class ClockFace implements Observer {
     private void drawRadialArc(Canvas canvas, PathCache pc, double secondsStart, double secondsEnd, float startRadius, float endRadius, Paint paint, Paint outlinePaint) {
         /*
          * Below is an attempt to do this "correctly" using the arc functionality supported natively
-         * by Android's Path. This implementation totally didn't work. Rather than debugging it,
-         * we instead did the dumb-but-accurate thing of stepping at a very small angle and computing
-         * lots of points along the arc. This sounds criminal from a performance perspective, but all
-         * of it is dumped into a path where the GPU can rendering it directly, so all the trig computations
-         * happen only once. (Or at least, only once per refresh of the calendar, which doesn't happen
-         * all that frequently.)
+         * by Android's Path.
          */
 
         if(startRadius < 0 || startRadius > 1 || endRadius < 0 || endRadius > 1) {
@@ -213,25 +208,13 @@ public class ClockFace implements Observer {
             RectF startOval = getRectRadius(startRadius);
             RectF endOval = getRectRadius(endRadius);
 
-            /*
-            double timeDelta = TimeWrapper.getLocalFloorHour() / 720000.0; // 1000 * 60 * 60 * 2
-
-            secondsStart -= timeDelta;
-            secondsEnd -= timeDelta;
-            */
-
-            // TODO hypothesis: this was originally assuming 2*PI rather than the correct 360 degrees,
-            // so the fix should be straightforward: multiply by 6, then maybe subtract 90
-
-            Log.e(TAG, "New arc: radius(" + Float.toString((float) startRadius) + "," + Float.toString((float) endRadius) +
-                    "), seconds(" + Float.toString((float) secondsStart) + "," + Float.toString((float) secondsEnd) + ")");
-
             p.arcTo(startOval, (float) (secondsStart * 6 - 90), (float) ((secondsEnd - secondsStart) * 6), true);
-            Log.e(TAG, "--> arcTo: startOval, " + Float.toString((float) (secondsStart * 6 - 90)) + ", " +  Float.toString((float) ((secondsEnd - secondsStart) * 6)));
-            // p.lineTo(clockX(secondsEnd, endRadius), clockY(secondsEnd, endRadius));
             p.arcTo(endOval, (float) (secondsEnd * 6 - 90), (float) (-(secondsEnd - secondsStart) * 6));
-            Log.e(TAG, "--> arcTo: endOval, " + Float.toString((float) (secondsEnd * 6 - 90)) + ", " +  Float.toString((float) (-(secondsEnd - secondsStart) * 6)));
-            // p.lineTo(clockX(secondsStart,startRadius), clockY(secondsStart, startRadius));
+
+//            Log.e(TAG, "New arc: radius(" + Float.toString((float) startRadius) + "," + Float.toString((float) endRadius) +
+//                    "), seconds(" + Float.toString((float) secondsStart) + "," + Float.toString((float) secondsEnd) + ")");
+//            Log.e(TAG, "--> arcTo: startOval, " + Float.toString((float) (secondsStart * 6 - 90)) + ", " +  Float.toString((float) ((secondsEnd - secondsStart) * 6)));
+//            Log.e(TAG, "--> arcTo: endOval, " + Float.toString((float) (secondsEnd * 6 - 90)) + ", " +  Float.toString((float) (-(secondsEnd - secondsStart) * 6)));
             p.close();
 
             pc.set(p);
