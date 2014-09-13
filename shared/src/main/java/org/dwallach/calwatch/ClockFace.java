@@ -4,6 +4,7 @@ import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
 import android.graphics.Path;
+import android.graphics.RectF;
 import android.text.format.DateUtils;
 import android.util.Log;
 
@@ -182,6 +183,14 @@ public class ClockFace implements Observer {
         path.close();
     }
 
+    private RectF getRectRadius(float radius) {
+        return new RectF(
+                clockX(45,radius), // bottom
+                clockY(30,radius), // left
+                clockY(15,radius), // right
+                clockY(0,radius)); // top
+    }
+
     private void drawRadialArc(Canvas canvas, PathCache pc, double secondsStart, double secondsEnd, float startRadius, float endRadius, Paint paint, Paint outlinePaint) {
         /*
          * Below is an attempt to do this "correctly" using the arc functionality supported natively
@@ -191,32 +200,41 @@ public class ClockFace implements Observer {
          * of it is dumped into a path where the GPU can rendering it directly, so all the trig computations
          * happen only once. (Or at least, only once per refresh of the calendar, which doesn't happen
          * all that frequently.)
+         */
 
-        Path p = new Path();
-        RectF startOval = new RectF(
-                clockX(45,startRadius), // bottom
-                clockY(30,startRadius), // left
-                clockY(15,startRadius), // right
-                clockY(0,startRadius)); // top
-        RectF endOval = new RectF(
-                clockX(45,endRadius), // bottom
-                clockY(30,endRadius), // left
-                clockY(15,endRadius), // right
-                clockY(0,endRadius)); // top
+        if(startRadius < 0 || startRadius > 1 || endRadius < 0 || endRadius > 1) {
+            Log.e(TAG, "arc too big! radius(" + Float.toString((float) startRadius) + "," + Float.toString((float) endRadius) +
+                            "), seconds(" + Float.toString((float) secondsStart) + "," + Float.toString((float) secondsEnd) + ")");
+        }
 
-		// TODO hypothesis: this was originally assuming 2*PI rather than the correct 360 degrees,
-		// so the fix should be straightforward: multiply by 6, then maybe subtract 90
+        Path p = pc.get();
+        if(p == null) {
+            p = new Path();
+            RectF startOval = getRectRadius(startRadius);
+            RectF endOval = getRectRadius(endRadius);
 
-        p.addArc(startOval, (float)(secondsStart * Math.PI / 30.0 + Math.PI / 2.0), (float)((secondsEnd - secondsStart) * Math.PI / 30.0 + Math.PI / 2.0));
-        p.lineTo(clockX(secondsEnd,endRadius), clockY(secondsEnd, endRadius));
-        p.arcTo(endOval, (float)(secondsEnd * Math.PI / 30.0 + Math.PI / 2.0), (float)(-(secondsEnd - secondsStart) * Math.PI / 30.0 + Math.PI / 2.0));
-        p.lineTo(clockX(secondsStart,startRadius), clockY(secondsStart, startRadius));
-        */
+            // TODO hypothesis: this was originally assuming 2*PI rather than the correct 360 degrees,
+            // so the fix should be straightforward: multiply by 6, then maybe subtract 90
+
+            Log.e(TAG, "New arc: radius(" + Float.toString((float) startRadius) + "," + Float.toString((float) endRadius) +
+                    "), seconds(" + Float.toString((float) secondsStart) + "," + Float.toString((float) secondsEnd) + ")");
+
+            p.arcTo(startOval, (float) (secondsStart * 6 - 90), (float) ((secondsEnd - secondsStart) * 6), true);
+            // p.lineTo(clockX(secondsEnd, endRadius), clockY(secondsEnd, endRadius));
+            p.arcTo(endOval, (float) (secondsEnd * 6 - 90), (float) (-(secondsEnd - secondsStart) * 6));
+            // p.lineTo(clockX(secondsStart,startRadius), clockY(secondsStart, startRadius));
+            p.close();
+
+            pc.set(p);
+        }
 
         /*
-         * Caching the path in the event gives us good performance, despite the delta theta
-         * being awfully small and thus a whole lot of trig going on in here.
+         * Below is the version that plots out lots of points around the circle because I didn't understand
+         * how the arc-paths worked. This is now obsolete but will stick around here in case I want it
+         * for comparison at some point.
          */
+
+        /*
         Path p = pc.get();
         if(p == null) {
             // Log.v(TAG, "new path!" + (long) secondsStart + " " + (long) secondsEnd + " " + startRadius + " " + endRadius);
@@ -234,6 +252,7 @@ public class ClockFace implements Observer {
 
             pc.set(p);
         }
+        */
 
         canvas.drawPath(p, paint);
         canvas.drawPath(p, outlinePaint);
@@ -588,12 +607,7 @@ public class ClockFace implements Observer {
 
             float drawRadius = .06f;
 
-            float x1=clockX(45, drawRadius),
-                  y1=clockY(0, drawRadius),
-                  x2=clockX(15, drawRadius),
-                  y2=clockY(30, drawRadius);
-
-            RectF circle = new RectF(x1, y1, x2, y2);
+            RectF circle = getRectRadius(drawRadius);
             batteryPathCache.arcTo(circle, (float) (theta - 90), (float)(360 - 2*theta), true);
             batteryPathCache.close();
 
