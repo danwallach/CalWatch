@@ -1,5 +1,7 @@
 Performance
    TODO do we have a performance problem? we're getting 30fps on LG watch, 55+ FPS on N5 with small face
+   -- first crack showed we're spending most of our time in the native drawPath routine, so there
+      isn't exactly a whole lot we can do. Fixed text outlines to only render once versus a 2D loop.
 
 DONE?! deal with recurring events
 -- RecurrenceProcessor.expand() seems to do exactly what I want. Hypothetically, this is going to
@@ -25,7 +27,7 @@ Port to Android Wear
 
         TODO "sample" face for selector
         TODO deal with dimming (kill second hand? lower frame rate? all white?) "Ambient mode"
-        -- untested ambient mode code now in place, 1Hz updates for minute hand, no second hand, no calendar; may want to go more slowly
+        -- seems to be working, although the clock is still running when it's obscured
 
     TODO better ambient mode detection? https://gist.github.com/PomepuyN/cdd821eca163a3279de2 (pasted at bottom)
 
@@ -65,6 +67,7 @@ BUGS BUGs BUGZ!
      there's some ugliness when another email or event wants to draw on top.
   TODO after 12 hours overnight disconnected, we're still having radius > 1 and/or < 0 issues
   -- see images/bug-shot-2014-09-12-071550.png
+  -- maybe fixed now that local vs. GMT is straightened out?
 
 Notes on supporting a "real" watch face (via reading over:
 https://github.com/twotoasters/watchface-template/tree/master/submodules
