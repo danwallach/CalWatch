@@ -259,8 +259,8 @@ public class ClockFace implements Observer {
 
     private void drawMonthBox(Canvas canvas) {
         // for now, hard-coded to the 9-oclock position
-        String m = localMonthDay();
-        String d = localDayOfWeek();
+        String m = TimeWrapper.localMonthDay();
+        String d = TimeWrapper.localDayOfWeek();
         float x1, y1;
         x1 = clockX(45, .85f);
         y1 = clockY(45, .85f);
@@ -718,22 +718,6 @@ public class ClockFace implements Observer {
             }
         } else
             return 1f;
-    }
-
-    private static String localTimeString() {
-        String format = "HH:mm:ss.SSS";
-        SimpleDateFormat sdf = new SimpleDateFormat(format, Locale.getDefault());
-        return sdf.format(new Date());
-    }
-
-    private static String localMonthDay() {
-        return DateUtils.formatDateTime(null, System.currentTimeMillis(), DateUtils.FORMAT_ABBREV_MONTH | DateUtils.FORMAT_SHOW_DATE);
-    }
-
-    private static String localDayOfWeek() {
-        String format = "cccc";
-        SimpleDateFormat sdf = new SimpleDateFormat(format, Locale.getDefault());
-        return sdf.format(new Date());
     }
 
     private int faceMode;

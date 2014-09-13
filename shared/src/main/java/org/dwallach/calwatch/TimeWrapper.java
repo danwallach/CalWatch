@@ -1,10 +1,13 @@
 package org.dwallach.calwatch;
 
 import android.os.SystemClock;
+import android.text.format.DateUtils;
 import android.util.Log;
 
 import java.text.DateFormat;
+import java.text.SimpleDateFormat;
 import java.util.Date;
+import java.util.Locale;
 import java.util.TimeZone;
 
 /**
@@ -44,6 +47,41 @@ public class TimeWrapper {
         df.setTimeZone(TimeZone.getDefault());
 
         return df.format(new Date(millis));
+    }
+
+    private static String localMonthDayCache, localDayOfWeekCache;
+    private static long monthDayCacheTime = 0;
+
+    private static void updateMonthDayCache() {
+        // assumption: the day and month and such only change when we hit a new hour, otherwise we can reuse an old result
+        long newCacheTime = getLocalFloorHour();
+        if(newCacheTime != monthDayCacheTime || localMonthDayCache == null) {
+            localMonthDayCache = DateUtils.formatDateTime(null, getGMTTime(), DateUtils.FORMAT_ABBREV_MONTH | DateUtils.FORMAT_SHOW_DATE);
+            localDayOfWeekCache = DateUtils.formatDateTime(null, getGMTTime(), DateUtils.FORMAT_SHOW_WEEKDAY);
+            monthDayCacheTime = newCacheTime;
+        }
+    }
+
+    /**
+     * Fetches something along the lines of "May 5", but in the current locale
+     */
+    public static String localMonthDay() {
+        updateMonthDayCache();
+        return localMonthDayCache;
+    }
+
+    /**
+     * Fetches something along the lines of "Monday", but in the current locale
+     */
+    public static String localDayOfWeek() {
+        updateMonthDayCache();
+        return localDayOfWeekCache;
+
+        /* -- old version, based on standard Java utils
+        String format = "cccc";
+        SimpleDateFormat sdf = new SimpleDateFormat(format, Locale.getDefault());
+        return sdf.format(new Date());
+        */
     }
 
     private static long frameStartTime = 0;
