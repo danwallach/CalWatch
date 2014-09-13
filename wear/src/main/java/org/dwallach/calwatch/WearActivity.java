@@ -91,13 +91,13 @@ public class WearActivity extends Activity {
     }
 
     private void initAmbientWatcher() {
-        Log.v(TAG, "initializing ambient watcher");
-
-        Handler handler = new Handler(Looper.getMainLooper());
-
-        final DisplayManager displayManager = (DisplayManager) getSystemService(Context.DISPLAY_SERVICE);
-
         if(this.displayListener == null) {
+            Log.v(TAG, "initializing ambient watcher");
+
+            Handler handler = new Handler(Looper.getMainLooper());
+
+            final DisplayManager displayManager = (DisplayManager) getSystemService(Context.DISPLAY_SERVICE);
+
             this.displayListener = new DisplayManager.DisplayListener() {
                 @Override
                 public void onDisplayAdded(int displayId) {
@@ -141,8 +141,7 @@ public class WearActivity extends Activity {
                     }
                 }
             };
+            displayManager.registerDisplayListener(displayListener, handler);
         }
-
-        displayManager.registerDisplayListener(displayListener, handler);
     }
 }

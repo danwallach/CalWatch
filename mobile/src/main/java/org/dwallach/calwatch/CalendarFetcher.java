@@ -404,6 +404,7 @@ public class CalendarFetcher extends Observable implements Runnable {
 
     private void addEvent(CalendarResults cr, CalendarResults.Event e, long queryStartMillis, long queryEndMillis) {
         if (e.startTime < queryEndMillis && e.endTime > queryStartMillis && e.visible && !e.allDay) {
+            // TODO: remove this logging before shipping, since we don't want to dump user-private information into the logs
             if(e.title != null) {
                 Log.v(TAG, "Found visible event. Title(" + e.title + "), calID(" + e.calendarID + "), eventColor(" + Integer.toHexString(e.eventColor) + "), eventColorKey(" + e.eventColorKey + "), displayColor(" + Integer.toHexString(e.displayColor) + "), ID(" + e.ID + "), originalID( " + e.originalID + ")");
                 Log.v(TAG, "--> Start: " + DateUtils.formatDateTime(ctx, e.startTime, DateUtils.FORMAT_SHOW_DATE | DateUtils.FORMAT_SHOW_TIME) + ", End: " + DateUtils.formatDateTime(ctx, e.endTime, DateUtils.FORMAT_SHOW_TIME | DateUtils.FORMAT_SHOW_DATE));

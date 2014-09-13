@@ -678,8 +678,8 @@ public class ClockFace implements Observer {
         smBlack.setStrokeWidth(lineWidth /4);
         smRed.setStrokeWidth(lineWidth /3);
 
-        smTextShadow.setStrokeWidth(lineWidth / 8);
-        textShadow.setStrokeWidth(lineWidth / 4);
+        smTextShadow.setStrokeWidth(lineWidth / 4);
+        textShadow.setStrokeWidth(lineWidth / 2);
         outlineBlack.setStrokeWidth(lineWidth /3);
         superThinBlack.setStrokeWidth(lineWidth / 8);
 
