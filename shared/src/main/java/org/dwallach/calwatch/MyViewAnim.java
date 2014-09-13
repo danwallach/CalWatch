@@ -6,6 +6,7 @@ import android.content.Context;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.PorterDuff;
+import android.os.Debug;
 import android.os.Handler;
 import android.os.Looper;
 import android.os.SystemClock;
@@ -17,11 +18,16 @@ import android.view.SurfaceView;
 public class MyViewAnim extends SurfaceView implements SurfaceHolder.Callback {
     private static final String TAG = "MyViewAnim";
 
+    private static final boolean debugTracingDesired = false;
+
     private PanelThread drawThread;
     private volatile ClockFace clockFace;
     private volatile TimeAnimator animator;
     private Context context;
     private volatile boolean activeDrawing = false;
+
+    private static long debugStopTime;
+    private static boolean debugTracingOn = false;
 
     public ClockFace getClockFace() { return clockFace; }
 
@@ -39,6 +45,19 @@ public class MyViewAnim extends SurfaceView implements SurfaceHolder.Callback {
         Log.v(TAG, "setup!");
         this.context = ctx;
         getHolder().addCallback(this);
+
+        /*
+         * Set up debug performance traces
+         */
+        if(debugTracingDesired) {
+            Log.v(TAG, "setting up debug tracing");
+            TimeWrapper.update();
+            debugStopTime = TimeWrapper.getGMTTime() + 60 * 1000;  // 60 seconds
+            Debug.startMethodTracing("calwatch");
+            debugTracingOn = true;
+            Log.v(TAG, "done!");
+        }
+
         clockFace = new ClockFace();
     }
 
@@ -187,6 +206,15 @@ public class MyViewAnim extends SurfaceView implements SurfaceHolder.Callback {
 
                 c.drawColor(Color.TRANSPARENT, PorterDuff.Mode.CLEAR);
                 localClockFace.drawEverything(c);
+
+                if(debugTracingDesired) {
+                    TimeWrapper.update();
+                    long currentTime = TimeWrapper.getGMTTime();
+                    if (currentTime > debugStopTime && debugTracingOn) {
+                        debugTracingOn = false;
+                        Debug.stopMethodTracing();
+                    }
+                }
 
                 ClockState clockState = ClockState.getSingleton();
 

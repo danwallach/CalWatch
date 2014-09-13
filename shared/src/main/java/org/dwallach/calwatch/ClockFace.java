@@ -56,7 +56,7 @@ public class ClockFace implements Observer {
 
     private int missingBottomPixels = 0; // Moto 360 hack; set to non-zero number to pull up the indicia
 
-    private Paint white, yellow, smWhite, smYellow, black, smBlack, smRed, gray, outlineBlack, superThinBlack;
+    private Paint white, yellow, smWhite, smYellow, black, smBlack, smRed, gray, outlineBlack, superThinBlack, smTextShadow, textShadow;
 
     private ClockState clockState;
 
@@ -94,6 +94,8 @@ public class ClockFace implements Observer {
         smRed = newPaint();
         gray = newPaint();
         outlineBlack = newPaint();
+        smTextShadow = newPaint();
+        textShadow = newPaint();
         superThinBlack = newPaint();
 
         yellow.setColor(Color.YELLOW);
@@ -101,17 +103,22 @@ public class ClockFace implements Observer {
         black.setColor(Color.BLACK);
         smBlack.setColor(Color.BLACK);
         outlineBlack.setColor(Color.BLACK);
+        smTextShadow.setColor(Color.BLACK);
+        textShadow.setColor(Color.BLACK);
         superThinBlack.setColor(Color.BLACK);
         smRed.setColor(Color.RED);
         gray.setColor(Color.GRAY);
 
         smYellow.setTextAlign(Paint.Align.LEFT);
         smWhite.setTextAlign(Paint.Align.LEFT);
+        smTextShadow.setTextAlign(Paint.Align.LEFT);
         smBlack.setTextAlign(Paint.Align.LEFT);
         white.setTextAlign(Paint.Align.CENTER);
         black.setTextAlign(Paint.Align.CENTER);
 
         outlineBlack.setStyle(Paint.Style.STROKE);
+        smTextShadow.setStyle(Paint.Style.STROKE);
+        textShadow.setStyle(Paint.Style.STROKE);
         superThinBlack.setStyle(Paint.Style.STROKE);
     }
 
@@ -265,16 +272,19 @@ public class ClockFace implements Observer {
         float dybottom = -metrics.ascent-metrics.leading; // smidge it up a bunch
         float dytop = -metrics.descent; // smidge it down a little
 
-        drawShadowText(canvas, d, x1, y1+dybottom, paint, smBlack);
-        drawShadowText(canvas, m, x1, y1+dytop, paint, smBlack);
+        drawShadowText(canvas, d, x1, y1+dybottom, paint, smTextShadow);
+        drawShadowText(canvas, m, x1, y1+dytop, paint, smTextShadow);
     }
 
     private void drawShadowText(Canvas canvas, String text, float x, float y, Paint paint, Paint shadowPaint) {
         // TODO: sort out how to render the text as an outline and thus shrink this from 26 drawText calls to two of them
+        /*
         for(float sx=-2.8f; sx<=3.0f; sx += 1.4f)
             for(float sy=-2.8f; sy<3.0; sy += 1.4f)
                 canvas.drawText(text, x - sx*shadow, y - sy*shadow, shadowPaint);
+        */
 
+        canvas.drawText(text, x, y, shadowPaint);
         canvas.drawText(text, x, y, paint);
     }
 
@@ -351,7 +361,7 @@ public class ClockFace implements Observer {
 
             white.setTextAlign(Paint.Align.CENTER);
             black.setTextAlign(Paint.Align.CENTER);
-            drawShadowText(canvas, "12", x, y, white, black);
+            drawShadowText(canvas, "12", x, y, white, textShadow);
 
             if(!debugMetricsPrinted) {
                 debugMetricsPrinted = true;
@@ -370,7 +380,7 @@ public class ClockFace implements Observer {
 
             white.setTextAlign(Paint.Align.CENTER);
             black.setTextAlign(Paint.Align.CENTER);
-            drawShadowText(canvas, "3", x, y, white, black);
+            drawShadowText(canvas, "3", x, y, white, textShadow);
 
             //
             // 6 o'clock
@@ -383,7 +393,7 @@ public class ClockFace implements Observer {
 
             white.setTextAlign(Paint.Align.CENTER);
             black.setTextAlign(Paint.Align.CENTER);
-            drawShadowText(canvas, "6", x, y, white, black);
+            drawShadowText(canvas, "6", x, y, white, textShadow);
         }
     }
 
@@ -651,6 +661,7 @@ public class ClockFace implements Observer {
         yellow.setTextSize(textSize);
         gray.setTextSize(textSize);
         black.setTextSize(textSize);
+        textShadow.setTextSize(textSize);
 
         white.setStrokeWidth(lineWidth);
         yellow.setStrokeWidth(lineWidth);
@@ -660,11 +671,15 @@ public class ClockFace implements Observer {
         smWhite.setTextSize(smTextSize);
         smYellow.setTextSize(smTextSize);
         smBlack.setTextSize(smTextSize);
+        smTextShadow.setTextSize(smTextSize);
+
         smWhite.setStrokeWidth(lineWidth /3);
         smYellow.setStrokeWidth(lineWidth /3);
         smBlack.setStrokeWidth(lineWidth /4);
         smRed.setStrokeWidth(lineWidth /3);
 
+        smTextShadow.setStrokeWidth(lineWidth / 8);
+        textShadow.setStrokeWidth(lineWidth / 4);
         outlineBlack.setStrokeWidth(lineWidth /3);
         superThinBlack.setStrokeWidth(lineWidth / 8);
 
