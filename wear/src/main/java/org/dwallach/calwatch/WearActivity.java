@@ -60,7 +60,7 @@ public class WearActivity extends Activity {
     protected void onResume() {
         super.onResume();
         Log.v(TAG, "Resume!");
-//        if(view != null) view.resume();
+        if(view != null) view.resume();
         initAmbientWatcher();
     }
 

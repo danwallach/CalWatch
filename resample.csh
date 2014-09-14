@@ -8,4 +8,4 @@ cp mobile/src/main/res/drawable-hdpi/ic_launcher.png wear/src/main/res/drawable-
 cp mobile/src/main/res/drawable-mdpi/ic_launcher.png wear/src/main/res/drawable-mdpi/ic_launcher.png
 cp mobile/src/main/res/drawable-xhdpi/ic_launcher.png wear/src/main/res/drawable-xhdpi/ic_launcher.png
 cp mobile/src/main/res/drawable-xxhdpi/ic_launcher.png wear/src/main/res/drawable-xxhdpi/ic_launcher.png
-
+cp $src wear/src/main/res/drawable/preview.png

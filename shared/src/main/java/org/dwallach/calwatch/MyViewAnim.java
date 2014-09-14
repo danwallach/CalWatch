@@ -146,9 +146,12 @@ public class MyViewAnim extends SurfaceView implements SurfaceHolder.Callback {
                 // animator.start() needs to happen on the PanelThread, not this one
                 Handler handler = drawThread.getHandler();
 
-                Looper looper = handler.getLooper();
-                if(looper != null)
-                    looper.quitSafely();
+                // it's weird, but this happens some times
+                if(handler != null) {
+                    Looper looper = handler.getLooper();
+                    if (looper != null)
+                        looper.quitSafely();
+                }
 
                 // maybe these will do something; it's unclear
                 animator.end();
