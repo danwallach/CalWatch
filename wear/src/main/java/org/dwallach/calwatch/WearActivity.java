@@ -1,16 +1,23 @@
 package org.dwallach.calwatch;
 
 import android.app.Activity;
+import android.app.AlarmManager;
+import android.app.PendingIntent;
+import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.hardware.display.DisplayManager;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
+import android.os.PowerManager;
 import android.support.wearable.view.WatchViewStub;
 import android.util.Log;
 import android.view.Display;
 import android.view.WindowManager;
+
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 public class WearActivity extends Activity {
     private static final String TAG = "WearActivity";
@@ -23,7 +30,9 @@ public class WearActivity extends Activity {
 
     private MyViewAnim view;
 
-    public MyViewAnim getViewAnim() { return view; }
+    public MyViewAnim getViewAnim() {
+        return view;
+    }
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -60,7 +69,7 @@ public class WearActivity extends Activity {
     protected void onResume() {
         super.onResume();
         Log.v(TAG, "Resume!");
-        if(view != null) view.resume();
+        if (view != null) view.resume();
         initAmbientWatcher();
     }
 
@@ -79,11 +88,19 @@ public class WearActivity extends Activity {
 //        killAmbientWatcher();
     }
 
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        Log.v(TAG, "Destroy!");
+        if (view != null) view.stop();
+        killAmbientWatcher();
+    }
+
     private DisplayManager.DisplayListener displayListener = null;
 
     private void killAmbientWatcher() {
         Log.v(TAG, "killing ambient watcher");
-        if(displayListener != null) {
+        if (displayListener != null) {
             final DisplayManager displayManager = (DisplayManager) getSystemService(Context.DISPLAY_SERVICE);
             displayManager.unregisterDisplayListener(displayListener);
             displayListener = null;
@@ -91,7 +108,7 @@ public class WearActivity extends Activity {
     }
 
     private void initAmbientWatcher() {
-        if(this.displayListener == null) {
+        if (this.displayListener == null) {
             Log.v(TAG, "initializing ambient watcher");
 
             Handler handler = new Handler(Looper.getMainLooper());
