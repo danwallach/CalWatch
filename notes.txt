@@ -50,6 +50,10 @@ BUGS BUGs BUGZ!
      anything, at all, when the user covers the screen with something else. Not good. Also,
      there's some ugliness when another email or event wants to draw on top.
 
+  -- now that we've integrated the 5-second alarm, we should try killing off the
+     render thread as part of the onStop() lifecycle *and* should immediately render
+     the screen when the lifecycle moves back into action. Will that work?
+
 Notes on supporting a "real" watch face (via reading over:
 https://github.com/twotoasters/watchface-template/tree/master/submodules
 

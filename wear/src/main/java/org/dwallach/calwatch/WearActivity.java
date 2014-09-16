@@ -26,6 +26,15 @@ public class WearActivity extends Activity {
     private static WearActivity singletonActivity = null;
     private AlarmManager alarmManager;
 
+    // This boolean keeps track of whether we think the watch is running or whether we think
+    // the screen is completely dark. In the dark case, we'll keep all the alarms and intents
+    // up and running but won't do any graphics at all. We *could* tear all of that down,
+    // perhaps in hopes of saving a bit of power, but the wake-up-go-to-sleep cycle ensures
+    // that we're not killed outright, which means we'll be around to receive messages from
+    // the phone that update our service. This *might* not be necessary, since we've got
+    // WearReceiverService running, hypothetically independent of the activity.
+    private boolean watchFaceRunning = true;
+
     public static WearActivity getSingletonActivity() {
         return singletonActivity;
     }
@@ -96,6 +105,7 @@ public class WearActivity extends Activity {
     @Override
     protected void onDestroy() {
         super.onDestroy();
+        // Hmm... this never seems to actually happen
         Log.v(TAG, "Destroy!");
         if (view != null) view.stop();
         killAmbientWatcher();
@@ -117,6 +127,7 @@ public class WearActivity extends Activity {
             pendingIntent = null;
         }
 
+        watchFaceRunning = false;
     }
 
     private BroadcastReceiver tickReceiver = null;
@@ -146,6 +157,7 @@ public class WearActivity extends Activity {
     }
 
     private void initAmbientWatcher() {
+        watchFaceRunning = true;
 
         // Create a broadcast receiver to handle change in time
         // Source: http://sourabhsoni.com/how-to-use-intent-action_time_tick/
@@ -155,6 +167,14 @@ public class WearActivity extends Activity {
                 @Override
                 public void onReceive(Context context, Intent intent) {
                     String actionString = intent.getAction();
+
+                    if(!watchFaceRunning) {
+                        // received a timer event but we're not supposed to be doing graphics right now,
+                        // so just quietly return
+
+                        return;
+                    }
+
                     if(actionString.equals(Intent.ACTION_TIME_CHANGED) || actionString.equals(Intent.ACTION_TIME_TICK)) {
                         if(view == null) {
                             Log.v(TAG, actionString + " received, but can't redraw");
@@ -218,18 +238,27 @@ public class WearActivity extends Activity {
                     switch (newState) {
                         case Display.STATE_DOZING:
                             clockFace.setAmbientMode(true);
+                            view.stop();
+                            watchFaceRunning = true;
                             Log.v(TAG, "onDisplayChanged: dozing");
                             break;
                         case Display.STATE_OFF:
                             clockFace.setAmbientMode(true);
+                            view.stop();
+                            watchFaceRunning = false;
                             Log.v(TAG, "onDisplayChanged: off!"); // presumably this event will be accompanied by other things that shut us down
                             break;
                         case Display.STATE_ON:
                             clockFace.setAmbientMode(false);
+                            view.redrawClock();                   // it might take a while for the other bits to get rolling again, so do this immediately
+                            view.resume();
+                            watchFaceRunning = true;
                             Log.v(TAG, "onDisplayChanged: on!");
                             break;
                         default:
                             clockFace.setAmbientMode(false);
+                            view.resume();
+                            watchFaceRunning = true;
                             Log.v(TAG, "onDisplayChanged: unknown state, defaulting to non-ambient mode");
                             break;
                     }
