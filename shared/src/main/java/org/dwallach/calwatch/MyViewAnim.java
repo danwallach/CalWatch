@@ -227,6 +227,12 @@ public class MyViewAnim extends SurfaceView implements SurfaceHolder.Callback {
                 // if we're not showing the second hand, then we don't need to refresh at 50+Hz
                 // so instead we sleep one second; regardless, the minute hand will move
                 // very, very smoothly.
+                if (c != null) {
+                    surfaceHolder.unlockCanvasAndPost(c);
+                    c = null;
+                }
+
+                // TODO: verify that we never get here any more and kill this off
                 SystemClock.sleep(1000);
 
             }
