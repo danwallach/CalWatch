@@ -159,12 +159,12 @@ public class WearActivity extends Activity {
                         if(view == null) {
                             Log.v(TAG, actionString + " received, but can't redraw");
                         } else {
-                            Log.v(TAG, actionString + " received, redrawing");
+//                            Log.v(TAG, actionString + " received, redrawing");
                             view.redrawClock();
                         }
                         initAlarm(); // just in case it's not set up properly
                     } else if(actionString.equals(ACTION_KEEP_WATCHFACE_AWAKE)) {
-                        Log.v(TAG, "five second alarm!");
+//                        Log.v(TAG, "five second alarm!");
                         if(view != null) {
                             view.redrawClock();
                         } else {
