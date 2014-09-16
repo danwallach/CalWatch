@@ -58,7 +58,10 @@ public class MyViewAnim extends SurfaceView implements SurfaceHolder.Callback {
             Log.v(TAG, "done!");
         }
 
-        clockFace = new ClockFace();
+        if(clockFace == null) {
+            Log.v(TAG, "initializing ClockFace");
+            clockFace = new ClockFace();
+        }
     }
 
     @Override
@@ -110,8 +113,9 @@ public class MyViewAnim extends SurfaceView implements SurfaceHolder.Callback {
             animator.resume();
         } else {
             Log.v(TAG, "new animator starting");
+            surfaceHolder = getHolder();
             animator = new TimeAnimator();
-            animator.setTimeListener(new MyTimeListener(getHolder(), context));
+            animator.setTimeListener(new MyTimeListener());
             // animator.setFrameDelay(1000);  // doesn't actually work?
 
             if(drawThread == null) {
@@ -159,25 +163,87 @@ public class MyViewAnim extends SurfaceView implements SurfaceHolder.Callback {
 
                 animator = null;
                 drawThread = null;
-                clockFace.destroy();
-                clockFace = null;
+//                clockFace.destroy();
+//                clockFace = null;
+            }
+        }
+    }
+
+    // called by the timer in WearActivity
+    public void redrawClock() {
+        if(clockFace == null) {
+            Log.e(TAG, "tick without a clock!");
+            return;
+        }
+
+        if(animator == null || drawThread == null) {
+            Log.v(TAG, "tick without a drawing thread");
+            ticks++;
+            redrawInternal();
+        }
+
+    }
+
+    private SurfaceHolder surfaceHolder = null;
+    private int ticks = 0;
+
+    // called by redrawClock *and* by the TimeListener contraption which is running a separate thread
+    // at full 60Hz speed
+    private void redrawInternal() {
+        ClockFace localClockFace = clockFace; // local cached copy, to deal with concurrency issues
+        TimeWrapper.update();
+        Canvas c = null;
+
+        try {
+            try {
+                c = surfaceHolder.lockCanvas(null);
+            } catch (java.lang.IllegalStateException e) {
+                if(ticks % 1000 == 0) Log.e(TAG, "Failed to get a canvas for drawing!");
+                c = null;
+            }
+
+            if(c == null) {
+                if(ticks % 1000 == 0) Log.e(TAG, "null canvas, can't draw anything");
+                return;
+            }
+
+            c.drawColor(Color.TRANSPARENT, PorterDuff.Mode.CLEAR);
+            localClockFace.drawEverything(c);
+
+            if(debugTracingDesired) {
+                TimeWrapper.update();
+                long currentTime = TimeWrapper.getGMTTime();
+                if (currentTime > debugStopTime && debugTracingOn) {
+                    debugTracingOn = false;
+                    Debug.stopMethodTracing();
+                }
+            }
+
+            ClockState clockState = ClockState.getSingleton();
+
+            // TODO add support for ambient mode, do the same thing
+            if(clockState == null) {
+                Log.e(TAG, "whoa, no clock state?!");
+                return;
+            }
+            if(!clockState.getShowSeconds() || localClockFace.getAmbientMode()) {
+                // if we're not showing the second hand, then we don't need to refresh at 50+Hz
+                // so instead we sleep one second; regardless, the minute hand will move
+                // very, very smoothly.
+                SystemClock.sleep(1000);
+
+            }
+        } finally {
+            if (c != null) {
+                surfaceHolder.unlockCanvasAndPost(c);
             }
         }
     }
 
     class MyTimeListener implements TimeAnimator.TimeListener {
-        private SurfaceHolder surfaceHolder;
-        private Context context;
-        // private double fps = 0.0;
-
-        public MyTimeListener(SurfaceHolder surfaceHolder, Context context) {
-            this.surfaceHolder = surfaceHolder;
-            this.context = context;
-
+        public MyTimeListener() {
             Log.v(TAG, "Time listener is up!");
         }
-
-        private int ticks = 0;
 
         @Override
         public void onTimeUpdate(TimeAnimator animation, long totalTime, long deltaTime) {
@@ -190,54 +256,7 @@ public class MyViewAnim extends SurfaceView implements SurfaceHolder.Callback {
                 return;
             }
 
-            ClockFace localClockFace = clockFace; // local cached copy, to deal with concurrency issues
-            TimeWrapper.update();
-            Canvas c = null;
-
-            try {
-                try {
-                    c = surfaceHolder.lockCanvas(null);
-                } catch (java.lang.IllegalStateException e) {
-                    if(ticks % 1000 == 0) Log.w(TAG, "Failed to get a canvas for drawing!");
-                    c = null;
-                }
-
-                if(c == null) {
-                    Log.w(TAG, "no canvas yet?");
-                    return;
-                }
-
-                c.drawColor(Color.TRANSPARENT, PorterDuff.Mode.CLEAR);
-                localClockFace.drawEverything(c);
-
-                if(debugTracingDesired) {
-                    TimeWrapper.update();
-                    long currentTime = TimeWrapper.getGMTTime();
-                    if (currentTime > debugStopTime && debugTracingOn) {
-                        debugTracingOn = false;
-                        Debug.stopMethodTracing();
-                    }
-                }
-
-                ClockState clockState = ClockState.getSingleton();
-
-                // TODO add support for ambient mode, do the same thing
-                if(clockState == null) {
-                    Log.e(TAG, "whoa, no clock state?!");
-                    return;
-                }
-                if(!clockState.getShowSeconds() || localClockFace.getAmbientMode()) {
-                    // if we're not showing the second hand, then we don't need to refresh at 50+Hz
-                    // so instead we sleep one second; regardless, the minute hand will move
-                    // very, very smoothly.
-                    SystemClock.sleep(1000);
-
-                }
-            } finally {
-                if (c != null) {
-                    surfaceHolder.unlockCanvasAndPost(c);
-                }
-            }
+            redrawInternal();
         }
     }
     /**

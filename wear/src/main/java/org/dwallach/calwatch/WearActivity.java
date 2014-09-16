@@ -6,6 +6,7 @@ import android.app.PendingIntent;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.hardware.display.DisplayManager;
 import android.os.Bundle;
 import android.os.Handler;
@@ -107,7 +108,33 @@ public class WearActivity extends Activity {
         }
     }
 
+    private static BroadcastReceiver tickReceiver = null;
+
     private void initAmbientWatcher() {
+
+        // Create a broadcast receiver to handle change in time
+        // Source: http://sourabhsoni.com/how-to-use-intent-action_time_tick/
+        if(tickReceiver == null) {
+            tickReceiver = new BroadcastReceiver() {
+                @Override
+                public void onReceive(Context context, Intent intent) {
+                    if (intent.getAction().compareTo(Intent.ACTION_TIME_TICK) == 0) {
+                        Log.v(TAG, "ACTION_TIME_TICK received");
+                        if(view != null) {
+                            view.redrawClock();
+                        } else {
+                            Log.e(TAG, "tick received, no clock view to redraw");
+                        }
+                    } else {
+                        Log.e(TAG, "Unknown intent received: " + intent.toString());
+                    }
+                }
+            };
+
+            //Register the broadcast receiver to receive TIME_TICK
+            registerReceiver(tickReceiver, new IntentFilter(Intent.ACTION_TIME_TICK));
+        }
+
         if (this.displayListener == null) {
             Log.v(TAG, "initializing ambient watcher");
 
