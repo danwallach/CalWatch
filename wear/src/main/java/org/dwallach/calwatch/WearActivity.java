@@ -133,7 +133,10 @@ public class WearActivity extends Activity {
         if (alarmManager == null && view != null) {
             Log.v(TAG, "initializing second-scale alarm");
             alarmManager = (AlarmManager) view.getContext().getSystemService(Context.ALARM_SERVICE);
-            alarmManager.setRepeating(AlarmManager.RTC_WAKEUP, System.currentTimeMillis() + 1000, 1000, getPendingIntent());
+
+            // every five seconds, we'll redraw the minute hand while sleeping; this gives us 12 ticks per minute, which should still look smooth
+            // while otherwise saving lots of power
+            alarmManager.setRepeating(AlarmManager.RTC_WAKEUP, System.currentTimeMillis() + 5000, 5000, getPendingIntent());
             alarmSet = true;
         }
 
@@ -159,7 +162,9 @@ public class WearActivity extends Activity {
                             Log.v(TAG, actionString + " received, redrawing");
                             view.redrawClock();
                         }
+                        initAlarm(); // just in case it's not set up properly
                     } else if(actionString.equals(ACTION_KEEP_WATCHFACE_AWAKE)) {
+                        Log.v(TAG, "five second alarm!");
                         if(view != null) {
                             view.redrawClock();
                         } else {

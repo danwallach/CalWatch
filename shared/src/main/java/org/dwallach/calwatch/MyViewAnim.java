@@ -176,12 +176,9 @@ public class MyViewAnim extends SurfaceView implements SurfaceHolder.Callback {
             return;
         }
 
-        if(animator == null || drawThread == null) {
-            Log.v(TAG, "tick without a drawing thread");
-            ticks++;
-            redrawInternal();
-        }
-
+        ticks++;
+        redrawInternal();
+        return;
     }
 
     private SurfaceHolder surfaceHolder = null;
