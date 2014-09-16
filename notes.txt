@@ -1,8 +1,3 @@
-Performance
-   TODO do we have a performance problem? we're getting 30fps on LG watch, 55+ FPS on N5 with small face
-   -- first crack showed we're spending most of our time in the native drawPath routine, so there
-      isn't exactly a whole lot we can do. Fixed text outlines to only render once versus a 2D loop.
-
 DONE?! deal with recurring events
 -- RecurrenceProcessor.expand() seems to do exactly what I want. Hypothetically, this is going to
    be a quick hack, if it work.
@@ -31,15 +26,7 @@ Port to Android Wear
     -- only way to detect seems to be using android.os.Build.MODEL, but I don't know the value until I've got a real Moto 360.
     -- cropping code is otherwise ready to go
 
-    DONE!? support the "real" watchface API?
-        http://www.binpress.com/tutorial/how-to-create-a-custom-android-wear-watch-face/120
-        https://github.com/kentarosu/androidwear-myfirstwatchface
-
-        DONE "sample" face for selector
-        DONE deal with dimming (kill second hand? lower frame rate? all white?) "Ambient mode"
-        -- seems to be working, although the clock is still running when it's obscured
-
-    TODO better ambient mode detection? https://gist.github.com/PomepuyN/cdd821eca163a3279de2 (pasted at bottom)
+    TODO verify correct operation when ambient mode on phone disabled
 
 
 TODO sort out how to compile protobufs automatically via Gradle (vs. known bugs lodged with Google)
@@ -55,29 +42,13 @@ Verify all the weird connect/disconnect corner cases
     TODO nothing running on phone / fresh watch wants data
     TODO are we recovering properly if the phone kills the service after a long hiatus?
 
-TODO get a real app icon
-DONE?! slower refresh rate when second hand not being displayed
 TODO app signing
-TODO smarter DrawArc
-
-DONE! make battery gauge pretty
-DONE?! if we're coming back from being asleep, make sure we invalidate the batteryPathCache
-
-DONE! fix regression: we're not clipping the events to the visible 12 hour window
-  Also, we now send 24 hours of events at once and do all the clipping in the watch, meaning
-  that the watch will have something useful to show in the morning even if it's been disconnected
-  from the phone all night (e.g., if charging in different parts of the house)
-
 
 BUGS BUGs BUGZ!
-  TODO when there are no events coming up, it looks like nothing ever gets sent to the watch
   TODO incorrect handling of watch lifecycle (shock, horror)
   -- ignoring changes in the Activity seems to be helping, a bit, but we're not learning
      anything, at all, when the user covers the screen with something else. Not good. Also,
      there's some ugliness when another email or event wants to draw on top.
-  TODO after 12 hours overnight disconnected, we're still having radius > 1 and/or < 0 issues
-  -- see images/bug-shot-2014-09-12-071550.png
-  -- maybe fixed now that local vs. GMT is straightened out?
 
 Notes on supporting a "real" watch face (via reading over:
 https://github.com/twotoasters/watchface-template/tree/master/submodules
@@ -87,7 +58,6 @@ https://github.com/twotoasters/watchface-template/tree/master/submodules
     DeviceUtils.java: totally cheesy way of determining AMOLED: lookup
       table based on device type
     Watch.java:
-      TODO- an intent called KEEP_WATCHFACE_AWAKE
       - logic to deal with changing timezones
       - onTimeChanged() via alarm manager when seconds are turned off (do we care?)
       - unclear if any of this is necessary
@@ -96,45 +66,13 @@ https://github.com/twotoasters/watchface-template/tree/master/submodules
     uses-permission for background
     preview.png
 
-    (BOTH DONE! -- but need to redo the preview image once the face graphics settles down)
-
   wear/src/main/AndroidManifest.xml:
     more permission usage
     some funkiness about how the activity is set up (providing background, etc.)
 
-    (BOTH DONE!)
-
   Meanwhile, there's all this business about Square's various testing
   and code injection libraries. Probably not worth bothering
   now. Maybe later.
-
-
-Lifecycle madness:
-
-Here's what happens when I hit the home button on the phone:
-
-09-09 16:36:18.176  25448-25448/org.dwallach.calwatch V/PhoneActivity﹕ Pause!
-09-09 16:36:18.176  25448-25448/org.dwallach.calwatch V/MyViewAnim﹕ pausing animation
-09-09 16:36:18.576  25448-25448/org.dwallach.calwatch V/MyViewAnim﹕ Drawing surface destroyed!
-09-09 16:36:18.576  25448-25448/org.dwallach.calwatch V/MyViewAnim﹕ stopping animation!
-09-09 16:36:18.576  25448-10110/org.dwallach.calwatch V/MyViewAnim﹕ looper finished!
-09-09 16:36:18.976  25448-25448/org.dwallach.calwatch V/PhoneActivity﹕ Stop!
-09-09 16:36:18.976  25448-25448/org.dwallach.calwatch V/MyViewAnim﹕ stopping animation!
-
-Versus, here's what happens, *sometimes* when the screen goes off by itself:
-
-09-09 16:27:00.676  25448-25448/org.dwallach.calwatch V/PhoneActivity﹕ Pause!
-09-09 16:27:00.676  25448-25448/org.dwallach.calwatch V/MyViewAnim﹕ pausing animation
-09-09 16:27:00.686  25448-25448/org.dwallach.calwatch V/PhoneActivity﹕ Stop!
-09-09 16:27:00.686  25448-25448/org.dwallach.calwatch V/MyViewAnim﹕ stopping animation!
-09-09 16:27:00.686   25448-9866/org.dwallach.calwatch V/MyViewAnim﹕ looper finished!
-09-09 16:27:06.106  25448-25448/org.dwallach.calwatch V/MyViewAnim﹕ Drawing surface destroyed!
-09-09 16:27:06.106  25448-25448/org.dwallach.calwatch V/MyViewAnim﹕ stopping animation!
-TODO: where the hell did this come from and why is the phone activity restarting itself?
-09-09 16:27:06.126  25448-25448/org.dwallach.calwatch V/PhoneActivity﹕ Create!
-09-09 16:27:06.126  25448-25448/org.dwallach.calwatch V/PhoneActivity﹕ Start!
-09-09 16:27:06.126  25448-25448/org.dwallach.calwatch V/PhoneActivity﹕ And in the beginning ...
-09-09 16:27:06.126  25448-25448/org.dwallach.calwatch V/PhoneActivity﹕ reconnecting clock state
 
 
 
