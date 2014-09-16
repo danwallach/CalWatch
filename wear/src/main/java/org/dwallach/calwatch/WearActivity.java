@@ -24,6 +24,7 @@ public class WearActivity extends Activity {
     private static final String TAG = "WearActivity";
 
     private static WearActivity singletonActivity = null;
+    private AlarmManager alarmManager;
 
     public static WearActivity getSingletonActivity() {
         return singletonActivity;
@@ -66,12 +67,15 @@ public class WearActivity extends Activity {
         initAmbientWatcher();
     }
 
+    boolean alarmSet = false;
+
     @Override
     protected void onResume() {
         super.onResume();
         Log.v(TAG, "Resume!");
         if (view != null) view.resume();
         initAmbientWatcher();
+        initAlarm();
     }
 
     @Override
@@ -100,26 +104,62 @@ public class WearActivity extends Activity {
     private DisplayManager.DisplayListener displayListener = null;
 
     private void killAmbientWatcher() {
-        Log.v(TAG, "killing ambient watcher");
+        Log.v(TAG, "killing ambient watcher & alarm");
         if (displayListener != null) {
             final DisplayManager displayManager = (DisplayManager) getSystemService(Context.DISPLAY_SERVICE);
             displayManager.unregisterDisplayListener(displayListener);
             displayListener = null;
         }
+
+        if(pendingIntent != null) {
+            alarmSet = false;
+            alarmManager.cancel(pendingIntent);
+            pendingIntent = null;
+        }
+
     }
 
-    private static BroadcastReceiver tickReceiver = null;
+    private BroadcastReceiver tickReceiver = null;
+    private static final String ACTION_KEEP_WATCHFACE_AWAKE = "intent.action.keep.watchface.awake";
+    private PendingIntent pendingIntent = null;
+
+    private PendingIntent getPendingIntent() {
+        if(pendingIntent == null && view != null)
+            pendingIntent =  PendingIntent.getBroadcast(view.getContext(), 0, new Intent(ACTION_KEEP_WATCHFACE_AWAKE), 0);
+        return pendingIntent;
+    }
+
+    private void initAlarm() {
+        if (alarmManager == null && view != null) {
+            Log.v(TAG, "initializing second-scale alarm");
+            alarmManager = (AlarmManager) view.getContext().getSystemService(Context.ALARM_SERVICE);
+            alarmManager.setRepeating(AlarmManager.RTC_WAKEUP, System.currentTimeMillis() + 1000, 1000, getPendingIntent());
+            alarmSet = true;
+        }
+
+        if(!alarmSet) {
+            Log.e(TAG, "failed to initialize alarm");
+        }
+    }
 
     private void initAmbientWatcher() {
 
         // Create a broadcast receiver to handle change in time
         // Source: http://sourabhsoni.com/how-to-use-intent-action_time_tick/
+        // Also: https://github.com/twotoasters/watchface-gears/blob/master/library/src/main/java/com/twotoasters/watchface/gears/widget/Watch.java
         if(tickReceiver == null) {
             tickReceiver = new BroadcastReceiver() {
                 @Override
                 public void onReceive(Context context, Intent intent) {
-                    if (intent.getAction().compareTo(Intent.ACTION_TIME_TICK) == 0) {
-                        Log.v(TAG, "ACTION_TIME_TICK received");
+                    String actionString = intent.getAction();
+                    if(actionString.equals(Intent.ACTION_TIME_CHANGED) || actionString.equals(Intent.ACTION_TIME_TICK)) {
+                        if(view == null) {
+                            Log.v(TAG, actionString + " received, but can't redraw");
+                        } else {
+                            Log.v(TAG, actionString + " received, redrawing");
+                            view.redrawClock();
+                        }
+                    } else if(actionString.equals(ACTION_KEEP_WATCHFACE_AWAKE)) {
                         if(view != null) {
                             view.redrawClock();
                         } else {
@@ -132,7 +172,12 @@ public class WearActivity extends Activity {
             };
 
             //Register the broadcast receiver to receive TIME_TICK
-            registerReceiver(tickReceiver, new IntentFilter(Intent.ACTION_TIME_TICK));
+            IntentFilter filter = new IntentFilter();
+            filter.addAction(Intent.ACTION_TIME_TICK);
+            filter.addAction(Intent.ACTION_TIME_CHANGED);
+            filter.addAction(ACTION_KEEP_WATCHFACE_AWAKE);
+
+            registerReceiver(tickReceiver, filter);
         }
 
         if (this.displayListener == null) {
