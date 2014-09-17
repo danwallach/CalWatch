@@ -54,6 +54,9 @@ BUGS BUGs BUGZ!
      render thread as part of the onStop() lifecycle *and* should immediately render
      the screen when the lifecycle moves back into action. Will that work?
 
+     -- mostly yes; there's still a ~1 sec delay when the phone sends a UI command to the phone
+        and when it responds, but only in ambient mode
+
 Notes on supporting a "real" watch face (via reading over:
 https://github.com/twotoasters/watchface-template/tree/master/submodules
 
