@@ -322,11 +322,11 @@ public class ClockFace implements Observer {
                         drawRadialLine(p, strokeWidth, -0.4f, .8f, 1.0f, true, false);
                         drawRadialLine(p, strokeWidth, 0.4f, .8f, 1.0f, true, false);
                     }
-                } else if (i == 45) { // 9 o'clock, don't extend into the inside
+                } else if (i == 45 && !ambientMode) { // 9 o'clock, don't extend into the inside
                     drawRadialLine(p, strokeWidth, i, 0.9f, 1.0f, false, false);
                 } else {
                     // we want lines for 1, 2, 4, 5, 7, 8, 10, and 11 no matter what
-                    if (faceMode != ClockState.FACE_NUMBERS || !(i == 15 || i == 30))
+                    if (faceMode != ClockState.FACE_NUMBERS || !(i == 15 || i == 30 || i == 45))
                         drawRadialLine(p, strokeWidth, i, .8f, 1.0f, false, bottomHack);
                 }
             }
@@ -378,8 +378,6 @@ public class ClockFace implements Observer {
             x = clockX(15, r) - threeWidth / 2f;
             y = clockY(15, r) - metrics.ascent / 2f - metrics.descent / 2f; // empirically gets the middle of the "3" -- actually a smidge off with Roboto but close enough for now and totally font-dependent with no help from metrics
 
-            white.setTextAlign(Paint.Align.CENTER);
-            black.setTextAlign(Paint.Align.CENTER);
             drawShadowText(canvas, "3", x, y, white, textShadow);
 
             //
@@ -391,9 +389,23 @@ public class ClockFace implements Observer {
             x = clockX(30, r);
             y = clockY(30, r) + metrics.descent - (missingBottomPixels / 2); // another hack for Moto 360
 
-            white.setTextAlign(Paint.Align.CENTER);
-            black.setTextAlign(Paint.Align.CENTER);
             drawShadowText(canvas, "6", x, y, white, textShadow);
+
+            //
+            // 9 o'clock
+            //
+
+            if(ambientMode) {
+                r = 0.9f;
+                float nineWidth = white.measureText("9");
+
+                x = clockX(45, r) + nineWidth / 2f;
+                y = clockY(45, r) - metrics.ascent / 2f - metrics.descent / 2f;
+
+                drawShadowText(canvas, "9", x, y, white, textShadow);
+
+
+            }
         }
     }
 
@@ -641,6 +653,7 @@ public class ClockFace implements Observer {
     public void setAmbientMode(boolean mode) {
         Log.i(TAG, "Ambient mode: " + mode);
         ambientMode = mode;
+        wipeCaches();       // this might be overkill, but we definitely have to nuke the facePathCache
     }
 
     public boolean getAmbientMode() {
