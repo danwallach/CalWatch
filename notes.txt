@@ -10,6 +10,9 @@ DONE?! deal with recurring events
 
    The claim is that there's a "missing LHS" in the timezone part. Hrmm.
 
+   TODO understand / fix incorrect handling of GS recurring event; maybe we need to give up on the calendarcommon thing and move to the above codebase
+
+
 Port to Android Wear
 -- Useful article including sample code: http://toastdroid.com/2014/07/18/developing-watchfaces-for-android-wear/
 -- How to set up the damn emulator: http://www.tech-recipes.com/rx/49586/how-do-i-connect-an-android-wear-emulator-to-a-real-phone/
@@ -54,9 +57,6 @@ BUGS BUGs BUGZ!
      render thread as part of the onStop() lifecycle *and* should immediately render
      the screen when the lifecycle moves back into action. Will that work?
 
-     -- mostly yes; there's still a ~1 sec delay when the phone sends a UI command to the phone
-        and when it responds, but only in ambient mode
-
 Notes on supporting a "real" watch face (via reading over:
 https://github.com/twotoasters/watchface-template/tree/master/submodules
 
@@ -100,3 +100,4 @@ Further improvements:
 
   Moto 360:
     DONE!! pull back the radius along the bottom to fit the cropped ~30 pixels -- maybe an extension to drawRadialLine that knows about the bounding box and projects the line backward
+    TODO android.os.Build check for whether we're on Moto 360, then set the crop factor
