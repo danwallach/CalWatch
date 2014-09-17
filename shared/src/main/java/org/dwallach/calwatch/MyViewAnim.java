@@ -25,6 +25,7 @@ public class MyViewAnim extends SurfaceView implements SurfaceHolder.Callback {
     private volatile TimeAnimator animator;
     private Context context;
     private volatile boolean activeDrawing = false;
+    private boolean sleepInEventLoop = false;
 
     private static long debugStopTime;
     private static boolean debugTracingOn = false;
@@ -62,6 +63,17 @@ public class MyViewAnim extends SurfaceView implements SurfaceHolder.Callback {
             Log.v(TAG, "initializing ClockFace");
             clockFace = new ClockFace();
         }
+    }
+
+    /**
+     * Set this to true if you want the event loop, maintained by the MyViewAnim, to internally
+     * have a 1-sec sleep that it does when the seconds-hand isn't visible. This defaults to
+     * false, under the assumption that you've got some external process (alarms/intents/whatever)
+     * that drives the refresh rates under such low-frequency circumstances.
+     * @param sleepInEventLoop
+     */
+    public void setSleepInEventLoop(boolean sleepInEventLoop) {
+        this.sleepInEventLoop = sleepInEventLoop;
     }
 
     @Override
@@ -232,8 +244,14 @@ public class MyViewAnim extends SurfaceView implements SurfaceHolder.Callback {
                     c = null;
                 }
 
-                // TODO: verify that we never get here any more and kill this off
-                SystemClock.sleep(1000);
+                // We used to sleep for a second here between ticks, because this event loop never stopped
+                // and we wanted to keep the minute hand going even if the second hand wasn't being shown.
+                // Now, this is handled by the alarm intent that's set up in WearActivity.java. So, we'll
+                // continue blasting away at 60Hz here, under the assumption that this whole thread will
+                // be torn down when we hit ambient mode land.
+
+                if(sleepInEventLoop)
+                    SystemClock.sleep(1000);
 
             }
         } finally {
