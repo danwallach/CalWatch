@@ -82,7 +82,7 @@ public class CalendarFetcher extends Observable implements Runnable {
             long currentGMTOffset = TimeWrapper.getGmtOffset();
             long queryStartMillis = TimeWrapper.getLocalFloorHour() - currentGMTOffset;
 
-            if(queryStartMillis > lastQueryStartTime || lastGMTOffset != currentGMTOffset) { // we've rolled to a new hour, or the timezone changed, so it's time to reload!
+            if(queryStartMillis != lastQueryStartTime || lastGMTOffset != currentGMTOffset) { // we've rolled to a new hour, or the timezone changed, so it's time to reload!
                 newContentAvailable = true;
                 lastQueryStartTime = queryStartMillis;
                 lastGMTOffset = currentGMTOffset;
