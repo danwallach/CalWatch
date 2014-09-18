@@ -49,7 +49,7 @@ public class CalendarResults {
         public String exRule;
         public String duration;
         public String originalID;
-        public String ID;
+        public long ID;
         public Paint paint;
         public Path path;
 
@@ -83,25 +83,46 @@ public class CalendarResults {
         public String toString() {
             return "Title(" + title + "), dtStart(" + startTime + "), dtEnd(" + endTime + "), rRule(" + rRule + "), rDate(" + rDate + "), exRule(" + exRule + "), exDate(" + exDate + "), duration(" + duration + "), ID(" + ID + "), originalID(" + originalID + ")";
         }
+
+        public WireEvent toWireEvent() {
+            return new WireEvent(startTime, endTime, displayColor);
+        }
+    }
+
+    public static class Instance {
+        public long startTime;
+        public long endTime;
+        public long eventID;
+        public int displayColor;
+        public boolean allDay;
+        public boolean visible;
+
+        public Event event;
+
+        public WireEvent toWireEvent() {
+            return new WireEvent(startTime, endTime, displayColor);
+        }
     }
 
     public SparseArray<Calendar> calendars;
     public Map<String,Color> colors;
     public ArrayList<Event> events;
-
-    public int maxLevel; // filled in by the layout algorithm as well, levels go from 0 to this, **inclusive**
+    public Map<Long,Event> eventMap;
+    public ArrayList<Instance> instances;
 
     public CalendarResults() {
         // calendars = new HashMap<Integer, Calendar>();
         calendars = new SparseArray<Calendar>();
         colors = new HashMap<String, Color>();
         events = new ArrayList<Event>();
+        eventMap = new HashMap<Long, Event>();
+        instances = new ArrayList<Instance>();
     }
 
     public List<WireEvent> getWireEvents() {
         List<WireEvent> wireList = new ArrayList<WireEvent>();
         for(Event e : events) {
-            wireList.add(new WireEvent(e.startTime, e.endTime, e.displayColor));
+            wireList.add(e.toWireEvent());
         }
         return wireList;
     }
@@ -109,7 +130,7 @@ public class CalendarResults {
     public List<EventWrapper> getWrappedEvents() {
         List<EventWrapper> wireList = new ArrayList<EventWrapper>();
         for(Event e : events) {
-            wireList.add(new EventWrapper(new WireEvent(e.startTime, e.endTime, e.displayColor)));
+            wireList.add(new EventWrapper(e.toWireEvent()));
         }
         return wireList;
     }

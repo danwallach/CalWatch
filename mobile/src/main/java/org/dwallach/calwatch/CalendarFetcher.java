@@ -329,9 +329,13 @@ public class CalendarFetcher extends Observable implements Runnable {
                 e.exRule = mCursor.getString(i++);
                 e.duration = mCursor.getString(i++);
                 e.originalID = mCursor.getString(i++);
-                e.ID = mCursor.getString(i++);
+                e.ID = mCursor.getLong(i++);
 
                 e.paint = PaintCan.getPaint(e.displayColor); // at least on my phone, this tells you everything you need to know
+
+                // we're no longer processing recurrences ourselves, so all the code below is on the remove-me-soon list
+
+                /*
 
                 // Log.v(TAG, "Found event: " + e.toString());
 
@@ -368,7 +372,8 @@ public class CalendarFetcher extends Observable implements Runnable {
                         Log.v(TAG, "InvalidFormatException: " + e.toString() +  ie.toString());
 
                     }
-                } else addEvent(cr, e, queryStartMillis, queryEndMillis);
+                } else */
+                addEvent(cr, e, queryStartMillis, queryEndMillis);
 
             } while (mCursor.moveToNext());
         }
@@ -388,7 +393,42 @@ public class CalendarFetcher extends Observable implements Runnable {
 
         Log.v(TAG, "database found events(" + cr.events.size() + ")");
 
-        // EventLayout.debugDump(ctx, cr.events);
+        // And now, the event *instances*
+
+        final String[] instancesProjection = new String[] {
+                CalendarContract.Instances.BEGIN,
+                CalendarContract.Instances.END,
+                CalendarContract.Instances.EVENT_ID,
+                CalendarContract.Instances.DISPLAY_COLOR,
+                CalendarContract.Instances.ALL_DAY,
+                CalendarContract.Instances.VISIBLE,
+        };
+
+        // now, get the list of events
+        Cursor iCursor = CalendarContract.Instances.query(ctx.getContentResolver(), instancesProjection, queryStartMillis, queryEndMillis);
+
+        if (iCursor.moveToFirst()) {
+            do {
+                CalendarResults.Instance instance = new CalendarResults.Instance();
+                int i = 0;
+
+                instance.startTime = iCursor.getLong(i++);
+                instance.endTime = iCursor.getLong(i++);
+                instance.eventID = iCursor.getLong(i++);
+                instance.displayColor = iCursor.getInt(i++);
+                instance.allDay = (iCursor.getInt(i++) != 0);
+                instance.visible = (iCursor.getInt(i++) != 0);
+
+                instance.event = cr.eventMap.get(new Long(instance.eventID));
+                if (instance.event == null)
+                    Log.e(TAG, "instance without corresponding event? eventID=" + instance.eventID);
+
+                cr.instances.add(instance);
+            } while (iCursor.moveToNext());
+        }
+
+        Log.v(TAG, "database found instances(" + cr.instances.size() + ")");
+
         /*
          * register an observer in case something changes
          */
@@ -406,9 +446,9 @@ public class CalendarFetcher extends Observable implements Runnable {
         if (e.startTime < queryEndMillis && e.endTime > queryStartMillis && e.visible && !e.allDay) {
             // TODO: remove this logging before shipping, since we don't want to dump user-private information into the logs
             if(e.title != null) {
-//                Log.v(TAG, "Found visible event. Title(" + e.title + "), calID(" + e.calendarID + "), eventColor(" + Integer.toHexString(e.eventColor) + "), eventColorKey(" + e.eventColorKey + "), displayColor(" + Integer.toHexString(e.displayColor) + "), ID(" + e.ID + "), originalID( " + e.originalID + ")");
-//                Log.v(TAG, "--> Start: " + DateUtils.formatDateTime(ctx, e.startTime, DateUtils.FORMAT_SHOW_DATE | DateUtils.FORMAT_SHOW_TIME) + ", End: " + DateUtils.formatDateTime(ctx, e.endTime, DateUtils.FORMAT_SHOW_TIME | DateUtils.FORMAT_SHOW_DATE));
-//                Log.v(TAG, "--> Clip: " + DateUtils.formatDateTime(ctx, queryStartMillis, DateUtils.FORMAT_SHOW_DATE | DateUtils.FORMAT_SHOW_TIME) + ", End: " + DateUtils.formatDateTime(ctx, queryEndMillis, DateUtils.FORMAT_SHOW_TIME | DateUtils.FORMAT_SHOW_DATE));
+                Log.v(TAG, "Found visible event. Title(" + e.title + "), calID(" + e.calendarID + "), eventColor(" + Integer.toHexString(e.eventColor) + "), eventColorKey(" + e.eventColorKey + "), displayColor(" + Integer.toHexString(e.displayColor) + "), ID(" + e.ID + "), originalID( " + e.originalID + ")");
+                Log.v(TAG, "--> Start: " + DateUtils.formatDateTime(ctx, e.startTime, DateUtils.FORMAT_SHOW_DATE | DateUtils.FORMAT_SHOW_TIME) + ", End: " + DateUtils.formatDateTime(ctx, e.endTime, DateUtils.FORMAT_SHOW_TIME | DateUtils.FORMAT_SHOW_DATE));
+                Log.v(TAG, "--> Clip: " + DateUtils.formatDateTime(ctx, queryStartMillis, DateUtils.FORMAT_SHOW_DATE | DateUtils.FORMAT_SHOW_TIME) + ", End: " + DateUtils.formatDateTime(ctx, queryEndMillis, DateUtils.FORMAT_SHOW_TIME | DateUtils.FORMAT_SHOW_DATE));
             }
 
             // Hypothesis: if e.originalID is set, then this event is "an exception" to another event.
@@ -417,6 +457,10 @@ public class CalendarFetcher extends Observable implements Runnable {
             // TODO: validate what this field really means
             if(e.originalID == null)
                 cr.events.add(e);
+
+            // we want to keep these, no matter what, since we're going to use them to sort out the details
+            // on Instances
+            cr.eventMap.put(new Long(e.ID), e);
         }
     }
 
