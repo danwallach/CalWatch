@@ -246,9 +246,12 @@ public class MyViewAnim extends SurfaceView implements SurfaceHolder.Callback {
 
                 // We used to sleep for a second here between ticks, because this event loop never stopped
                 // and we wanted to keep the minute hand going even if the second hand wasn't being shown.
-                // Now, this is handled by the alarm intent that's set up in WearActivity.java. So, we'll
+                // (If the second hand as shown, then we didn't sleep.)
+
+                // Now, slow refreshes are handled by the alarm intent that's set up in WearActivity.java. So, we'll
                 // continue blasting away at 60Hz here, under the assumption that this whole thread will
-                // be torn down when we hit ambient mode land.
+                // be torn down when we hit ambient mode land. And it *usually* is. Except when it isn't.
+                // That's what the activeDrawing boolean is for.
 
                 if(sleepInEventLoop)
                     SystemClock.sleep(1000);
@@ -270,10 +273,11 @@ public class MyViewAnim extends SurfaceView implements SurfaceHolder.Callback {
         public void onTimeUpdate(TimeAnimator animation, long totalTime, long deltaTime) {
             ticks++;
 
-            // we have a weird race condition when the screen turns off and blanks out
+            // sometimes, this still happens even when we don't care, thus the activeDrawing
+            // boolean. There are some conditions, not exactly clear what, when this gets
+            // called once every three seconds. Why three seconds? Why isn't the PanelThread dead?
+            // No idea, so we'll just ignore it.
             if(!activeDrawing) {
-                if(ticks % 1000 == 0)
-                    Log.v(TAG, "onTimeUpdate being called while we're not needing it");
                 return;
             }
 
