@@ -9,6 +9,8 @@ import android.provider.CalendarContract;
 import android.text.format.DateUtils;
 import android.util.Log;
 
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.Observable;
 
 /**
@@ -203,6 +205,29 @@ public class CalendarFetcher extends Observable implements Runnable {
 
                 Log.v(TAG, "visible instances found: " + instance.toString());
             } while (iCursor.moveToNext());
+        }
+
+        if(cr.instances.size() > 1) {
+            // Primary sort: endTime, with objects ending earlier appearing first in the sort.
+            //   (goal: first fill in the outer ring of the display with smaller wedges; the big
+            //    ones will end late in the day, and will thus end up on the inside of the watchface)
+
+            // Secondary sort: startTime, with objects starting earlier appearing first in the sort.
+
+            // Third priority: color, so all else the same, the colors will stack the same way
+
+            Collections.sort(cr.instances, new Comparator<CalendarResults.Instance>() {
+                @Override
+                public int compare(CalendarResults.Instance lhs, CalendarResults.Instance rhs) {
+                    if(lhs.endTime == rhs.endTime)
+                        if(lhs.startTime == rhs.startTime)
+                            return Long.compare(lhs.displayColor, rhs.displayColor);
+                        else
+                            return Long.compare(lhs.startTime, lhs.endTime);
+                    else
+                        return Long.compare(lhs.endTime, rhs.endTime);
+                }
+            });
         }
 
         Log.v(TAG, "database found instances(" + cr.instances.size() + ")");
