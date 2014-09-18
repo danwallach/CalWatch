@@ -325,7 +325,12 @@ public class MyViewAnim extends SurfaceView implements SurfaceHolder.Callback {
                 // with the latest state (typically ambient mode) rather than
                 // leaving the calendar wedges visible but without a moving
                 // seconds hand.
-                redrawInternal();
+
+                try {
+                    redrawInternal();
+                } catch (IllegalStateException e) {
+                    // this happens if the surface has gone away; we'll quietly ignore the error
+                }
 
                 Log.v(TAG, "looper finished!");
             } catch (Throwable t) {

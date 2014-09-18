@@ -5,19 +5,9 @@ import android.database.ContentObserver;
 import android.database.Cursor;
 import android.net.Uri;
 import android.os.ConditionVariable;
-import android.os.SystemClock;
 import android.provider.CalendarContract;
 import android.text.format.DateUtils;
-import android.text.format.Time;
 import android.util.Log;
-
-import com.android.calendarcommon2.DateException;
-import com.android.calendarcommon2.Duration;
-import com.android.calendarcommon2.EventRecurrence;
-import com.android.calendarcommon2.RecurrenceProcessor;
-import com.android.calendarcommon2.RecurrenceSet;
-
-import org.dwallach.calwatch.proto.WireEvent;
 
 import java.util.Observable;
 
@@ -25,7 +15,6 @@ import java.util.Observable;
  * Created by dwallach on 8/13/14.
  *
  * Support for extracting calendar data from the platform's Calendar service.
- * Decent documentation: http://www.grokkingandroid.com/androids-calendarcontract-provider/
  */
 public class CalendarFetcher extends Observable implements Runnable {
     private final static String TAG = "CalendarFetcher";
@@ -74,7 +63,7 @@ public class CalendarFetcher extends Observable implements Runnable {
         // reasonably current to display, despite waking things up properly to do another round of queries
         // against the calendar.
         //
-        // TODO: this could probably be replaced with a Looper, but hey, it works and it's modestly efficient
+        // TODO: this could probably be replaced with a Looper or an alarm or something, but this works for now
         //
         for(;;) {
             // Log.v(TAG, "ping");
@@ -160,99 +149,19 @@ public class CalendarFetcher extends Observable implements Runnable {
 
 
 
-    private RecurrenceProcessor rprocessor = null;
     /**
      * queries the calendar database with proper Android APIs (ugly stuff)
      */
     private CalendarResults loadContent() {
-        if(rprocessor == null)
-            rprocessor = new RecurrenceProcessor();
-
         // local copy; don't overwrite the class variable until we're done!
         CalendarResults cr = new CalendarResults();
 
         // first, get the list of calendars
         Log.v(TAG, "starting to load content");
-        final String[] calProjection =
-                new String[]{
-                        CalendarContract.Calendars._ID,
-                        CalendarContract.Calendars.NAME,
-                        CalendarContract.Calendars.ACCOUNT_NAME,
-                        CalendarContract.Calendars.ACCOUNT_TYPE,
-                        CalendarContract.Calendars.CALENDAR_COLOR,
-                        CalendarContract.Calendars.CALENDAR_COLOR_KEY,
-                        CalendarContract.Calendars.VISIBLE
-                };
-
         if(ctx == null) {
             Log.e(TAG, "No query context!");
             return null;
         }
-
-        Cursor calCursor = ctx.getContentResolver().
-                query(CalendarContract.Calendars.CONTENT_URI,
-                        calProjection,
-                        CalendarContract.Calendars.VISIBLE + " = 1",  // solve our UI problems by copying visibility from the main calendar (?)
-                        null,
-                        CalendarContract.Calendars._ID + " ASC");
-
-
-        int calendarsFound = 0;
-        if (calCursor.moveToFirst()) {
-            do {
-                int i = 0;
-                CalendarResults.Calendar cal = new CalendarResults.Calendar();
-
-                cal.ID = calCursor.getInt(i++);
-                cal.name = calCursor.getString(i++);
-                cal.accountName = calCursor.getString(i++);
-                cal.accountType = calCursor.getString(i++);
-                cal.calendarColor = calCursor.getInt(i++);
-                cal.calendarColorKey = calCursor.getString(i++);
-                cal.visible = (calCursor.getInt(i++) != 0);
-
-                // Log.v(TAG, "Found calendar. ID(" + cal.ID + "), name(" + cal.name + "), color(" + Integer.toHexString(cal.calendarColor) + "), colorKey(" + cal.calendarColorKey + "), accountName(" + cal.accountName + "), visible(" + Boolean.toString(cal.visible)+ ")");
-
-                cr.calendars.put(cal.ID, cal);
-                calendarsFound++;
-            }
-            while (calCursor.moveToNext()) ;
-        }
-        Log.v(TAG, "calendars found ("+ calendarsFound + ")");
-
-        calCursor.close();
-
-        final String[] colorsProjection =
-                new String[] {
-                        CalendarContract.Colors.COLOR,
-                        CalendarContract.Colors.COLOR_KEY
-                };
-
-        Cursor colorCursor = ctx.getContentResolver().query(CalendarContract.Colors.CONTENT_URI, colorsProjection, null, null, null);
-
-        if(colorCursor.moveToFirst()) {
-            do {
-                int i = 0;
-                CalendarResults.Color color = new CalendarResults.Color();
-
-                color.argb = colorCursor.getInt(i++);
-                color.key = colorCursor.getString(i++);
-                color.paint = PaintCan.getPaint(color.argb);
-
-                // Log.v(TAG, "Found color. ID(" + color.key + "), argb=(" + Integer.toHexString(color.argb) + ")");
-
-                cr.colors.put(color.key, color);
-            } while(colorCursor.moveToNext());
-        }
-
-        colorCursor.close();
-
-        // now, get the list of events
-        // fantastically helpful:
-        // http://stackoverflow.com/questions/10133616/reading-all-of-todays-events-using-calendarcontract-android-4-0
-        // http://www.grokkingandroid.com/androids-calendarcontract-provider/
-        // http://www.techrepublic.com/blog/software-engineer/programming-with-the-android-40-calendar-api-the-good-the-bad-and-the-ugly/
-
 
         TimeWrapper.update();
         long time = TimeWrapper.getGMTTime();
@@ -263,137 +172,7 @@ public class CalendarFetcher extends Observable implements Runnable {
                 ", QueryStart: " + DateUtils.formatDateTime(ctx, queryStartMillis, DateUtils.FORMAT_SHOW_TIME | DateUtils.FORMAT_SHOW_DATE)  +
                 ", QueryEnd: " + DateUtils.formatDateTime(ctx, queryEndMillis, DateUtils.FORMAT_SHOW_TIME | DateUtils.FORMAT_SHOW_DATE));
 
-        // select events that end after the start of our window AND start before the end of our window,
-        // filtering out any all-day events and any events that aren't visible
-        // Note: < rather than <= because we don't care about an event that starts at the beginning of the next hour
-        String eventSelection =
-                "((" + CalendarContract.Events.DTSTART + " < ?) " +
-                // "AND ((" + CalendarContract.Events.DTEND + " > ?) OR (" + CalendarContract.Events.DTEND + " = 0))" +
-                "AND (" + CalendarContract.Events.ALL_DAY + " = 0) " +
-                "AND (" + CalendarContract.Events.VISIBLE + " = 1)" +
-                 ")";
-
-        // commented out the DTEND part because recurring events don't have it at all. This means the query is pulling in a lot of
-        // unnecessary events, but we'll deal with it. Also, the OR clause at the end of the DTEND thing didn't work at all; probably
-        // needs to say something about empty string rather than zero.
-
-        String[] eventSelectionArgs = new String[] {
-                Long.toString(queryEndMillis)  // , Long.toString(queryStartMillis), // during today, not all day
-        };
-
-
-        final String[] eventProjection = new String[] {
-                CalendarContract.Events.TITLE,
-                CalendarContract.Events.DTSTART,
-                CalendarContract.Events.DTEND,
-                CalendarContract.Events.ALL_DAY,
-                CalendarContract.Events.ACCOUNT_NAME,
-                CalendarContract.Events.ACCOUNT_TYPE,
-                CalendarContract.Events.CALENDAR_ID,
-                CalendarContract.Events.EVENT_COLOR,
-                CalendarContract.Events.EVENT_COLOR_KEY,
-                CalendarContract.Events.DISPLAY_COLOR,
-                CalendarContract.Events.VISIBLE,
-                CalendarContract.Events.RDATE,
-                CalendarContract.Events.RRULE,
-                CalendarContract.Events.EXDATE,
-                CalendarContract.Events.EXRULE,
-                CalendarContract.Events.DURATION,
-                CalendarContract.Events.ORIGINAL_ID,
-                "_id"
-        };
-
-        // now, get the list of events
-        Cursor mCursor = ctx.getContentResolver().query(
-                CalendarContract.Events.CONTENT_URI, eventProjection, eventSelection, eventSelectionArgs, CalendarContract.Events.DTSTART + " ASC");
-
-        if (mCursor.moveToFirst()) {
-            do {
-                CalendarResults.Event e = new CalendarResults.Event();
-                int i=0;
-
-                e.title = mCursor.getString(i++);
-                e.startTime = mCursor.getLong(i++);
-                e.endTime = mCursor.getLong(i++);
-                e.allDay = (mCursor.getInt(i++) != 0);
-                e.accountName = mCursor.getString(i++);
-                e.accountType = mCursor.getString(i++);
-                e.calendarID = mCursor.getInt(i++);
-                e.eventColor = mCursor.getInt(i++);
-                e.eventColorKey = mCursor.getString(i++);
-                e.displayColor = mCursor.getInt(i++);
-                e.visible = (mCursor.getInt(i++) != 0);
-                e.rDate = mCursor.getString(i++);
-                e.rRule = mCursor.getString(i++);
-                e.exDate = mCursor.getString(i++);
-                e.exRule = mCursor.getString(i++);
-                e.duration = mCursor.getString(i++);
-                e.originalID = mCursor.getString(i++);
-                e.ID = mCursor.getLong(i++);
-
-                e.paint = PaintCan.getPaint(e.displayColor); // at least on my phone, this tells you everything you need to know
-
-                // we're no longer processing recurrences ourselves, so all the code below is on the remove-me-soon list
-
-                /*
-
-                // Log.v(TAG, "Found event: " + e.toString());
-
-                if(e.rDate != null || e.rRule != null || e.exDate != null || e.exRule != null) {
-                    // holy crap, it's a recurring event
-                    try {
-                        // important to make a copy and mutate that rather than mutating the original; ensures
-                        // that if there are multiple start times in the window that they'll have distinct
-                        // events in the results rather than all pointing to the same object, having contents
-                        // corresponding to the final iteration through the below loop
-                        CalendarResults.Event ce = new CalendarResults.Event(e);
-                        RecurrenceSet rset = new RecurrenceSet(ce.rRule, ce.rDate, ce.exDate, ce.exDate);
-                        Time startTime = new Time();
-                        startTime.set(ce.startTime);
-                        long startTimes[] = rprocessor.expand(startTime, rset, queryStartMillis, queryEndMillis);
-
-                        if(startTimes.length != 0)
-                            Log.v(TAG, "recurring event: " + e.title + " -- " + startTimes.length + " instances found");
-
-                        for (long st : startTimes) {
-                            ce.startTime = st;
-                            Duration d = new Duration();
-                            d.parse(e.duration);
-                            ce.endTime = ce.startTime + d.getMillis();
-
-                            addEvent(cr, ce, queryStartMillis, queryEndMillis);
-                        }
-
-                    } catch (DateException de) {
-                        // whatever... just means that we won't be adding any recurring events
-                        Log.v(TAG, "DateException: " + de.toString());
-                    } catch (EventRecurrence.InvalidFormatException ie) {
-                        // this shouldn't really happen, but at least it doesn't happen often!
-                        Log.v(TAG, "InvalidFormatException: " + e.toString() +  ie.toString());
-
-                    }
-                } else */
-                addEvent(cr, e, queryStartMillis, queryEndMillis);
-
-            } while (mCursor.moveToNext());
-        }
-
-        mCursor.close();
-
-        // DONE!: deal with recurring events (RDATE, RRULE)
-        // DONE!: deal with "recurring exceptions" (EXDATE, EXRULE)
-        // relevant code? https://android.googlesource.com/platform/frameworks/opt/calendar/+/ics-mr1/src/com/android/calendarcommon/RecurrenceProcessor.java
-        // and https://android.googlesource.com/platform/frameworks/opt/calendar/+/ics-mr1/src/com/android/calendarcommon/RecurrenceSet.java
-        // StackOverflow relevance:
-        // http://stackoverflow.com/questions/23342334/android-calendarcontract-recurring-event-with-exception-dates
-        // http://stackoverflow.com/questions/13537315/in-calendarcontracts-instances-determine-if-original-event-is-recurring
-
-        // curious open-source scanning contraption:
-        // http://www.programcreek.com/java-api-examples/index.php?api=android.provider.CalendarContract
-
-        Log.v(TAG, "database found events(" + cr.events.size() + ")");
-
-        // And now, the event *instances*
+        // And now, the event instances
 
         final String[] instancesProjection = new String[] {
                 CalendarContract.Instances.BEGIN,
@@ -419,10 +198,6 @@ public class CalendarFetcher extends Observable implements Runnable {
                 instance.allDay = (iCursor.getInt(i++) != 0);
                 instance.visible = (iCursor.getInt(i++) != 0);
 
-                instance.event = cr.eventMap.get(new Long(instance.eventID));
-                if (instance.event == null)
-                    Log.e(TAG, "instance without corresponding event? eventID=" + instance.eventID);
-
                 if(instance.visible && !instance.allDay)
                     cr.instances.add(instance);
 
@@ -443,28 +218,6 @@ public class CalendarFetcher extends Observable implements Runnable {
         }
 
         return cr;
-    }
-
-    private void addEvent(CalendarResults cr, CalendarResults.Event e, long queryStartMillis, long queryEndMillis) {
-        if (e.startTime < queryEndMillis && e.endTime > queryStartMillis && e.visible && !e.allDay) {
-            // TODO: remove this logging before shipping, since we don't want to dump user-private information into the logs
-            if(e.title != null) {
-                Log.v(TAG, "Found visible event. Title(" + e.title + "), calID(" + e.calendarID + "), eventColor(" + Integer.toHexString(e.eventColor) + "), eventColorKey(" + e.eventColorKey + "), displayColor(" + Integer.toHexString(e.displayColor) + "), ID(" + e.ID + "), originalID( " + e.originalID + ")");
-                Log.v(TAG, "--> Start: " + DateUtils.formatDateTime(ctx, e.startTime, DateUtils.FORMAT_SHOW_DATE | DateUtils.FORMAT_SHOW_TIME) + ", End: " + DateUtils.formatDateTime(ctx, e.endTime, DateUtils.FORMAT_SHOW_TIME | DateUtils.FORMAT_SHOW_DATE));
-                Log.v(TAG, "--> Clip: " + DateUtils.formatDateTime(ctx, queryStartMillis, DateUtils.FORMAT_SHOW_DATE | DateUtils.FORMAT_SHOW_TIME) + ", End: " + DateUtils.formatDateTime(ctx, queryEndMillis, DateUtils.FORMAT_SHOW_TIME | DateUtils.FORMAT_SHOW_DATE));
-            }
-
-            // Hypothesis: if e.originalID is set, then this event is "an exception" to another event.
-            // The one time I've seen this occur, it appears to be superfluous (regular Google Calendar
-            // doesn't render it). So... for now... we're going to ignore it.
-            // TODO: validate what this field really means
-            if(e.originalID == null)
-                cr.events.add(e);
-
-            // we want to keep these, no matter what, since we're going to use them to sort out the details
-            // on Instances
-            cr.eventMap.put(new Long(e.ID), e);
-        }
     }
 
     /*
@@ -493,4 +246,3 @@ public class CalendarFetcher extends Observable implements Runnable {
         }
     }
 }
-
