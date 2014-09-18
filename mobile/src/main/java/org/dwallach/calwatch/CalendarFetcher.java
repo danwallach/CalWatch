@@ -219,13 +219,13 @@ public class CalendarFetcher extends Observable implements Runnable {
             Collections.sort(cr.instances, new Comparator<CalendarResults.Instance>() {
                 @Override
                 public int compare(CalendarResults.Instance lhs, CalendarResults.Instance rhs) {
-                    if(lhs.endTime == rhs.endTime)
-                        if(lhs.startTime == rhs.startTime)
-                            return Long.compare(lhs.displayColor, rhs.displayColor);
-                        else
-                            return Long.compare(lhs.startTime, lhs.endTime);
-                    else
+                    if (lhs.endTime != rhs.endTime)
                         return Long.compare(lhs.endTime, rhs.endTime);
+
+                    if (lhs.startTime != rhs.startTime)
+                        return Long.compare(lhs.startTime, lhs.endTime);
+
+                    return Long.compare(lhs.displayColor, rhs.displayColor);
                 }
             });
         }
