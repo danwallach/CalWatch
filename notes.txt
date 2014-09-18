@@ -1,18 +1,3 @@
-DONE?! deal with recurring events
--- RecurrenceProcessor.expand() seems to do exactly what I want. Hypothetically, this is going to
-   be a quick hack, if it work.
-
-   maybe I need a better RFC 2245 (iCal) parser? Google has one:
-   https://code.google.com/p/google-rfc-2445/
-
-   Curiously, it's blowing up on the E2E VIV office hours, which has an exDate field of this:
-   America/Los_Angeles;20140815T100000,20140822T100000,20140829T100000)
-
-   The claim is that there's a "missing LHS" in the timezone part. Hrmm.
-
-   TODO understand / fix incorrect handling of GS recurring event; maybe we need to give up on the calendarcommon thing and move to the above codebase
-
-
 Port to Android Wear
 -- Useful article including sample code: http://toastdroid.com/2014/07/18/developing-watchfaces-for-android-wear/
 -- How to set up the damn emulator: http://www.tech-recipes.com/rx/49586/how-do-i-connect-an-android-wear-emulator-to-a-real-phone/
@@ -56,32 +41,6 @@ BUGS BUGs BUGZ!
   -- now that we've integrated the 5-second alarm, we should try killing off the
      render thread as part of the onStop() lifecycle *and* should immediately render
      the screen when the lifecycle moves back into action. Will that work?
-
-Notes on supporting a "real" watch face (via reading over:
-https://github.com/twotoasters/watchface-template/tree/master/submodules
-
- Gears library:
-    Activity.java: nothing interesting at all
-    DeviceUtils.java: totally cheesy way of determining AMOLED: lookup
-      table based on device type
-    Watch.java:
-      - logic to deal with changing timezones
-      - onTimeChanged() via alarm manager when seconds are turned off (do we care?)
-      - unclear if any of this is necessary
-
-  mobile/src/main/AndroidMainfest.xml:
-    uses-permission for background
-    preview.png
-
-  wear/src/main/AndroidManifest.xml:
-    more permission usage
-    some funkiness about how the activity is set up (providing background, etc.)
-
-  Meanwhile, there's all this business about Square's various testing
-  and code injection libraries. Probably not worth bothering
-  now. Maybe later.
-
-
 
 Further improvements:
   Calendar rendering:
