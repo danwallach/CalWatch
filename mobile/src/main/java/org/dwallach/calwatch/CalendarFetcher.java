@@ -208,24 +208,26 @@ public class CalendarFetcher extends Observable implements Runnable {
         }
 
         if(cr.instances.size() > 1) {
-            // Primary sort: endTime, with objects ending earlier appearing first in the sort.
+            // Primary sort: color, so events from the same calendar will become consecutive wedges
+
+            // Secondary sort: endTime, with objects ending earlier appearing first in the sort.
             //   (goal: first fill in the outer ring of the display with smaller wedges; the big
             //    ones will end late in the day, and will thus end up on the inside of the watchface)
 
-            // Secondary sort: startTime, with objects starting earlier appearing first in the sort.
+            // Third-priority sort: startTime, with objects starting earlier appearing first in the sort.
 
-            // Third priority: color, so all else the same, the colors will stack the same way
 
             Collections.sort(cr.instances, new Comparator<CalendarResults.Instance>() {
                 @Override
                 public int compare(CalendarResults.Instance lhs, CalendarResults.Instance rhs) {
+                    if(lhs.displayColor != rhs.displayColor)
+                        return Long.compare(lhs.displayColor, rhs.displayColor);
+
                     if (lhs.endTime != rhs.endTime)
                         return Long.compare(lhs.endTime, rhs.endTime);
 
-                    if (lhs.startTime != rhs.startTime)
-                        return Long.compare(lhs.startTime, lhs.endTime);
-
-                    return Long.compare(lhs.displayColor, rhs.displayColor);
+//                    if (lhs.startTime != rhs.startTime)
+                    return Long.compare(lhs.startTime, lhs.endTime);
                 }
             });
         }

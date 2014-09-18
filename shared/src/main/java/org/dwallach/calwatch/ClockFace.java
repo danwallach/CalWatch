@@ -5,6 +5,7 @@ import android.graphics.Color;
 import android.graphics.Paint;
 import android.graphics.Path;
 import android.graphics.RectF;
+import android.os.Build;
 import android.text.format.DateUtils;
 import android.util.Log;
 
@@ -56,7 +57,7 @@ public class ClockFace implements Observer {
 
     private int missingBottomPixels = 0; // Moto 360 hack; set to non-zero number to pull up the indicia
 
-    private Paint white, yellow, smWhite, smYellow, black, smBlack, smRed, gray, outlineBlack, superThinBlack, smTextShadow, textShadow;
+    private Paint white, whiteHour, whiteMinute, yellow, smWhite, smYellow, black, smBlack, smRed, gray, outlineBlack, superThinBlack, smTextShadow, textShadow;
 
     private ClockState clockState;
 
@@ -86,6 +87,8 @@ public class ClockFace implements Observer {
         update(null, null); // initialize variables from initial constants, or whatever else is hanging out in ClockState
 
         white = newPaint();
+        whiteHour = newPaint();
+        whiteMinute = newPaint();
         yellow = newPaint();
         smWhite = newPaint();
         smYellow = newPaint();
@@ -114,12 +117,20 @@ public class ClockFace implements Observer {
         smTextShadow.setTextAlign(Paint.Align.LEFT);
         smBlack.setTextAlign(Paint.Align.LEFT);
         white.setTextAlign(Paint.Align.CENTER);
+        whiteHour.setTextAlign(Paint.Align.CENTER);
+        whiteMinute.setTextAlign(Paint.Align.CENTER);
         black.setTextAlign(Paint.Align.CENTER);
 
         outlineBlack.setStyle(Paint.Style.STROKE);
         smTextShadow.setStyle(Paint.Style.STROKE);
         textShadow.setStyle(Paint.Style.STROKE);
         superThinBlack.setStyle(Paint.Style.STROKE);
+
+        // not sure exactly which magic string goes where, so a little big of paranoia here
+        if(Build.MODEL.contains("metallica") || Build.MODEL.contains("Moto 360") || Build.PRODUCT.contains("metallica") || Build.PRODUCT.contains("Moto 360")) {
+            Log.v(TAG, "Moto 360 detected. Flat bottom hack enabled.");
+            setMissingBottomPixels(30);
+        }
     }
 
     /*
@@ -416,8 +427,8 @@ public class ClockFace implements Observer {
         double minutes = seconds / 60.0;
         double hours = minutes / 12.0;  // because drawRadialLine is scaled to a 60-unit circle
 
-        drawRadialLine(canvas, minutes, 0.1f, 0.9f, white, superThinBlack);
-        drawRadialLine(canvas, hours, 0.1f, 0.6f, white, superThinBlack);
+        drawRadialLine(canvas, minutes, 0.1f, 0.9f, whiteMinute, superThinBlack);
+        drawRadialLine(canvas, hours, 0.1f, 0.6f, whiteHour, superThinBlack);
 
         if(!ambientMode) {
             // ugly details: we might run 10% or more away from our targets at 4Hz, making the second
@@ -670,12 +681,16 @@ public class ClockFace implements Observer {
         shadow = lineWidth / 20f;  // for drop shadows
 
         white.setTextSize(textSize);
+        whiteHour.setTextSize(textSize);
+        whiteMinute.setTextSize(textSize);
         yellow.setTextSize(textSize);
         gray.setTextSize(textSize);
         black.setTextSize(textSize);
         textShadow.setTextSize(textSize);
 
         white.setStrokeWidth(lineWidth);
+        whiteHour.setStrokeWidth(lineWidth * 1.5f);
+        whiteMinute.setStrokeWidth(lineWidth);
         yellow.setStrokeWidth(lineWidth);
         gray.setStrokeWidth(lineWidth);
         black.setStrokeWidth(lineWidth);
