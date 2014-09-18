@@ -320,6 +320,13 @@ public class MyViewAnim extends SurfaceView implements SurfaceHolder.Callback {
                 // quit() the looper (see below)
                 Looper.loop();
 
+                // We'll only get here if somebody's trying to tear down
+                // the Looper. One last redraw will ensure that we're drawing
+                // with the latest state (typically ambient mode) rather than
+                // leaving the calendar wedges visible but without a moving
+                // seconds hand.
+                redrawInternal();
+
                 Log.v(TAG, "looper finished!");
             } catch (Throwable t) {
                 Log.e(TAG, "looper halted due to an error", t);
