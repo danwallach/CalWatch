@@ -3,7 +3,6 @@
 // % cd CalWatch/shared
 // % java -jar wire-compiler-1.5.1-jar-with-dependencies.jar --proto_path=src/main/java --java_out=src/main/java/ org/dwallach/calwatch/proto/calendar.proto
 
-
 // Hopefully, this won't have to happen very often. All of this really belongs in the Gradle file,
 // with automated support from Android Studio, but there are bugs surrounding that. Lovely. So we go
 // by hand.
@@ -19,6 +18,5 @@ message WireEvent {
 message WireUpdate {
     repeated WireEvent events = 1;
     required bool newEvents = 2; // true: the events are new, have a look; false: ignore the events field
-    required bool showSeconds = 3;
-    required int32 faceMode = 4;
+    required int32 faceMode = 3;
 }

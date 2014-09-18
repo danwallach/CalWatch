@@ -21,9 +21,9 @@ public class TimeWrapper {
     private static int gmtOffset;
     private static long time;
 
-    private static final long magicOffset = -12 * 60 * 60 * 1000; // 12 hours earlier, for debugging
+//    private static final long magicOffset = -12 * 60 * 60 * 1000; // 12 hours earlier, for debugging
 //    private static final long magicOffset = 25 * 60 * 1000;       // 25 minutes later, for debugging
-//    private static final long magicOffset = 0;                      // for production use
+    private static final long magicOffset = 0;                      // for production use
 
     public static void update() {
         tz=TimeZone.getDefault();

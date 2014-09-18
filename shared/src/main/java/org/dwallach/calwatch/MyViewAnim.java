@@ -235,7 +235,7 @@ public class MyViewAnim extends SurfaceView implements SurfaceHolder.Callback {
                 Log.e(TAG, "whoa, no clock state?!");
                 return;
             }
-            if(!clockState.getShowSeconds() || localClockFace.getAmbientMode()) {
+            if(localClockFace.getAmbientMode()) {
                 // if we're not showing the second hand, then we don't need to refresh at 50+Hz
                 // so instead we sleep one second; regardless, the minute hand will move
                 // very, very smoothly.

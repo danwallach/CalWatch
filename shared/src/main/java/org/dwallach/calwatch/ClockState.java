@@ -22,7 +22,6 @@ public class ClockState extends Observable {
     public final static int FACE_LITE = 2;
 
     private int faceMode = Constants.DefaultWatchFace;
-    private boolean showSeconds = Constants.DefaultShowSeconds;
     private List<EventWrapper> eventList = null;
     private List<EventWrapper> visibleEventList = null;
     private int maxLevel = 0;
@@ -55,16 +54,6 @@ public class ClockState extends Observable {
         return faceMode;
     }
 
-
-    public synchronized void setShowSeconds(boolean b) {
-        showSeconds = b;
-
-        pingObservers();
-    }
-
-    public synchronized boolean getShowSeconds() {
-        return showSeconds;
-    }
 
     /**
      * Load the eventlist. This is meant to consume the output of the calendarFetcher,
@@ -210,7 +199,6 @@ public class ClockState extends Observable {
             setWireEventListHelper(wireUpdate.events);
 
         setFaceMode(wireUpdate.faceMode);
-        setShowSeconds(wireUpdate.showSeconds);
 
         Log.v(TAG, "event update complete");
     }
@@ -220,7 +208,7 @@ public class ClockState extends Observable {
      * @return the protobuf
      */
     public synchronized byte[] getProtobuf() {
-        WireUpdate wireUpdate = new WireUpdate(getWireEventList(), true, getShowSeconds(), getFaceMode());
+        WireUpdate wireUpdate = new WireUpdate(getWireEventList(), true, getFaceMode());
         byte[] output = wireUpdate.toByteArray();
 
         return output;

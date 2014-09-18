@@ -33,7 +33,6 @@ public class WearReceiverService extends WearableListenerService implements Goog
 
     // private List<EventWrapper> eventList = null;
     // private int maxLevel = 0;
-    // private boolean showSeconds = true;
     // private int faceMode = ClockFace.FACE_TOOL;
     private GoogleApiClient mGoogleApiClient = null;
     private static WearReceiverService singleton;

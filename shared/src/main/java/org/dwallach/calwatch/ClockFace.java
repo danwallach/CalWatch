@@ -419,7 +419,7 @@ public class ClockFace implements Observer {
         drawRadialLine(canvas, minutes, 0.1f, 0.9f, white, superThinBlack);
         drawRadialLine(canvas, hours, 0.1f, 0.6f, white, superThinBlack);
 
-        if(showSeconds && !ambientMode) {
+        if(!ambientMode) {
             // ugly details: we might run 10% or more away from our targets at 4Hz, making the second
             // hand miss the indices. Ugly. Thus, some hackery.
             if(clipSeconds) seconds = Math.floor(seconds * freqUpdate) / freqUpdate;
@@ -505,9 +505,9 @@ public class ClockFace implements Observer {
             stipplePathCache = new Path();
             stippleTimeCache = stippleTime;
 
-            if(calendarTicker % 1000 == 0)
-                Log.v("ClockFace", "StippleTime(" + stippleTime +
-                        "),  currentTime(" + Float.toString((time) / 720000f) + ")");
+//            if(calendarTicker % 1000 == 0)
+//                Log.v("ClockFace", "StippleTime(" + stippleTime +
+//                        "),  currentTime(" + Float.toString((time) / 720000f) + ")");
 
             float r1=calendarRingMinRadius, r2;
 
@@ -559,12 +559,12 @@ public class ClockFace implements Observer {
                 stipplePathCache.close();
                 // canvas.drawPath(p, black);
 
-                if(calendarTicker % 1000 == 0)
-                    Log.v("ClockFace", "x1(" + Float.toString(x1) + "), y1(" + Float.toString(y1) +
-                            "), x2(" + Float.toString(x1) + "), y2(" + Float.toString(y2) +
-                            "), xlow(" + Float.toString(xlow) + "), ylow(" + Float.toString(ylow) +
-                            "), xhigh(" + Float.toString(xhigh) + "), yhigh(" + Float.toString(yhigh) +
-                            ")");
+//                if(calendarTicker % 1000 == 0)
+//                    Log.v("ClockFace", "x1(" + Float.toString(x1) + "), y1(" + Float.toString(y1) +
+//                            "), x2(" + Float.toString(x1) + "), y2(" + Float.toString(y2) +
+//                            "), xlow(" + Float.toString(xlow) + "), ylow(" + Float.toString(ylow) +
+//                            "), xhigh(" + Float.toString(xhigh) + "), yhigh(" + Float.toString(yhigh) +
+//                            ")");
             }
         }
         canvas.drawPath(stipplePathCache, black);
@@ -579,8 +579,7 @@ public class ClockFace implements Observer {
 
         // we don't want to poll *too* often; this translates to about once per five minute
         if(batteryPathCache == null ||
-                (showSeconds &&  calendarTicker % 300000 == 0) ||
-                (!showSeconds && calendarTicker % 300 == 0)) {
+                (calendarTicker % 300000 == 0)) {
             batteryMonitor.fetchStatus();
             Log.v(TAG, "fetching new battery status (" + calendarTicker + ")");
             batteryPct = batteryMonitor.getBatteryPct();
@@ -693,7 +692,7 @@ public class ClockFace implements Observer {
 
         smTextShadow.setStrokeWidth(lineWidth / 4);
         textShadow.setStrokeWidth(lineWidth / 2);
-        outlineBlack.setStrokeWidth(lineWidth /3);
+        outlineBlack.setStrokeWidth(lineWidth /6);
         superThinBlack.setStrokeWidth(lineWidth / 8);
 
         wipeCaches();
@@ -734,7 +733,6 @@ public class ClockFace implements Observer {
     }
 
     private int faceMode;
-    private boolean showSeconds;
     private boolean ambientMode = false;
     private List<EventWrapper> eventList;
     private int maxLevel;
@@ -755,7 +753,6 @@ public class ClockFace implements Observer {
     public void update(Observable observable, Object data) {
         wipeCaches();
         TimeWrapper.update();
-        this.showSeconds = clockState.getShowSeconds();
         this.faceMode = clockState.getFaceMode();
         updateEventList();
     }

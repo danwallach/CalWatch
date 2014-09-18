@@ -16,7 +16,6 @@ public final class WireUpdate extends Message {
 
   public static final List<WireEvent> DEFAULT_EVENTS = Collections.emptyList();
   public static final Boolean DEFAULT_NEWEVENTS = false;
-  public static final Boolean DEFAULT_SHOWSECONDS = false;
   public static final Integer DEFAULT_FACEMODE = 0;
 
   @ProtoField(tag = 1, label = REPEATED)
@@ -28,21 +27,17 @@ public final class WireUpdate extends Message {
   /**
    * true: the events are new, have a look; false: ignore the events field
    */
-  @ProtoField(tag = 3, type = BOOL, label = REQUIRED)
-  public final Boolean showSeconds;
-
-  @ProtoField(tag = 4, type = INT32, label = REQUIRED)
+  @ProtoField(tag = 3, type = INT32, label = REQUIRED)
   public final Integer faceMode;
 
-  public WireUpdate(List<WireEvent> events, Boolean newEvents, Boolean showSeconds, Integer faceMode) {
+  public WireUpdate(List<WireEvent> events, Boolean newEvents, Integer faceMode) {
     this.events = immutableCopyOf(events);
     this.newEvents = newEvents;
-    this.showSeconds = showSeconds;
     this.faceMode = faceMode;
   }
 
   private WireUpdate(Builder builder) {
-    this(builder.events, builder.newEvents, builder.showSeconds, builder.faceMode);
+    this(builder.events, builder.newEvents, builder.faceMode);
     setBuilder(builder);
   }
 
@@ -53,7 +48,6 @@ public final class WireUpdate extends Message {
     WireUpdate o = (WireUpdate) other;
     return equals(events, o.events)
         && equals(newEvents, o.newEvents)
-        && equals(showSeconds, o.showSeconds)
         && equals(faceMode, o.faceMode);
   }
 
@@ -63,7 +57,6 @@ public final class WireUpdate extends Message {
     if (result == 0) {
       result = events != null ? events.hashCode() : 1;
       result = result * 37 + (newEvents != null ? newEvents.hashCode() : 0);
-      result = result * 37 + (showSeconds != null ? showSeconds.hashCode() : 0);
       result = result * 37 + (faceMode != null ? faceMode.hashCode() : 0);
       hashCode = result;
     }
@@ -74,7 +67,6 @@ public final class WireUpdate extends Message {
 
     public List<WireEvent> events;
     public Boolean newEvents;
-    public Boolean showSeconds;
     public Integer faceMode;
 
     public Builder() {
@@ -85,7 +77,6 @@ public final class WireUpdate extends Message {
       if (message == null) return;
       this.events = copyOf(message.events);
       this.newEvents = message.newEvents;
-      this.showSeconds = message.showSeconds;
       this.faceMode = message.faceMode;
     }
 
@@ -102,11 +93,6 @@ public final class WireUpdate extends Message {
     /**
      * true: the events are new, have a look; false: ignore the events field
      */
-    public Builder showSeconds(Boolean showSeconds) {
-      this.showSeconds = showSeconds;
-      return this;
-    }
-
     public Builder faceMode(Integer faceMode) {
       this.faceMode = faceMode;
       return this;

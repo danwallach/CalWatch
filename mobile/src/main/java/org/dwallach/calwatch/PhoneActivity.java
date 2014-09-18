@@ -19,7 +19,6 @@ import java.util.Observer;
 public class PhoneActivity extends Activity implements Observer {
     private final static String TAG = "PhoneActivity";
 
-    private Switch toggle;
     private RadioButton toolButton, numbersButton, liteButton;
     private MyViewAnim clockView;
 
@@ -100,7 +99,6 @@ public class PhoneActivity extends Activity implements Observer {
         setContentView(R.layout.activity_phone);
 
         // Core UI widgets: find 'em
-        toggle = (Switch)findViewById(R.id.toggleButton);
         liteButton = (RadioButton) findViewById(R.id.liteButton);
         toolButton = (RadioButton) findViewById(R.id.toolButton);
         numbersButton = (RadioButton) findViewById(R.id.numbersButton);
@@ -108,13 +106,6 @@ public class PhoneActivity extends Activity implements Observer {
         clockView.setSleepInEventLoop(true);
 
         Log.v(TAG, "registering callback");
-
-        // Register the onClick listener for the seconds? button
-        toggle.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
-            public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
-                showSecondsStateChange(isChecked);
-            }
-        });
 
         liteButton.setOnClickListener(new View.OnClickListener() {
             public void onClick(View v) {
@@ -178,13 +169,6 @@ public class PhoneActivity extends Activity implements Observer {
         if(clockView != null) clockView.pause(); // shouldn't be necessary, but isn't happening on its own
     }
 
-    // when the user clicks the button
-    protected void showSecondsStateChange(boolean state) {
-        Log.v(TAG, state?"Selected":"Unselected");
-
-        getClockState().setShowSeconds(state);
-    }
-
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         // Inflate the menu; this adds items to the action bar if it is present.
@@ -210,7 +194,6 @@ public class PhoneActivity extends Activity implements Observer {
         SharedPreferences.Editor editor = prefs.edit();
 
         ClockState clockState = getClockState();
-        editor.putBoolean("showSeconds", clockState.getShowSeconds());
         editor.putInt("faceMode", clockState.getFaceMode());
 
         if(!editor.commit())
@@ -223,18 +206,15 @@ public class PhoneActivity extends Activity implements Observer {
         ClockState clockState = getClockState();
 
         SharedPreferences prefs = getSharedPreferences("org.dwallach.calwatch.prefs", MODE_PRIVATE);
-        boolean showSeconds = prefs.getBoolean("showSeconds", true);
         int faceMode = prefs.getInt("faceMode", ClockState.FACE_TOOL);
 
         clockState.setFaceMode(faceMode);
-        clockState.setShowSeconds(showSeconds);
 
-        if (toggle == null || toolButton == null || numbersButton == null || liteButton == null) {
+        if (toolButton == null || numbersButton == null || liteButton == null) {
             Log.v(TAG, "loadPreferences has no widgets to update");
             return;
         }
 
-        toggle.setChecked(showSeconds);
         setFaceModeUI(faceMode);
     }
 
