@@ -99,6 +99,15 @@ public class CalendarResults {
 
         public Event event;
 
+        public String toString() {
+            return "Start(" + startTime +
+                    "), End(" + endTime +
+                    "), ID(" + eventID +
+                    "), displayColor(" + Integer.toHexString(displayColor) +
+                    "), allDay(" + allDay +
+                    "), visible(" + visible + ")";
+        }
+
         public WireEvent toWireEvent() {
             return new WireEvent(startTime, endTime, displayColor);
         }
@@ -121,16 +130,16 @@ public class CalendarResults {
 
     public List<WireEvent> getWireEvents() {
         List<WireEvent> wireList = new ArrayList<WireEvent>();
-        for(Event e : events) {
-            wireList.add(e.toWireEvent());
+        for(Instance instance : instances) {
+            wireList.add(instance.toWireEvent());
         }
         return wireList;
     }
 
     public List<EventWrapper> getWrappedEvents() {
         List<EventWrapper> wireList = new ArrayList<EventWrapper>();
-        for(Event e : events) {
-            wireList.add(new EventWrapper(e.toWireEvent()));
+        for(Instance instance : instances) {
+            wireList.add(new EventWrapper(instance.toWireEvent()));
         }
         return wireList;
     }
