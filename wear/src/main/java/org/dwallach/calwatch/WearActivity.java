@@ -52,6 +52,8 @@ public class WearActivity extends Activity {
 
         singletonActivity = this;
 
+        BatteryMonitor.init(this);
+
         // start the background service, if it's not already running
         WearReceiverService.kickStart(this);
 

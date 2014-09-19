@@ -588,6 +588,13 @@ public class ClockFace implements Observer {
         BatteryMonitor batteryMonitor = BatteryMonitor.getSingleton();
         float batteryPct;
 
+        if(batteryMonitor == null) {
+            // Whoops, not initialized yet, so we'll just return and wait for it to come
+            // around later. We're initializing this from the service *and* from the activity,
+            // so it *should* be around, but paranoia says check your errors...
+            return;
+        }
+
         // we don't want to poll *too* often; this translates to about once per five minute
         if(batteryPathCache == null ||
                 (calendarTicker % 300000 == 0)) {

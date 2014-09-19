@@ -96,6 +96,8 @@ public class PhoneActivity extends Activity implements Observer {
 
         getClockState(); // initialize it, if it's not already here
 
+        BatteryMonitor.init(this);
+
         setContentView(R.layout.activity_phone);
 
         // Core UI widgets: find 'em
