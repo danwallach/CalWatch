@@ -248,32 +248,6 @@ public class ClockFace implements Observer {
             pc.set(p);
         }
 
-        /*
-         * Below is the version that plots out lots of points around the circle because I didn't understand
-         * how the arc-paths worked. This is now obsolete but will stick around here in case I want it
-         * for comparison at some point.
-         */
-
-        /*
-        Path p = pc.get();
-        if(p == null) {
-            // Log.v(TAG, "new path!" + (long) secondsStart + " " + (long) secondsEnd + " " + startRadius + " " + endRadius);
-            p = new Path();
-            double dt = 0.2; // smaller numbers == closer to a proper arc
-
-            p.moveTo(clockX(secondsStart, startRadius), clockY(secondsStart, startRadius));
-            for (double theta = secondsStart; theta < secondsEnd; theta += dt)
-                p.lineTo(clockX(theta, startRadius), clockY(theta, startRadius));
-            p.lineTo(clockX(secondsEnd, startRadius), clockY(secondsEnd, startRadius));
-            p.lineTo(clockX(secondsEnd, endRadius), clockY(secondsEnd, endRadius));
-            for (double theta = secondsEnd; theta >= secondsStart; theta -= dt)
-                p.lineTo(clockX(theta, endRadius), clockY(theta, endRadius));
-            p.close();
-
-            pc.set(p);
-        }
-        */
-
         canvas.drawPath(p, paint);
         canvas.drawPath(p, outlinePaint);
     }
@@ -298,13 +272,6 @@ public class ClockFace implements Observer {
     }
 
     private void drawShadowText(Canvas canvas, String text, float x, float y, Paint paint, Paint shadowPaint) {
-        // TODO: sort out how to render the text as an outline and thus shrink this from 26 drawText calls to two of them
-        /*
-        for(float sx=-2.8f; sx<=3.0f; sx += 1.4f)
-            for(float sy=-2.8f; sy<3.0; sy += 1.4f)
-                canvas.drawText(text, x - sx*shadow, y - sy*shadow, shadowPaint);
-        */
-
         canvas.drawText(text, x, y, shadowPaint);
         canvas.drawText(text, x, y, paint);
     }
@@ -613,30 +580,6 @@ public class ClockFace implements Observer {
             Log.v(TAG, "fetching new battery status (" + calendarTicker + ")");
             batteryPct = batteryMonitor.getBatteryPct();
             batteryPathCache = new Path();
-
-
-            //
-            // Old idea: we want to draw a circle in the center of the watchface, where you might
-            // normally have the hands coming together and have a mechanical spindle or something.
-            // Instead, we're going to draw a white dot, a circle. But, we're going to shave off the
-            // top as the charge drops.
-            //
-            // We need to compute the angle, relative to the top. This calls for cos^{-1}. We need
-            // to rescale the batteryPct to +/- 1, then the inverse trig function will tell us the
-            // angle from 0 to PI, which we then have to rescale to 360 degrees.
-            //
-
-            /*
-            double theta = 180 * Math.acos(batteryPct * 2.0 - 1.0) / Math.PI;
-
-            float drawRadius = .06f;
-
-            RectF circle = getRectRadius(drawRadius);
-            batteryPathCache.arcTo(circle, (float) (theta - 90), (float)(360 - 2*theta), true);
-            batteryPathCache.close();
-
-            batteryLow = (batteryPct <= 0.1f);
-            */
 
             //
             // New idea: draw nothing unless the battery is low. At 50%, we start a small yellow
