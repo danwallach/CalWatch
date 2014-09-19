@@ -427,8 +427,8 @@ public class ClockFace implements Observer {
         double minutes = seconds / 60.0;
         double hours = minutes / 12.0;  // because drawRadialLine is scaled to a 60-unit circle
 
-        drawRadialLine(canvas, minutes, 0.1f, 0.9f, whiteMinute, superThinBlack);
         drawRadialLine(canvas, hours, 0.1f, 0.6f, whiteHour, superThinBlack);
+        drawRadialLine(canvas, minutes, 0.1f, 0.9f, whiteMinute, superThinBlack);
 
         if(!ambientMode) {
             // ugly details: we might run 10% or more away from our targets at 4Hz, making the second
