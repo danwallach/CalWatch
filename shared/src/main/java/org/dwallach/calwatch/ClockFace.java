@@ -226,19 +226,24 @@ public class ClockFace implements Observer {
         Path p = pc.get();
         if(p == null) {
             p = new Path();
-            RectF startOval = getRectRadius(startRadius);
-            RectF endOval = getRectRadius(endRadius);
 
-            p.arcTo(startOval, (float) (secondsStart * 6 - 90), (float) ((secondsEnd - secondsStart) * 6), true);
-            if(!ambientMode)
+            if(ambientMode) {
+                RectF midOval = getRectRadius((startRadius + endRadius) / 2f);
+
+                p.arcTo(midOval, (float) (secondsStart * 6 - 90), (float) ((secondsEnd - secondsStart) * 6), true);
+            } else {
+                RectF startOval = getRectRadius(startRadius);
+                RectF endOval = getRectRadius(endRadius);
+
+                p.arcTo(startOval, (float) (secondsStart * 6 - 90), (float) ((secondsEnd - secondsStart) * 6), true);
                 p.arcTo(endOval, (float) (secondsEnd * 6 - 90), (float) (-(secondsEnd - secondsStart) * 6));
 
 //            Log.e(TAG, "New arc: radius(" + Float.toString((float) startRadius) + "," + Float.toString((float) endRadius) +
 //                    "), seconds(" + Float.toString((float) secondsStart) + "," + Float.toString((float) secondsEnd) + ")");
 //            Log.e(TAG, "--> arcTo: startOval, " + Float.toString((float) (secondsStart * 6 - 90)) + ", " +  Float.toString((float) ((secondsEnd - secondsStart) * 6)));
 //            Log.e(TAG, "--> arcTo: endOval, " + Float.toString((float) (secondsEnd * 6 - 90)) + ", " +  Float.toString((float) (-(secondsEnd - secondsStart) * 6)));
-            if(!ambientMode)
                 p.close();
+            }
 
             pc.set(p);
         }
