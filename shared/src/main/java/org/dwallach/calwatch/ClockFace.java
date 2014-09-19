@@ -57,7 +57,7 @@ public class ClockFace implements Observer {
 
     private int missingBottomPixels = 0; // Moto 360 hack; set to non-zero number to pull up the indicia
 
-    private Paint white, whiteHour, whiteMinute, yellow, smWhite, smYellow, black, smBlack, smRed, gray, outlineBlack, superThinBlack, smTextShadow, textShadow;
+    private Paint white, whiteHour, whiteMinute, yellow, smWhite, smYellow, black, smBlack, smRed, gray, outlineBlack, thickOutlineBlack, superThinBlack, smTextShadow, textShadow;
 
     private ClockState clockState;
 
@@ -97,6 +97,7 @@ public class ClockFace implements Observer {
         smRed = newPaint();
         gray = newPaint();
         outlineBlack = newPaint();
+        thickOutlineBlack = newPaint();
         smTextShadow = newPaint();
         textShadow = newPaint();
         superThinBlack = newPaint();
@@ -106,6 +107,7 @@ public class ClockFace implements Observer {
         black.setColor(Color.BLACK);
         smBlack.setColor(Color.BLACK);
         outlineBlack.setColor(Color.BLACK);
+        thickOutlineBlack.setColor(Color.BLACK);
         smTextShadow.setColor(Color.BLACK);
         textShadow.setColor(Color.BLACK);
         superThinBlack.setColor(Color.BLACK);
@@ -122,6 +124,7 @@ public class ClockFace implements Observer {
         black.setTextAlign(Paint.Align.CENTER);
 
         outlineBlack.setStyle(Paint.Style.STROKE);
+        thickOutlineBlack.setStyle(Paint.Style.STROKE);
         smTextShadow.setStyle(Paint.Style.STROKE);
         textShadow.setStyle(Paint.Style.STROKE);
         superThinBlack.setStyle(Paint.Style.STROKE);
@@ -141,7 +144,7 @@ public class ClockFace implements Observer {
         TimeWrapper.frameStart();
 
         // draw the calendar wedges first, at the bottom of the stack, then the face indices
-        if(!ambientMode) drawCalendar(canvas);
+        drawCalendar(canvas);
         drawFace(canvas);
         drawHands(canvas);
 
@@ -195,7 +198,7 @@ public class ClockFace implements Observer {
 
         path.moveTo(x1+dx, y1+dy);
         path.lineTo(x2+dx, y2+dy);
-        path.lineTo(x2-dx, y2-dy);
+        path.lineTo(x2 - dx, y2 - dy);
         path.lineTo(x1-dx, y1-dy);
         // path.lineTo(x1+dx, y1+dy);
         path.close();
@@ -227,13 +230,15 @@ public class ClockFace implements Observer {
             RectF endOval = getRectRadius(endRadius);
 
             p.arcTo(startOval, (float) (secondsStart * 6 - 90), (float) ((secondsEnd - secondsStart) * 6), true);
-            p.arcTo(endOval, (float) (secondsEnd * 6 - 90), (float) (-(secondsEnd - secondsStart) * 6));
+            if(!ambientMode)
+                p.arcTo(endOval, (float) (secondsEnd * 6 - 90), (float) (-(secondsEnd - secondsStart) * 6));
 
 //            Log.e(TAG, "New arc: radius(" + Float.toString((float) startRadius) + "," + Float.toString((float) endRadius) +
 //                    "), seconds(" + Float.toString((float) secondsStart) + "," + Float.toString((float) secondsEnd) + ")");
 //            Log.e(TAG, "--> arcTo: startOval, " + Float.toString((float) (secondsStart * 6 - 90)) + ", " +  Float.toString((float) ((secondsEnd - secondsStart) * 6)));
 //            Log.e(TAG, "--> arcTo: endOval, " + Float.toString((float) (secondsEnd * 6 - 90)) + ", " +  Float.toString((float) (-(secondsEnd - secondsStart) * 6)));
-            p.close();
+            if(!ambientMode)
+                p.close();
 
             pc.set(p);
         }
@@ -495,9 +500,10 @@ public class ClockFace implements Observer {
 
             // path caching happens inside drawRadialArc
             drawRadialArc(canvas, eventWrapper.getPathCache(), arcStart, arcEnd,
-                    calendarRingMaxRadius - evMinLevel * calendarRingWidth / (maxLevel+1),
-                    calendarRingMaxRadius - (evMaxLevel+1) * calendarRingWidth / (maxLevel+1),
-                    eventWrapper.getPaint(), outlineBlack);
+                    calendarRingMaxRadius - evMinLevel * calendarRingWidth / (maxLevel + 1),
+                    calendarRingMaxRadius - (evMaxLevel + 1) * calendarRingWidth / (maxLevel + 1),
+                    (ambientMode)?white:eventWrapper.getPaint(),
+                    (ambientMode)?thickOutlineBlack:outlineBlack);
         }
 
         // Lastly, draw a stippled pattern at the current hour mark to delineate where the
@@ -670,7 +676,7 @@ public class ClockFace implements Observer {
     public void setAmbientMode(boolean mode) {
         Log.i(TAG, "Ambient mode: " + mode);
         ambientMode = mode;
-        wipeCaches();       // this might be overkill, but we definitely have to nuke the facePathCache
+        wipeCaches();
     }
 
     public boolean getAmbientMode() {
@@ -715,6 +721,7 @@ public class ClockFace implements Observer {
         smTextShadow.setStrokeWidth(lineWidth / 4);
         textShadow.setStrokeWidth(lineWidth / 2);
         outlineBlack.setStrokeWidth(lineWidth /6);
+        thickOutlineBlack.setStrokeWidth(lineWidth*1.2f);
         superThinBlack.setStrokeWidth(lineWidth / 8);
 
         wipeCaches();
