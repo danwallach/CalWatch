@@ -1,5 +1,4 @@
 Port to Android Wear
--- Useful article including sample code: http://toastdroid.com/2014/07/18/developing-watchfaces-for-android-wear/
 -- How to set up the damn emulator: http://www.tech-recipes.com/rx/49586/how-do-i-connect-an-android-wear-emulator-to-a-real-phone/
    adb -d forward tcp:5601 tcp:5601
 
@@ -10,7 +9,7 @@ Port to Android Wear
         http://stackoverflow.com/questions/24907557/android-wear-type-detection-round-or-square
         http://stackoverflow.com/questions/22525582/is-there-any-way-to-detect-if-the-clock-is-round
 
-    TODO detect Moto 360 and deal with cropping
+    DONE?! detect Moto 360 and deal with cropping
     -- only way to detect seems to be using android.os.Build.MODEL, but I don't know the value until I've got a real Moto 360.
     -- cropping code is otherwise ready to go
 
@@ -56,7 +55,3 @@ Further improvements:
 
     http://jacopguide.osolpro.com/guideJaCoP.html
     http://www.constraintsolving.com/solvers/java-based-solvers
-
-  Moto 360:
-    DONE!! pull back the radius along the bottom to fit the cropped ~30 pixels -- maybe an extension to drawRadialLine that knows about the bounding box and projects the line backward
-    TODO android.os.Build check for whether we're on Moto 360, then set the crop factor

@@ -479,7 +479,6 @@ public class ClockFace implements Observer {
                     calendarRingMaxRadius - (evMaxLevel + 1) * calendarRingWidth / (maxLevel + 1),
                     (ambientMode)?white:eventWrapper.getPaint(),
                     outlineBlack);
-//                    (ambientMode)?thickOutlineBlack:outlineBlack);
         }
 
         // Lastly, draw a stippled pattern at the current hour mark to delineate where the
