@@ -227,22 +227,25 @@ public class ClockFace implements Observer {
         if(p == null) {
             p = new Path();
 
+            RectF midOval = getRectRadius((startRadius + endRadius) / 2f + 0.025f);
+            RectF midOvalDelta = getRectRadius((startRadius + endRadius) / 2f - 0.025f);
+            RectF startOval = getRectRadius(startRadius);
+            RectF endOval = getRectRadius(endRadius);
             if(ambientMode) {
-                RectF midOval = getRectRadius((startRadius + endRadius) / 2f);
-
+                // in ambient mode, we're going to draw some slender arcs of fixed width at roughly the center of the big
+                // colored pie wedge which we normally show when we're not in ambient mode
                 p.arcTo(midOval, (float) (secondsStart * 6 - 90), (float) ((secondsEnd - secondsStart) * 6), true);
+                p.arcTo(midOvalDelta, (float) (secondsEnd * 6 - 90), (float) (-(secondsEnd - secondsStart) * 6));
+                p.close();
             } else {
-                RectF startOval = getRectRadius(startRadius);
-                RectF endOval = getRectRadius(endRadius);
-
                 p.arcTo(startOval, (float) (secondsStart * 6 - 90), (float) ((secondsEnd - secondsStart) * 6), true);
                 p.arcTo(endOval, (float) (secondsEnd * 6 - 90), (float) (-(secondsEnd - secondsStart) * 6));
+                p.close();
 
 //            Log.e(TAG, "New arc: radius(" + Float.toString((float) startRadius) + "," + Float.toString((float) endRadius) +
 //                    "), seconds(" + Float.toString((float) secondsStart) + "," + Float.toString((float) secondsEnd) + ")");
 //            Log.e(TAG, "--> arcTo: startOval, " + Float.toString((float) (secondsStart * 6 - 90)) + ", " +  Float.toString((float) ((secondsEnd - secondsStart) * 6)));
 //            Log.e(TAG, "--> arcTo: endOval, " + Float.toString((float) (secondsEnd * 6 - 90)) + ", " +  Float.toString((float) (-(secondsEnd - secondsStart) * 6)));
-                p.close();
             }
 
             pc.set(p);
@@ -475,7 +478,8 @@ public class ClockFace implements Observer {
                     calendarRingMaxRadius - evMinLevel * calendarRingWidth / (maxLevel + 1),
                     calendarRingMaxRadius - (evMaxLevel + 1) * calendarRingWidth / (maxLevel + 1),
                     (ambientMode)?white:eventWrapper.getPaint(),
-                    (ambientMode)?thickOutlineBlack:outlineBlack);
+                    outlineBlack);
+//                    (ambientMode)?thickOutlineBlack:outlineBlack);
         }
 
         // Lastly, draw a stippled pattern at the current hour mark to delineate where the

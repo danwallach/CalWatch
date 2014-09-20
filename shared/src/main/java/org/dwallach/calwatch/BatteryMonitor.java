@@ -18,7 +18,7 @@ public class BatteryMonitor {
     private int chargePlug;
     private boolean usbCharge;
     private boolean acCharge;
-    private float batteryPct;
+    private float batteryPct = 1.0f;
 
     private static BatteryMonitor singleton;
 
@@ -50,22 +50,27 @@ public class BatteryMonitor {
         // official docs.
         // http://developer.android.com/training/monitoring-device-state/battery-monitoring.html
 
-        IntentFilter ifilter = new IntentFilter(Intent.ACTION_BATTERY_CHANGED);
-        Intent batteryStatus = context.registerReceiver(null, ifilter);
+        try {
+            IntentFilter ifilter = new IntentFilter(Intent.ACTION_BATTERY_CHANGED);
+            Intent batteryStatus = context.registerReceiver(null, ifilter);
 
-        // Are we charging / charged?
-        status = batteryStatus.getIntExtra(BatteryManager.EXTRA_STATUS, -1);
-        isCharging = (status == BatteryManager.BATTERY_STATUS_CHARGING || status == BatteryManager.BATTERY_STATUS_FULL);
+            // Are we charging / charged?
+            status = batteryStatus.getIntExtra(BatteryManager.EXTRA_STATUS, -1);
+            isCharging = (status == BatteryManager.BATTERY_STATUS_CHARGING || status == BatteryManager.BATTERY_STATUS_FULL);
 
-        // How are we charging?
-        chargePlug = batteryStatus.getIntExtra(BatteryManager.EXTRA_PLUGGED, -1);
-        usbCharge = chargePlug == BatteryManager.BATTERY_PLUGGED_USB;
-        acCharge = chargePlug == BatteryManager.BATTERY_PLUGGED_AC;
+            // How are we charging?
+            chargePlug = batteryStatus.getIntExtra(BatteryManager.EXTRA_PLUGGED, -1);
+            usbCharge = chargePlug == BatteryManager.BATTERY_PLUGGED_USB;
+            acCharge = chargePlug == BatteryManager.BATTERY_PLUGGED_AC;
 
-        int level = batteryStatus.getIntExtra(BatteryManager.EXTRA_LEVEL, -1);
-        int scale = batteryStatus.getIntExtra(BatteryManager.EXTRA_SCALE, -1);
+            int level = batteryStatus.getIntExtra(BatteryManager.EXTRA_LEVEL, -1);
+            int scale = batteryStatus.getIntExtra(BatteryManager.EXTRA_SCALE, -1);
 
-        batteryPct = level / (float)scale;
+            batteryPct = level / (float) scale;
+        } catch (Throwable throwable) {
+            // if something fails, we really don't care; whatever value as in batteryPct from
+            // last time is just fine for the next time
+        }
     }
 
     public float getBatteryPct() {
