@@ -14,6 +14,7 @@ public class EventWrapper {
     private PathCache pathCache;
     private Paint paint;
     private int minLevel, maxLevel;
+    private int localID;
 
     public EventWrapper(WireEvent wireEvent) {
         this.wireEvent = wireEvent;
@@ -39,6 +40,10 @@ public class EventWrapper {
     public int getMaxLevel() { return maxLevel; }
 
     public void setMaxLevel(int maxLevel) { this.maxLevel = maxLevel; }
+
+    public void setLocalID(int localID) { this.localID = localID; }
+
+    public int getLocalID() { return localID; }
 
     public boolean overlaps(EventWrapper e) {
         return this.wireEvent.startTime < e.wireEvent.endTime && e.wireEvent.startTime < this.wireEvent.endTime;
