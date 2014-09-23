@@ -21,7 +21,7 @@ public class EventLayoutUniformTest extends TestCase {
 
         boolean success = EventLayoutUniform.go(data);
         assertEquals(success, true);
-        levelCheck(data, 1000);
+        levelCheck(data, EventLayoutUniform.MAXLEVEL);
 
         data = new Builder().add(new WireEvent(1L, 10L, 1))
                 .add(new WireEvent(5L, 20L, 2))
@@ -31,9 +31,10 @@ public class EventLayoutUniformTest extends TestCase {
 
         success = EventLayoutUniform.go(data);
         assertEquals(success, true);
-        levelCheck(data, 1000);
+        levelCheck(data, EventLayoutUniform.MAXLEVEL);
 
-        // okay, now for something really evil: a really long event with three stacks below it
+        // okay, now for something really evil: a really long event with three stacks below it of
+        // difference sizes, and another stack on the side
 
         data = new Builder().add(new WireEvent(1L, 30L, 1))
                 .add(new WireEvent(1L, 5L, 2))
@@ -42,11 +43,13 @@ public class EventLayoutUniformTest extends TestCase {
                 .add(new WireEvent(21L, 25L, 5))
                 .add(new WireEvent(21L, 25L, 6))
                 .add(new WireEvent(21L, 25L, 7))
+                .add(new WireEvent(31L, 35L, 8))
+                .add(new WireEvent(31L, 35L, 9))
                 .get();
 
         success = EventLayoutUniform.go(data);
         assertEquals(success, true);
-        levelCheck(data, 1000);
+        levelCheck(data, EventLayoutUniform.MAXLEVEL);
     }
 
     class Builder {

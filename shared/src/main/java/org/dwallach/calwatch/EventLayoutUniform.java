@@ -13,7 +13,7 @@ import EDU.Washington.grad.gjb.cassowary.*;
  */
 public class EventLayoutUniform {
     private final static String TAG = "EventLayoutUniform";
-    private final static int MAXLEVEL = 1000; // we'll go from 0 to MAXLEVEL, inclusive
+    public final static int MAXLEVEL = 10000; // we'll go from 0 to MAXLEVEL, inclusive
 
     /**
      * Takes a list of calendar events and mutates their minLevel and maxLevel for calendar side-by-side
@@ -29,6 +29,8 @@ public class EventLayoutUniform {
         if (events == null) return true; // degenerate case, in which we trivially succeed
         nEvents = events.size();
         if (nEvents == 0) return true; // degenerate case, in which we trivially succeed
+
+        int overlapCounter[] = new int[nEvents];
 
         for (i = 1; i < nEvents; i++) {
             EventWrapper e = events.get(i);
@@ -67,22 +69,29 @@ public class EventLayoutUniform {
             }
 
             // constraint: the sum of all the sizes is greater than the maximum it could ever be under the absolute best of cases
-            // (note: ClStrength.weak -- we just want to push things to be greater than the degenerate case of zero-width events)
             ClLinearInequality sumSizesEq = new ClLinearInequality(sumSizes, CL.GEQ, new ClLinearExpression(MAXLEVEL*nEvents), ClStrength.weak);
             solver.addConstraint(sumSizesEq);
 
             for (i = 0; i < nEvents; i++) {
-                for (j = i + 1; j < nEvents; j++)
+                for (j = i + 1; j < nEvents; j++) {
                     if (events.get(i).overlaps(events.get(j))) {
+                        overlapCounter[i]++;
+                        overlapCounter[j]++;
+
                         // constraint: base level + its size < base level of next dependency
                         ClLinearExpression levelPlusSize = new ClLinearExpression(startLevels[i]).plus(sizes[i]);
                         ClLinearInequality liq = new ClLinearInequality(levelPlusSize, CL.LEQ, startLevels[j], ClStrength.required);
                         solver.addConstraint(liq);
 
-                        // weak constraint: constrained segments should have the same size
-                        ClLinearEquation eqSize = new ClLinearEquation(sizes[i], new ClLinearExpression(sizes[j]), ClStrength.medium);
+                        // weak constraint: constrained segments should have the same size (0.5x weight of other weak constraints)
+                        ClLinearEquation eqSize = new ClLinearEquation(sizes[i], new ClLinearExpression(sizes[j]), ClStrength.weak, 0.5);
                         solver.addConstraint(eqSize);
                     }
+                }
+
+                // weak constraint: each block size is greater than 1/N of the size, for overlap of N
+                ClLinearInequality equalBlockSize = new ClLinearInequality(sizes[i], CL.GEQ, MAXLEVEL / (1+overlapCounter[i]), ClStrength.strong);
+                solver.addConstraint(equalBlockSize);
             }
 
             // and... away we go!
