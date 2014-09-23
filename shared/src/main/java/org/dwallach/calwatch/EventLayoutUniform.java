@@ -98,7 +98,7 @@ public class EventLayoutUniform {
                 e.setMinLevel((int) start);
                 e.setMaxLevel((int) (start + size));
 
-                Log.v(TAG, "event " + i + ": minLevel(" + start + "), maxLevel(" + start+size + ")");
+                Log.v(TAG, "event " + i + ": minLevel(" + start + "), maxLevel(" + Double.toString(start+size) + ")");
             }
         } catch (ExCLInternalError e) {
             Log.e(TAG, e.toString());

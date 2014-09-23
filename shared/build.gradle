@@ -27,5 +27,4 @@ android {
 dependencies {
     compile fileTree(dir: 'libs', include: ['*.jar'])
     compile 'com.squareup.wire:wire-runtime:1.5.1'
-    compile files('/Users/dwallach/AndroidStudioProjects/CalWatch/libs/cassowary.jar')
 }
