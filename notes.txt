@@ -40,18 +40,3 @@ BUGS BUGs BUGZ!
   -- now that we've integrated the 5-second alarm, we should try killing off the
      render thread as part of the onStop() lifecycle *and* should immediately render
      the screen when the lifecycle moves back into action. Will that work?
-
-Further improvements:
-  Calendar rendering:
-    TODO if we've got a busy calendar on one side of the watch and a simpler one on the other side, we can have unbalanced wedges (one could be 0-5 and the other is 6-6)
-
-    Possible solution: rather than having the current scheme where we add levels every time, we could instead start with 0 - MAXINT
-    Every wedge starts out from 0 - MAXINT. When there's overlap, we add a constraint that the two not overlap. That has us
-    setting up a series of constraints that a solver could go after. This.max is less than that.min. That.min is greater than this.max, but
-    we want to maximize the size of each wedge *and* we want to minimize another function that measures stddev over wedge thickness when
-    wedges overlap.
-
-    A constraint solver can probably do this without breaking a sweat. Seems like overkill, but might work.
-
-    http://jacopguide.osolpro.com/guideJaCoP.html
-    http://www.constraintsolving.com/solvers/java-based-solvers

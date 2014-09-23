@@ -152,9 +152,16 @@ public class ClockState extends Observable {
         }
 
         // now, we run off and do our greedy algorithm to fill out the minLevel / maxLevel on each event
-        if(eventList != null)
-            this.maxLevel = EventLayout.go(visibleEventList);
-        else
+        if(eventList != null) {
+            if(EventLayoutUniform.go(visibleEventList)) {
+                // yeah, we succeeded
+                this.maxLevel = EventLayoutUniform.MAXLEVEL;
+            } else {
+                // something blew up with the Simplex solver, fall back
+                Log.v(TAG, "falling back to older greedy method");
+                this.maxLevel = EventLayout.go(visibleEventList);
+            }
+        } else
             this.maxLevel = 0;
 
         EventLayout.sanityTest(visibleEventList, this.maxLevel, "After clipping");
