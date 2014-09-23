@@ -1,5 +1,7 @@
 package org.dwallach.calwatch;
 
+import android.util.Log;
+
 import junit.framework.TestCase;
 
 import org.dwallach.calwatch.proto.WireEvent;
@@ -8,6 +10,7 @@ import java.util.LinkedList;
 import java.util.List;
 
 public class EventLayoutUniformTest extends TestCase {
+    private final static String TAG = "EventLayoutUniformTest";
 
     public void testGo() throws Exception {
         List<EventWrapper> data = new Builder().add(new WireEvent(1L, 10L, 1))
@@ -24,6 +27,21 @@ public class EventLayoutUniformTest extends TestCase {
                 .add(new WireEvent(5L, 20L, 2))
                 .add(new WireEvent(21L, 30L, 3))
                 .add(new WireEvent(31L, 40L, 4))
+                .get();
+
+        success = EventLayoutUniform.go(data);
+        assertEquals(success, true);
+        levelCheck(data, 1000);
+
+        // okay, now for something really evil: a really long event with three stacks below it
+
+        data = new Builder().add(new WireEvent(1L, 30L, 1))
+                .add(new WireEvent(1L, 5L, 2))
+                .add(new WireEvent(11L, 15L, 3))
+                .add(new WireEvent(11L, 15L, 4))
+                .add(new WireEvent(21L, 25L, 5))
+                .add(new WireEvent(21L, 25L, 6))
+                .add(new WireEvent(21L, 25L, 7))
                 .get();
 
         success = EventLayoutUniform.go(data);
@@ -59,6 +77,7 @@ public class EventLayoutUniformTest extends TestCase {
             EventWrapper e = events.get(i);
             assertTrue("event: " + e.toString(), e.getMinLevel() >= 0);
             assertTrue("event: " + e.toString(), e.getMaxLevel() <= maxLevel);
+            Log.v(TAG, "event " + i + ": minLevel(" + e.getMinLevel() + "), maxLevel(" + e.getMaxLevel() + ")");
         }
 
     }
