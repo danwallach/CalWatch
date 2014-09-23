@@ -89,9 +89,9 @@ public class EventLayoutUniform {
                     }
                 }
 
-                // weak constraint: each block size is greater than 1/N of the size, for overlap of N
-                ClLinearInequality equalBlockSize = new ClLinearInequality(sizes[i], CL.GEQ, MAXLEVEL / (1+overlapCounter[i]), ClStrength.strong);
-                solver.addConstraint(equalBlockSize);
+                // stronger constraint: each block size is greater than 1/N of the size, for overlap of N
+//                ClLinearInequality equalBlockSize = new ClLinearInequality(sizes[i], CL.GEQ, MAXLEVEL / (1+overlapCounter[i]), ClStrength.strong);
+//                solver.addConstraint(equalBlockSize);
             }
 
             // and... away we go!
