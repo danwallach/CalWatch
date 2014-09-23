@@ -69,6 +69,7 @@ public class EventLayoutUniform {
             }
 
             // constraint: the sum of all the sizes is greater than the maximum it could ever be under the absolute best of cases
+            // (this constraint's job is to force us out of degenerate cases when the solver might prefer zeros everywhere)
             ClLinearInequality sumSizesEq = new ClLinearInequality(sumSizes, CL.GEQ, new ClLinearExpression(MAXLEVEL*nEvents), ClStrength.weak);
             solver.addConstraint(sumSizesEq);
 
@@ -90,6 +91,7 @@ public class EventLayoutUniform {
                 }
 
                 // stronger constraint: each block size is greater than 1/N of the size, for overlap of N
+                // (turns out that this didn't change the results, but removing it sped things up significantly)
 //                ClLinearInequality equalBlockSize = new ClLinearInequality(sizes[i], CL.GEQ, MAXLEVEL / (1+overlapCounter[i]), ClStrength.strong);
 //                solver.addConstraint(equalBlockSize);
             }
