@@ -174,7 +174,7 @@ public class PhoneActivity extends Activity implements Observer {
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         // Inflate the menu; this adds items to the action bar if it is present.
-        getMenuInflater().inflate(R.menu.phone, menu);
+//        getMenuInflater().inflate(R.menu.phone, menu);
         return true;
     }
 

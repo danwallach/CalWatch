@@ -151,12 +151,12 @@ public class ClockFace implements Observer {
         // something a real watch can't do: float the text over the hands
         // this visually conflicts with other notifications, drawn as text above the hands,
         // so it's easiest to just cut it during ambient mode
-        if(!ambientMode) drawMonthBox(canvas);
+        if(!getAmbientMode()) drawMonthBox(canvas);
 
         // and lastly, the battery meter
         // -- note that the watch draws its own battery meter, so this is really just window
         //    dressing, unnecessary in ambient mode
-        if(!ambientMode) drawBattery(canvas);
+        if(!getAmbientMode()) drawBattery(canvas);
 
 
         TimeWrapper.frameEnd();
@@ -231,7 +231,7 @@ public class ClockFace implements Observer {
             RectF midOvalDelta = getRectRadius((startRadius + endRadius) / 2f - 0.025f);
             RectF startOval = getRectRadius(startRadius);
             RectF endOval = getRectRadius(endRadius);
-            if(ambientMode) {
+            if(getAmbientMode()) {
                 // in ambient mode, we're going to draw some slender arcs of fixed width at roughly the center of the big
                 // colored pie wedge which we normally show when we're not in ambient mode
                 p.arcTo(midOval, (float) (secondsStart * 6 - 90), (float) ((secondsEnd - secondsStart) * 6), true);
@@ -313,7 +313,7 @@ public class ClockFace implements Observer {
                         drawRadialLine(p, strokeWidth, -0.4f, .8f, 1.0f, true, false);
                         drawRadialLine(p, strokeWidth, 0.4f, .8f, 1.0f, true, false);
                     }
-                } else if (i == 45 && !ambientMode) { // 9 o'clock, don't extend into the inside
+                } else if (i == 45 && !getAmbientMode()) { // 9 o'clock, don't extend into the inside
                     drawRadialLine(p, strokeWidth, i, 0.9f, 1.0f, false, false);
                 } else {
                     // we want lines for 1, 2, 4, 5, 7, 8, 10, and 11 no matter what
@@ -386,7 +386,7 @@ public class ClockFace implements Observer {
             // 9 o'clock
             //
 
-            if(ambientMode) {
+            if(getAmbientMode()) {
                 r = 0.9f;
                 float nineWidth = white.measureText("9");
 
@@ -410,7 +410,7 @@ public class ClockFace implements Observer {
         drawRadialLine(canvas, hours, 0.1f, 0.6f, whiteHour, superThinBlack);
         drawRadialLine(canvas, minutes, 0.1f, 0.9f, whiteMinute, superThinBlack);
 
-        if(!ambientMode) {
+        if(!getAmbientMode()) {
             // ugly details: we might run 10% or more away from our targets at 4Hz, making the second
             // hand miss the indices. Ugly. Thus, some hackery.
             if(clipSeconds) seconds = Math.floor(seconds * freqUpdate) / freqUpdate;
@@ -477,7 +477,7 @@ public class ClockFace implements Observer {
             drawRadialArc(canvas, eventWrapper.getPathCache(), arcStart, arcEnd,
                     calendarRingMaxRadius - evMinLevel * calendarRingWidth / (maxLevel + 1),
                     calendarRingMaxRadius - (evMaxLevel + 1) * calendarRingWidth / (maxLevel + 1),
-                    (ambientMode)?white:eventWrapper.getPaint(),
+                    (getAmbientMode())?white:eventWrapper.getPaint(),
                     outlineBlack);
         }
 
@@ -617,7 +617,7 @@ public class ClockFace implements Observer {
             else
                 paint = smYellow;
 
-            if(ambientMode)
+            if(getAmbientMode())
                 paint = smWhite;
 
             canvas.drawPath(batteryPathCache, paint);

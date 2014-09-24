@@ -203,7 +203,7 @@ public class CalendarFetcher extends Observable implements Runnable {
                 if(instance.visible && !instance.allDay)
                     cr.instances.add(instance);
 
-                Log.v(TAG, "visible instances found: " + instance.toString());
+//                Log.v(TAG, "visible instances found: " + instance.toString());
             } while (iCursor.moveToNext());
         }
 
