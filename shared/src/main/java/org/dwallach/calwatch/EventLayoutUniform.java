@@ -99,7 +99,7 @@ public class EventLayoutUniform {
             // and... away we go!
             solver.solve();
 
-            Log.v(TAG, "solver completed!");
+            Log.v(TAG, "Event layout success.");
 
             for(i=0; i<nEvents; i++) {
                 EventWrapper e = events.get(i);
@@ -120,7 +120,7 @@ public class EventLayoutUniform {
             return false;
         } finally {
             long nanoStop = SystemClock.elapsedRealtimeNanos();
-            Log.v(TAG, "Constraing solver, completed: " + (Double.toString((nanoStop - nanoStart) / 1000000.0)) + " ms");
+            Log.v(TAG, "Event layout time: " + (Double.toString((nanoStop - nanoStart) / 1000000.0)) + " ms");
         }
 
         return true;

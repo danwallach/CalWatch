@@ -125,7 +125,7 @@ public class TimeWrapper {
         samples++;
 
 
-        // if at least five minutes have elapsed, then it's time to print all the things
+        // if at least one minute has elapsed, then it's time to print all the things
         if(elapsedTime > 60000000000L) { // 60 * 10^9 nanoseconds: one minute
             float fps = (samples * 1000000000f) / elapsedTime;  // * 10^9 so we're not just computing frames per nanosecond
             Log.i(TAG, "FPS: " + Float.toString(fps));
