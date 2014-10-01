@@ -3,7 +3,6 @@ package org.dwallach.calwatch;
 import android.app.AlarmManager;
 import android.app.PendingIntent;
 import android.content.BroadcastReceiver;
-import android.content.ContentResolver;
 import android.content.Context;
 import android.content.Intent;
 import android.os.PowerManager;
@@ -16,8 +15,8 @@ import java.util.concurrent.Executors;
  * This sad and pathetic class serves one function: to continually kick the WatchCalendarService
  * back to life if it's somehow managed to die
  */
-public class WatchReceiver extends BroadcastReceiver {
-    private final static String TAG = "WatchReceiver";
+public class WakeupReceiver extends BroadcastReceiver {
+    private final static String TAG = "WakeupReceiver";
 
     private static volatile boolean firstTime = true;
     private static volatile long lastTime = -1;
@@ -92,7 +91,7 @@ public class WatchReceiver extends BroadcastReceiver {
                 // goal: the onReceive method will get kicked once every 15 minutes or so, which will then
                 // in turn kick the calendar service. We really, really don't want the service to stay dead
                 // for very long, if ever.
-                Intent alarmIntent = new Intent(context, WatchReceiver.class);
+                Intent alarmIntent = new Intent(context, WakeupReceiver.class);
                 PendingIntent pending = PendingIntent.getBroadcast(context, 0, alarmIntent, PendingIntent.FLAG_CANCEL_CURRENT);
 
 

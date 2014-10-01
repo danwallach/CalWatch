@@ -6,15 +6,11 @@ import android.graphics.Paint;
 import android.graphics.Path;
 import android.graphics.RectF;
 import android.os.Build;
-import android.text.format.DateUtils;
 import android.util.Log;
 
 import org.dwallach.calwatch.proto.WireEvent;
 
-import java.text.SimpleDateFormat;
-import java.util.Date;
 import java.util.List;
-import java.util.Locale;
 import java.util.Observable;
 import java.util.Observer;
 
@@ -38,7 +34,7 @@ public class ClockFace implements Observer {
     // with a whole lot less horsepower than on the phone. Hopefully this will do the job. Also of
     // note: you can't render text to a path, only a canvas, so we can't cache the text
     // part if the user wants a watchface with text on it. Presumably, text rendering is otherwise
-    // optimized and is *not my problem*.
+    // optimized and is *not our problem*.
     //
 
     private int cx;
@@ -566,10 +562,10 @@ public class ClockFace implements Observer {
     private boolean batteryCritical = false;
 
     private void drawBattery(Canvas canvas) {
-        BatteryMonitor batteryMonitor = BatteryMonitor.getSingleton();
+        BatteryWrapper batteryWrapper = BatteryWrapper.getSingleton();
         float batteryPct;
 
-        if(batteryMonitor == null) {
+        if(batteryWrapper == null) {
             // Whoops, not initialized yet, so we'll just return and wait for it to come
             // around later. We're initializing this from the service *and* from the activity,
             // so it *should* be around, but paranoia says check your errors...
@@ -579,9 +575,9 @@ public class ClockFace implements Observer {
         // we don't want to poll *too* often; this translates to about once per five minute
         if(batteryPathCache == null ||
                 (calendarTicker % 300000 == 0)) {
-            batteryMonitor.fetchStatus();
+            batteryWrapper.fetchStatus();
             Log.v(TAG, "fetching new battery status (" + calendarTicker + ")");
-            batteryPct = batteryMonitor.getBatteryPct();
+            batteryPct = batteryWrapper.getBatteryPct();
             batteryPathCache = new Path();
 
             //

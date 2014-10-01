@@ -135,7 +135,7 @@ public class ClockState extends Observable {
 //                Log.v(TAG, "New event: startTime: " + TimeWrapper.formatGMTTime(startTime) +
 //                        ", endTime: " + TimeWrapper.formatGMTTime(endTime));
 
-                // this clipping is hopefully unnecessary as we've moved it into ClockState
+                // clip the event to the screen
                 if (startTime < clipStartMillis) startTime = clipStartMillis;
                 if (endTime > clipEndMillis) endTime = clipEndMillis;
 
@@ -151,20 +151,21 @@ public class ClockState extends Observable {
             }
         }
 
-        // now, we run off and do our greedy algorithm to fill out the minLevel / maxLevel on each event
+        // now, we run off and do screen layout
         if(eventList != null) {
+            // first, try the fancy constraint solver
             if(EventLayoutUniform.go(visibleEventList)) {
                 // yeah, we succeeded
                 this.maxLevel = EventLayoutUniform.MAXLEVEL;
             } else {
-                // something blew up with the Simplex solver, fall back
+                // something blew up with the Simplex solver, fall back to the cheesy, greedy algorithm
                 Log.v(TAG, "falling back to older greedy method");
                 this.maxLevel = EventLayout.go(visibleEventList);
             }
         } else
             this.maxLevel = 0;
 
-        EventLayout.sanityTest(visibleEventList, this.maxLevel, "After clipping");
+        EventLayout.sanityTest(visibleEventList, this.maxLevel, "After new event layout");
         Log.v(TAG, "maxLevel for new events: " + this.maxLevel);
         Log.v(TAG, "number of new events: " + visibleEventList.size());
 

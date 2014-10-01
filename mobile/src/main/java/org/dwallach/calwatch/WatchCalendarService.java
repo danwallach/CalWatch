@@ -1,13 +1,10 @@
 package org.dwallach.calwatch;
 
-import android.app.AlarmManager;
-import android.app.PendingIntent;
 import android.app.Service;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
 import android.os.IBinder;
-import android.os.SystemClock;
 import android.util.Log;
 
 import com.google.android.gms.common.ConnectionResult;
@@ -17,7 +14,6 @@ import com.google.android.gms.wearable.MessageEvent;
 import com.google.android.gms.wearable.Node;
 import com.google.android.gms.wearable.Wearable;
 
-import java.util.Calendar;
 import java.util.Observable;
 import java.util.Observer;
 
@@ -107,7 +103,7 @@ public class WatchCalendarService extends Service implements MessageApi.MessageL
         super.onStartCommand(intent, flags, startId);
         Log.v(TAG, "service starting!");
 
-        BatteryMonitor.init(this);
+        BatteryWrapper.init(this);
         getClockState();
 
         // We want this service to continue running until it is explicitly

@@ -6,9 +6,6 @@ import android.os.AsyncTask;
 import android.os.Bundle;
 import android.util.Log;
 
-import org.dwallach.calwatch.proto.WireEvent;
-import org.dwallach.calwatch.proto.WireUpdate;
-
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.api.GoogleApiClient;
 import com.google.android.gms.wearable.MessageApi;
@@ -17,11 +14,6 @@ import com.google.android.gms.wearable.Node;
 import com.google.android.gms.wearable.NodeApi;
 import com.google.android.gms.wearable.Wearable;
 import com.google.android.gms.wearable.WearableListenerService;
-import com.squareup.wire.Wire;
-
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.concurrent.TimeUnit;
 
 /**
  * This class pairs up with WearSender
@@ -66,7 +58,7 @@ public class WearReceiverService extends WearableListenerService implements Goog
 
         // this also seems a reasonable place to set up the battery monitor
 
-        BatteryMonitor.init(this);
+        BatteryWrapper.init(this);
 
         return START_STICKY;
     }
@@ -163,6 +155,9 @@ public class WearReceiverService extends WearableListenerService implements Goog
                     NodeApi.GetConnectedNodesResult nodes =
                             Wearable.NodeApi.getConnectedNodes(mGoogleApiClient).await();
                     int failures = 0;
+
+                    // TODO: test weird cases when we have one watch associated with >1 phone
+                    // (is that possible?) or one phone associated with more than one phone
                     for (Node node : nodes.getNodes()) {
                         Log.v(TAG, "Sending to node: " + node.getDisplayName());
                         MessageApi.SendMessageResult result = Wearable.MessageApi.sendMessage(

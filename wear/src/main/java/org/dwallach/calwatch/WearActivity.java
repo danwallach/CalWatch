@@ -11,14 +11,9 @@ import android.hardware.display.DisplayManager;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
-import android.os.PowerManager;
 import android.support.wearable.view.WatchViewStub;
 import android.util.Log;
 import android.view.Display;
-import android.view.WindowManager;
-
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
 
 public class WearActivity extends Activity {
     private static final String TAG = "WearActivity";
@@ -52,7 +47,7 @@ public class WearActivity extends Activity {
 
         singletonActivity = this;
 
-        BatteryMonitor.init(this);
+        BatteryWrapper.init(this);
 
         // start the background service, if it's not already running
         WearReceiverService.kickStart(this);

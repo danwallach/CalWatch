@@ -49,7 +49,7 @@ public class CalendarFetcher extends Observable implements Runnable {
 
         //
         // This is the event loop of the background thread. Its job is to snarf calendar content
-        // whenever it changes. It will make at most one set of queries every two seconds, but that
+        // whenever it changes. It will make at most one query every two seconds, but that
         // would only ever happen if the calendar were actually *changing* that fast. In the common
         // case, where the calendar stays put, the observers that are watching it (set in loadContent())
         // won't fire and this event loop will simply wake up every two seconds, notice that newContentAvailable

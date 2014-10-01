@@ -9,8 +9,8 @@ import android.util.Log;
 /**
  * Created by dwallach on 9/1/14.
  */
-public class BatteryMonitor {
-    private static final String TAG = "BatteryMonitor";
+public class BatteryWrapper {
+    private static final String TAG = "BatteryWrapper";
 
     private Context context;
     private int status;
@@ -20,17 +20,17 @@ public class BatteryMonitor {
     private boolean acCharge;
     private float batteryPct = 1.0f;
 
-    private static BatteryMonitor singleton;
+    private static BatteryWrapper singleton;
 
 
-    private BatteryMonitor(Context context) {
+    private BatteryWrapper(Context context) {
         this.context = context;
         singleton = this;
     }
 
     public static void init(Context context) {
         if(singleton == null) {
-            singleton = new BatteryMonitor(context);
+            singleton = new BatteryWrapper(context);
         } else if (context != singleton.context) {
             Log.v(TAG, "Hmm, a new context");
             singleton.context = context;
@@ -38,9 +38,9 @@ public class BatteryMonitor {
         singleton.fetchStatus();
     }
 
-    public static BatteryMonitor getSingleton() {
+    public static BatteryWrapper getSingleton() {
         if(singleton == null)
-            Log.e(TAG, "BatteryMonitor not initialized properly");
+            Log.e(TAG, "BatteryWrapper not initialized properly");
 
         return singleton;
     }

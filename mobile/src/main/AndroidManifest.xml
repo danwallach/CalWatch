@@ -35,7 +35,7 @@
 
 
         <receiver
-            android:name=".WatchReceiver"
+            android:name=".WakeupReceiver"
             android:enabled="true"
             android:exported="true">
             <intent-filter>

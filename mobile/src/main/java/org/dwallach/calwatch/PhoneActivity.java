@@ -1,16 +1,12 @@
 package org.dwallach.calwatch;
 import android.app.Activity;
-import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
-import android.os.Debug;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
-import android.widget.CompoundButton;
 import android.widget.RadioButton;
-import android.widget.Switch;
 
 import java.util.Observable;
 import java.util.Observer;
@@ -96,7 +92,7 @@ public class PhoneActivity extends Activity implements Observer {
 
         getClockState(); // initialize it, if it's not already here
 
-        BatteryMonitor.init(this);
+        BatteryWrapper.init(this);
 
         setContentView(R.layout.activity_phone);
 
@@ -127,7 +123,7 @@ public class PhoneActivity extends Activity implements Observer {
             }
         });
 
-        WatchReceiver.kickStart(this);        // bring it up, if it's not already up
+        WakeupReceiver.kickStart(this);        // bring it up, if it's not already up
         WatchCalendarService.kickStart(this); // bring it up, if it's not already up
 
         loadPreferences();
