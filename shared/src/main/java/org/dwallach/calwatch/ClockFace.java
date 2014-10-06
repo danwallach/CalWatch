@@ -623,6 +623,10 @@ public class ClockFace implements Observer {
     public void setAmbientMode(boolean mode) {
         Log.i(TAG, "Ambient mode: " + mode);
         ambientMode = mode;
+
+        if(ambientMode == oldAmbientMode) return; // nothing changed, we're done
+        oldAmbientMode = ambientMode;
+
         wipeCaches();
     }
 
@@ -715,7 +719,7 @@ public class ClockFace implements Observer {
     }
 
     private int faceMode;
-    private boolean ambientMode = false;
+    private boolean ambientMode = false, oldAmbientMode = false;
     private List<EventWrapper> eventList;
     private int maxLevel;
 

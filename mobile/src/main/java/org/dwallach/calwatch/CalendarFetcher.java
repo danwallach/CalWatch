@@ -188,24 +188,31 @@ public class CalendarFetcher extends Observable implements Runnable {
         // now, get the list of events
         Cursor iCursor = CalendarContract.Instances.query(ctx.getContentResolver(), instancesProjection, queryStartMillis, queryEndMillis);
 
-        if (iCursor.moveToFirst()) {
-            do {
-                CalendarResults.Instance instance = new CalendarResults.Instance();
-                int i = 0;
+        // if it's null, which shouldn't ever happen, then we at least won't gratuitously fail here
+        if(iCursor != null) {
+            if (iCursor.moveToFirst()) {
+                do {
+                    CalendarResults.Instance instance = new CalendarResults.Instance();
+                    int i = 0;
 
-                instance.startTime = iCursor.getLong(i++);
-                instance.endTime = iCursor.getLong(i++);
-                instance.eventID = iCursor.getLong(i++);
-                instance.displayColor = iCursor.getInt(i++);
-                instance.allDay = (iCursor.getInt(i++) != 0);
-                instance.visible = (iCursor.getInt(i++) != 0);
+                    instance.startTime = iCursor.getLong(i++);
+                    instance.endTime = iCursor.getLong(i++);
+                    instance.eventID = iCursor.getLong(i++);
+                    instance.displayColor = iCursor.getInt(i++);
+                    instance.allDay = (iCursor.getInt(i++) != 0);
+                    instance.visible = (iCursor.getInt(i++) != 0);
 
-                if(instance.visible && !instance.allDay)
-                    cr.instances.add(instance);
+                    if (instance.visible && !instance.allDay)
+                        cr.instances.add(instance);
 
 //                Log.v(TAG, "visible instances found: " + instance.toString());
-            } while (iCursor.moveToNext());
+                } while (iCursor.moveToNext());
+            }
+
+            // lifecycle cleanliness: important to close down when we're done
+            iCursor.close();
         }
+
 
         if(cr.instances.size() > 1) {
             // Primary sort: color, so events from the same calendar will become consecutive wedges

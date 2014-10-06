@@ -209,6 +209,10 @@ public class MyViewAnim extends SurfaceView implements SurfaceHolder.Callback {
             } catch (java.lang.IllegalStateException e) {
                 if(ticks % 1000 == 0) Log.e(TAG, "Failed to get a canvas for drawing!");
                 c = null;
+            } catch (Throwable throwable) {
+                // this should never happen
+                Log.e(TAG, "unknown exception when trying to lock canvas: " + throwable.toString());
+                c = null;
             }
 
             if(c == null) {
