@@ -124,6 +124,11 @@ public class WearActivity extends Activity {
             pendingIntent = null;
         }
 
+        if(tickReceiver != null) {
+            unregisterReceiver(tickReceiver);
+            tickReceiver = null;
+        }
+
         watchFaceRunning = false;
     }
 
