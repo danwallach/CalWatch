@@ -94,6 +94,48 @@ public class TimeWrapper {
     private static long avgRuntimeAccumulator = 0;
 
     /**
+     * for performance monitoring: start the counters over again from scratch
+     */
+    public static void frameReset() {
+        lastFPSTime = 0; // frameEnd() will change this afterward
+        samples = 0;
+        minRuntime = 0;
+        maxRuntime = 0;
+        avgRuntimeAccumulator = 0;
+    }
+
+    /**
+     * for performance monitoring: report the FPS counters and reset them immediately
+     */
+    public static void frameReport() {
+        frameReport(SystemClock.elapsedRealtimeNanos());
+    }
+
+    /**
+     * Internal version, avoids multiple calls to get the system clock
+     * @param frameEndTime
+     */
+    private static void frameReport(long frameEndTime) {
+        if(samples > 0) {
+            long elapsedTime = frameEndTime - lastFPSTime; // ns since last time we printed something
+            long runtime = frameEndTime - frameStartTime;  // ns since frameStart() called
+            float fps = (samples * 1000000000f) / elapsedTime;  // * 10^9 so we're not just computing frames per nanosecond
+            Log.i(TAG, "FPS: " + Float.toString(fps) + ", samples: " + samples);
+
+            Log.i(TAG, "Min/Avg/Max frame render speed (ms): "
+                    + minRuntime / 1000000f + " / "
+                    + (avgRuntimeAccumulator / samples) / 1000000f + " / "
+                    + maxRuntime / 1000000f);
+
+            // this waketime percentage is really a lower bound; it's not counting work in the render thread
+            // thread that's outside of the ClockFace rendering methods, and it's also not counting
+            // work that happens on other threads
+            Log.i(TAG, "Waketime: " + (100f * (avgRuntimeAccumulator - runtime) / elapsedTime) + "%");
+        }
+        frameReset();
+    }
+
+    /**
      * for performance monitoring: call this at the beginning of every screen refresh
      */
     public static void frameStart() {
@@ -127,24 +169,8 @@ public class TimeWrapper {
 
         // if at least one minute has elapsed, then it's time to print all the things
         if(elapsedTime > 60000000000L) { // 60 * 10^9 nanoseconds: one minute
-            float fps = (samples * 1000000000f) / elapsedTime;  // * 10^9 so we're not just computing frames per nanosecond
-            Log.i(TAG, "FPS: " + Float.toString(fps));
-
-            Log.i(TAG, "Min/Avg/Max frame render speed (ms): "
-                    + minRuntime / 1000000f + " / "
-                    + (avgRuntimeAccumulator/samples)/1000000f + " / "
-                    + maxRuntime / 1000000f);
-
-            // this waketime percentage is really a lower bound; it's not counting work in the render thread
-            // thread that's outside of the ClockFace rendering methods, and it's also not counting
-            // work that happens on other threads
-            Log.i(TAG, "Waketime: " + (100f * (avgRuntimeAccumulator - runtime) / elapsedTime) + "%");
-
+            frameReport(frameEndTime);
             lastFPSTime = frameEndTime;
-            samples = 0;
-            minRuntime = 0;
-            maxRuntime = 0;
-            avgRuntimeAccumulator = 0;
         }
     }
 

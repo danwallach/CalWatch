@@ -230,6 +230,8 @@ public class WearActivity extends Activity {
                         return;
                     }
 
+                    TimeWrapper.frameReport();            // dump performance data *now* before things change
+
                     // inspiration: https://gist.github.com/kentarosu/52fb21eb92181716b0ce
 
                     switch (newState) {

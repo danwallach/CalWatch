@@ -37,8 +37,8 @@ public class ClockFace implements Observer {
     // optimized and is *not our problem*.
     //
 
-    private int cx;
-    private int cy;
+    private int cx, oldCx = -1;
+    private int cy, oldCy = -1;
     private int radius;
     private float shadow;
 
@@ -633,6 +633,12 @@ public class ClockFace implements Observer {
     public void setSize(int width, int height) {
         cx = width / 2;
         cy = height / 2;
+
+        if(cx == oldCx && cy == oldCy) return; // nothing changed, we're done
+
+        oldCx = cx;
+        oldCy = cy;
+
         radius = (cx > cy) ? cy : cx; // minimum of the two
         float textSize = radius / 3f;
         float smTextSize = radius / 6f;

@@ -2,6 +2,9 @@ Port to Android Wear
 -- How to set up the damn emulator: http://www.tech-recipes.com/rx/49586/how-do-i-connect-an-android-wear-emulator-to-a-real-phone/
    adb -d forward tcp:5601 tcp:5601
 
+-- How to connect to Bluetooth debugging for Moto 360: http://blog.timmattison.com/archives/2014/07/16/common-android-wear-tasks-for-developers/
+    adb forward tcp:4444 localabstract:/adb-hub; adb connect localhost:4444
+
     TODO verify on round face
     Kludgy way to detect if we're on round vs. square:
         http://stackoverflow.com/questions/25821544/detect-moto-360-circlular-shape-and-onapplywindowinsetlistener-not-being-called
