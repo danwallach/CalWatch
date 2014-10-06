@@ -28,6 +28,19 @@ public class ClockState extends Observable {
 
     private static ClockState singleton = null;
 
+    private boolean wireInitialized = false;
+
+    /**
+     * Query whether or not a wire update has arrived yet. If the result is false,
+     * *and* we're running on the watch, then we've only got default values. If we're
+     * running on the phone, this data structure might be otherwise initialized, so
+     * this getter might return false even when the data structure is loaded with events.
+     * @return if a wire message has successfully initialized the clock state
+     */
+    public boolean getWireInitialized() {
+        return wireInitialized;
+    }
+
 
     // we don't want others constructing this
     private ClockState() { }
@@ -192,6 +205,7 @@ public class ClockState extends Observable {
 
         try {
             wireUpdate = (WireUpdate) wire.parseFrom(eventBytes, WireUpdate.class);
+            wireInitialized = true;
         } catch (IOException ioe) {
             Log.e(TAG, "parse failure on protobuf: nbytes(" + eventBytes.length + "), error(" + ioe.toString() + ")");
             return;

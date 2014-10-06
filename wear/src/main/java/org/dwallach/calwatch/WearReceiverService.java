@@ -2,8 +2,10 @@ package org.dwallach.calwatch;
 
 import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.util.Base64;
 import android.util.Log;
 
 import com.google.android.gms.common.ConnectionResult;
@@ -39,17 +41,18 @@ public class WearReceiverService extends WearableListenerService implements Goog
 
     private void newEventBytes(byte[] eventBytes) {
         ClockState clockState = ClockState.getSingleton();
+        if(clockState == null) {
+            Log.e(TAG, "whoa, no ClockState yet?!");
+            return;
+        }
         clockState.setProtobuf(eventBytes);
     }
 
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
         Log.v(TAG, "service starting!");
-        // handleCommand(intent);
-        // We want this service to continue running until it is explicitly
-        // stopped, so return sticky.
 
-        // DONE!: send message to wake up phone and update us here on the watch
+        // Send message to wake up phone and update us here on the watch
         // Note that we're doing is here and not in onCreate(). This seems
         // to get called later on, and suggests that we'll be ready to receive
         // a message in return from the phone, assuming it's alive and kicking.
@@ -60,6 +63,21 @@ public class WearReceiverService extends WearableListenerService implements Goog
 
         BatteryWrapper.init(this);
 
+        // and to load any saved data while we're waiting on the phone to give us fresh data
+
+        ClockState clockState = ClockState.getSingleton();
+        if(clockState == null) {
+            Log.e(TAG, "whoa, no ClockState yet?!");
+        } else {
+            if(clockState.getWireInitialized()) {
+                Log.v(TAG, "clock state already initialized, no need to go to saved prefs");
+            } else {
+                loadPreferences();
+            }
+        }
+
+        // We want this service to continue running until it is explicitly
+        // stopped, so return sticky.
         return START_STICKY;
     }
 
@@ -79,6 +97,7 @@ public class WearReceiverService extends WearableListenerService implements Goog
                 pingPhone(); // something went awfully wrong here
             } else {
                 newEventBytes(messageData);
+                savePreferences(messageData); // save this for subsequent restarts
             }
         } else {
             Log.v(TAG, "received message on unexpected path: " + messageEvent.getPath());
@@ -178,6 +197,51 @@ public class WearReceiverService extends WearableListenerService implements Goog
             Log.e(TAG, "pingPhone: No GoogleAPI?!");
         }
     }
+
+    /**
+     * Take a serialized state update and commit it to stable storage.
+     * @param eventBytes protobuf-serialed WireUpdate (typically received from the phone)
+     */
+    public void savePreferences(byte[] eventBytes) {
+        // if there's not enough state there to be real, then don't save it
+        if(eventBytes == null || eventBytes.length < 1)
+            return;
+
+        Log.v(TAG, "savePreferences");
+        SharedPreferences prefs = getSharedPreferences("org.dwallach.calwatch.prefs", MODE_PRIVATE);
+        SharedPreferences.Editor editor = prefs.edit();
+
+        // Kinda sad that we need to base64-encode our state before we save it, but the SharedPreferences
+        // interface doesn't allow for arbitrary arrays of bytes. So yeah, base64-encoded,
+        // protobuf-encoded, WireUpdate structure, which itself has a handful of ints and a
+        // variable-length array of WireEvents, which are themselves just a bunch of long's.
+        editor.putString("savedState", Base64.encodeToString(eventBytes, Base64.DEFAULT));
+
+        if(!editor.commit())
+            Log.v(TAG, "savePreferences commit failed ?!");
+    }
+
+    /**
+     * load saved state, if it's present, and use it to initialize the watchface.
+     */
+    public void loadPreferences() {
+        Log.v(TAG, "loadPreferences");
+
+        SharedPreferences prefs = getSharedPreferences("org.dwallach.calwatch.prefs", MODE_PRIVATE);
+        String savedState = prefs.getString("savedState", "");
+
+        if(savedState != null && savedState.length() > 0) {
+            try {
+                byte[] eventBytes = Base64.decode(savedState, Base64.DEFAULT);
+                newEventBytes(eventBytes);
+
+            } catch (IllegalArgumentException e) {
+                Log.e(TAG, "failed to decode base64 saved state: " + e.toString());
+                return;
+            }
+        }
+    }
+
 
     public static void kickStart(Context context) {
         // start the calendar service, if it's not already running
