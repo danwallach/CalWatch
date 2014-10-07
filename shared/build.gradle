@@ -8,8 +8,8 @@ android {
         applicationId "org.dwallach.calwatch.shared"
         minSdkVersion 19
         targetSdkVersion 19
-        versionCode 4
-        versionName "beta4"
+        versionCode 5
+        versionName "beta5"
     }
 
     compileOptions {

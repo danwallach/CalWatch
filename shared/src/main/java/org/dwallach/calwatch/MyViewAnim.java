@@ -128,7 +128,7 @@ public class MyViewAnim extends SurfaceView implements SurfaceHolder.Callback {
             animator.resume();
         } else {
             Log.v(TAG, "new animator starting");
-            surfaceHolder = getHolder();
+            // surfaceHolder = getHolder();
             animator = new TimeAnimator();
             animator.setTimeListener(new MyTimeListener());
             // animator.setFrameDelay(1000);  // doesn't actually work?
@@ -197,25 +197,40 @@ public class MyViewAnim extends SurfaceView implements SurfaceHolder.Callback {
         return;
     }
 
-    private SurfaceHolder surfaceHolder = null;
+    private volatile SurfaceHolder surfaceHolder = null;
     private int ticks = 0;
 
     // called by redrawClock *and* by the TimeListener contraption which is running a separate thread
     // at full 60Hz speed
     private void redrawInternal() {
         ClockFace localClockFace = clockFace; // local cached copy, to deal with concurrency issues
+        SurfaceHolder localSurfaceHolder = surfaceHolder; // local cached copy, to deal with concurrency issues
         TimeWrapper.update();
         Canvas c = null;
 
-        if(surfaceHolder == null) {
+        if(localSurfaceHolder == null) {
             Log.e(TAG, "no surface holder, can't draw anything");
             return;
         }
 
+        // Digression on surface holders: these seem to be necessary in order to draw anything. The problem
+        // seems to occur when the watch is busy putting itself to sleep while simultaneously we're trying
+        // to draw to the screen on this separate thread. There seem to be one or more redraws that will
+        // be attempted after the canvas and such is long gone. This is a source of weird exceptions and
+        // general badness.
+
+        // Original solution: when the stop() method is called (on the UI thread), it needs to stop the Looper
+        // which is doing all of the redrawing. Thus, the whole quitSafely() business and killing the animator.
+        // Yet still, there would be at least one more round-trip through the redrawing.
+
+        // Kludgy solution: stop() now also nulls out the surface holder (a volatile private member variable,
+        // so we'll notice this very quickly on the drawing thread). Because this could happen at any time,
+        // we only sample the contents of the variable once at the top of this function. Thereafter, we'll use
+        // it and be happy.
 
         try {
             try {
-                c = surfaceHolder.lockCanvas(null);
+                c = localSurfaceHolder.lockCanvas(null);
             } catch (java.lang.IllegalStateException e) {
                 if(ticks % 1000 == 0) Log.e(TAG, "Failed to get a canvas for drawing!");
                 c = null;
@@ -244,14 +259,13 @@ public class MyViewAnim extends SurfaceView implements SurfaceHolder.Callback {
 
             ClockState clockState = ClockState.getSingleton();
 
-            // TODO add support for ambient mode, do the same thing
             if(clockState == null) {
                 Log.e(TAG, "whoa, no clock state?!");
                 return;
             }
         } finally {
             if (c != null) {
-                surfaceHolder.unlockCanvasAndPost(c);
+                localSurfaceHolder.unlockCanvasAndPost(c);
             }
 
             if(sleepInEventLoop)
@@ -317,16 +331,7 @@ public class MyViewAnim extends SurfaceView implements SurfaceHolder.Callback {
                 Looper.loop();
 
                 // We'll only get here if somebody's trying to tear down
-                // the Looper. One last redraw will ensure that we're drawing
-                // with the latest state (typically ambient mode) rather than
-                // leaving the calendar wedges visible but without a moving
-                // seconds hand.
-
-                try {
-                    redrawInternal();
-                } catch (IllegalStateException e) {
-                    // this happens if the surface has gone away; we'll quietly ignore the error
-                }
+                // the Looper.
 
                 Log.v(TAG, "looper finished!");
             } catch (Throwable t) {

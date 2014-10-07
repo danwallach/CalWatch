@@ -101,7 +101,7 @@ public class PhoneActivity extends Activity implements Observer {
         toolButton = (RadioButton) findViewById(R.id.toolButton);
         numbersButton = (RadioButton) findViewById(R.id.numbersButton);
         clockView = (MyViewAnim) findViewById(R.id.surfaceView);
-        clockView.setSleepInEventLoop(true);
+//        clockView.setSleepInEventLoop(true);
 
         Log.v(TAG, "registering callback");
 
