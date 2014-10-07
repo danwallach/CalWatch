@@ -235,7 +235,10 @@ public class WearActivity extends Activity {
                         return;
                     }
 
-                    TimeWrapper.frameReport();            // dump performance data *now* before things change
+                    if(watchFaceRunning)
+                        TimeWrapper.frameReport();            // dump performance data *now* before things change
+                    else
+                        TimeWrapper.frameReset();             // if we get here, the face isn't running but is about to start, so it's a good time to reset the counters
 
                     // inspiration: https://gist.github.com/kentarosu/52fb21eb92181716b0ce
 

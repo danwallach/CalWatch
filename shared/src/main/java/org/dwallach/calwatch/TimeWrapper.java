@@ -97,11 +97,15 @@ public class TimeWrapper {
      * for performance monitoring: start the counters over again from scratch
      */
     public static void frameReset() {
-        lastFPSTime = 0; // frameEnd() will change this afterward
+        frameReset(SystemClock.elapsedRealtimeNanos());
+    }
+
+    private static void frameReset(long currentTime) {
         samples = 0;
         minRuntime = 0;
         maxRuntime = 0;
         avgRuntimeAccumulator = 0;
+        lastFPSTime = currentTime;
     }
 
     /**
@@ -132,7 +136,7 @@ public class TimeWrapper {
             // work that happens on other threads
             Log.i(TAG, "Waketime: " + (100f * (avgRuntimeAccumulator - runtime) / elapsedTime) + "%");
         }
-        frameReset();
+        frameReset(frameEndTime);
     }
 
     /**
@@ -170,7 +174,6 @@ public class TimeWrapper {
         // if at least one minute has elapsed, then it's time to print all the things
         if(elapsedTime > 60000000000L) { // 60 * 10^9 nanoseconds: one minute
             frameReport(frameEndTime);
-            lastFPSTime = frameEndTime;
         }
     }
 
