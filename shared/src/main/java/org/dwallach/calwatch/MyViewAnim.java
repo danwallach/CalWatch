@@ -120,6 +120,9 @@ public class MyViewAnim extends SurfaceView implements SurfaceHolder.Callback {
         clockFace.wipeCaches();
         activeDrawing = true;
 
+        if(surfaceHolder == null)
+            surfaceHolder = getHolder();
+
         if(animator != null) {
             Log.v(TAG, "resuming old animator!");
             animator.resume();
@@ -154,6 +157,7 @@ public class MyViewAnim extends SurfaceView implements SurfaceHolder.Callback {
         Log.v(TAG, "stopping animation!");
 
         activeDrawing = false;
+        surfaceHolder = null;
         if(animator != null) {
             // new experimental ways to maybe quit things
             if(drawThread == null) {
@@ -203,6 +207,12 @@ public class MyViewAnim extends SurfaceView implements SurfaceHolder.Callback {
         TimeWrapper.update();
         Canvas c = null;
 
+        if(surfaceHolder == null) {
+            Log.e(TAG, "no surface holder, can't draw anything");
+            return;
+        }
+
+
         try {
             try {
                 c = surfaceHolder.lockCanvas(null);
@@ -239,32 +249,14 @@ public class MyViewAnim extends SurfaceView implements SurfaceHolder.Callback {
                 Log.e(TAG, "whoa, no clock state?!");
                 return;
             }
-            if(localClockFace.getAmbientMode()) {
-                // if we're not showing the second hand, then we don't need to refresh at 50+Hz
-                // so instead we sleep one second; regardless, the minute hand will move
-                // very, very smoothly.
-                if (c != null) {
-                    surfaceHolder.unlockCanvasAndPost(c);
-                    c = null;
-                }
-
-                // We used to sleep for a second here between ticks, because this event loop never stopped
-                // and we wanted to keep the minute hand going even if the second hand wasn't being shown.
-                // (If the second hand as shown, then we didn't sleep.)
-
-                // Now, slow refreshes are handled by the alarm intent that's set up in WearActivity.java. So, we'll
-                // continue blasting away at 60Hz here, under the assumption that this whole thread will
-                // be torn down when we hit ambient mode land. And it *usually* is. Except when it isn't.
-                // That's what the activeDrawing boolean is for.
-
-                if(sleepInEventLoop)
-                    SystemClock.sleep(1000);
-
-            }
         } finally {
             if (c != null) {
                 surfaceHolder.unlockCanvasAndPost(c);
             }
+
+            if(sleepInEventLoop)
+                SystemClock.sleep(1000);
+
         }
     }
 
