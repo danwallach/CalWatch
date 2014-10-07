@@ -313,8 +313,15 @@ public class ClockFace implements Observer {
                     drawRadialLine(p, strokeWidth, i, 0.9f, 1.0f, false, false);
                 } else {
                     // we want lines for 1, 2, 4, 5, 7, 8, 10, and 11 no matter what
-                    if (faceMode != ClockState.FACE_NUMBERS || !(i == 15 || i == 30 || i == 45))
-                        drawRadialLine(p, strokeWidth, i, .8f, 1.0f, false, bottomHack);
+                    if (faceMode != ClockState.FACE_NUMBERS || !(i == 15 || i == 30 || i == 45)) {
+                        // in the particular case of 6 o'clock and the Moto 360 bottomHack, we're
+                        // going to make the 6 o'clock index line the same length as the other lines
+                        // so it doesn't stand out as much
+                        if (i == 30 && bottomHack)
+                            drawRadialLine(p, strokeWidth, i, .9f, 1.0f, false, bottomHack);
+                        else
+                            drawRadialLine(p, strokeWidth, i, .8f, 1.0f, false, bottomHack);
+                    }
                 }
             }
 
@@ -374,7 +381,7 @@ public class ClockFace implements Observer {
             r = 0.9f;
 
             x = clockX(30, r);
-            y = clockY(30, r) + metrics.descent - (missingBottomPixels / 2); // another hack for Moto 360
+            y = clockY(30, r) + metrics.descent - (missingBottomPixels); // another hack for Moto 360
 
             drawShadowText(canvas, "6", x, y, white, textShadow);
 
