@@ -92,20 +92,18 @@ public class TimeWrapper {
     private static long minRuntime = 0;
     private static long maxRuntime = 0;
     private static long avgRuntimeAccumulator = 0;
+    private static boolean measuringFrame = false;
 
     /**
      * for performance monitoring: start the counters over again from scratch
      */
     public static void frameReset() {
-        frameReset(SystemClock.elapsedRealtimeNanos());
-    }
-
-    private static void frameReset(long currentTime) {
         samples = 0;
         minRuntime = 0;
         maxRuntime = 0;
         avgRuntimeAccumulator = 0;
-        lastFPSTime = currentTime;
+        measuringFrame = false;
+        lastFPSTime = 0;
     }
 
     /**
@@ -117,12 +115,11 @@ public class TimeWrapper {
 
     /**
      * Internal version, avoids multiple calls to get the system clock
-     * @param frameEndTime
+     * @param currentTime
      */
-    private static void frameReport(long frameEndTime) {
+    private static void frameReport(long currentTime) {
         if(samples > 0) {
-            long elapsedTime = frameEndTime - lastFPSTime; // ns since last time we printed something
-            long runtime = frameEndTime - frameStartTime;  // ns since frameStart() called
+            long elapsedTime = currentTime - lastFPSTime; // ns since last time we printed something
             float fps = (samples * 1000000000f) / elapsedTime;  // * 10^9 so we're not just computing frames per nanosecond
             Log.i(TAG, "FPS: " + Float.toString(fps) + ", samples: " + samples);
 
@@ -134,9 +131,10 @@ public class TimeWrapper {
             // this waketime percentage is really a lower bound; it's not counting work in the render thread
             // thread that's outside of the ClockFace rendering methods, and it's also not counting
             // work that happens on other threads
-            Log.i(TAG, "Waketime: " + (100f * (avgRuntimeAccumulator - runtime) / elapsedTime) + "%");
+            Log.i(TAG, "Waketime: " + (100f * avgRuntimeAccumulator / elapsedTime) + "%");
+            lastFPSTime = 0;
         }
-        frameReset(frameEndTime);
+        frameReset();
     }
 
     /**
@@ -144,6 +142,7 @@ public class TimeWrapper {
      */
     public static void frameStart() {
         frameStartTime = SystemClock.elapsedRealtimeNanos();
+        measuringFrame = true;
     }
 
     /**
@@ -151,9 +150,13 @@ public class TimeWrapper {
      */
     public static void frameEnd() {
         long frameEndTime = SystemClock.elapsedRealtimeNanos();
+        measuringFrame = false;
 
-        if(lastFPSTime == 0)
+        // first sample around, we're not remembering anything, just the time it ended; this gets on smooth footing for subsequent samples
+        if(lastFPSTime == 0) {
             lastFPSTime = frameEndTime;
+            return;
+        }
 
         long elapsedTime = frameEndTime - lastFPSTime; // ns since last time we printed something
         long runtime = frameEndTime - frameStartTime;  // ns since frameStart() called
