@@ -9,6 +9,13 @@
 
 # Add any project specific keep options here:
 
+-keep public class org.dwallach.calwatch.PhoneActivity
+-keep public class org.dwallach.calwatch.WakeupReceiver
+-keep public class org.dwallach.calwatch.WatchCalendarService
+
+-dontwarn java.nio.**
+-dontwarn org.codehaus.mojo.animal_sniffer.IgnoreJRERequirement
+
 # If your project uses WebView with JS, uncomment the following
 # and specify the fully qualified class name to the JavaScript interface
 # class:

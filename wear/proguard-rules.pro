@@ -9,6 +9,12 @@
 
 # Add any project specific keep options here:
 
+-keep public class org.dwallach.calwatch.WearActivity
+-keep public class org.dwallach.calwatch.WearReceiverService
+
+-dontwarn java.nio.**
+-dontwarn org.codehaus.mojo.animal_sniffer.IgnoreJRERequirement
+
 # If your project uses WebView with JS, uncomment the following
 # and specify the fully qualified class name to the JavaScript interface
 # class:
