@@ -125,8 +125,20 @@ public class ClockFace implements Observer {
         textShadow.setStyle(Paint.Style.STROKE);
         superThinBlack.setStyle(Paint.Style.STROKE);
 
-        // not sure exactly which magic string goes where, so a little big of paranoia here
-        if(Build.MODEL.contains("metallica") || Build.MODEL.contains("Moto 360") || Build.PRODUCT.contains("metallica") || Build.PRODUCT.contains("Moto 360")) {
+        // Now, to detect a Moto 360 and install the hack. FYI, here's what all the Build.MODEL strings
+        // are, at least on my own Moto 360:
+
+        // BOARD: minnow
+        // BRAND: motorola
+        // DEVICE: minnow
+        // HARDWARE: minnow
+        // ID: KGW42R
+        // MANUFACTURER: Motorola
+        // MODEL: Moto 360
+        // PRODUCT: metallica
+        // TYPE: user
+
+        if(Build.MODEL.contains("Moto 360") || Build.PRODUCT.contains("metallica")) {
             Log.v(TAG, "Moto 360 detected. Flat bottom hack enabled.");
             setMissingBottomPixels(30);
         }

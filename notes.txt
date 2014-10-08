@@ -44,6 +44,7 @@ BUGS BUGs BUGZ!
      render thread as part of the onStop() lifecycle *and* should immediately render
      the screen when the lifecycle moves back into action. Will that work?
 
+  -- the crap below seems to be fixed now (in beta 5), keeping around until we're sure
 
 10-07 06:13:20.389    1745-1766/? W/ActivityManager﹕ Activity pause timeout for ActivityRecord{adfb52a8 u0 org.dwallach.calwatch/.WearActivity t73}
 10-07 06:13:27.716    1745-1798/? D/ActivityManager﹕ finishAllActivitiesLocked: finishing ActivityRecord{adfb52a8 u0 org.dwallach.calwatch/.WearActivity t73} immediately
