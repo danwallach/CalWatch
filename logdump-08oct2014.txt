@@ -1,4 +1,4 @@
-Crash around 10:12am
+Crash around 10:12am, appears to have happened at 10:07am in the log
 
 ========
 10-08 06:45:12.108    1752-1912/? E/WindowState﹕ getStack: Window{adff2700 u0 com.google.android.apps.wearable.settings/com.google.android.clockwork.settings.SettingsActivity EXITING} couldn't find taskId=30 Callers=com.android.server.wm.WindowState.getDisplayContent:721 com.android.server.wm.WindowStateAnimator.updateSurfaceWindowCrop:1119 com.android.server.wm.WindowStateAnimator.setSurfaceBoundariesLocked:1241 com.android.server.wm.WindowManagerService.performLayoutAndPlaceSurfacesLockedInner:9277
