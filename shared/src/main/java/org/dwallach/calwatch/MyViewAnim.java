@@ -108,7 +108,8 @@ public class MyViewAnim extends SurfaceView implements SurfaceHolder.Callback {
 
     public void pause() {
         Log.v(TAG, "pausing animation");
-        animator.pause();
+        if(animator != null)
+            animator.pause();
 //        clockFace.setAmbientMode(true);
     }
 
@@ -336,6 +337,19 @@ public class MyViewAnim extends SurfaceView implements SurfaceHolder.Callback {
                 Log.v(TAG, "looper finished!");
             } catch (Throwable t) {
                 Log.e(TAG, "looper halted due to an error", t);
+
+                // half-assed cleanup code; it we get here, something went really, really badly wrong
+                // so we'll just hope that by shutting things down and waiting a bit, they'll come back
+                // again after the screen goes to sleep and comes back again
+                try {
+                    animator.end();
+                    animator.cancel();
+                } catch (Throwable t2) {
+                    Log.e(TAG, "can't clean up animator cleanly, either", t2);
+                }
+            } finally {
+                animator = null;
+                drawThread = null;
             }
         }
     }
