@@ -1,4 +1,4 @@
-6:22pm or so, the watchface got weird and would refresh itself once but not restart the rendering thread. Switching away and back fixed it.
+6:18pm or so, the watchface got weird and would refresh itself once but not restart the rendering thread. Switching away and back fixed it.
 
     --------- beginning of system
 10-09 11:00:22.436    1752-3165/? D/SensorHAL﹕ adjustSensorHandle: handle = 9 adjustedHandle = 1
