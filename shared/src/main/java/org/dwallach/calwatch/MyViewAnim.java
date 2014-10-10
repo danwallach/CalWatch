@@ -88,8 +88,8 @@ public class MyViewAnim extends SurfaceView implements SurfaceHolder.Callback {
     @Override
     public void surfaceChanged(SurfaceHolder holder, int format, int width, int height) {
         Log.v(TAG, "Drawing surface changed!");
-        resume();
         clockFace.setSize(width, height);
+        resume();
 
     }
 
@@ -107,9 +107,8 @@ public class MyViewAnim extends SurfaceView implements SurfaceHolder.Callback {
     }
 
     public void pause() {
-        Log.v(TAG, "pausing animation");
-        if(animator != null)
-            animator.pause();
+        Log.v(TAG, "pause requested, stopping");
+        stop();
 //        clockFace.setAmbientMode(true);
     }
 
@@ -174,9 +173,9 @@ public class MyViewAnim extends SurfaceView implements SurfaceHolder.Callback {
                         looper.quitSafely();
                 }
 
-                // maybe these will do something; it's unclear
-                animator.end();
-                animator.cancel();
+                // these seem to be required to happen on the same thread as where the drawing is happening, so does nothing here
+//                animator.end();
+//                animator.cancel();
 
                 animator = null;
                 drawThread = null;
@@ -237,7 +236,7 @@ public class MyViewAnim extends SurfaceView implements SurfaceHolder.Callback {
                 c = null;
             } catch (Throwable throwable) {
                 // this should never happen
-                Log.e(TAG, "unknown exception when trying to lock canvas: " + throwable.toString());
+                Log.e(TAG, "unknown exception when trying to lock canvas", throwable);
                 c = null;
             }
 
@@ -300,10 +299,10 @@ public class MyViewAnim extends SurfaceView implements SurfaceHolder.Callback {
      */
     class PanelThread extends Thread {
         Handler handler = null;
-        Animator animator;
+        Animator localAnimator;
 
         public PanelThread(Animator animator) {
-            this.animator = animator;
+            this.localAnimator = animator;
         }
 
         public Handler getHandler() {
@@ -318,7 +317,7 @@ public class MyViewAnim extends SurfaceView implements SurfaceHolder.Callback {
                 Looper.prepare();
 
                 // this needs to happen on the same thread
-                animator.start();
+                localAnimator.start();
 
                 // now, the handler will automatically bind to the
                 // Looper that is attached to the current thread
@@ -342,8 +341,8 @@ public class MyViewAnim extends SurfaceView implements SurfaceHolder.Callback {
                 // so we'll just hope that by shutting things down and waiting a bit, they'll come back
                 // again after the screen goes to sleep and comes back again
                 try {
-                    animator.end();
-                    animator.cancel();
+                    localAnimator.end();
+                    localAnimator.cancel();
                 } catch (Throwable t2) {
                     Log.e(TAG, "can't clean up animator cleanly, either", t2);
                 }
