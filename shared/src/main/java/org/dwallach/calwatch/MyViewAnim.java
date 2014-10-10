@@ -341,7 +341,6 @@ public class MyViewAnim extends SurfaceView implements SurfaceHolder.Callback {
                 // so we'll just hope that by shutting things down and waiting a bit, they'll come back
                 // again after the screen goes to sleep and comes back again
                 try {
-                    localAnimator.end();
                     localAnimator.cancel();
                 } catch (Throwable t2) {
                     Log.e(TAG, "can't clean up animator cleanly, either", t2);
