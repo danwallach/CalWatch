@@ -232,7 +232,7 @@ public class MyViewAnim extends SurfaceView implements SurfaceHolder.Callback {
             try {
                 c = localSurfaceHolder.lockCanvas(null);
             } catch (java.lang.IllegalStateException e) {
-                if(ticks % 1000 == 0) Log.e(TAG, "Failed to get a canvas for drawing!");
+                if (ticks % 1000 == 0) Log.e(TAG, "Failed to get a canvas for drawing!");
                 c = null;
             } catch (Throwable throwable) {
                 // this should never happen
@@ -240,15 +240,15 @@ public class MyViewAnim extends SurfaceView implements SurfaceHolder.Callback {
                 c = null;
             }
 
-            if(c == null) {
-                if(ticks % 1000 == 0) Log.e(TAG, "null canvas, can't draw anything");
+            if (c == null) {
+                if (ticks % 1000 == 0) Log.e(TAG, "null canvas, can't draw anything");
                 return;
             }
 
             c.drawColor(Color.TRANSPARENT, PorterDuff.Mode.CLEAR);
             localClockFace.drawEverything(c);
 
-            if(debugTracingDesired) {
+            if (debugTracingDesired) {
                 TimeWrapper.update();
                 long currentTime = TimeWrapper.getGMTTime();
                 if (currentTime > debugStopTime && debugTracingOn) {
@@ -259,13 +259,19 @@ public class MyViewAnim extends SurfaceView implements SurfaceHolder.Callback {
 
             ClockState clockState = ClockState.getSingleton();
 
-            if(clockState == null) {
+            if (clockState == null) {
                 Log.e(TAG, "whoa, no clock state?!");
                 return;
             }
+        } catch (Throwable t) {
+            Log.e(TAG, "something blew up while redrawing", t);
         } finally {
             if (c != null) {
-                localSurfaceHolder.unlockCanvasAndPost(c);
+                try {
+                    localSurfaceHolder.unlockCanvasAndPost(c);
+                } catch (Throwable t) {
+                    Log.e(TAG, "something blew up while unlocking the canvas", t);
+                }
             }
 
             if(sleepInEventLoop)
