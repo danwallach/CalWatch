@@ -118,8 +118,8 @@ public class TimeWrapper {
      * @param currentTime
      */
     private static void frameReport(long currentTime) {
-        if(samples > 0) {
-            long elapsedTime = currentTime - lastFPSTime; // ns since last time we printed something
+        long elapsedTime = currentTime - lastFPSTime; // ns since last time we printed something
+        if(samples > 0 && elapsedTime > 0) {
             float fps = (samples * 1000000000f) / elapsedTime;  // * 10^9 so we're not just computing frames per nanosecond
             Log.i(TAG, "FPS: " + Float.toString(fps) + ", samples: " + samples);
 

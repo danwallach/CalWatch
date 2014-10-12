@@ -51,7 +51,7 @@ public class MyViewAnim extends SurfaceView implements SurfaceHolder.Callback, O
     }
 
     private void setDrawThreadDesired(boolean drawThreadDesired) {
-        Log.v(TAG, "draw thread desired: " + drawThreadDesired);
+//        Log.v(TAG, "draw thread desired: " + drawThreadDesired);
         if(this.drawThreadDesired == drawThreadDesired) return;
 
         this.drawThreadDesired = drawThreadDesired;
@@ -151,7 +151,8 @@ public class MyViewAnim extends SurfaceView implements SurfaceHolder.Callback, O
         if (surfaceHolder == null)
             surfaceHolder = getHolder();
 
-        startDrawThread();
+        if(drawThreadDesired)
+            startDrawThread();
     }
 
     private void startDrawThread() {
@@ -252,8 +253,12 @@ public class MyViewAnim extends SurfaceView implements SurfaceHolder.Callback, O
         Canvas c = null;
 
         if(localSurfaceHolder == null) {
-            Log.e(TAG, "no surface holder, can't draw anything");
-            return;
+            Log.e(TAG, "no surface holder, retrying");
+            localSurfaceHolder = surfaceHolder = getHolder();
+            if(localSurfaceHolder == null) {
+                Log.e(TAG, "still no surface holder, giving up");
+                return;
+            }
         }
 
         // Digression on surface holders: these seem to be necessary in order to draw anything. The problem
@@ -324,7 +329,7 @@ public class MyViewAnim extends SurfaceView implements SurfaceHolder.Callback, O
      */
     @Override
     public void update(Observable observable, Object o) {
-        Log.v(TAG, "update from ClockState");
+//        Log.v(TAG, "update from ClockState");
         ClockState clockState = ClockState.getSingleton();
         if(clockState == null)
             Log.e(TAG, "null ClockState?!!");
