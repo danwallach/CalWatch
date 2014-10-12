@@ -170,10 +170,12 @@ public class PhoneActivity extends Activity implements Observer {
 
         // http://developer.android.com/reference/android/app/Activity.html
 
-        if(clockView != null) clockView.stop();
+        if(clockView != null)
+            clockView.stop();
 
         clockState.deleteObserver(this);
         clockState = null;
+        watchFaceRunning = false;
         killAlarm();
     }
 
@@ -181,6 +183,7 @@ public class PhoneActivity extends Activity implements Observer {
         super.onStart();
         Log.v(TAG, "Start!");
 
+        watchFaceRunning = true;
         activitySetup();
     }
 
@@ -188,6 +191,7 @@ public class PhoneActivity extends Activity implements Observer {
         super.onResume();
         Log.v(TAG, "Resume!");
         if(clockView != null) clockView.resume(); // shouldn't be necessary, but isn't happening on its own
+        watchFaceRunning = true;
         initAlarm();
     }
 
@@ -195,6 +199,7 @@ public class PhoneActivity extends Activity implements Observer {
         super.onPause();
         Log.v(TAG, "Pause!");
         if(clockView != null) clockView.pause(); // shouldn't be necessary, but isn't happening on its own
+        watchFaceRunning = false;
         killAlarm();
     }
 

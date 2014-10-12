@@ -117,21 +117,20 @@ public class MyViewAnim extends SurfaceView implements SurfaceHolder.Callback, O
     public void surfaceChanged(SurfaceHolder holder, int format, int width, int height) {
         Log.v(TAG, "Drawing surface changed!");
         clockFace.setSize(width, height);
-        resume();
-
+//        resume();
     }
 
     @Override
     public void surfaceCreated(SurfaceHolder holder) {
         Log.v(TAG, "Drawing surface created!");
-        resume();
+//        resume();
     }
 
 
     @Override
     public void surfaceDestroyed(SurfaceHolder holder) {
         Log.v(TAG, "Drawing surface destroyed!");
-        stop();
+//        stop();
     }
 
     public void pause() {
