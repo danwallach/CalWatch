@@ -13,6 +13,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Observable;
+import java.util.concurrent.locks.Lock;
 
 public class ClockState extends Observable {
     private final static String TAG = "ClockState";
@@ -55,37 +56,34 @@ public class ClockState extends Observable {
         return singleton;
     }
 
-    // note: all the public methods are synchronized; this deals with the weird case
-    // when a big update is coming in and we want to make sure that somebody reading
-    // this class gets a consistent view of it
-    public synchronized void setFaceMode(int faceMode) {
+    public void setFaceMode(int faceMode) {
         // warning: this might come in from another thread!
         this.faceMode = faceMode;
 
 //        pingObservers();
     }
 
-    public synchronized int getFaceMode() {
+    public int getFaceMode() {
         return faceMode;
     }
 
-    public synchronized void setShowSeconds(boolean showSeconds) {
+    public void setShowSeconds(boolean showSeconds) {
         this.showSeconds = showSeconds;
 
 //        pingObservers();
     }
 
-    public synchronized boolean getShowSeconds() {
+    public boolean getShowSeconds() {
         return showSeconds;
     }
 
-    public synchronized void setShowDayDate(boolean showDayDate) {
+    public void setShowDayDate(boolean showDayDate) {
         this.showDayDate = showDayDate;
 
 //        pingObservers();
     }
 
-    public synchronized boolean getShowDayDate() {
+    public boolean getShowDayDate() {
         return showDayDate;
     }
 
@@ -95,10 +93,15 @@ public class ClockState extends Observable {
      * which is in GMT time, *not* local time.
      * @param eventList list of events (GMT time)
      */
-    public synchronized void setEventList(List<EventWrapper> eventList) {
-        this.eventList = eventList;
-        this.visibleEventList = null;
-        pingObservers();
+    public void setEventList(List<EventWrapper> eventList) {
+        LockWrapper.lock();
+        try {
+            this.eventList = eventList;
+            this.visibleEventList = null;
+            pingObservers();
+        } finally {
+            LockWrapper.unlock();
+        }
     }
 
     private void setWireEventListHelper(List<WireEvent> wireEventList) {
@@ -212,7 +215,7 @@ public class ClockState extends Observable {
      * the *local* timezone. If you want GMT events, which will not have been clipped, then use
      * getWireEventList().
      */
-    public synchronized List<EventWrapper> getVisibleLocalEventList() {
+    public List<EventWrapper> getVisibleLocalEventList() {
         computeVisibleEvents(); // should be fast, since mostly it will detect that nothing has changed
         return visibleEventList;
     }
@@ -221,55 +224,61 @@ public class ClockState extends Observable {
      * Load the ClockState with a protobuf containing a complete update
      * @param eventBytes a marshalled protobuf of type WireUpdate
      */
-    public synchronized void setProtobuf(byte[] eventBytes) {
-        Wire wire = new Wire();
-        WireUpdate wireUpdate = null;
+    public void setProtobuf(byte[] eventBytes) {
+        LockWrapper.lock();
 
         try {
-            wireUpdate = (WireUpdate) wire.parseFrom(eventBytes, WireUpdate.class);
-            wireInitialized = true;
-        } catch (IOException ioe) {
-            Log.e(TAG, "parse failure on protobuf: nbytes(" + eventBytes.length + "), error(" + ioe.toString() + ")");
-            return;
-        } catch (Exception e) {
-            if(eventBytes.length == 0)
-                Log.e(TAG, "zero-length message received!");
-            else
-                Log.e(TAG, "some other weird failure on protobuf: nbytes(" + eventBytes.length + "), error(" + e.toString() + ")");
-            return;
+            Wire wire = new Wire();
+            WireUpdate wireUpdate = null;
+
+            try {
+                wireUpdate = (WireUpdate) wire.parseFrom(eventBytes, WireUpdate.class);
+                wireInitialized = true;
+            } catch (IOException ioe) {
+                Log.e(TAG, "parse failure on protobuf: nbytes(" + eventBytes.length + "), error(" + ioe.toString() + ")");
+                return;
+            } catch (Exception e) {
+                if (eventBytes.length == 0)
+                    Log.e(TAG, "zero-length message received!");
+                else
+                    Log.e(TAG, "some other weird failure on protobuf: nbytes(" + eventBytes.length + "), error(" + e.toString() + ")");
+                return;
+            }
+
+            if (wireUpdate.newEvents)
+                setWireEventListHelper(wireUpdate.events);
+
+            setFaceMode(wireUpdate.faceMode);
+            setShowSeconds(wireUpdate.showSecondHand);
+            setShowDayDate(wireUpdate.showDayDate);
+
+            pingObservers();
+
+            Log.v(TAG, "event update complete");
+        } finally {
+            LockWrapper.unlock();
         }
-
-        if (wireUpdate.newEvents)
-            setWireEventListHelper(wireUpdate.events);
-
-        setFaceMode(wireUpdate.faceMode);
-        setShowSeconds(wireUpdate.showSecondHand);
-        setShowDayDate(wireUpdate.showDayDate);
-
-        pingObservers();
-
-        Log.v(TAG, "event update complete");
     }
 
     /**
      * marshalls into a protobuf for transmission elsewhere
      * @return the protobuf
      */
-    public synchronized byte[] getProtobuf() {
+    public byte[] getProtobuf() {
         WireUpdate wireUpdate = new WireUpdate(getWireEventList(), true, getFaceMode(), getShowSeconds(), getShowDayDate());
         byte[] output = wireUpdate.toByteArray();
 
         return output;
     }
 
-    public synchronized void pingObservers() {
+    public void pingObservers() {
         // this incantation will make observers elsewhere aware that there's new content
         setChanged();
         notifyObservers();
         clearChanged();
     }
 
-    public synchronized int getMaxLevel() {
+    public int getMaxLevel() {
         return maxLevel;
     }
 

@@ -246,77 +246,83 @@ public class MyViewAnim extends SurfaceView implements SurfaceHolder.Callback, O
     // called by redrawClock *and* by the TimeListener contraption which is running a separate thread
     // at full 60Hz speed
     private void redrawInternal() {
-        ClockFace localClockFace = clockFace; // local cached copy, to deal with concurrency issues
-        SurfaceHolder localSurfaceHolder = surfaceHolder; // local cached copy, to deal with concurrency issues
-        TimeWrapper.update();
-        Canvas c = null;
-
-        if(localSurfaceHolder == null) {
-            Log.e(TAG, "no surface holder, retrying");
-            localSurfaceHolder = surfaceHolder = getHolder();
-            if(localSurfaceHolder == null) {
-                Log.e(TAG, "still no surface holder, giving up");
-                return;
-            }
-        }
-
-        // Digression on surface holders: these seem to be necessary in order to draw anything. The problem
-        // seems to occur when the watch is busy putting itself to sleep while simultaneously we're trying
-        // to draw to the screen on this separate thread. There seem to be one or more redraws that will
-        // be attempted after the canvas and such is long gone. This is a source of weird exceptions and
-        // general badness.
-
-        // Original solution: when the stop() method is called (on the UI thread), it needs to stop the Looper
-        // which is doing all of the redrawing. Thus, the whole quitSafely() business and killing the animator.
-        // Yet still, there would be at least one more round-trip through the redrawing.
-
-        // Kludgy solution: stop() now also nulls out the surface holder (a volatile private member variable,
-        // so we'll notice this very quickly on the drawing thread). Because this could happen at any time,
-        // we only sample the contents of the variable once at the top of this function. Thereafter, we'll use
-        // it and be happy.
+        LockWrapper.lock();
 
         try {
+            ClockFace localClockFace = clockFace; // local cached copy, to deal with concurrency issues
+            SurfaceHolder localSurfaceHolder = surfaceHolder; // local cached copy, to deal with concurrency issues
+            TimeWrapper.update();
+            Canvas c = null;
+
+            if (localSurfaceHolder == null) {
+                Log.e(TAG, "no surface holder, retrying");
+                localSurfaceHolder = surfaceHolder = getHolder();
+                if (localSurfaceHolder == null) {
+                    Log.e(TAG, "still no surface holder, giving up");
+                    return;
+                }
+            }
+
+            // Digression on surface holders: these seem to be necessary in order to draw anything. The problem
+            // seems to occur when the watch is busy putting itself to sleep while simultaneously we're trying
+            // to draw to the screen on this separate thread. There seem to be one or more redraws that will
+            // be attempted after the canvas and such is long gone. This is a source of weird exceptions and
+            // general badness.
+
+            // Original solution: when the stop() method is called (on the UI thread), it needs to stop the Looper
+            // which is doing all of the redrawing. Thus, the whole quitSafely() business and killing the animator.
+            // Yet still, there would be at least one more round-trip through the redrawing.
+
+            // Kludgy solution: stop() now also nulls out the surface holder (a volatile private member variable,
+            // so we'll notice this very quickly on the drawing thread). Because this could happen at any time,
+            // we only sample the contents of the variable once at the top of this function. Thereafter, we'll use
+            // it and be happy.
+
             try {
-                c = localSurfaceHolder.lockCanvas(null);
-            } catch (java.lang.IllegalStateException e) {
-                if (ticks % 1000 == 0) Log.e(TAG, "Failed to get a canvas for drawing!");
-                c = null;
-            } catch (Throwable throwable) {
-                // this should never happen
-                Log.e(TAG, "unknown exception when trying to lock canvas", throwable);
-                c = null;
-            }
-
-            if (c == null) {
-                if (ticks % 1000 == 0) Log.e(TAG, "null canvas, can't draw anything");
-                return;
-            }
-
-            c.drawColor(Color.TRANSPARENT, PorterDuff.Mode.CLEAR);
-            localClockFace.drawEverything(c);
-
-            if (debugTracingDesired) {
-                TimeWrapper.update();
-                long currentTime = TimeWrapper.getGMTTime();
-                if (currentTime > debugStopTime && debugTracingOn) {
-                    debugTracingOn = false;
-                    Debug.stopMethodTracing();
-                }
-            }
-        } catch (Throwable t) {
-            Log.e(TAG, "something blew up while redrawing", t);
-        } finally {
-            if (c != null) {
                 try {
-                    localSurfaceHolder.unlockCanvasAndPost(c);
-                } catch (Throwable t) {
-                    Log.e(TAG, "something blew up while unlocking the canvas", t);
+                    c = localSurfaceHolder.lockCanvas(null);
+                } catch (java.lang.IllegalStateException e) {
+                    if (ticks % 1000 == 0) Log.e(TAG, "Failed to get a canvas for drawing!");
+                    c = null;
+                } catch (Throwable throwable) {
+                    // this should never happen
+                    Log.e(TAG, "unknown exception when trying to lock canvas", throwable);
+                    c = null;
                 }
+
+                if (c == null) {
+                    if (ticks % 1000 == 0) Log.e(TAG, "null canvas, can't draw anything");
+                    return;
+                }
+
+                c.drawColor(Color.TRANSPARENT, PorterDuff.Mode.CLEAR);
+                localClockFace.drawEverything(c);
+
+                if (debugTracingDesired) {
+                    TimeWrapper.update();
+                    long currentTime = TimeWrapper.getGMTTime();
+                    if (currentTime > debugStopTime && debugTracingOn) {
+                        debugTracingOn = false;
+                        Debug.stopMethodTracing();
+                    }
+                }
+            } catch (Throwable t) {
+                Log.e(TAG, "something blew up while redrawing", t);
+            } finally {
+                if (c != null) {
+                    try {
+                        localSurfaceHolder.unlockCanvasAndPost(c);
+                    } catch (Throwable t) {
+                        Log.e(TAG, "something blew up while unlocking the canvas", t);
+                    }
+                }
+
+                if (sleepInEventLoop)
+                    SystemClock.sleep(1000);
+
             }
-
-            if(sleepInEventLoop)
-                SystemClock.sleep(1000);
-
+        } finally {
+            LockWrapper.unlock();
         }
     }
 

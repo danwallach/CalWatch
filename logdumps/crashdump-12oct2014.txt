@@ -1,0 +1,1268 @@
+10-12 17:55:10.083      819-845/? W/BroadcastQueue﹕ Timeout of broadcast BroadcastRecord{44850f60 u-1 android.intent.action.TIME_TICK} - receiver=android.os.BinderProxy@44cf92c8, started 10000ms ago
+10-12 17:55:10.083      819-845/? W/BroadcastQueue﹕ Receiver during timeout: BroadcastFilter{44b8e5e0 u0 ReceiverList{44cfff98 18415 org.dwallach.calwatch/10219/u0 remote:44cf92c8}}
+10-12 17:55:10.093      819-845/? W/XPrivacy/XActivityManagerService﹕ Background ANR uid=10219 ondemand=false
+10-12 17:55:10.153      819-845/? I/ActivityManager﹕ Skipping duplicate ANR: ProcessRecord{433296b8 18415:org.dwallach.calwatch/u0a219} Broadcast of Intent { act=android.intent.action.TIME_TICK flg=0x50000014 (has extras) }
+10-12 17:55:11.443      819-819/? V/KeyguardServiceDelegate﹕ onScreenTurnedOn(showListener = com.android.internal.policy.impl.PhoneWindowManager$17@432bb530)
+10-12 17:55:11.443     819-1101/? V/KeyguardServiceDelegate﹕ **** SHOWN CALLED ****
+10-12 17:55:11.443      819-869/? I/PowerManagerService﹕ Waking up from sleep...
+10-12 17:55:11.443     819-1101/? I/WindowManager﹕ No lock screen! windowToken=null
+10-12 17:55:11.513      819-863/? D/DisplayPowerController﹕ Unblocked screen on after 459672499 ms
+10-12 17:55:11.533      819-819/? A/ProcessStats﹕ Starting service ServiceState{447d7e08 com.google.android.tts.service.GoogleTTSService pkg=com.google.android.tts proc=447d7e08} without owner
+10-12 17:55:11.543     819-1571/? D/PowerManagerService-JNI﹕ Excessive delay in setInteractive(true) while turning screen on: 43ms
+10-12 17:55:11.553      184-184/? D/SurfaceFlinger﹕ Screen acquired, type=0 flinger=0xb8e77450
+10-12 17:55:11.553      184-184/? D/qdhwcomposer﹕ hwc_blank: Unblanking display: 0
+10-12 17:55:11.783      184-184/? D/qdhwcomposer﹕ hwc_blank: Done unblanking display: 0
+10-12 17:55:11.783     819-1571/? D/SurfaceControl﹕ Excessive delay in unblankDisplay() while turning screen on: 235ms
+10-12 17:55:11.783      819-819/? W/XPrivacy/XActivityManagerService﹕ Sleeping=false
+10-12 17:55:11.883    1154-1262/? I/USERIAL_LINUX﹕ USERIAL_Open(): enter
+10-12 17:55:11.883    1154-1262/? I/USERIAL_LINUX﹕ USERIAL_Open() device: /dev/bcm2079x port=5, uart_port=0 WAKE_DELAY(20) WRITE_DELAY(20) POWER_ON_DELAY(0) PRE_POWER_OFF_DELAY(10) POST_POWER_OFF_DELAY(0)
+10-12 17:55:11.893    1154-1262/? I/USERIAL_LINUX﹕ USERIAL_Open(): exit
+10-12 17:55:11.933      819-857/? I/ActivityManager﹕ Start proc com.android.providers.calendar for content provider com.android.providers.calendar/.CalendarProvider2: pid=30344 uid=10001 gids={50001, 3003, 1028, 1015}
+10-12 17:55:11.953    3728-3728/? W/ManagedEGLContext﹕ doTerminate failed: EGL count is 2 but managed count is 1
+10-12 17:55:11.953      185-185/? D/dalvikvm﹕ GC_EXPLICIT freed 44K, 13% free 17210K/19732K, paused 2ms+2ms, total 25ms
+10-12 17:55:11.973      185-185/? D/dalvikvm﹕ GC_EXPLICIT freed <1K, 13% free 17210K/19732K, paused 1ms+2ms, total 22ms
+10-12 17:55:12.003      185-185/? D/dalvikvm﹕ GC_EXPLICIT freed <1K, 13% free 17210K/19732K, paused 1ms+2ms, total 21ms
+10-12 17:55:12.013  30344-30344/? I/CalendarProvider2﹕ Created com.android.providers.calendar.CalendarAlarmManager@432d7cb0(com.android.providers.calendar.CalendarProvider2@432ca690)
+10-12 17:55:12.013  30344-30344/? W/ActivityThread﹕ ClassLoader.loadClass: The class loader returned by Thread.getContextClassLoader() may fail for processes that host multiple applications. You should explicitly specify a context class loader. For example: Thread.setContextClassLoader(getClass().getClassLoader());
+10-12 17:55:12.043  30344-30348/? D/dalvikvm﹕ GC_CONCURRENT freed 305K, 14% free 17316K/20096K, paused 2ms+1ms, total 19ms
+10-12 17:55:12.583    1154-1253/? D/NfcService﹕ NFC-C ON
+10-12 17:55:13.053  30344-30344/? I/CalendarProvider2﹕ Sending notification intent: Intent { act=android.intent.action.PROVIDER_CHANGED dat=content://com.android.calendar }
+10-12 17:55:13.053  30344-30344/? W/ContentResolver﹕ Failed to get type for: content://com.android.calendar (Unknown URL content://com.android.calendar)
+10-12 17:55:13.243   29973-2592/? D/AbstractMetricsFactoryImpl﹕ record : No data points in metrics event
+10-12 17:55:15.903  18415-18426/? V/WatchCalendarService﹕ message received!
+10-12 17:55:25.553    6669-6674/? D/dalvikvm﹕ GC_CONCURRENT freed 400K, 14% free 18284K/21180K, paused 11ms+6ms, total 93ms
+10-12 17:55:26.883    2377-2455/? W/bt-btif﹕ dm_pm_timer expires
+10-12 17:55:26.883    2377-2455/? W/bt-btif﹕ dm_pm_timer expires 0
+10-12 17:55:26.883    2377-2455/? W/bt-btif﹕ proc dm_pm_timer expires
+10-12 17:55:28.243   29973-2592/? D/AbstractMetricsFactoryImpl﹕ record : No data points in metrics event
+10-12 17:55:40.993  11122-11126/? D/dalvikvm﹕ GC_CONCURRENT freed 992K, 23% free 20170K/26004K, paused 19ms+2ms, total 48ms
+10-12 17:55:40.993  11122-11287/? D/dalvikvm﹕ WAIT_FOR_CONCURRENT_GC blocked 16ms
+10-12 17:55:41.013   1208-30392/? W/Uploader﹕ No account for auth token provided
+10-12 17:55:41.023   1208-30392/? I/PseudonymousIdIntentService﹕ getToken invoked
+10-12 17:55:41.043  11122-11157/? I/GCoreUlr﹕ Starting service, intent=Intent { act=com.google.android.location.reporting.ACTION_LOCATION_STATUS cmp=com.google.android.gms/com.google.android.location.reporting.service.DispatchingService (has extras) }, extras=Bundle[{status=LocationStatus[cell status: STATUS_SUCCESSFUL, wifi status: STATUS_SUCCESSFUL, elapsed realtime ns: 459702015891076]}]
+10-12 17:55:41.103  11122-11162/? I/GCoreUlr﹕ Successfully inserted location
+10-12 17:55:41.103  11122-11162/? I/GCoreUlr﹕ Not calling LocationReportingService, hasMoved: false, elapsed millis: 123741, request: Phone
+10-12 17:55:41.153  11122-11126/? D/dalvikvm﹕ GC_CONCURRENT freed 980K, 23% free 20173K/26004K, paused 2ms+3ms, total 28ms
+10-12 17:55:41.993   1208-30392/? W/Uploader﹕ No account for auth token provided
+10-12 17:55:42.003   1208-30392/? I/PseudonymousIdIntentService﹕ getToken invoked
+10-12 17:55:42.223   1208-30392/? W/Uploader﹕ No account for auth token provided
+10-12 17:55:42.223   1208-30392/? I/PseudonymousIdIntentService﹕ getToken invoked
+10-12 17:55:42.433   1208-30392/? W/Uploader﹕ No account for auth token provided
+10-12 17:55:42.453   1208-30392/? I/PseudonymousIdIntentService﹕ getToken invoked
+10-12 17:55:42.473    1208-1212/? D/dalvikvm﹕ GC_CONCURRENT freed 1286K, 16% free 21469K/25332K, paused 2ms+2ms, total 62ms
+10-12 17:55:42.773   1208-30392/? I/PseudonymousIdIntentService﹕ getToken invoked
+10-12 17:55:43.153   1208-30392/? D/dalvikvm﹕ GC_FOR_ALLOC freed 1075K, 16% free 21513K/25400K, paused 22ms, total 22ms
+10-12 17:55:43.153   1208-30392/? I/PseudonymousIdIntentService﹕ getToken invoked
+10-12 17:55:43.243   29973-2592/? D/AbstractMetricsFactoryImpl﹕ record : No data points in metrics event
+10-12 17:55:43.513   1208-30392/? I/PseudonymousIdIntentService﹕ getToken invoked
+10-12 17:55:43.933   1208-30392/? D/dalvikvm﹕ GC_FOR_ALLOC freed 1151K, 16% free 21547K/25468K, paused 21ms, total 21ms
+10-12 17:55:43.943   1208-30392/? I/PseudonymousIdIntentService﹕ getToken invoked
+10-12 17:55:44.303   1208-30392/? I/PseudonymousIdIntentService﹕ getToken invoked
+10-12 17:55:44.583   1208-30392/? I/PseudonymousIdIntentService﹕ getToken invoked
+10-12 17:55:44.903   1208-30392/? I/PseudonymousIdIntentService﹕ getToken invoked
+10-12 17:55:44.923    1208-1212/? D/dalvikvm﹕ GC_CONCURRENT freed 1495K, 16% free 21447K/25484K, paused 2ms+2ms, total 34ms
+10-12 17:55:48.663      819-849/? I/ActivityManager﹕ Config changes=480 {1.0 310mcc260mnc en_US ldltr sw360dp w360dp h567dp 480dpi nrml port finger -keyb/v/h -nav/h s.123}
+10-12 17:55:48.693      819-869/? I/InputReader﹕ Reconfiguring input devices.  changes=0x00000004
+10-12 17:55:48.693      819-869/? I/InputReader﹕ Device reconfigured: id=4, name='touch_dev', size 1080x1920, orientation 0, mode 1, display id 0
+10-12 17:55:48.703      819-869/? I/InputReader﹕ Reconfiguring input devices.  changes=0x00000004
+10-12 17:55:48.823    1124-1128/? D/dalvikvm﹕ GC_CONCURRENT freed 390K, 14% free 18497K/21492K, paused 2ms+1ms, total 17ms
+10-12 17:55:48.833    3728-3732/? D/dalvikvm﹕ GC_CONCURRENT freed 891K, 17% free 20245K/24276K, paused 12ms+2ms, total 32ms
+10-12 17:55:48.843      951-951/? D/PhoneStatusBar﹕ mSettingsPanelGravity = 55
+10-12 17:55:48.843    6931-6935/? D/dalvikvm﹕ GC_CONCURRENT freed 389K, 15% free 17256K/20120K, paused 3ms+0ms, total 25ms
+10-12 17:55:48.903  29804-29808/? D/dalvikvm﹕ GC_CONCURRENT freed 318K, 14% free 17279K/20072K, paused 2ms+1ms, total 32ms
+10-12 17:55:50.633      819-844/? W/WindowManager﹕ Window freeze timeout expired.
+10-12 17:55:50.633      819-844/? W/WindowManager﹕ Force clearing orientation change: Window{43d42a40 u0 org.dwallach.calwatch/org.dwallach.calwatch.PhoneActivity}
+10-12 17:55:50.633      819-844/? W/WindowManager﹕ Force clearing orientation change: Window{43307848 u0 SurfaceView}
+10-12 17:55:50.633      819-844/? W/WindowManager﹕ Force clearing orientation change: Window{43a86fd0 u0 com.android.systemui.ImageWallpaper}
+10-12 17:55:50.653      819-844/? I/WindowManager﹕ Screen frozen for +3m49s643ms due to Window{43d42a40 u0 org.dwallach.calwatch/org.dwallach.calwatch.PhoneActivity}
+10-12 17:55:50.653      819-868/? I/InputDispatcher﹕ Dropped event because it is stale.
+10-12 17:55:50.663      819-868/? I/InputDispatcher﹕ Dropped event because it is stale.
+10-12 17:55:50.663      819-868/? I/InputDispatcher﹕ Dropped event because it is stale.
+10-12 17:55:50.663      819-868/? I/InputDispatcher﹕ Dropped event because it is stale.
+10-12 17:55:50.663      819-868/? I/InputDispatcher﹕ Dropped event because it is stale.
+10-12 17:55:50.663      819-868/? I/InputDispatcher﹕ Dropped event because it is stale.
+10-12 17:55:50.663      819-868/? I/InputDispatcher﹕ Dropped event because it is stale.
+10-12 17:55:50.663      819-868/? I/InputDispatcher﹕ Dropped event because it is stale.
+10-12 17:55:50.673      819-868/? I/InputDispatcher﹕ Dropped event because it is stale.
+10-12 17:55:50.673      819-868/? I/InputDispatcher﹕ Dropped event because it is stale.
+10-12 17:55:50.673      819-868/? I/InputDispatcher﹕ Dropped event because it is stale.
+10-12 17:55:50.673      819-868/? I/InputDispatcher﹕ Dropped event because it is stale.
+10-12 17:55:50.673      819-868/? I/InputDispatcher﹕ Dropped event because it is stale.
+10-12 17:55:50.673      819-868/? I/InputDispatcher﹕ Dropped event because it is stale.
+10-12 17:55:50.673      819-868/? I/InputDispatcher﹕ Dropped event because it is stale.
+10-12 17:55:50.673      819-868/? I/InputDispatcher﹕ Dropped event because it is stale.
+10-12 17:55:50.673      819-868/? I/InputDispatcher﹕ Dropped event because it is stale.
+10-12 17:55:50.673      819-868/? I/InputDispatcher﹕ Dropped event because it is stale.
+10-12 17:55:50.673      819-868/? I/InputDispatcher﹕ Dropped event because it is stale.
+10-12 17:55:50.673      819-868/? I/InputDispatcher﹕ Dropped event because it is stale.
+10-12 17:55:50.673      819-868/? I/InputDispatcher﹕ Dropped event because it is stale.
+10-12 17:55:50.673      819-868/? I/InputDispatcher﹕ Dropped event because it is stale.
+10-12 17:55:50.673      819-868/? I/InputDispatcher﹕ Dropped event because it is stale.
+10-12 17:55:50.673      819-868/? I/InputDispatcher﹕ Dropped event because it is stale.
+10-12 17:55:50.673      819-868/? I/InputDispatcher﹕ Dropped event because it is stale.
+10-12 17:55:50.673      819-868/? I/InputDispatcher﹕ Dropped event because it is stale.
+10-12 17:55:50.673      819-868/? I/InputDispatcher﹕ Dropped event because it is stale.
+10-12 17:55:50.673      819-868/? I/InputDispatcher﹕ Dropped event because it is stale.
+10-12 17:55:50.673      819-868/? I/InputDispatcher﹕ Dropped event because it is stale.
+10-12 17:55:50.673      819-868/? I/InputDispatcher﹕ Dropped event because it is stale.
+10-12 17:55:50.673      819-868/? I/InputDispatcher﹕ Dropped event because it is stale.
+10-12 17:55:50.673      819-868/? I/InputDispatcher﹕ Dropped event because it is stale.
+10-12 17:55:50.673      819-868/? I/InputDispatcher﹕ Dropped event because it is stale.
+10-12 17:55:50.673      819-868/? I/InputDispatcher﹕ Dropped event because it is stale.
+10-12 17:55:50.683      819-868/? I/InputDispatcher﹕ Dropped event because it is stale.
+10-12 17:55:50.683      819-868/? I/InputDispatcher﹕ Dropped event because it is stale.
+10-12 17:55:50.683      819-868/? I/InputDispatcher﹕ Dropped event because it is stale.
+10-12 17:55:50.683      819-868/? I/InputDispatcher﹕ Dropped event because it is stale.
+10-12 17:55:50.683      819-868/? I/InputDispatcher﹕ Dropped event because it is stale.
+10-12 17:55:50.683      819-868/? I/InputDispatcher﹕ Dropped event because it is stale.
+10-12 17:55:50.683      819-868/? I/InputDispatcher﹕ Dropped event because it is stale.
+10-12 17:55:50.683      819-868/? I/InputDispatcher﹕ Dropped event because it is stale.
+10-12 17:55:50.683      819-868/? I/InputDispatcher﹕ Dropped event because it is stale.
+10-12 17:55:50.683      819-868/? I/InputDispatcher﹕ Dropped event because it is stale.
+10-12 17:55:50.683      819-868/? I/InputDispatcher﹕ Dropped event because it is stale.
+10-12 17:55:50.683      819-868/? I/InputDispatcher﹕ Dropped event because it is stale.
+10-12 17:55:50.683      819-868/? I/InputDispatcher﹕ Dropped event because it is stale.
+10-12 17:55:50.683      819-868/? I/InputDispatcher﹕ Dropped event because it is stale.
+10-12 17:55:50.683      819-868/? I/InputDispatcher﹕ Dropped event because it is stale.
+10-12 17:55:50.683      819-868/? I/InputDispatcher﹕ Dropped event because it is stale.
+10-12 17:55:50.683      819-868/? I/InputDispatcher﹕ Dropped event because it is stale.
+10-12 17:55:50.683      819-868/? I/InputDispatcher﹕ Dropped event because it is stale.
+10-12 17:55:50.683      819-868/? I/InputDispatcher﹕ Dropped event because it is stale.
+10-12 17:55:50.683      819-868/? I/InputDispatcher﹕ Dropped event because it is stale.
+10-12 17:55:50.683      819-868/? I/InputDispatcher﹕ Dropped event because it is stale.
+10-12 17:55:50.683      819-868/? I/InputDispatcher﹕ Dropped event because it is stale.
+10-12 17:55:50.683      819-868/? I/InputDispatcher﹕ Dropped event because it is stale.
+10-12 17:55:50.683      819-868/? I/InputDispatcher﹕ Dropped event because it is stale.
+10-12 17:55:50.683      819-868/? I/InputDispatcher﹕ Dropped event because it is stale.
+10-12 17:55:50.683      819-868/? I/InputDispatcher﹕ Dropped event because it is stale.
+10-12 17:55:50.683      819-868/? I/InputDispatcher﹕ Dropped event because it is stale.
+10-12 17:55:50.683      819-868/? I/InputDispatcher﹕ Dropped event because it is stale.
+10-12 17:55:50.713      819-868/? I/ActivityManager﹕ START u0 {act=android.intent.action.MAIN cat=[android.intent.category.HOME] flg=0x10200000 cmp=com.google.android.googlequicksearchbox/com.google.android.launcher.GEL} from pid 819
+10-12 17:55:50.823    1102-1102/? W/InputConnectionWrapper.ICC﹕ Timed out waiting on IInputContextCallback
+10-12 17:55:51.023      819-868/? I/WindowManager﹕ Screenshot max retries 4 of Token{43b4c468 ActivityRecord{4330e868 u0 org.dwallach.calwatch/.PhoneActivity t174}} appWin=Window{43d42a40 u0 org.dwallach.calwatch/org.dwallach.calwatch.PhoneActivity} drawState=1
+10-12 17:55:51.023      819-868/? W/WindowManager﹕ Screenshot failure taking screenshot for (1080x1920) to layer 21080
+10-12 17:55:51.033      819-868/? I/ActivityManager﹕ START u0 {act=android.intent.action.MAIN cat=[android.intent.category.HOME] flg=0x10200000 cmp=com.google.android.googlequicksearchbox/com.google.android.launcher.GEL} from pid 819
+10-12 17:55:51.043      819-868/? I/ActivityManager﹕ START u0 {act=android.intent.action.MAIN cat=[android.intent.category.HOME] flg=0x10200000 cmp=com.google.android.googlequicksearchbox/com.google.android.launcher.GEL} from pid 819
+10-12 17:55:51.523      819-845/? W/ActivityManager﹕ Activity pause timeout for ActivityRecord{4330e868 u0 org.dwallach.calwatch/.PhoneActivity t174}
+10-12 17:55:51.533    3728-3728/? W/ManagedEGLContext﹕ doTerminate failed: EGL count is 2 but managed count is 1
+10-12 17:55:51.543    1166-1166/? I/GEL﹕ handleIntent(Intent { act=android.intent.action.MAIN cat=[android.intent.category.HOME] flg=0x10600000 cmp=com.google.android.googlequicksearchbox/com.google.android.launcher.GEL })
+10-12 17:55:51.543    1166-1166/? I/GEL﹕ handleIntent(Intent { act=android.intent.action.MAIN cat=[android.intent.category.HOME] flg=0x10600000 cmp=com.google.android.googlequicksearchbox/com.google.android.launcher.GEL })
+10-12 17:55:51.553    1166-1166/? I/GEL﹕ handleIntent(Intent { act=android.intent.action.MAIN cat=[android.intent.category.HOME] flg=0x10600000 cmp=com.google.android.googlequicksearchbox/com.google.android.launcher.GEL })
+10-12 17:55:51.613    1166-1166/? W/HandlerScheduledExecuto﹕ Task does not implement UiTask. Consider using NamedUiRunnable for eww@4391f618
+10-12 17:55:51.663    1166-1166/? V/RenderScript﹕ Application requested CPU execution
+10-12 17:55:51.663    1166-1166/? V/RenderScript﹕ 0x76b988a0 Launching thread(s), CPUs 4
+10-12 17:55:51.743    1484-1488/? D/dalvikvm﹕ GC_CONCURRENT freed 2843K, 42% free 26055K/44436K, paused 3ms+3ms, total 38ms
+10-12 17:55:52.823      819-844/? D/dalvikvm﹕ GC_EXPLICIT freed 7279K, 34% free 52616K/79260K, paused 5ms+9ms, total 162ms
+10-12 17:55:52.823    1102-1102/? W/InputConnectionWrapper.ICC﹕ Timed out waiting on IInputContextCallback
+10-12 17:55:53.193      819-845/? W/ActivityManager﹕ Force finishing activity org.dwallach.calwatch/.PhoneActivity
+10-12 17:55:53.193      819-845/? I/ActivityManager﹕ Killing 18415:org.dwallach.calwatch/u0a219 (adj 2): user request after error
+10-12 17:55:53.203     819-1101/? W/ActivityManager﹕ Service crashed 2 times, stopping: ServiceRecord{45906df8 u0 org.dwallach.calwatch/.WatchCalendarService}
+10-12 17:55:53.203      819-829/? I/WindowState﹕ WIN DEATH: Window{43d42a40 u0 org.dwallach.calwatch/org.dwallach.calwatch.PhoneActivity}
+10-12 17:55:53.203      819-829/? W/WindowManager﹕ Force-removing child win Window{43307848 u0 SurfaceView} from container Window{43d42a40 u0 org.dwallach.calwatch/org.dwallach.calwatch.PhoneActivity}
+10-12 17:55:53.213     819-1202/? W/WindowManager﹕ Failed looking up window
+    java.lang.IllegalArgumentException: Requested window android.os.BinderProxy@44c625a8 does not exist
+            at com.android.server.wm.WindowManagerService.windowForClientLocked(WindowManagerService.java:7939)
+            at com.android.server.wm.WindowManagerService.windowForClientLocked(WindowManagerService.java:7930)
+            at com.android.server.wm.WindowState$DeathRecipient.binderDied(WindowState.java:1047)
+            at android.os.BinderProxy.sendDeathNotice(Binder.java:493)
+            at dalvik.system.NativeStart.run(Native Method)
+10-12 17:55:53.213     819-1202/? I/WindowState﹕ WIN DEATH: null
+10-12 17:55:53.243   1484-30518/? I/MicrophoneInputStream﹕ mic_starting fib@43e4c120
+10-12 17:55:53.243   1484-30519/? I/HotwordRecognitionRnr﹕ Starting hotword detection.
+10-12 17:55:53.273    189-30520/? D/audio_hw_primary﹕ select_devices: out_snd_device(0: ) in_snd_device(35: voice-rec-mic)
+10-12 17:55:53.273    189-30520/? D/﹕ Failed to fetch the lookup information of the device 0000003E
+10-12 17:55:53.273    189-30520/? E/ACDB-LOADER﹕ Error: ACDB AudProc vol returned = -19
+10-12 17:55:53.363    1484-1484/? I/HotwordWorker﹕ onReady
+10-12 17:55:54.823    1102-1102/? W/InputConnectionWrapper.ICC﹕ Timed out waiting on IInputContextCallback
+10-12 17:55:54.823    1102-1102/? E/bl﹕ onStartInput event aborted: com.touchtype.keyboard.c.ag: could not obtain extracted text (class com.touchtype.keyboard.c.ag)
+10-12 17:55:54.823    1102-1102/? I/Choreographer﹕ Skipped 360 frames!  The application may be doing too much work on its main thread.
+10-12 17:55:55.903  28711-28715/? D/dalvikvm﹕ GC_CONCURRENT freed 8177K, 25% free 85592K/114088K, paused 3ms+5ms, total 110ms
+10-12 17:55:55.903  28711-30535/? D/dalvikvm﹕ WAIT_FOR_CONCURRENT_GC blocked 70ms
+10-12 17:55:56.833      819-845/? W/BroadcastQueue﹕ Timeout of broadcast BroadcastRecord{44b925f8 u0 intent.action.keep.watchface.awake} - receiver=android.os.BinderProxy@44cf92c8, started 60001ms ago
+10-12 17:55:56.833      819-845/? W/BroadcastQueue﹕ Receiver during timeout: BroadcastFilter{44b8e5e0 u0 ReceiverList{44cfff98 18415 org.dwallach.calwatch/10219/u0 remote:44cf92c8}}
+10-12 17:55:56.833      819-845/? W/BroadcastQueue﹕ Failure sending broadcast Intent { act=intent.action.keep.watchface.awake flg=0x14 (has extras) }
+    android.os.DeadObjectException
+            at android.os.BinderProxy.transact(Native Method)
+            at de.robv.android.xposed.XposedBridge.invokeOriginalMethodNative(Native Method)
+            at de.robv.android.xposed.XposedBridge.handleHookedMethod(XposedBridge.java:631)
+            at android.os.BinderProxy.transact(Native Method)
+            at android.content.IIntentReceiver$Stub$Proxy.performReceive(IIntentReceiver.java:124)
+            at com.android.server.am.BroadcastQueue.performReceiveLocked(BroadcastQueue.java:424)
+            at com.android.server.am.BroadcastQueue.deliverToRegisteredReceiverLocked(BroadcastQueue.java:507)
+            at com.android.server.am.BroadcastQueue.processNextBroadcast(BroadcastQueue.java:714)
+            at com.android.server.am.BroadcastQueue$1.handleMessage(BroadcastQueue.java:141)
+            at android.os.Handler.dispatchMessage(Handler.java:102)
+            at android.os.Looper.loop(Looper.java:136)
+            at com.android.server.am.ActivityManagerService$AThread.run(ActivityManagerService.java:1870)
+10-12 17:55:56.833      819-845/? W/BroadcastQueue﹕ Failure sending broadcast Intent { act=intent.action.keep.watchface.awake flg=0x14 (has extras) }
+    android.os.DeadObjectException
+            at android.os.BinderProxy.transact(Native Method)
+            at de.robv.android.xposed.XposedBridge.invokeOriginalMethodNative(Native Method)
+            at de.robv.android.xposed.XposedBridge.handleHookedMethod(XposedBridge.java:631)
+            at android.os.BinderProxy.transact(Native Method)
+            at android.content.IIntentReceiver$Stub$Proxy.performReceive(IIntentReceiver.java:124)
+            at com.android.server.am.BroadcastQueue.performReceiveLocked(BroadcastQueue.java:424)
+            at com.android.server.am.BroadcastQueue.deliverToRegisteredReceiverLocked(BroadcastQueue.java:507)
+            at com.android.server.am.BroadcastQueue.processNextBroadcast(BroadcastQueue.java:714)
+            at com.android.server.am.BroadcastQueue$1.handleMessage(BroadcastQueue.java:141)
+            at android.os.Handler.dispatchMessage(Handler.java:102)
+            at android.os.Looper.loop(Looper.java:136)
+            at com.android.server.am.ActivityManagerService$AThread.run(ActivityManagerService.java:1870)
+10-12 17:55:56.833      819-845/? W/BroadcastQueue﹕ Failure sending broadcast Intent { act=intent.action.keep.watchface.awake flg=0x14 (has extras) }
+    android.os.DeadObjectException
+            at android.os.BinderProxy.transact(Native Method)
+            at de.robv.android.xposed.XposedBridge.invokeOriginalMethodNative(Native Method)
+            at de.robv.android.xposed.XposedBridge.handleHookedMethod(XposedBridge.java:631)
+            at android.os.BinderProxy.transact(Native Method)
+            at android.content.IIntentReceiver$Stub$Proxy.performReceive(IIntentReceiver.java:124)
+            at com.android.server.am.BroadcastQueue.performReceiveLocked(BroadcastQueue.java:424)
+            at com.android.server.am.BroadcastQueue.deliverToRegisteredReceiverLocked(BroadcastQueue.java:507)
+            at com.android.server.am.BroadcastQueue.processNextBroadcast(BroadcastQueue.java:714)
+            at com.android.server.am.BroadcastQueue$1.handleMessage(BroadcastQueue.java:141)
+            at android.os.Handler.dispatchMessage(Handler.java:102)
+            at android.os.Looper.loop(Looper.java:136)
+            at com.android.server.am.ActivityManagerService$AThread.run(ActivityManagerService.java:1870)
+10-12 17:55:56.843    819-14448/? W/BroadcastQueue﹕ Failure sending broadcast Intent { act=intent.action.keep.watchface.awake flg=0x14 (has extras) }
+    android.os.DeadObjectException
+            at android.os.BinderProxy.transact(Native Method)
+            at de.robv.android.xposed.XposedBridge.invokeOriginalMethodNative(Native Method)
+            at de.robv.android.xposed.XposedBridge.handleHookedMethod(XposedBridge.java:631)
+            at android.os.BinderProxy.transact(Native Method)
+            at android.content.IIntentReceiver$Stub$Proxy.performReceive(IIntentReceiver.java:124)
+            at com.android.server.am.BroadcastQueue.performReceiveLocked(BroadcastQueue.java:424)
+            at com.android.server.am.BroadcastQueue.deliverToRegisteredReceiverLocked(BroadcastQueue.java:507)
+            at com.android.server.am.BroadcastQueue.processNextBroadcast(BroadcastQueue.java:714)
+            at com.android.server.am.ActivityManagerService.finishReceiver(ActivityManagerService.java:13815)
+            at android.app.ActivityManagerNative.onTransact(ActivityManagerNative.java:383)
+            at com.android.server.am.ActivityManagerService.onTransact(ActivityManagerService.java:2071)
+            at android.os.Binder.execTransact(Binder.java:404)
+            at de.robv.android.xposed.XposedBridge.invokeOriginalMethodNative(Native Method)
+            at de.robv.android.xposed.XposedBridge.handleHookedMethod(XposedBridge.java:631)
+            at android.os.Binder.execTransact(Native Method)
+            at dalvik.system.NativeStart.run(Native Method)
+10-12 17:55:56.843    819-14448/? W/BroadcastQueue﹕ Failure sending broadcast Intent { act=intent.action.keep.watchface.awake flg=0x14 (has extras) }
+    android.os.DeadObjectException
+            at android.os.BinderProxy.transact(Native Method)
+            at de.robv.android.xposed.XposedBridge.invokeOriginalMethodNative(Native Method)
+            at de.robv.android.xposed.XposedBridge.handleHookedMethod(XposedBridge.java:631)
+            at android.os.BinderProxy.transact(Native Method)
+            at android.content.IIntentReceiver$Stub$Proxy.performReceive(IIntentReceiver.java:124)
+            at com.android.server.am.BroadcastQueue.performReceiveLocked(BroadcastQueue.java:424)
+            at com.android.server.am.BroadcastQueue.deliverToRegisteredReceiverLocked(BroadcastQueue.java:507)
+            at com.android.server.am.BroadcastQueue.processNextBroadcast(BroadcastQueue.java:714)
+            at com.android.server.am.ActivityManagerService.finishReceiver(ActivityManagerService.java:13815)
+            at android.app.ActivityManagerNative.onTransact(ActivityManagerNative.java:383)
+            at com.android.server.am.ActivityManagerService.onTransact(ActivityManagerService.java:2071)
+            at android.os.Binder.execTransact(Binder.java:404)
+            at de.robv.android.xposed.XposedBridge.invokeOriginalMethodNative(Native Method)
+            at de.robv.android.xposed.XposedBridge.handleHookedMethod(XposedBridge.java:631)
+            at android.os.Binder.execTransact(Native Method)
+            at dalvik.system.NativeStart.run(Native Method)
+10-12 17:55:56.863    819-14448/? W/BroadcastQueue﹕ Failure sending broadcast Intent { act=intent.action.keep.watchface.awake flg=0x14 (has extras) }
+    android.os.DeadObjectException
+            at android.os.BinderProxy.transact(Native Method)
+            at de.robv.android.xposed.XposedBridge.invokeOriginalMethodNative(Native Method)
+            at de.robv.android.xposed.XposedBridge.handleHookedMethod(XposedBridge.java:631)
+            at android.os.BinderProxy.transact(Native Method)
+            at android.content.IIntentReceiver$Stub$Proxy.performReceive(IIntentReceiver.java:124)
+            at com.android.server.am.BroadcastQueue.performReceiveLocked(BroadcastQueue.java:424)
+            at com.android.server.am.BroadcastQueue.deliverToRegisteredReceiverLocked(BroadcastQueue.java:507)
+            at com.android.server.am.BroadcastQueue.processNextBroadcast(BroadcastQueue.java:714)
+            at com.android.server.am.ActivityManagerService.finishReceiver(ActivityManagerService.java:13815)
+            at android.app.ActivityManagerNative.onTransact(ActivityManagerNative.java:383)
+            at com.android.server.am.ActivityManagerService.onTransact(ActivityManagerService.java:2071)
+            at android.os.Binder.execTransact(Binder.java:404)
+            at de.robv.android.xposed.XposedBridge.invokeOriginalMethodNative(Native Method)
+            at de.robv.android.xposed.XposedBridge.handleHookedMethod(XposedBridge.java:631)
+            at android.os.Binder.execTransact(Native Method)
+            at dalvik.system.NativeStart.run(Native Method)
+10-12 17:55:56.863     819-1202/? W/BroadcastQueue﹕ Failure sending broadcast Intent { act=intent.action.keep.watchface.awake flg=0x14 (has extras) }
+    android.os.DeadObjectException
+            at android.os.BinderProxy.transact(Native Method)
+            at de.robv.android.xposed.XposedBridge.invokeOriginalMethodNative(Native Method)
+            at de.robv.android.xposed.XposedBridge.handleHookedMethod(XposedBridge.java:631)
+            at android.os.BinderProxy.transact(Native Method)
+            at android.content.IIntentReceiver$Stub$Proxy.performReceive(IIntentReceiver.java:124)
+            at com.android.server.am.BroadcastQueue.performReceiveLocked(BroadcastQueue.java:424)
+            at com.android.server.am.BroadcastQueue.deliverToRegisteredReceiverLocked(BroadcastQueue.java:507)
+            at com.android.server.am.BroadcastQueue.processNextBroadcast(BroadcastQueue.java:714)
+            at com.android.server.am.ActivityManagerService.finishReceiver(ActivityManagerService.java:13815)
+            at android.app.ActivityManagerNative.onTransact(ActivityManagerNative.java:383)
+            at com.android.server.am.ActivityManagerService.onTransact(ActivityManagerService.java:2071)
+            at android.os.Binder.execTransact(Binder.java:404)
+            at de.robv.android.xposed.XposedBridge.invokeOriginalMethodNative(Native Method)
+            at de.robv.android.xposed.XposedBridge.handleHookedMethod(XposedBridge.java:631)
+            at android.os.Binder.execTransact(Native Method)
+            at dalvik.system.NativeStart.run(Native Method)
+10-12 17:55:56.863      819-845/? W/BroadcastQueue﹕ Failure sending broadcast Intent { act=intent.action.keep.watchface.awake flg=0x14 (has extras) }
+    android.os.DeadObjectException
+            at android.os.BinderProxy.transact(Native Method)
+            at de.robv.android.xposed.XposedBridge.invokeOriginalMethodNative(Native Method)
+            at de.robv.android.xposed.XposedBridge.handleHookedMethod(XposedBridge.java:631)
+            at android.os.BinderProxy.transact(Native Method)
+            at android.content.IIntentReceiver$Stub$Proxy.performReceive(IIntentReceiver.java:124)
+            at com.android.server.am.BroadcastQueue.performReceiveLocked(BroadcastQueue.java:424)
+            at com.android.server.am.BroadcastQueue.deliverToRegisteredReceiverLocked(BroadcastQueue.java:507)
+            at com.android.server.am.BroadcastQueue.processNextBroadcast(BroadcastQueue.java:714)
+            at com.android.server.am.BroadcastQueue$1.handleMessage(BroadcastQueue.java:141)
+            at android.os.Handler.dispatchMessage(Handler.java:102)
+            at android.os.Looper.loop(Looper.java:136)
+            at com.android.server.am.ActivityManagerService$AThread.run(ActivityManagerService.java:1870)
+10-12 17:55:56.863      819-845/? W/BroadcastQueue﹕ Failure sending broadcast Intent { act=intent.action.keep.watchface.awake flg=0x14 (has extras) }
+    android.os.DeadObjectException
+            at android.os.BinderProxy.transact(Native Method)
+            at de.robv.android.xposed.XposedBridge.invokeOriginalMethodNative(Native Method)
+            at de.robv.android.xposed.XposedBridge.handleHookedMethod(XposedBridge.java:631)
+            at android.os.BinderProxy.transact(Native Method)
+            at android.content.IIntentReceiver$Stub$Proxy.performReceive(IIntentReceiver.java:124)
+            at com.android.server.am.BroadcastQueue.performReceiveLocked(BroadcastQueue.java:424)
+            at com.android.server.am.BroadcastQueue.deliverToRegisteredReceiverLocked(BroadcastQueue.java:507)
+            at com.android.server.am.BroadcastQueue.processNextBroadcast(BroadcastQueue.java:714)
+            at com.android.server.am.BroadcastQueue$1.handleMessage(BroadcastQueue.java:141)
+            at android.os.Handler.dispatchMessage(Handler.java:102)
+            at android.os.Looper.loop(Looper.java:136)
+            at com.android.server.am.ActivityManagerService$AThread.run(ActivityManagerService.java:1870)
+10-12 17:55:56.873      819-845/? W/BroadcastQueue﹕ Failure sending broadcast Intent { act=intent.action.keep.watchface.awake flg=0x14 (has extras) }
+    android.os.DeadObjectException
+            at android.os.BinderProxy.transact(Native Method)
+            at de.robv.android.xposed.XposedBridge.invokeOriginalMethodNative(Native Method)
+            at de.robv.android.xposed.XposedBridge.handleHookedMethod(XposedBridge.java:631)
+            at android.os.BinderProxy.transact(Native Method)
+            at android.content.IIntentReceiver$Stub$Proxy.performReceive(IIntentReceiver.java:124)
+            at com.android.server.am.BroadcastQueue.performReceiveLocked(BroadcastQueue.java:424)
+            at com.android.server.am.BroadcastQueue.deliverToRegisteredReceiverLocked(BroadcastQueue.java:507)
+            at com.android.server.am.BroadcastQueue.processNextBroadcast(BroadcastQueue.java:714)
+            at com.android.server.am.BroadcastQueue$1.handleMessage(BroadcastQueue.java:141)
+            at android.os.Handler.dispatchMessage(Handler.java:102)
+            at android.os.Looper.loop(Looper.java:136)
+            at com.android.server.am.ActivityManagerService$AThread.run(ActivityManagerService.java:1870)
+10-12 17:55:56.873     819-1201/? W/BroadcastQueue﹕ Failure sending broadcast Intent { act=intent.action.keep.watchface.awake flg=0x14 (has extras) }
+    android.os.DeadObjectException
+            at android.os.BinderProxy.transact(Native Method)
+            at de.robv.android.xposed.XposedBridge.invokeOriginalMethodNative(Native Method)
+            at de.robv.android.xposed.XposedBridge.handleHookedMethod(XposedBridge.java:631)
+            at android.os.BinderProxy.transact(Native Method)
+            at android.content.IIntentReceiver$Stub$Proxy.performReceive(IIntentReceiver.java:124)
+            at com.android.server.am.BroadcastQueue.performReceiveLocked(BroadcastQueue.java:424)
+            at com.android.server.am.BroadcastQueue.deliverToRegisteredReceiverLocked(BroadcastQueue.java:507)
+            at com.android.server.am.BroadcastQueue.processNextBroadcast(BroadcastQueue.java:714)
+            at com.android.server.am.ActivityManagerService.finishReceiver(ActivityManagerService.java:13815)
+            at android.app.ActivityManagerNative.onTransact(ActivityManagerNative.java:383)
+            at com.android.server.am.ActivityManagerService.onTransact(ActivityManagerService.java:2071)
+            at android.os.Binder.execTransact(Binder.java:404)
+            at de.robv.android.xposed.XposedBridge.invokeOriginalMethodNative(Native Method)
+            at de.robv.android.xposed.XposedBridge.handleHookedMethod(XposedBridge.java:631)
+            at android.os.Binder.execTransact(Native Method)
+            at dalvik.system.NativeStart.run(Native Method)
+10-12 17:55:56.883      819-845/? W/BroadcastQueue﹕ Failure sending broadcast Intent { act=intent.action.keep.watchface.awake flg=0x14 (has extras) }
+    android.os.DeadObjectException
+            at android.os.BinderProxy.transact(Native Method)
+            at de.robv.android.xposed.XposedBridge.invokeOriginalMethodNative(Native Method)
+            at de.robv.android.xposed.XposedBridge.handleHookedMethod(XposedBridge.java:631)
+            at android.os.BinderProxy.transact(Native Method)
+            at android.content.IIntentReceiver$Stub$Proxy.performReceive(IIntentReceiver.java:124)
+            at com.android.server.am.BroadcastQueue.performReceiveLocked(BroadcastQueue.java:424)
+            at com.android.server.am.BroadcastQueue.deliverToRegisteredReceiverLocked(BroadcastQueue.java:507)
+            at com.android.server.am.BroadcastQueue.processNextBroadcast(BroadcastQueue.java:714)
+            at com.android.server.am.BroadcastQueue$1.handleMessage(BroadcastQueue.java:141)
+            at android.os.Handler.dispatchMessage(Handler.java:102)
+            at android.os.Looper.loop(Looper.java:136)
+            at com.android.server.am.ActivityManagerService$AThread.run(ActivityManagerService.java:1870)
+10-12 17:55:56.883      819-845/? W/BroadcastQueue﹕ Failure sending broadcast Intent { act=intent.action.keep.watchface.awake flg=0x14 (has extras) }
+    android.os.DeadObjectException
+            at android.os.BinderProxy.transact(Native Method)
+            at de.robv.android.xposed.XposedBridge.invokeOriginalMethodNative(Native Method)
+            at de.robv.android.xposed.XposedBridge.handleHookedMethod(XposedBridge.java:631)
+            at android.os.BinderProxy.transact(Native Method)
+            at android.content.IIntentReceiver$Stub$Proxy.performReceive(IIntentReceiver.java:124)
+            at com.android.server.am.BroadcastQueue.performReceiveLocked(BroadcastQueue.java:424)
+            at com.android.server.am.BroadcastQueue.deliverToRegisteredReceiverLocked(BroadcastQueue.java:507)
+            at com.android.server.am.BroadcastQueue.processNextBroadcast(BroadcastQueue.java:714)
+            at com.android.server.am.BroadcastQueue$1.handleMessage(BroadcastQueue.java:141)
+            at android.os.Handler.dispatchMessage(Handler.java:102)
+            at android.os.Looper.loop(Looper.java:136)
+            at com.android.server.am.ActivityManagerService$AThread.run(ActivityManagerService.java:1870)
+10-12 17:55:56.883      819-845/? W/BroadcastQueue﹕ Failure sending broadcast Intent { act=intent.action.keep.watchface.awake flg=0x14 (has extras) }
+    android.os.DeadObjectException
+            at android.os.BinderProxy.transact(Native Method)
+            at de.robv.android.xposed.XposedBridge.invokeOriginalMethodNative(Native Method)
+            at de.robv.android.xposed.XposedBridge.handleHookedMethod(XposedBridge.java:631)
+            at android.os.BinderProxy.transact(Native Method)
+            at android.content.IIntentReceiver$Stub$Proxy.performReceive(IIntentReceiver.java:124)
+            at com.android.server.am.BroadcastQueue.performReceiveLocked(BroadcastQueue.java:424)
+            at com.android.server.am.BroadcastQueue.deliverToRegisteredReceiverLocked(BroadcastQueue.java:507)
+            at com.android.server.am.BroadcastQueue.processNextBroadcast(BroadcastQueue.java:714)
+            at com.android.server.am.BroadcastQueue$1.handleMessage(BroadcastQueue.java:141)
+            at android.os.Handler.dispatchMessage(Handler.java:102)
+            at android.os.Looper.loop(Looper.java:136)
+            at com.android.server.am.ActivityManagerService$AThread.run(ActivityManagerService.java:1870)
+10-12 17:55:56.883      819-845/? W/BroadcastQueue﹕ Failure sending broadcast Intent { act=intent.action.keep.watchface.awake flg=0x14 (has extras) }
+    android.os.DeadObjectException
+            at android.os.BinderProxy.transact(Native Method)
+            at de.robv.android.xposed.XposedBridge.invokeOriginalMethodNative(Native Method)
+            at de.robv.android.xposed.XposedBridge.handleHookedMethod(XposedBridge.java:631)
+            at android.os.BinderProxy.transact(Native Method)
+            at android.content.IIntentReceiver$Stub$Proxy.performReceive(IIntentReceiver.java:124)
+            at com.android.server.am.BroadcastQueue.performReceiveLocked(BroadcastQueue.java:424)
+            at com.android.server.am.BroadcastQueue.deliverToRegisteredReceiverLocked(BroadcastQueue.java:507)
+            at com.android.server.am.BroadcastQueue.processNextBroadcast(BroadcastQueue.java:714)
+            at com.android.server.am.BroadcastQueue$1.handleMessage(BroadcastQueue.java:141)
+            at android.os.Handler.dispatchMessage(Handler.java:102)
+            at android.os.Looper.loop(Looper.java:136)
+            at com.android.server.am.ActivityManagerService$AThread.run(ActivityManagerService.java:1870)
+10-12 17:55:56.883      819-845/? W/BroadcastQueue﹕ Failure sending broadcast Intent { act=intent.action.keep.watchface.awake flg=0x14 (has extras) }
+    android.os.DeadObjectException
+            at android.os.BinderProxy.transact(Native Method)
+            at de.robv.android.xposed.XposedBridge.invokeOriginalMethodNative(Native Method)
+            at de.robv.android.xposed.XposedBridge.handleHookedMethod(XposedBridge.java:631)
+            at android.os.BinderProxy.transact(Native Method)
+            at android.content.IIntentReceiver$Stub$Proxy.performReceive(IIntentReceiver.java:124)
+            at com.android.server.am.BroadcastQueue.performReceiveLocked(BroadcastQueue.java:424)
+            at com.android.server.am.BroadcastQueue.deliverToRegisteredReceiverLocked(BroadcastQueue.java:507)
+            at com.android.server.am.BroadcastQueue.processNextBroadcast(BroadcastQueue.java:714)
+            at com.android.server.am.BroadcastQueue$1.handleMessage(BroadcastQueue.java:141)
+            at android.os.Handler.dispatchMessage(Handler.java:102)
+            at android.os.Looper.loop(Looper.java:136)
+            at com.android.server.am.ActivityManagerService$AThread.run(ActivityManagerService.java:1870)
+10-12 17:55:56.903     819-3652/? W/BroadcastQueue﹕ Failure sending broadcast Intent { act=intent.action.keep.watchface.awake flg=0x14 (has extras) }
+    android.os.DeadObjectException
+            at android.os.BinderProxy.transact(Native Method)
+            at de.robv.android.xposed.XposedBridge.invokeOriginalMethodNative(Native Method)
+            at de.robv.android.xposed.XposedBridge.handleHookedMethod(XposedBridge.java:631)
+            at android.os.BinderProxy.transact(Native Method)
+            at android.content.IIntentReceiver$Stub$Proxy.performReceive(IIntentReceiver.java:124)
+            at com.android.server.am.BroadcastQueue.performReceiveLocked(BroadcastQueue.java:424)
+            at com.android.server.am.BroadcastQueue.deliverToRegisteredReceiverLocked(BroadcastQueue.java:507)
+            at com.android.server.am.BroadcastQueue.processNextBroadcast(BroadcastQueue.java:714)
+            at com.android.server.am.ActivityManagerService.finishReceiver(ActivityManagerService.java:13815)
+            at android.app.ActivityManagerNative.onTransact(ActivityManagerNative.java:383)
+            at com.android.server.am.ActivityManagerService.onTransact(ActivityManagerService.java:2071)
+            at android.os.Binder.execTransact(Binder.java:404)
+            at de.robv.android.xposed.XposedBridge.invokeOriginalMethodNative(Native Method)
+            at de.robv.android.xposed.XposedBridge.handleHookedMethod(XposedBridge.java:631)
+            at android.os.Binder.execTransact(Native Method)
+            at dalvik.system.NativeStart.run(Native Method)
+10-12 17:55:56.903    819-30312/? E/qcom_sensors_hal﹕ hal_process_report_ind: Bad item quality: 11
+10-12 17:55:56.903      819-845/? W/BroadcastQueue﹕ Failure sending broadcast Intent { act=intent.action.keep.watchface.awake flg=0x14 (has extras) }
+    android.os.DeadObjectException
+            at android.os.BinderProxy.transact(Native Method)
+            at de.robv.android.xposed.XposedBridge.invokeOriginalMethodNative(Native Method)
+            at de.robv.android.xposed.XposedBridge.handleHookedMethod(XposedBridge.java:631)
+            at android.os.BinderProxy.transact(Native Method)
+            at android.content.IIntentReceiver$Stub$Proxy.performReceive(IIntentReceiver.java:124)
+            at com.android.server.am.BroadcastQueue.performReceiveLocked(BroadcastQueue.java:424)
+            at com.android.server.am.BroadcastQueue.deliverToRegisteredReceiverLocked(BroadcastQueue.java:507)
+            at com.android.server.am.BroadcastQueue.processNextBroadcast(BroadcastQueue.java:714)
+            at com.android.server.am.BroadcastQueue$1.handleMessage(BroadcastQueue.java:141)
+            at android.os.Handler.dispatchMessage(Handler.java:102)
+            at android.os.Looper.loop(Looper.java:136)
+            at com.android.server.am.ActivityManagerService$AThread.run(ActivityManagerService.java:1870)
+10-12 17:55:56.923    819-14448/? W/BroadcastQueue﹕ Failure sending broadcast Intent { act=intent.action.keep.watchface.awake flg=0x14 (has extras) }
+    android.os.DeadObjectException
+            at android.os.BinderProxy.transact(Native Method)
+            at de.robv.android.xposed.XposedBridge.invokeOriginalMethodNative(Native Method)
+            at de.robv.android.xposed.XposedBridge.handleHookedMethod(XposedBridge.java:631)
+            at android.os.BinderProxy.transact(Native Method)
+            at android.content.IIntentReceiver$Stub$Proxy.performReceive(IIntentReceiver.java:124)
+            at com.android.server.am.BroadcastQueue.performReceiveLocked(BroadcastQueue.java:424)
+            at com.android.server.am.BroadcastQueue.deliverToRegisteredReceiverLocked(BroadcastQueue.java:507)
+            at com.android.server.am.BroadcastQueue.processNextBroadcast(BroadcastQueue.java:714)
+            at com.android.server.am.ActivityManagerService.finishReceiver(ActivityManagerService.java:13815)
+            at android.app.ActivityManagerNative.onTransact(ActivityManagerNative.java:383)
+            at com.android.server.am.ActivityManagerService.onTransact(ActivityManagerService.java:2071)
+            at android.os.Binder.execTransact(Binder.java:404)
+            at de.robv.android.xposed.XposedBridge.invokeOriginalMethodNative(Native Method)
+            at de.robv.android.xposed.XposedBridge.handleHookedMethod(XposedBridge.java:631)
+            at android.os.Binder.execTransact(Native Method)
+            at dalvik.system.NativeStart.run(Native Method)
+10-12 17:55:56.923      819-845/? W/BroadcastQueue﹕ Failure sending broadcast Intent { act=intent.action.keep.watchface.awake flg=0x14 (has extras) }
+    android.os.DeadObjectException
+            at android.os.BinderProxy.transact(Native Method)
+            at de.robv.android.xposed.XposedBridge.invokeOriginalMethodNative(Native Method)
+            at de.robv.android.xposed.XposedBridge.handleHookedMethod(XposedBridge.java:631)
+            at android.os.BinderProxy.transact(Native Method)
+            at android.content.IIntentReceiver$Stub$Proxy.performReceive(IIntentReceiver.java:124)
+            at com.android.server.am.BroadcastQueue.performReceiveLocked(BroadcastQueue.java:424)
+            at com.android.server.am.BroadcastQueue.deliverToRegisteredReceiverLocked(BroadcastQueue.java:507)
+            at com.android.server.am.BroadcastQueue.processNextBroadcast(BroadcastQueue.java:714)
+            at com.android.server.am.BroadcastQueue$1.handleMessage(BroadcastQueue.java:141)
+            at android.os.Handler.dispatchMessage(Handler.java:102)
+            at android.os.Looper.loop(Looper.java:136)
+            at com.android.server.am.ActivityManagerService$AThread.run(ActivityManagerService.java:1870)
+10-12 17:55:56.943   1208-30554/? I/SubscribedFeeds﹕ Received message
+10-12 17:55:56.943     819-1200/? W/BroadcastQueue﹕ Failure sending broadcast Intent { act=intent.action.keep.watchface.awake flg=0x14 (has extras) }
+    android.os.DeadObjectException
+            at android.os.BinderProxy.transact(Native Method)
+            at de.robv.android.xposed.XposedBridge.invokeOriginalMethodNative(Native Method)
+            at de.robv.android.xposed.XposedBridge.handleHookedMethod(XposedBridge.java:631)
+            at android.os.BinderProxy.transact(Native Method)
+            at android.content.IIntentReceiver$Stub$Proxy.performReceive(IIntentReceiver.java:124)
+            at com.android.server.am.BroadcastQueue.performReceiveLocked(BroadcastQueue.java:424)
+            at com.android.server.am.BroadcastQueue.deliverToRegisteredReceiverLocked(BroadcastQueue.java:507)
+            at com.android.server.am.BroadcastQueue.processNextBroadcast(BroadcastQueue.java:714)
+            at com.android.server.am.ActivityManagerService.finishReceiver(ActivityManagerService.java:13815)
+            at android.app.ActivityManagerNative.onTransact(ActivityManagerNative.java:383)
+            at com.android.server.am.ActivityManagerService.onTransact(ActivityManagerService.java:2071)
+            at android.os.Binder.execTransact(Binder.java:404)
+            at de.robv.android.xposed.XposedBridge.invokeOriginalMethodNative(Native Method)
+            at de.robv.android.xposed.XposedBridge.handleHookedMethod(XposedBridge.java:631)
+            at android.os.Binder.execTransact(Native Method)
+            at dalvik.system.NativeStart.run(Native Method)
+10-12 17:55:56.953      819-845/? W/BroadcastQueue﹕ Failure sending broadcast Intent { act=intent.action.keep.watchface.awake flg=0x14 (has extras) }
+    android.os.DeadObjectException
+            at android.os.BinderProxy.transact(Native Method)
+            at de.robv.android.xposed.XposedBridge.invokeOriginalMethodNative(Native Method)
+            at de.robv.android.xposed.XposedBridge.handleHookedMethod(XposedBridge.java:631)
+            at android.os.BinderProxy.transact(Native Method)
+            at android.content.IIntentReceiver$Stub$Proxy.performReceive(IIntentReceiver.java:124)
+            at com.android.server.am.BroadcastQueue.performReceiveLocked(BroadcastQueue.java:424)
+            at com.android.server.am.BroadcastQueue.deliverToRegisteredReceiverLocked(BroadcastQueue.java:507)
+            at com.android.server.am.BroadcastQueue.processNextBroadcast(BroadcastQueue.java:714)
+            at com.android.server.am.BroadcastQueue$1.handleMessage(BroadcastQueue.java:141)
+            at android.os.Handler.dispatchMessage(Handler.java:102)
+            at android.os.Looper.loop(Looper.java:136)
+            at com.android.server.am.ActivityManagerService$AThread.run(ActivityManagerService.java:1870)
+10-12 17:55:56.963     819-1201/? W/BroadcastQueue﹕ Failure sending broadcast Intent { act=intent.action.keep.watchface.awake flg=0x14 (has extras) }
+    android.os.DeadObjectException
+            at android.os.BinderProxy.transact(Native Method)
+            at de.robv.android.xposed.XposedBridge.invokeOriginalMethodNative(Native Method)
+            at de.robv.android.xposed.XposedBridge.handleHookedMethod(XposedBridge.java:631)
+            at android.os.BinderProxy.transact(Native Method)
+            at android.content.IIntentReceiver$Stub$Proxy.performReceive(IIntentReceiver.java:124)
+            at com.android.server.am.BroadcastQueue.performReceiveLocked(BroadcastQueue.java:424)
+            at com.android.server.am.BroadcastQueue.deliverToRegisteredReceiverLocked(BroadcastQueue.java:507)
+            at com.android.server.am.BroadcastQueue.processNextBroadcast(BroadcastQueue.java:714)
+            at com.android.server.am.ActivityManagerService.finishReceiver(ActivityManagerService.java:13815)
+            at android.app.ActivityManagerNative.onTransact(ActivityManagerNative.java:383)
+            at com.android.server.am.ActivityManagerService.onTransact(ActivityManagerService.java:2071)
+            at android.os.Binder.execTransact(Binder.java:404)
+            at de.robv.android.xposed.XposedBridge.invokeOriginalMethodNative(Native Method)
+            at de.robv.android.xposed.XposedBridge.handleHookedMethod(XposedBridge.java:631)
+            at android.os.Binder.execTransact(Native Method)
+            at dalvik.system.NativeStart.run(Native Method)
+10-12 17:55:56.963      819-829/? W/BroadcastQueue﹕ Failure sending broadcast Intent { act=intent.action.keep.watchface.awake flg=0x14 (has extras) }
+    android.os.DeadObjectException
+            at android.os.BinderProxy.transact(Native Method)
+            at de.robv.android.xposed.XposedBridge.invokeOriginalMethodNative(Native Method)
+            at de.robv.android.xposed.XposedBridge.handleHookedMethod(XposedBridge.java:631)
+            at android.os.BinderProxy.transact(Native Method)
+            at android.content.IIntentReceiver$Stub$Proxy.performReceive(IIntentReceiver.java:124)
+            at com.android.server.am.BroadcastQueue.performReceiveLocked(BroadcastQueue.java:424)
+            at com.android.server.am.BroadcastQueue.deliverToRegisteredReceiverLocked(BroadcastQueue.java:507)
+            at com.android.server.am.BroadcastQueue.processNextBroadcast(BroadcastQueue.java:714)
+            at com.android.server.am.ActivityManagerService.finishReceiver(ActivityManagerService.java:13815)
+            at android.app.ActivityManagerNative.onTransact(ActivityManagerNative.java:383)
+            at com.android.server.am.ActivityManagerService.onTransact(ActivityManagerService.java:2071)
+            at android.os.Binder.execTransact(Binder.java:404)
+            at de.robv.android.xposed.XposedBridge.invokeOriginalMethodNative(Native Method)
+            at de.robv.android.xposed.XposedBridge.handleHookedMethod(XposedBridge.java:631)
+            at android.os.Binder.execTransact(Native Method)
+            at dalvik.system.NativeStart.run(Native Method)
+10-12 17:55:56.973     819-1203/? W/BroadcastQueue﹕ Failure sending broadcast Intent { act=intent.action.keep.watchface.awake flg=0x14 (has extras) }
+    android.os.DeadObjectException
+            at android.os.BinderProxy.transact(Native Method)
+            at de.robv.android.xposed.XposedBridge.invokeOriginalMethodNative(Native Method)
+            at de.robv.android.xposed.XposedBridge.handleHookedMethod(XposedBridge.java:631)
+            at android.os.BinderProxy.transact(Native Method)
+            at android.content.IIntentReceiver$Stub$Proxy.performReceive(IIntentReceiver.java:124)
+            at com.android.server.am.BroadcastQueue.performReceiveLocked(BroadcastQueue.java:424)
+            at com.android.server.am.BroadcastQueue.deliverToRegisteredReceiverLocked(BroadcastQueue.java:507)
+            at com.android.server.am.BroadcastQueue.processNextBroadcast(BroadcastQueue.java:714)
+            at com.android.server.am.ActivityManagerService.finishReceiver(ActivityManagerService.java:13815)
+            at android.app.ActivityManagerNative.onTransact(ActivityManagerNative.java:383)
+            at com.android.server.am.ActivityManagerService.onTransact(ActivityManagerService.java:2071)
+            at android.os.Binder.execTransact(Binder.java:404)
+            at de.robv.android.xposed.XposedBridge.invokeOriginalMethodNative(Native Method)
+            at de.robv.android.xposed.XposedBridge.handleHookedMethod(XposedBridge.java:631)
+            at android.os.Binder.execTransact(Native Method)
+            at dalvik.system.NativeStart.run(Native Method)
+10-12 17:55:56.973      819-845/? W/BroadcastQueue﹕ Failure sending broadcast Intent { act=intent.action.keep.watchface.awake flg=0x14 (has extras) }
+    android.os.DeadObjectException
+            at android.os.BinderProxy.transact(Native Method)
+            at de.robv.android.xposed.XposedBridge.invokeOriginalMethodNative(Native Method)
+            at de.robv.android.xposed.XposedBridge.handleHookedMethod(XposedBridge.java:631)
+            at android.os.BinderProxy.transact(Native Method)
+            at android.content.IIntentReceiver$Stub$Proxy.performReceive(IIntentReceiver.java:124)
+            at com.android.server.am.BroadcastQueue.performReceiveLocked(BroadcastQueue.java:424)
+            at com.android.server.am.BroadcastQueue.deliverToRegisteredReceiverLocked(BroadcastQueue.java:507)
+            at com.android.server.am.BroadcastQueue.processNextBroadcast(BroadcastQueue.java:714)
+            at com.android.server.am.BroadcastQueue$1.handleMessage(BroadcastQueue.java:141)
+            at android.os.Handler.dispatchMessage(Handler.java:102)
+            at android.os.Looper.loop(Looper.java:136)
+            at com.android.server.am.ActivityManagerService$AThread.run(ActivityManagerService.java:1870)
+10-12 17:55:56.973      819-845/? W/BroadcastQueue﹕ Failure sending broadcast Intent { act=intent.action.keep.watchface.awake flg=0x14 (has extras) }
+    android.os.DeadObjectException
+            at android.os.BinderProxy.transact(Native Method)
+            at de.robv.android.xposed.XposedBridge.invokeOriginalMethodNative(Native Method)
+            at de.robv.android.xposed.XposedBridge.handleHookedMethod(XposedBridge.java:631)
+            at android.os.BinderProxy.transact(Native Method)
+            at android.content.IIntentReceiver$Stub$Proxy.performReceive(IIntentReceiver.java:124)
+            at com.android.server.am.BroadcastQueue.performReceiveLocked(BroadcastQueue.java:424)
+            at com.android.server.am.BroadcastQueue.deliverToRegisteredReceiverLocked(BroadcastQueue.java:507)
+            at com.android.server.am.BroadcastQueue.processNextBroadcast(BroadcastQueue.java:714)
+            at com.android.server.am.BroadcastQueue$1.handleMessage(BroadcastQueue.java:141)
+            at android.os.Handler.dispatchMessage(Handler.java:102)
+            at android.os.Looper.loop(Looper.java:136)
+            at com.android.server.am.ActivityManagerService$AThread.run(ActivityManagerService.java:1870)
+10-12 17:55:57.013  29697-29697/? W/ContextImpl﹕ Implicit intents with startService are not safe: Intent { act=com.google.android.music.NETWORK_MONITOR_SERVICE } android.content.ContextWrapper.bindService:517 com.google.android.music.utils.SafeServiceConnection$ServiceConnectionImp.bindService:98 com.google.android.music.utils.SafeServiceConnection.bindService:259
+10-12 17:55:57.013      819-846/? I/ActivityManager﹕ Start proc com.google.android.gm for service com.google.android.gm/.provider.MailSyncAdapterService: pid=30562 uid=10042 gids={50042, 3003, 1028, 1015}
+10-12 17:55:57.023  29697-29697/? W/ContextImpl﹕ Implicit intents with startService are not safe: Intent { act=com.google.android.music.NETWORK_MONITOR_SERVICE } android.content.ContextWrapper.bindService:517 com.google.android.music.utils.SafeServiceConnection$ServiceConnectionImp.bindService:98 com.google.android.music.utils.SafeServiceConnection.bindService:259
+10-12 17:55:57.053  29697-30559/? I/MusicLeanback﹕ Conditions not met for autocaching.
+10-12 17:55:57.053  29697-30559/? I/MusicLeanback﹕ Stop autocaching.
+10-12 17:55:57.093      819-856/? I/ActivityManager﹕ Start proc com.google.android.deskclock for broadcast com.google.android.deskclock/com.android.deskclock.AlarmInitReceiver: pid=30579 uid=10035 gids={50035, 1028}
+10-12 17:55:57.123  29697-29700/? D/dalvikvm﹕ GC_CONCURRENT freed 458K, 15% free 17730K/20664K, paused 2ms+1ms, total 21ms
+10-12 17:55:57.143  30562-30566/? D/dalvikvm﹕ GC_CONCURRENT freed 309K, 14% free 17395K/20180K, paused 3ms+2ms, total 17ms
+10-12 17:55:57.153  30579-30579/? V/AlarmClock﹕ AlarmInitReceiver android.intent.action.TIME_SET
+10-12 17:55:57.203  30562-30566/? D/dalvikvm﹕ GC_CONCURRENT freed 347K, 14% free 17493K/20316K, paused 3ms+1ms, total 14ms
+10-12 17:55:57.203  30579-30594/? I/AlarmClock﹕ Displaying next alarm time: ''
+10-12 17:55:57.213  30579-30594/? V/AlarmClock﹕ AlarmInitReceiver finished
+10-12 17:55:57.213  30562-30562/? W/GAV2﹕ Thread[main,5,main]: Need to call initialize() and be in fallback mode to start dispatch.
+10-12 17:55:57.223  30579-30583/? D/dalvikvm﹕ GC_CONCURRENT freed 400K, 15% free 17284K/20160K, paused 11ms+2ms, total 33ms
+10-12 17:55:57.253      819-942/? I/ActivityManager﹕ Start proc com.qualcomm.timeservice for broadcast com.qualcomm.timeservice/.TimeServiceBroadcastReceiver: pid=30598 uid=10070 gids={50070}
+10-12 17:55:57.253      819-942/? A/ProcessStats﹕ Starting service ServiceState{447d7e08 com.google.android.tts.service.GoogleTTSService pkg=com.google.android.tts proc=447d7e08} without owner
+10-12 17:55:57.293  30562-30566/? D/dalvikvm﹕ GC_CONCURRENT freed 364K, 14% free 17598K/20436K, paused 2ms+1ms, total 13ms
+10-12 17:55:57.333  30598-30598/? D/dalvikvm﹕ No JNI_OnLoad found in /vendor/lib/libTimeService.so 0x43294dd8, skipping init
+10-12 17:55:57.333  30598-30598/? D/TimeService﹕ Receivedandroid.intent.action.TIME_SET intent. Current Time is 1413154557343
+10-12 17:55:57.333  30598-30598/? D/﹕ TimeServiceNative: User Time to be set is 1413154557343
+10-12 17:55:57.333  30598-30598/? D/QC-time-services﹕ Lib:time_genoff_operation: pargs->base = 2
+10-12 17:55:57.333  30598-30598/? D/QC-time-services﹕ Lib:time_genoff_operation: pargs->operation = 0
+10-12 17:55:57.333  30598-30598/? D/QC-time-services﹕ Lib:time_genoff_operation: pargs->ts_val = 1413154557343
+10-12 17:55:57.333      204-639/? D/QC-time-services﹕ Daemon: Connection accepted:time_genoff
+10-12 17:55:57.333  30598-30598/? D/QC-time-services﹕ Lib:time_genoff_operation: Send to server  passed!!
+10-12 17:55:57.333    204-30616/? D/QC-time-services﹕ Daemon:Received base = 2, unit = 1, operation = 0,value = 1413154557343
+10-12 17:55:57.333    204-30616/? D/QC-time-services﹕ Daemon:genoff_opr: Base = 2, val = 1413154557343, operation = 0
+10-12 17:55:57.333    204-30616/? D/QC-time-services﹕ Daemon:rtc_get: Time read from RTC -- MM/DD/YY HH:MM:SS3/19/70 7:11:16
+10-12 17:55:57.333    204-30616/? D/QC-time-services﹕ Daemon:Value read from RTC seconds = 9357076000
+10-12 17:55:57.333    204-30616/? D/QC-time-services﹕ Daemon:new time 1413154557343
+10-12 17:55:57.333    204-30616/? D/QC-time-services﹕ Daemon: delta 1403797481343 genoff 1403797481343
+10-12 17:55:57.333    204-30616/? D/QC-time-services﹕ Daemon:genoff_persistent_update: Writing genoff = 1403797481343 to memory
+10-12 17:55:57.333    204-30616/? D/QC-time-services﹕ Daemon:Opening File: /data/system/time/ats_2
+10-12 17:55:57.333    204-30616/? D/QC-time-services﹕ Daemon:time_persistent_memory_opr:Genoff write operation
+10-12 17:55:57.343    204-30616/? D/QC-time-services﹕ Updating the TOD offset
+10-12 17:55:57.343    204-30616/? D/QC-time-services﹕ Daemon:genoff_persistent_update: Writing genoff = 1403797481343 to memory
+10-12 17:55:57.343    204-30616/? D/QC-time-services﹕ Daemon:Opening File: /data/system/time/ats_1
+10-12 17:55:57.343    204-30616/? D/QC-time-services﹕ Daemon:time_persistent_memory_opr:Genoff write operation
+10-12 17:55:57.353    204-30616/? D/QC-time-services﹕ Daemon:Update to modem bit set
+10-12 17:55:57.353    204-30616/? D/QC-time-services﹕ Daemon:genoff_send_modem: Sending data to MODEM !
+10-12 17:55:57.353    204-30616/? D/QC-time-services﹕ Daemon: Base = 2, Value being sent to MODEM = 1097189757343
+10-12 17:55:57.353  30598-30598/? E/QC-time-services﹕ Receive Passed == base = 2, unit = 1, operation = 0, result = 0
+10-12 17:55:57.353      204-639/? D/QC-time-services﹕ Daemon: Time-services: Waiting to acceptconnection
+10-12 17:55:57.353      204-635/? D/QC-time-services﹕ Daemon:tod_update_ind_cb: Got Update from modem msg_id 40
+10-12 17:55:57.373  17692-17696/? D/dalvikvm﹕ GC_CONCURRENT freed 974K, 22% free 20456K/26092K, paused 2ms+3ms, total 31ms
+10-12 17:55:57.383     819-1198/? I/ActivityManager﹕ Start proc com.google.android.keep for broadcast com.google.android.keep/.notification.AlertReceiver: pid=30619 uid=10053 gids={50053, 3003, 1028, 1015}
+10-12 17:55:57.433  30562-30566/? D/dalvikvm﹕ GC_CONCURRENT freed 302K, 14% free 17731K/20508K, paused 3ms+4ms, total 20ms
+10-12 17:55:57.433  28117-28121/? D/dalvikvm﹕ GC_CONCURRENT freed 426K, 15% free 17416K/20316K, paused 1ms+1ms, total 20ms
+10-12 17:55:57.453  30619-30623/? D/dalvikvm﹕ JIT code cache reset in 0 ms (0 bytes 3/0)
+10-12 17:55:57.463  30619-30623/? D/dalvikvm﹕ GC_CONCURRENT freed 265K, 14% free 17358K/20072K, paused 3ms+2ms, total 20ms
+10-12 17:55:57.543  30619-30623/? D/dalvikvm﹕ GC_CONCURRENT freed 406K, 15% free 17434K/20312K, paused 3ms+2ms, total 19ms
+10-12 17:55:57.583     819-1202/? I/ActivityManager﹕ Process com.plexapp.android (pid 29817) has died.
+10-12 17:55:57.583    819-14446/? E/WifiService﹕ Multicaster binderDied
+10-12 17:55:57.583     819-1202/? A/ActivityManager﹕ Service ServiceRecord{44846748 u0 com.plexapp.android/com.plexapp.plex.audioplayer.AudioService} in process ProcessRecord{43cd98f0 29817:com.plexapp.android/u0a171} not same as in map: null
+10-12 17:55:57.613     819-1202/? A/ProcessStats﹕ Starting service ServiceState{447d7e08 com.google.android.tts.service.GoogleTTSService pkg=com.google.android.tts proc=447d7e08} without owner
+10-12 17:55:57.653    3728-3728/? W/ManagedEGLContext﹕ doTerminate failed: EGL count is 2 but managed count is 1
+10-12 17:55:57.653  20032-20032/? I/DroidFu.ImageCache﹕ Sorting by oldest last
+10-12 17:55:57.653  20032-20032/? D/DroidFu.ImageCache﹕ Purged 0 files and left with 0 bytes on disk
+10-12 17:55:57.673  30562-30613/? I/Gmail﹕ calculateUnknownSyncRationalesAndPurgeInBackground: queueing
+10-12 17:55:57.693  30562-30566/? D/dalvikvm﹕ GC_CONCURRENT freed 309K, 14% free 17934K/20716K, paused 3ms+8ms, total 25ms
+10-12 17:55:57.693  30562-30612/? D/dalvikvm﹕ WAIT_FOR_CONCURRENT_GC blocked 19ms
+10-12 17:55:57.693  30562-30613/? D/dalvikvm﹕ WAIT_FOR_CONCURRENT_GC blocked 18ms
+10-12 17:55:57.693  30562-30634/? D/dalvikvm﹕ WAIT_FOR_CONCURRENT_GC blocked 18ms
+10-12 17:55:57.703  30619-30623/? D/dalvikvm﹕ GC_CONCURRENT freed 428K, 15% free 17458K/20356K, paused 1ms+2ms, total 12ms
+10-12 17:55:57.713  30562-30613/? I/Gmail﹕ calculateUnknownSyncRationalesAndPurgeInBackground: queueing
+10-12 17:55:57.713  30562-30613/? I/Gmail﹕ calculateUnknownSyncRationalesAndPurgeInBackground: running
+10-12 17:55:57.723  30562-30566/? D/dalvikvm﹕ GC_CONCURRENT freed 313K, 14% free 18133K/20920K, paused 1ms+1ms, total 15ms
+10-12 17:55:57.723  30562-30612/? D/dalvikvm﹕ WAIT_FOR_CONCURRENT_GC blocked 5ms
+10-12 17:55:57.733  30562-30613/? I/Gmail﹕ calculateUnknownSyncRationalesAndPurgeInBackground: running
+10-12 17:55:57.743  30562-30566/? D/dalvikvm﹕ GC_CONCURRENT freed 357K, 14% free 18289K/21120K, paused 1ms+1ms, total 14ms
+10-12 17:55:57.743  30562-30612/? D/dalvikvm﹕ WAIT_FOR_CONCURRENT_GC blocked 11ms
+10-12 17:55:57.763  17692-17696/? D/dalvikvm﹕ GC_CONCURRENT freed 1089K, 22% free 20409K/26092K, paused 3ms+3ms, total 26ms
+10-12 17:55:57.763  17692-17692/? D/dalvikvm﹕ WAIT_FOR_CONCURRENT_GC blocked 17ms
+10-12 17:55:57.793  29764-29768/? D/dalvikvm﹕ GC_CONCURRENT freed 379K, 14% free 17733K/20588K, paused 7ms+2ms, total 19ms
+10-12 17:55:57.793  30619-30623/? D/dalvikvm﹕ GC_CONCURRENT freed 412K, 15% free 17450K/20356K, paused 2ms+2ms, total 13ms
+10-12 17:55:57.823    1208-1212/? D/dalvikvm﹕ GC_CONCURRENT freed 1331K, 16% free 21450K/25484K, paused 2ms+3ms, total 30ms
+10-12 17:55:57.863  30562-30566/? D/dalvikvm﹕ GC_CONCURRENT freed 889K, 16% free 17845K/21212K, paused 1ms+2ms, total 15ms
+10-12 17:55:57.883  30619-30623/? D/dalvikvm﹕ GC_CONCURRENT freed 436K, 15% free 17497K/20408K, paused 1ms+3ms, total 16ms
+10-12 17:55:57.943     819-1202/? I/ActivityManager﹕ Start proc ch.bitspin.timely for broadcast ch.bitspin.timely/.alarm.AlarmBroadcastReceiver: pid=30648 uid=10103 gids={50103, 3003}
+10-12 17:55:57.953  17692-30647/? I/CheckinService﹕ active receiver: disabled
+10-12 17:55:57.953     819-1190/? A/ProcessStats﹕ Starting service ServiceState{447d7e08 com.google.android.tts.service.GoogleTTSService pkg=com.google.android.tts proc=447d7e08} without owner
+10-12 17:55:58.033  30648-30648/? D/dalvikvm﹕ GC_FOR_ALLOC freed 178K, 14% free 17244K/19896K, paused 14ms, total 14ms
+10-12 17:55:58.053  30648-30648/? I/dalvikvm-heap﹕ Grow heap (frag case) to 33.559MB for 15000016-byte allocation
+10-12 17:55:58.063  30648-30648/? D/dalvikvm﹕ GC_FOR_ALLOC freed 0K, 8% free 31892K/34548K, paused 10ms, total 10ms
+10-12 17:55:58.073     819-1198/? I/ActivityManager﹕ Process com.google.android.music:main (pid 29697) has died.
+10-12 17:55:58.073  30648-30652/? D/dalvikvm﹕ GC_CONCURRENT freed 2K, 8% free 31894K/34548K, paused 2ms+1ms, total 13ms
+10-12 17:55:58.073     819-1198/? A/ActivityManager﹕ Service ServiceRecord{44b3a8d0 u0 com.google.android.music/.preferences.MusicPreferenceService$MusicPreferenceServiceBinder} in process ProcessRecord{43e976d0 29697:com.google.android.music:main/u0a61} not same as in map: null
+10-12 17:55:58.073     819-1198/? A/ActivityManager﹕ Service ServiceRecord{44799628 u0 com.google.android.music/.net.NetworkMonitor} in process ProcessRecord{43e976d0 29697:com.google.android.music:main/u0a61} not same as in map: null
+10-12 17:55:58.083  30562-30566/? D/dalvikvm﹕ GC_CONCURRENT freed 423K, 16% free 17830K/21212K, paused 1ms+1ms, total 12ms
+10-12 17:55:58.083     819-1198/? A/ProcessStats﹕ Starting service ServiceState{447d7e08 com.google.android.tts.service.GoogleTTSService pkg=com.google.android.tts proc=447d7e08} without owner
+10-12 17:55:58.103  20032-20032/? I/DroidFu.ImageCache﹕ Sorting by oldest last
+10-12 17:55:58.103  20032-20032/? D/DroidFu.ImageCache﹕ Purged 0 files and left with 0 bytes on disk
+10-12 17:55:58.103    3728-3728/? W/ManagedEGLContext﹕ doTerminate failed: EGL count is 2 but managed count is 1
+10-12 17:55:58.153  28711-28715/? D/dalvikvm﹕ GC_CONCURRENT freed 7839K, 25% free 85955K/114088K, paused 6ms+7ms, total 136ms
+10-12 17:55:58.163  30648-30648/? D/dalvikvm﹕ Trying to load lib /data/app-lib/com.google.android.gms-1/libgmscore.so 0x4412da78
+10-12 17:55:58.173  30648-30648/? D/dalvikvm﹕ Added shared lib /data/app-lib/com.google.android.gms-1/libgmscore.so 0x4412da78
+10-12 17:55:58.173  30648-30648/? D/dalvikvm﹕ No JNI_OnLoad found in /data/app-lib/com.google.android.gms-1/libgmscore.so 0x4412da78, skipping init
+10-12 17:55:58.173  30648-30648/? D/dalvikvm﹕ Trying to load lib /data/app-lib/com.google.android.gms-1/libconscrypt_gmscore_jni.so 0x4412da78
+10-12 17:55:58.173  30648-30648/? D/dalvikvm﹕ Added shared lib /data/app-lib/com.google.android.gms-1/libconscrypt_gmscore_jni.so 0x4412da78
+10-12 17:55:58.173  30648-30648/? V/JNIHelp﹕ Registering com/google/android/gms/org/conscrypt/NativeCrypto's 235 native methods...
+10-12 17:55:58.203  30648-30648/? D/dalvikvm﹕ Trying to load lib /data/app-lib/com.google.android.gms-1/libgmscore.so 0x4412da78
+10-12 17:55:58.203  30648-30648/? D/dalvikvm﹕ Shared lib '/data/app-lib/com.google.android.gms-1/libgmscore.so' already loaded in same CL 0x4412da78
+10-12 17:55:58.213  30648-30648/? D/dalvikvm﹕ Trying to load lib /data/app-lib/com.google.android.gms-1/libconscrypt_gmscore_jni.so 0x4412da78
+10-12 17:55:58.213  30648-30648/? D/dalvikvm﹕ Shared lib '/data/app-lib/com.google.android.gms-1/libconscrypt_gmscore_jni.so' already loaded in same CL 0x4412da78
+10-12 17:55:58.243   29973-2592/? D/AbstractMetricsFactoryImpl﹕ record : No data points in metrics event
+10-12 17:55:58.253  30648-30648/? I/ProviderInstaller﹕ Installed default security provider GmsCore_OpenSSL
+10-12 17:55:58.293  17692-17692/? W/CastMediaRouteProvider﹕ addOrUpdateDevice: device: "Downstairs Chromecast" (aa707f7398afbda358461915ee2d069e) applicationName: null
+10-12 17:55:58.303    2377-2455/? E/bt-btif﹕ bta_jv_rfcomm_stop_server
+10-12 17:55:58.303    2377-2455/? E/bt-btif﹕ bta_jv_rfcomm_stop_server
+10-12 17:55:58.313      819-830/? I/ActivityManager﹕ Process com.pandora.android (pid 6669) has died.
+10-12 17:55:58.313      819-830/? W/ActivityManager﹕ Scheduling restart of crashed service com.pandora.android/.fordsync.SyncProxyAgentService in 1000ms
+10-12 17:55:58.313      819-830/? W/ActivityManager﹕ Scheduling restart of crashed service com.pandora.android/.api.bluetooth.BluetoothService in 11000ms
+10-12 17:55:58.333    819-14446/? D/dalvikvm﹕ GC_EXPLICIT freed 5675K, 34% free 52594K/79260K, paused 3ms+9ms, total 140ms
+10-12 17:55:58.383  29764-29768/? D/dalvikvm﹕ GC_CONCURRENT freed 728K, 16% free 17421K/20624K, paused 1ms+1ms, total 16ms
+10-12 17:55:58.393  30648-30648/? W/GAV2﹕ Thread[main,5,main]: Need to call initialize() and be in fallback mode to start dispatch.
+10-12 17:55:58.403  30648-30648/? W/ActivityThread﹕ ClassLoader.loadClass: The class loader returned by Thread.getContextClassLoader() may fail for processes that host multiple applications. You should explicitly specify a context class loader. For example: Thread.setContextClassLoader(getClass().getClassLoader());
+10-12 17:55:58.453  30648-30676/? W/Timely﹕ Device(8962645785875898831 is was deleted. Change dropped.
+10-12 17:55:58.483  30648-30648/? I/Timely﹕ Starting broadcast listening thread.
+10-12 17:55:58.483  30648-30648/? D/TimelyDebug﹕ AlarmManager.registerAlarms: reason = ACTION_TIME_CHANGED
+10-12 17:55:58.483  30648-30648/? W/Timely﹕ System time has changed.
+10-12 17:55:58.493  30648-30648/? I/Timely﹕ Stopping broadcast listening thread.
+10-12 17:55:58.493  30648-30648/? I/Timely﹕ Starting broadcast listening thread.
+10-12 17:55:58.493  30648-30677/? I/Timely﹕ Exiting broadcast listening thread.
+10-12 17:55:58.533  29973-29973/? W/com.amazon.mShop.android/com.amazon.identity.auth.device.storage.LambortishClock﹕ Users clock moved. System time is 1413154558536 and timestamp is 1413154670235
+10-12 17:55:58.533  29764-29768/? D/dalvikvm﹕ GC_CONCURRENT freed 409K, 16% free 17421K/20624K, paused 2ms+2ms, total 15ms
+10-12 17:55:58.563     819-1203/? I/ActivityManager﹕ Start proc ru.org.amip.ClockSync for broadcast ru.org.amip.ClockSync/.TimeChangeReceiver: pid=30679 uid=10119 gids={50119, 3003}
+10-12 17:55:58.633  30679-30679/? D/ClockSync﹕ Timer cancelled
+10-12 17:55:58.633  30679-30679/? D/ClockSync﹕ Time changed
+10-12 17:55:58.643  30679-30683/? D/dalvikvm﹕ GC_CONCURRENT freed 335K, 15% free 17268K/20080K, paused 2ms+0ms, total 13ms
+10-12 17:55:58.663      819-829/? I/ActivityManager﹕ Start proc com.pandora.android for broadcast com.pandora.android/.util.AlarmInitReceiver: pid=30692 uid=10124 gids={50124, 3003, 3002, 3001, 1028, 1015}
+10-12 17:55:58.663      819-829/? A/ProcessStats﹕ Starting service ServiceState{44241a48 com.pandora.android.api.bluetooth.BluetoothService pkg=com.pandora.android proc=44241a48} without owner
+10-12 17:55:58.673      819-829/? A/ProcessStats﹕ Starting service ServiceState{43d33298 com.pandora.android.fordsync.SyncProxyAgentService pkg=com.pandora.android proc=43d33298} without owner
+10-12 17:55:58.683      819-829/? A/ProcessStats﹕ Starting service ServiceState{447d7e08 com.google.android.tts.service.GoogleTTSService pkg=com.google.android.tts proc=447d7e08} without owner
+10-12 17:55:58.813  29764-29768/? D/dalvikvm﹕ GC_CONCURRENT freed 403K, 16% free 17425K/20624K, paused 0ms+2ms, total 13ms
+10-12 17:55:58.833     819-1200/? I/ActivityManager﹕ Process com.metago.astro (pid 29787) has died.
+10-12 17:55:58.833     819-1200/? A/ProcessStats﹕ Starting service ServiceState{447d7e08 com.google.android.tts.service.GoogleTTSService pkg=com.google.android.tts proc=447d7e08} without owner
+10-12 17:55:58.853  20032-20032/? I/DroidFu.ImageCache﹕ Sorting by oldest last
+10-12 17:55:58.853  20032-20032/? D/DroidFu.ImageCache﹕ Purged 0 files and left with 0 bytes on disk
+10-12 17:55:58.853    3728-3728/? W/ManagedEGLContext﹕ doTerminate failed: EGL count is 2 but managed count is 1
+10-12 17:55:58.883  30692-30692/? D/Crashlytics﹕ Initializing Crashlytics 0.9.11.11
+10-12 17:55:58.913  30692-30696/? D/dalvikvm﹕ JIT code cache reset in 0 ms (0 bytes 3/0)
+10-12 17:55:58.913  30692-30696/? D/dalvikvm﹕ GC_CONCURRENT freed 338K, 15% free 17281K/20096K, paused 4ms+1ms, total 22ms
+10-12 17:55:58.933  30648-30671/? V/Timely﹕ Registering AlarmClocks.
+10-12 17:55:58.963      819-829/? A/ProcessStats﹕ Starting service ServiceState{447d7e08 com.google.android.tts.service.GoogleTTSService pkg=com.google.android.tts proc=447d7e08} without owner
+10-12 17:55:58.973     819-1202/? I/ActivityManager﹕ Process com.google.android.gallery3d (pid 29741) has died.
+10-12 17:55:58.973     819-1202/? A/ProcessStats﹕ Starting service ServiceState{447d7e08 com.google.android.tts.service.GoogleTTSService pkg=com.google.android.tts proc=447d7e08} without owner
+10-12 17:55:58.993    3728-3728/? W/ManagedEGLContext﹕ doTerminate failed: EGL count is 2 but managed count is 1
+10-12 17:55:58.993  30692-30696/? D/dalvikvm﹕ GC_CONCURRENT freed 229K, 14% free 17532K/20236K, paused 10ms+10ms, total 28ms
+10-12 17:55:58.993  20032-20032/? I/DroidFu.ImageCache﹕ Sorting by oldest last
+10-12 17:55:58.993  20032-20032/? D/DroidFu.ImageCache﹕ Purged 0 files and left with 0 bytes on disk
+10-12 17:55:59.023  29764-29768/? D/dalvikvm﹕ GC_CONCURRENT freed 407K, 16% free 17426K/20624K, paused 1ms+1ms, total 21ms
+10-12 17:55:59.033  30692-30696/? D/dalvikvm﹕ GC_CONCURRENT freed 369K, 14% free 17652K/20496K, paused 2ms+2ms, total 15ms
+10-12 17:55:59.073  30648-30714/? I/Timely﹕ Skipping fetch.
+10-12 17:55:59.083  30692-30710/? D/dalvikvm﹕ GC_FOR_ALLOC freed 236K, 14% free 17706K/20556K, paused 12ms, total 12ms
+10-12 17:55:59.093     819-1201/? I/ActivityManager﹕ Process com.google.android.deskclock (pid 30579) has died.
+10-12 17:55:59.103  30648-30714/? I/Timely﹕ Sync getUser(): Not modified. Continue with local state.
+10-12 17:55:59.113  30692-30705/? E/Crashlytics﹕ Network error while loading Crashlytics settings. Crashes will be cached until the network is available. [URL=https://settings.crashlytics.com/api/v2/keys/7c8e30896e7a4cb3e95f8b41f651f86d0b2299a8/platforms/android/apps/com.pandora.android/settings.json?libVersion=0.9.11.11&bundleVersion=5409&shortBundleVersion=5.4]; [class java.net.ConnectException: failed to connect to settings.crashlytics.com/127.0.0.1 (port 443) after 10000ms: isConnected failed: ECONNREFUSED (Connection refused)]
+10-12 17:55:59.113  30692-30705/? E/Crashlytics﹕ Settings response code in invalid: -1
+10-12 17:55:59.133  30692-30710/? D/dalvikvm﹕ GC_FOR_ALLOC freed 222K, 15% free 17730K/20644K, paused 15ms, total 15ms
+10-12 17:55:59.133  30692-30710/? I/dalvikvm-heap﹕ Grow heap (frag case) to 19.853MB for 130826-byte allocation
+10-12 17:55:59.143  30692-30710/? D/dalvikvm﹕ GC_FOR_ALLOC freed 85K, 15% free 17773K/20772K, paused 12ms, total 12ms
+10-12 17:55:59.183  30692-30710/? D/dalvikvm﹕ GC_FOR_ALLOC freed 156K, 15% free 17799K/20772K, paused 9ms, total 9ms
+10-12 17:55:59.183  30692-30710/? I/dalvikvm-heap﹕ Grow heap (frag case) to 19.983MB for 196234-byte allocation
+10-12 17:55:59.193  30692-30700/? D/dalvikvm﹕ GC_FOR_ALLOC freed 127K, 15% free 17863K/20964K, paused 10ms, total 10ms
+10-12 17:55:59.203    819-14447/? I/ActivityManager﹕ Process com.aviary.android.feather:aviarycds (pid 29804) has died.
+10-12 17:55:59.233  30562-30566/? D/dalvikvm﹕ GC_CONCURRENT freed 403K, 16% free 17846K/21212K, paused 1ms+1ms, total 22ms
+10-12 17:55:59.273  29764-29768/? D/dalvikvm﹕ GC_CONCURRENT freed 397K, 16% free 17425K/20624K, paused 2ms+1ms, total 13ms
+10-12 17:55:59.293  30692-30710/? D/dalvikvm﹕ GC_FOR_ALLOC freed 239K, 15% free 17870K/20964K, paused 13ms, total 14ms
+10-12 17:55:59.293  30692-30710/? I/dalvikvm-heap﹕ Grow heap (frag case) to 20.146MB for 294346-byte allocation
+10-12 17:55:59.293  30562-30712/? I/Gmail﹕ MainSyncRequestProto: lowestBkwdConvoId: 0, highestHandledServerOp: 15253271, normalSync: true
+10-12 17:55:59.303  30692-30719/? D/dalvikvm﹕ GC_FOR_ALLOC freed 191K, 16% free 17966K/21252K, paused 13ms, total 13ms
+10-12 17:55:59.383  30692-30696/? D/dalvikvm﹕ GC_CONCURRENT freed 397K, 16% free 17954K/21252K, paused 2ms+1ms, total 14ms
+10-12 17:55:59.383  30692-30710/? D/dalvikvm﹕ WAIT_FOR_CONCURRENT_GC blocked 8ms
+10-12 17:55:59.383  30692-30710/? I/dalvikvm-heap﹕ Grow heap (frag case) to 20.368MB for 441514-byte allocation
+10-12 17:55:59.403  30692-30710/? D/dalvikvm﹕ GC_FOR_ALLOC freed 288K, 17% free 18097K/21684K, paused 12ms, total 12ms
+10-12 17:55:59.413  30692-30696/? D/dalvikvm﹕ GC_CONCURRENT freed 43K, 17% free 18084K/21684K, paused 1ms+4ms, total 14ms
+10-12 17:55:59.423  30562-30566/? D/dalvikvm﹕ GC_CONCURRENT freed 423K, 16% free 17848K/21212K, paused 2ms+0ms, total 16ms
+10-12 17:55:59.443  30692-30710/? D/dalvikvm﹕ GC_FOR_ALLOC freed 463K, 18% free 17960K/21684K, paused 18ms, total 18ms
+10-12 17:55:59.463  30692-30696/? D/dalvikvm﹕ GC_CONCURRENT freed 447K, 18% free 17964K/21684K, paused 2ms+2ms, total 13ms
+10-12 17:55:59.563     819-1203/? D/dalvikvm﹕ GC_EXPLICIT freed 3422K, 34% free 52445K/79260K, paused 4ms+8ms, total 134ms
+10-12 17:55:59.583  30692-30692/? W/XPrivacy/XTelephonyManager﹕ Added count=1 uid=10124
+10-12 17:55:59.583  30692-30692/? W/XPrivacy/XTelephonyManager﹕ Added count=2 uid=10124
+10-12 17:55:59.603  29764-29768/? D/dalvikvm﹕ GC_CONCURRENT freed 423K, 16% free 17420K/20624K, paused 6ms+1ms, total 25ms
+10-12 17:55:59.623  30692-30696/? D/dalvikvm﹕ GC_CONCURRENT freed 376K, 17% free 18100K/21684K, paused 3ms+0ms, total 19ms
+10-12 17:55:59.623  30692-30692/? D/dalvikvm﹕ WAIT_FOR_CONCURRENT_GC blocked 5ms
+10-12 17:55:59.623  30692-30730/? D/dalvikvm﹕ WAIT_FOR_CONCURRENT_GC blocked 6ms
+10-12 17:55:59.673  30692-30696/? D/dalvikvm﹕ GC_CONCURRENT freed 362K, 17% free 18202K/21684K, paused 1ms+2ms, total 18ms
+10-12 17:55:59.683      819-850/? D/BluetoothManagerService﹕ Message: 20
+10-12 17:55:59.683      819-850/? D/BluetoothManagerService﹕ Added callback: android.bluetooth.IBluetoothManagerCallback$Stub$Proxy@44028140:true
+10-12 17:55:59.693  30692-30692/? I/PANDORA﹕ ------------------------------------------------------------------------------------------------------------------------------
+10-12 17:55:59.693  30692-30692/? I/PANDORA﹕ Pandora App Version: 5.4 (prod, RC4-0-g32b2ac4), code = 5409, locale = US, brand = google, model = android-hammerhead, product = hammerhead, manufacturer = LGE, name = Nexus 5, buildType = pandora
+10-12 17:55:59.693  30692-30692/? I/PANDORA﹕ ------------------------------------------------------------------------------------------------------------------------------
+10-12 17:55:59.743     819-1201/? D/BluetoothManagerService﹕ checkIfCallerIsForegroundUser: valid=true callingUser=0 foregroundUser=0
+10-12 17:55:59.743     819-3652/? D/BluetoothManagerService﹕ checkIfCallerIsForegroundUser: valid=true callingUser=0 foregroundUser=0
+10-12 17:55:59.743  30742-30742/? I/dalvikvm﹕ Enabling JNI app bug workarounds for target SDK version 10...
+10-12 17:55:59.743  30692-30735/? W/BluetoothAdapter﹕ getBluetoothService() called with no BluetoothManagerCallback
+10-12 17:55:59.743     819-1190/? I/ActivityManager﹕ Start proc com.verisign.mvip.main for broadcast com.verisign.mvip.main/.GlobalTimeChangeReceiver: pid=30742 uid=10162 gids={50162, 3003}
+10-12 17:55:59.753  30692-30736/? W/BluetoothAdapter﹕ getBluetoothService() called with no BluetoothManagerCallback
+10-12 17:55:59.753  30692-30696/? D/dalvikvm﹕ GC_CONCURRENT freed 375K, 16% free 18306K/21684K, paused 3ms+3ms, total 26ms
+10-12 17:55:59.753   2377-21343/? E/BluetoothServiceJni﹕ SOCK FLAG = 3 ***********************
+10-12 17:55:59.763    2377-2390/? E/BluetoothServiceJni﹕ SOCK FLAG = 3 ***********************
+10-12 17:55:59.763  30692-30692/? W/ContextImpl﹕ Implicit intents with startService are not safe: Intent { act=com.airbiquity.hap.IHandsetApplicationProxy } android.content.ContextWrapper.bindService:517 com.pandora.android.hap.HAPClient.bindToHapService:169 com.pandora.android.hap.HAPClient.initialize:45
+10-12 17:55:59.763  30692-30692/? I/System.out﹕ Cant bind to Hap Service
+10-12 17:55:59.763     819-1202/? W/ActivityManager﹕ Unable to start service Intent { act=com.airbiquity.hap.IHandsetApplicationProxy } U=0: not found
+10-12 17:55:59.793  29764-29768/? D/dalvikvm﹕ GC_CONCURRENT freed 392K, 16% free 17470K/20624K, paused 1ms+5ms, total 19ms
+10-12 17:55:59.793      819-942/? I/ActivityManager﹕ Process eu.chainfire.supersu (pid 28940) has died.
+10-12 17:55:59.833  30742-30746/? D/dalvikvm﹕ GC_CONCURRENT freed 335K, 14% free 17327K/20136K, paused 3ms+1ms, total 20ms
+10-12 17:55:59.843  30742-30742/? D/dalvikvm﹕ DexOpt: --- BEGIN '.酔밒琝' (bootstrap=0) ---
+10-12 17:55:59.863     819-1200/? I/ActivityManager﹕ Process com.qualcomm.qcrilmsgtunnel (pid 6931) has died.
+10-12 17:55:59.863     819-1200/? W/ActivityManager﹕ Scheduling restart of crashed service com.qualcomm.qcrilmsgtunnel/.QcrilMsgTunnelService in 1000ms
+10-12 17:55:59.923  30758-30758/? D/dalvikvm﹕ DexOpt: load 6ms, verify+opt 1ms, 86372 bytes
+10-12 17:55:59.933  30742-30742/? D/dalvikvm﹕ DexOpt: --- END '.酔밒琝' (success) ---
+10-12 17:55:59.933  30742-30742/? D/dalvikvm﹕ DEX prep '/data/data/com.verisign.mvip.main/.酔밒琝': unzip in 0ms, rewrite 88ms
+10-12 17:55:59.973  30742-30742/? D/dalvikvm﹕ DexOpt: --- BEGIN '.酔밒琝' (bootstrap=0) ---
+10-12 17:55:59.983      819-857/? I/ActivityManager﹕ Process com.qualcomm.timeservice (pid 30598) has died.
+10-12 17:56:00.033  30759-30759/? D/dalvikvm﹕ DexOpt: load 2ms, verify+opt 3ms, 125388 bytes
+10-12 17:56:00.053  30742-30742/? D/dalvikvm﹕ DexOpt: --- END '.酔밒琝' (success) ---
+10-12 17:56:00.053  30742-30742/? D/dalvikvm﹕ DEX prep '/data/data/com.verisign.mvip.main/.酔밒琝': unzip in 0ms, rewrite 80ms
+10-12 17:56:00.053  29764-29768/? D/dalvikvm﹕ GC_CONCURRENT freed 491K, 16% free 17420K/20624K, paused 1ms+1ms, total 18ms
+10-12 17:56:00.063  30562-30566/? D/dalvikvm﹕ GC_CONCURRENT freed 334K, 16% free 18004K/21212K, paused 3ms+3ms, total 18ms
+10-12 17:56:00.093  14463-14463/? W/com.amazon.kindle/com.amazon.identity.auth.device.storage.LambortishClock﹕ Users clock moved. System time is 1413154560099 and timestamp is 1413154672057
+10-12 17:56:00.133    1139-1143/? D/dalvikvm﹕ GC_CONCURRENT freed 425K, 15% free 17257K/20152K, paused 1ms+0ms, total 12ms
+10-12 17:56:00.143    819-14446/? W/BroadcastQueue﹕ Failure sending broadcast Intent { act=intent.action.keep.watchface.awake flg=0x14 (has extras) }
+    android.os.DeadObjectException
+            at android.os.BinderProxy.transact(Native Method)
+            at de.robv.android.xposed.XposedBridge.invokeOriginalMethodNative(Native Method)
+            at de.robv.android.xposed.XposedBridge.handleHookedMethod(XposedBridge.java:631)
+            at android.os.BinderProxy.transact(Native Method)
+            at android.content.IIntentReceiver$Stub$Proxy.performReceive(IIntentReceiver.java:124)
+            at com.android.server.am.BroadcastQueue.performReceiveLocked(BroadcastQueue.java:424)
+            at com.android.server.am.BroadcastQueue.deliverToRegisteredReceiverLocked(BroadcastQueue.java:507)
+            at com.android.server.am.BroadcastQueue.processNextBroadcast(BroadcastQueue.java:714)
+            at com.android.server.am.ActivityManagerService.finishReceiver(ActivityManagerService.java:13815)
+            at android.app.ActivityManagerNative.onTransact(ActivityManagerNative.java:383)
+            at com.android.server.am.ActivityManagerService.onTransact(ActivityManagerService.java:2071)
+            at android.os.Binder.execTransact(Binder.java:404)
+            at de.robv.android.xposed.XposedBridge.invokeOriginalMethodNative(Native Method)
+            at de.robv.android.xposed.XposedBridge.handleHookedMethod(XposedBridge.java:631)
+            at android.os.Binder.execTransact(Native Method)
+            at dalvik.system.NativeStart.run(Native Method)
+10-12 17:56:00.143      819-845/? W/BroadcastQueue﹕ Failure sending broadcast Intent { act=intent.action.keep.watchface.awake flg=0x14 (has extras) }
+    android.os.DeadObjectException
+            at android.os.BinderProxy.transact(Native Method)
+            at de.robv.android.xposed.XposedBridge.invokeOriginalMethodNative(Native Method)
+            at de.robv.android.xposed.XposedBridge.handleHookedMethod(XposedBridge.java:631)
+            at android.os.BinderProxy.transact(Native Method)
+            at android.content.IIntentReceiver$Stub$Proxy.performReceive(IIntentReceiver.java:124)
+            at com.android.server.am.BroadcastQueue.performReceiveLocked(BroadcastQueue.java:424)
+            at com.android.server.am.BroadcastQueue.deliverToRegisteredReceiverLocked(BroadcastQueue.java:507)
+            at com.android.server.am.BroadcastQueue.processNextBroadcast(BroadcastQueue.java:714)
+            at com.android.server.am.BroadcastQueue$1.handleMessage(BroadcastQueue.java:141)
+            at android.os.Handler.dispatchMessage(Handler.java:102)
+            at android.os.Looper.loop(Looper.java:136)
+            at com.android.server.am.ActivityManagerService$AThread.run(ActivityManagerService.java:1870)
+10-12 17:56:00.153     819-3652/? W/BroadcastQueue﹕ Failure sending broadcast Intent { act=intent.action.keep.watchface.awake flg=0x14 (has extras) }
+    android.os.DeadObjectException
+            at android.os.BinderProxy.transact(Native Method)
+            at de.robv.android.xposed.XposedBridge.invokeOriginalMethodNative(Native Method)
+            at de.robv.android.xposed.XposedBridge.handleHookedMethod(XposedBridge.java:631)
+            at android.os.BinderProxy.transact(Native Method)
+            at android.content.IIntentReceiver$Stub$Proxy.performReceive(IIntentReceiver.java:124)
+            at com.android.server.am.BroadcastQueue.performReceiveLocked(BroadcastQueue.java:424)
+            at com.android.server.am.BroadcastQueue.deliverToRegisteredReceiverLocked(BroadcastQueue.java:507)
+            at com.android.server.am.BroadcastQueue.processNextBroadcast(BroadcastQueue.java:714)
+            at com.android.server.am.ActivityManagerService.finishReceiver(ActivityManagerService.java:13815)
+            at android.app.ActivityManagerNative.onTransact(ActivityManagerNative.java:383)
+            at com.android.server.am.ActivityManagerService.onTransact(ActivityManagerService.java:2071)
+            at android.os.Binder.execTransact(Binder.java:404)
+            at de.robv.android.xposed.XposedBridge.invokeOriginalMethodNative(Native Method)
+            at de.robv.android.xposed.XposedBridge.handleHookedMethod(XposedBridge.java:631)
+            at android.os.Binder.execTransact(Native Method)
+            at dalvik.system.NativeStart.run(Native Method)
+10-12 17:56:00.263     819-1202/? W/BroadcastQueue﹕ Failure sending broadcast Intent { act=intent.action.keep.watchface.awake flg=0x14 (has extras) }
+    android.os.DeadObjectException
+            at android.os.BinderProxy.transact(Native Method)
+            at de.robv.android.xposed.XposedBridge.invokeOriginalMethodNative(Native Method)
+            at de.robv.android.xposed.XposedBridge.handleHookedMethod(XposedBridge.java:631)
+            at android.os.BinderProxy.transact(Native Method)
+            at android.content.IIntentReceiver$Stub$Proxy.performReceive(IIntentReceiver.java:124)
+            at com.android.server.am.BroadcastQueue.performReceiveLocked(BroadcastQueue.java:424)
+            at com.android.server.am.BroadcastQueue.deliverToRegisteredReceiverLocked(BroadcastQueue.java:507)
+            at com.android.server.am.BroadcastQueue.processNextBroadcast(BroadcastQueue.java:714)
+            at com.android.server.am.ActivityManagerService.finishReceiver(ActivityManagerService.java:13815)
+            at android.app.ActivityManagerNative.onTransact(ActivityManagerNative.java:383)
+            at com.android.server.am.ActivityManagerService.onTransact(ActivityManagerService.java:2071)
+            at android.os.Binder.execTransact(Binder.java:404)
+            at de.robv.android.xposed.XposedBridge.invokeOriginalMethodNative(Native Method)
+            at de.robv.android.xposed.XposedBridge.handleHookedMethod(XposedBridge.java:631)
+            at android.os.Binder.execTransact(Native Method)
+            at dalvik.system.NativeStart.run(Native Method)
+10-12 17:56:00.263      819-845/? W/BroadcastQueue﹕ Failure sending broadcast Intent { act=intent.action.keep.watchface.awake flg=0x14 (has extras) }
+    android.os.DeadObjectException
+            at android.os.BinderProxy.transact(Native Method)
+            at de.robv.android.xposed.XposedBridge.invokeOriginalMethodNative(Native Method)
+            at de.robv.android.xposed.XposedBridge.handleHookedMethod(XposedBridge.java:631)
+            at android.os.BinderProxy.transact(Native Method)
+            at android.content.IIntentReceiver$Stub$Proxy.performReceive(IIntentReceiver.java:124)
+            at com.android.server.am.BroadcastQueue.performReceiveLocked(BroadcastQueue.java:424)
+            at com.android.server.am.BroadcastQueue.deliverToRegisteredReceiverLocked(BroadcastQueue.java:507)
+            at com.android.server.am.BroadcastQueue.processNextBroadcast(BroadcastQueue.java:714)
+            at com.android.server.am.BroadcastQueue$1.handleMessage(BroadcastQueue.java:141)
+            at android.os.Handler.dispatchMessage(Handler.java:102)
+            at android.os.Looper.loop(Looper.java:136)
+            at com.android.server.am.ActivityManagerService$AThread.run(ActivityManagerService.java:1870)
+10-12 17:56:00.263      819-845/? W/BroadcastQueue﹕ Failure sending broadcast Intent { act=intent.action.keep.watchface.awake flg=0x14 (has extras) }
+    android.os.DeadObjectException
+            at android.os.BinderProxy.transact(Native Method)
+            at de.robv.android.xposed.XposedBridge.invokeOriginalMethodNative(Native Method)
+            at de.robv.android.xposed.XposedBridge.handleHookedMethod(XposedBridge.java:631)
+            at android.os.BinderProxy.transact(Native Method)
+            at android.content.IIntentReceiver$Stub$Proxy.performReceive(IIntentReceiver.java:124)
+            at com.android.server.am.BroadcastQueue.performReceiveLocked(BroadcastQueue.java:424)
+            at com.android.server.am.BroadcastQueue.deliverToRegisteredReceiverLocked(BroadcastQueue.java:507)
+            at com.android.server.am.BroadcastQueue.processNextBroadcast(BroadcastQueue.java:714)
+            at com.android.server.am.BroadcastQueue$1.handleMessage(BroadcastQueue.java:141)
+            at android.os.Handler.dispatchMessage(Handler.java:102)
+            at android.os.Looper.loop(Looper.java:136)
+            at com.android.server.am.ActivityManagerService$AThread.run(ActivityManagerService.java:1870)
+10-12 17:56:00.263  29764-29768/? D/dalvikvm﹕ GC_CONCURRENT freed 389K, 16% free 17427K/20624K, paused 1ms+1ms, total 13ms
+10-12 17:56:00.263      819-845/? W/BroadcastQueue﹕ Failure sending broadcast Intent { act=intent.action.keep.watchface.awake flg=0x14 (has extras) }
+    android.os.DeadObjectException
+            at android.os.BinderProxy.transact(Native Method)
+            at de.robv.android.xposed.XposedBridge.invokeOriginalMethodNative(Native Method)
+            at de.robv.android.xposed.XposedBridge.handleHookedMethod(XposedBridge.java:631)
+            at android.os.BinderProxy.transact(Native Method)
+            at android.content.IIntentReceiver$Stub$Proxy.performReceive(IIntentReceiver.java:124)
+            at com.android.server.am.BroadcastQueue.performReceiveLocked(BroadcastQueue.java:424)
+            at com.android.server.am.BroadcastQueue.deliverToRegisteredReceiverLocked(BroadcastQueue.java:507)
+            at com.android.server.am.BroadcastQueue.processNextBroadcast(BroadcastQueue.java:714)
+            at com.android.server.am.BroadcastQueue$1.handleMessage(BroadcastQueue.java:141)
+            at android.os.Handler.dispatchMessage(Handler.java:102)
+            at android.os.Looper.loop(Looper.java:136)
+            at com.android.server.am.ActivityManagerService$AThread.run(ActivityManagerService.java:1870)
+10-12 17:56:00.263      819-845/? W/BroadcastQueue﹕ Failure sending broadcast Intent { act=intent.action.keep.watchface.awake flg=0x14 (has extras) }
+    android.os.DeadObjectException
+            at android.os.BinderProxy.transact(Native Method)
+            at de.robv.android.xposed.XposedBridge.invokeOriginalMethodNative(Native Method)
+            at de.robv.android.xposed.XposedBridge.handleHookedMethod(XposedBridge.java:631)
+            at android.os.BinderProxy.transact(Native Method)
+            at android.content.IIntentReceiver$Stub$Proxy.performReceive(IIntentReceiver.java:124)
+            at com.android.server.am.BroadcastQueue.performReceiveLocked(BroadcastQueue.java:424)
+            at com.android.server.am.BroadcastQueue.deliverToRegisteredReceiverLocked(BroadcastQueue.java:507)
+            at com.android.server.am.BroadcastQueue.processNextBroadcast(BroadcastQueue.java:714)
+            at com.android.server.am.BroadcastQueue$1.handleMessage(BroadcastQueue.java:141)
+            at android.os.Handler.dispatchMessage(Handler.java:102)
+            at android.os.Looper.loop(Looper.java:136)
+            at com.android.server.am.ActivityManagerService$AThread.run(ActivityManagerService.java:1870)
+10-12 17:56:00.263      819-845/? W/BroadcastQueue﹕ Failure sending broadcast Intent { act=intent.action.keep.watchface.awake flg=0x14 (has extras) }
+    android.os.DeadObjectException
+            at android.os.BinderProxy.transact(Native Method)
+            at de.robv.android.xposed.XposedBridge.invokeOriginalMethodNative(Native Method)
+            at de.robv.android.xposed.XposedBridge.handleHookedMethod(XposedBridge.java:631)
+            at android.os.BinderProxy.transact(Native Method)
+            at android.content.IIntentReceiver$Stub$Proxy.performReceive(IIntentReceiver.java:124)
+            at com.android.server.am.BroadcastQueue.performReceiveLocked(BroadcastQueue.java:424)
+            at com.android.server.am.BroadcastQueue.deliverToRegisteredReceiverLocked(BroadcastQueue.java:507)
+            at com.android.server.am.BroadcastQueue.processNextBroadcast(BroadcastQueue.java:714)
+            at com.android.server.am.BroadcastQueue$1.handleMessage(BroadcastQueue.java:141)
+            at android.os.Handler.dispatchMessage(Handler.java:102)
+            at android.os.Looper.loop(Looper.java:136)
+            at com.android.server.am.ActivityManagerService$AThread.run(ActivityManagerService.java:1870)
+10-12 17:56:00.273  28117-28117/? D/AlertReceiver﹕ onReceive: a=android.intent.action.PROVIDER_CHANGED Intent { act=android.intent.action.PROVIDER_CHANGED dat=content://com.android.calendar flg=0x10 cmp=com.google.android.calendar/com.android.calendar.alerts.AlertReceiver }
+10-12 17:56:00.283  28117-30760/? D/AlertService﹕ 0 Action = android.intent.action.PROVIDER_CHANGED
+10-12 17:56:00.293  28117-28121/? D/dalvikvm﹕ GC_CONCURRENT freed 468K, 15% free 17382K/20324K, paused 2ms+1ms, total 14ms
+10-12 17:56:00.323    819-14446/? I/ActivityManager﹕ Start proc org.dwallach.calwatch for broadcast org.dwallach.calwatch/.WakeupReceiver: pid=30763 uid=10219 gids={50219, 1028, 1015}
+10-12 17:56:00.373  30562-30566/? D/dalvikvm﹕ GC_CONCURRENT freed 390K, 15% free 18032K/21212K, paused 5ms+1ms, total 29ms
+10-12 17:56:00.453    819-30312/? E/qcom_sensors_hal﹕ hal_process_report_ind: Bad item quality: 11
+10-12 17:56:00.463  30763-30763/? V/WakeupReceiver﹕ received intent: Intent { act=android.intent.action.PROVIDER_CHANGED dat=content://com.android.calendar flg=0x10 cmp=org.dwallach.calwatch/.WakeupReceiver }
+10-12 17:56:00.463  30763-30763/? V/WakeupReceiver﹕ boot-time: set up alarm intent
+10-12 17:56:00.463  30763-30775/? V/WakeupReceiver﹕ setting up alarm service
+10-12 17:56:00.473  30763-30775/? V/WatchCalendarService﹕ launching watch calendar service
+10-12 17:56:00.473  30763-30763/? V/WatchCalendarService﹕ starting calendar fetcher
+10-12 17:56:00.473  30763-30763/? V/CalendarFetcher﹕ starting fetcher thread
+10-12 17:56:00.493  11122-11126/? D/dalvikvm﹕ GC_CONCURRENT freed 867K, 23% free 20190K/26004K, paused 3ms+2ms, total 36ms
+10-12 17:56:00.493  30763-30767/? D/dalvikvm﹕ JIT code cache reset in 0 ms (0 bytes 3/0)
+10-12 17:56:00.493  30763-30767/? D/dalvikvm﹕ GC_CONCURRENT freed 330K, 14% free 17268K/20072K, paused 2ms+1ms, total 19ms
+10-12 17:56:00.493  30763-30763/? V/WatchCalendarService﹕ service created!
+10-12 17:56:00.493  30763-30776/? V/CalendarFetcher﹕ run: starting
+10-12 17:56:00.493  30763-30776/? V/CalendarFetcher﹕ starting to load content
+10-12 17:56:00.513     819-1198/? W/BroadcastQueue﹕ Failure sending broadcast Intent { act=intent.action.keep.watchface.awake flg=0x14 (has extras) }
+    android.os.DeadObjectException
+            at android.os.BinderProxy.transact(Native Method)
+            at de.robv.android.xposed.XposedBridge.invokeOriginalMethodNative(Native Method)
+            at de.robv.android.xposed.XposedBridge.handleHookedMethod(XposedBridge.java:631)
+            at android.os.BinderProxy.transact(Native Method)
+            at android.content.IIntentReceiver$Stub$Proxy.performReceive(IIntentReceiver.java:124)
+            at com.android.server.am.BroadcastQueue.performReceiveLocked(BroadcastQueue.java:424)
+            at com.android.server.am.BroadcastQueue.deliverToRegisteredReceiverLocked(BroadcastQueue.java:507)
+            at com.android.server.am.BroadcastQueue.processNextBroadcast(BroadcastQueue.java:714)
+            at com.android.server.am.ActivityManagerService.finishReceiver(ActivityManagerService.java:13815)
+            at android.app.ActivityManagerNative.onTransact(ActivityManagerNative.java:383)
+            at com.android.server.am.ActivityManagerService.onTransact(ActivityManagerService.java:2071)
+            at android.os.Binder.execTransact(Binder.java:404)
+            at de.robv.android.xposed.XposedBridge.invokeOriginalMethodNative(Native Method)
+            at de.robv.android.xposed.XposedBridge.handleHookedMethod(XposedBridge.java:631)
+            at android.os.Binder.execTransact(Native Method)
+            at dalvik.system.NativeStart.run(Native Method)
+10-12 17:56:00.513      819-845/? W/BroadcastQueue﹕ Failure sending broadcast Intent { act=intent.action.keep.watchface.awake flg=0x14 (has extras) }
+    android.os.DeadObjectException
+            at android.os.BinderProxy.transact(Native Method)
+            at de.robv.android.xposed.XposedBridge.invokeOriginalMethodNative(Native Method)
+            at de.robv.android.xposed.XposedBridge.handleHookedMethod(XposedBridge.java:631)
+            at android.os.BinderProxy.transact(Native Method)
+            at android.content.IIntentReceiver$Stub$Proxy.performReceive(IIntentReceiver.java:124)
+            at com.android.server.am.BroadcastQueue.performReceiveLocked(BroadcastQueue.java:424)
+            at com.android.server.am.BroadcastQueue.deliverToRegisteredReceiverLocked(BroadcastQueue.java:507)
+            at com.android.server.am.BroadcastQueue.processNextBroadcast(BroadcastQueue.java:714)
+            at com.android.server.am.BroadcastQueue$1.handleMessage(BroadcastQueue.java:141)
+            at android.os.Handler.dispatchMessage(Handler.java:102)
+            at android.os.Looper.loop(Looper.java:136)
+            at com.android.server.am.ActivityManagerService$AThread.run(ActivityManagerService.java:1870)
+10-12 17:56:00.513      819-845/? W/BroadcastQueue﹕ Failure sending broadcast Intent { act=intent.action.keep.watchface.awake flg=0x14 (has extras) }
+    android.os.DeadObjectException
+            at android.os.BinderProxy.transact(Native Method)
+            at de.robv.android.xposed.XposedBridge.invokeOriginalMethodNative(Native Method)
+            at de.robv.android.xposed.XposedBridge.handleHookedMethod(XposedBridge.java:631)
+            at android.os.BinderProxy.transact(Native Method)
+            at android.content.IIntentReceiver$Stub$Proxy.performReceive(IIntentReceiver.java:124)
+            at com.android.server.am.BroadcastQueue.performReceiveLocked(BroadcastQueue.java:424)
+            at com.android.server.am.BroadcastQueue.deliverToRegisteredReceiverLocked(BroadcastQueue.java:507)
+            at com.android.server.am.BroadcastQueue.processNextBroadcast(BroadcastQueue.java:714)
+            at com.android.server.am.BroadcastQueue$1.handleMessage(BroadcastQueue.java:141)
+            at android.os.Handler.dispatchMessage(Handler.java:102)
+            at android.os.Looper.loop(Looper.java:136)
+            at com.android.server.am.ActivityManagerService$AThread.run(ActivityManagerService.java:1870)
+10-12 17:56:00.513      819-845/? W/BroadcastQueue﹕ Failure sending broadcast Intent { act=intent.action.keep.watchface.awake flg=0x14 (has extras) }
+    android.os.DeadObjectException
+            at android.os.BinderProxy.transact(Native Method)
+            at de.robv.android.xposed.XposedBridge.invokeOriginalMethodNative(Native Method)
+            at de.robv.android.xposed.XposedBridge.handleHookedMethod(XposedBridge.java:631)
+            at android.os.BinderProxy.transact(Native Method)
+            at android.content.IIntentReceiver$Stub$Proxy.performReceive(IIntentReceiver.java:124)
+            at com.android.server.am.BroadcastQueue.performReceiveLocked(BroadcastQueue.java:424)
+            at com.android.server.am.BroadcastQueue.deliverToRegisteredReceiverLocked(BroadcastQueue.java:507)
+            at com.android.server.am.BroadcastQueue.processNextBroadcast(BroadcastQueue.java:714)
+            at com.android.server.am.BroadcastQueue$1.handleMessage(BroadcastQueue.java:141)
+            at android.os.Handler.dispatchMessage(Handler.java:102)
+            at android.os.Looper.loop(Looper.java:136)
+            at com.android.server.am.ActivityManagerService$AThread.run(ActivityManagerService.java:1870)
+10-12 17:56:00.523      819-845/? W/BroadcastQueue﹕ Failure sending broadcast Intent { act=intent.action.keep.watchface.awake flg=0x14 (has extras) }
+    android.os.DeadObjectException
+            at android.os.BinderProxy.transact(Native Method)
+            at de.robv.android.xposed.XposedBridge.invokeOriginalMethodNative(Native Method)
+            at de.robv.android.xposed.XposedBridge.handleHookedMethod(XposedBridge.java:631)
+            at android.os.BinderProxy.transact(Native Method)
+            at android.content.IIntentReceiver$Stub$Proxy.performReceive(IIntentReceiver.java:124)
+            at com.android.server.am.BroadcastQueue.performReceiveLocked(BroadcastQueue.java:424)
+            at com.android.server.am.BroadcastQueue.deliverToRegisteredReceiverLocked(BroadcastQueue.java:507)
+            at com.android.server.am.BroadcastQueue.processNextBroadcast(BroadcastQueue.java:714)
+            at com.android.server.am.BroadcastQueue$1.handleMessage(BroadcastQueue.java:141)
+            at android.os.Handler.dispatchMessage(Handler.java:102)
+            at android.os.Looper.loop(Looper.java:136)
+            at com.android.server.am.ActivityManagerService$AThread.run(ActivityManagerService.java:1870)
+10-12 17:56:00.523  30763-30776/? V/CalendarFetcher﹕ Query times... Now: October 12, 5:56 PM, QueryStart: October 12, 5:00 PM, QueryEnd: October 13, 5:00 PM
+10-12 17:56:00.523     819-1190/? W/BroadcastQueue﹕ Failure sending broadcast Intent { act=intent.action.keep.watchface.awake flg=0x14 (has extras) }
+    android.os.DeadObjectException
+            at android.os.BinderProxy.transact(Native Method)
+            at de.robv.android.xposed.XposedBridge.invokeOriginalMethodNative(Native Method)
+            at de.robv.android.xposed.XposedBridge.handleHookedMethod(XposedBridge.java:631)
+            at android.os.BinderProxy.transact(Native Method)
+            at android.content.IIntentReceiver$Stub$Proxy.performReceive(IIntentReceiver.java:124)
+            at com.android.server.am.BroadcastQueue.performReceiveLocked(BroadcastQueue.java:424)
+            at com.android.server.am.BroadcastQueue.deliverToRegisteredReceiverLocked(BroadcastQueue.java:507)
+            at com.android.server.am.BroadcastQueue.processNextBroadcast(BroadcastQueue.java:714)
+            at com.android.server.am.ActivityManagerService.finishReceiver(ActivityManagerService.java:13815)
+            at android.app.ActivityManagerNative.onTransact(ActivityManagerNative.java:383)
+            at com.android.server.am.ActivityManagerService.onTransact(ActivityManagerService.java:2071)
+            at android.os.Binder.execTransact(Binder.java:404)
+            at de.robv.android.xposed.XposedBridge.invokeOriginalMethodNative(Native Method)
+            at de.robv.android.xposed.XposedBridge.handleHookedMethod(XposedBridge.java:631)
+            at android.os.Binder.execTransact(Native Method)
+            at dalvik.system.NativeStart.run(Native Method)
+10-12 17:56:00.533    1437-1439/? D/dalvikvm﹕ GC_CONCURRENT freed 376K, 15% free 17655K/20656K, paused 2ms+2ms, total 15ms
+10-12 17:56:00.533     819-1202/? W/BroadcastQueue﹕ Failure sending broadcast Intent { act=intent.action.keep.watchface.awake flg=0x14 (has extras) }
+    android.os.DeadObjectException
+            at android.os.BinderProxy.transact(Native Method)
+            at de.robv.android.xposed.XposedBridge.invokeOriginalMethodNative(Native Method)
+            at de.robv.android.xposed.XposedBridge.handleHookedMethod(XposedBridge.java:631)
+            at android.os.BinderProxy.transact(Native Method)
+            at android.content.IIntentReceiver$Stub$Proxy.performReceive(IIntentReceiver.java:124)
+            at com.android.server.am.BroadcastQueue.performReceiveLocked(BroadcastQueue.java:424)
+            at com.android.server.am.BroadcastQueue.deliverToRegisteredReceiverLocked(BroadcastQueue.java:507)
+            at com.android.server.am.BroadcastQueue.processNextBroadcast(BroadcastQueue.java:714)
+            at com.android.server.am.ActivityManagerService.finishReceiver(ActivityManagerService.java:13815)
+            at android.app.ActivityManagerNative.onTransact(ActivityManagerNative.java:383)
+            at com.android.server.am.ActivityManagerService.onTransact(ActivityManagerService.java:2071)
+            at android.os.Binder.execTransact(Binder.java:404)
+            at de.robv.android.xposed.XposedBridge.invokeOriginalMethodNative(Native Method)
+            at de.robv.android.xposed.XposedBridge.handleHookedMethod(XposedBridge.java:631)
+            at android.os.Binder.execTransact(Native Method)
+            at dalvik.system.NativeStart.run(Native Method)
+10-12 17:56:00.533      819-845/? W/BroadcastQueue﹕ Failure sending broadcast Intent { act=intent.action.keep.watchface.awake flg=0x14 (has extras) }
+    android.os.DeadObjectException
+            at android.os.BinderProxy.transact(Native Method)
+            at de.robv.android.xposed.XposedBridge.invokeOriginalMethodNative(Native Method)
+            at de.robv.android.xposed.XposedBridge.handleHookedMethod(XposedBridge.java:631)
+            at android.os.BinderProxy.transact(Native Method)
+            at android.content.IIntentReceiver$Stub$Proxy.performReceive(IIntentReceiver.java:124)
+            at com.android.server.am.BroadcastQueue.performReceiveLocked(BroadcastQueue.java:424)
+            at com.android.server.am.BroadcastQueue.deliverToRegisteredReceiverLocked(BroadcastQueue.java:507)
+            at com.android.server.am.BroadcastQueue.processNextBroadcast(BroadcastQueue.java:714)
+            at com.android.server.am.BroadcastQueue$1.handleMessage(BroadcastQueue.java:141)
+            at android.os.Handler.dispatchMessage(Handler.java:102)
+            at android.os.Looper.loop(Looper.java:136)
+            at com.android.server.am.ActivityManagerService$AThread.run(ActivityManagerService.java:1870)
+10-12 17:56:00.543  30763-30763/? V/WatchCalendarService﹕ service starting!
+10-12 17:56:00.553  29764-29768/? D/dalvikvm﹕ GC_CONCURRENT freed 437K, 16% free 17452K/20624K, paused 3ms+8ms, total 83ms
+10-12 17:56:00.563  30763-30763/? D/WearableClient﹕ WearableClientImpl.onPostInitHandler: done
+10-12 17:56:00.563  30763-30763/? V/WatchCalendarService﹕ Google API connected!
+10-12 17:56:00.583  30763-30763/? V/WearSender﹕ onCreate!
+10-12 17:56:00.603    1208-1212/? D/dalvikvm﹕ GC_CONCURRENT freed 1471K, 16% free 21416K/25484K, paused 2ms+3ms, total 29ms
+10-12 17:56:00.603    1208-1208/? D/dalvikvm﹕ WAIT_FOR_CONCURRENT_GC blocked 15ms
+10-12 17:56:00.613  30763-30767/? D/dalvikvm﹕ GC_CONCURRENT freed 252K, 14% free 17413K/20140K, paused 2ms+1ms, total 14ms
+10-12 17:56:00.613  30763-30776/? V/CalendarFetcher﹕ database found instances(6)
+10-12 17:56:00.623  30763-30763/? D/WearableClient﹕ WearableClientImpl.onPostInitHandler: done
+10-12 17:56:00.633  30763-30763/? V/WearSender﹕ connected to Google API!
+10-12 17:56:00.633  30763-30776/? V/WatchCalendarService﹕ New calendar state to send to watch!
+10-12 17:56:00.633  30763-30776/? V/WatchCalendarService﹕ internal clock state changed: time to send all to the watch
+10-12 17:56:00.643    819-14447/? D/dalvikvm﹕ GC_EXPLICIT freed 3330K, 34% free 52518K/79260K, paused 3ms+11ms, total 169ms
+10-12 17:56:00.673  30763-30776/? V/WearSender﹕ preparing event list for transmission, length(170 bytes)
+10-12 17:56:00.673  30763-30776/? V/WearSender﹕ ready to send request
+10-12 17:56:00.683  30763-30779/? V/WearSender﹕ Sending to node: d766314c-4774-46a5-a362-1ee3243ca232
+10-12 17:56:00.713      819-856/? I/ActivityManager﹕ Start proc com.google.android.deskclock for broadcast com.google.android.deskclock/com.android.alarmclock.DigitalAppWidgetProvider: pid=30781 uid=10035 gids={50035, 1028}
+10-12 17:56:00.793  29764-29768/? D/dalvikvm﹕ GC_CONCURRENT freed 418K, 16% free 17433K/20624K, paused 2ms+1ms, total 14ms
+10-12 17:56:00.813    1208-1208/? D/GCM﹕ GcmService start Intent { act=com.google.android.checkin.CHECKIN_COMPLETE flg=0x10 cmp=com.google.android.gms/.gcm.GcmService (has extras) } com.google.android.checkin.CHECKIN_COMPLETE
+10-12 17:56:00.843  30763-30763/? V/WakeupReceiver﹕ received intent: Intent { flg=0x14 cmp=org.dwallach.calwatch/.WakeupReceiver (has extras) }
+10-12 17:56:00.843  30763-30763/? V/WakeupReceiver﹕ attempting to kickstart the watch calendar service
+10-12 17:56:00.913      819-845/? I/ActivityManager﹕ Start proc com.qualcomm.qcrilmsgtunnel for service com.qualcomm.qcrilmsgtunnel/.QcrilMsgTunnelService: pid=30795 uid=1001 gids={41001, 3002, 3001, 3003, 2001, 1028, 1015}
+10-12 17:56:00.923      185-185/? D/dalvikvm﹕ GC_EXPLICIT freed 44K, 13% free 17210K/19732K, paused 2ms+1ms, total 19ms
+10-12 17:56:00.933      185-185/? D/dalvikvm﹕ GC_EXPLICIT freed <1K, 13% free 17210K/19732K, paused 1ms+1ms, total 15ms
+10-12 17:56:00.953      185-185/? D/dalvikvm﹕ GC_EXPLICIT freed <1K, 13% free 17210K/19732K, paused 1ms+1ms, total 16ms
+10-12 17:56:00.953  17692-17696/? D/dalvikvm﹕ GC_CONCURRENT freed 989K, 22% free 20444K/26092K, paused 3ms+3ms, total 31ms
+10-12 17:56:00.973  30795-30795/? D/QcrilMsgTunnelService﹕ onCreate method
+10-12 17:56:00.973  30795-30795/? D/QcrilMsgTunnelIfaceManager﹕ : Instantiated
+10-12 17:56:00.983  30795-30795/? V/QcrilMsgTunnelSocket﹕ Starting QcRilReceiver
+10-12 17:56:00.983  30795-30795/? D/QcrilMsgTunnelIfaceManager﹕ Registered for UNSOL OEM HOOK Responses to deliver external apps
+10-12 17:56:00.993  30795-30808/? D/QcrilMsgTunnelSocket﹕ Connecting to socket android.net.LocalSocket@432bc6e0 impl:android.net.LocalSocketImpl@432bc708 fd:FileDescriptor[51]
+10-12 17:56:00.993  30795-30808/? I/QcrilMsgTunnelSocket﹕ Connected to 'qmux_radio/rild_oem0' socket
+10-12 17:56:00.993  30795-30808/? V/QcrilMsgTunnelSocket﹕ Before reading offset = 0 remaining = 4 countRead = 0
+10-12 17:56:01.053      819-830/? I/ActivityManager﹕ Process com.google.android.keep (pid 30619) has died.
+10-12 17:56:01.063  28711-28715/? D/dalvikvm﹕ GC_CONCURRENT freed 8608K, 26% free 85538K/114088K, paused 3ms+7ms, total 118ms
+10-12 17:56:01.063  28711-30535/? D/dalvikvm﹕ WAIT_FOR_CONCURRENT_GC blocked 77ms
+10-12 17:56:01.063  28711-28711/? D/dalvikvm﹕ WAIT_FOR_CONCURRENT_GC blocked 77ms
+10-12 17:56:01.063  28711-28761/? D/dalvikvm﹕ WAIT_FOR_CONCURRENT_GC blocked 77ms
+10-12 17:56:01.153  29764-29768/? D/dalvikvm﹕ GC_CONCURRENT freed 428K, 16% free 17439K/20624K, paused 1ms+1ms, total 16ms
+10-12 17:56:01.173  30562-30566/? D/dalvikvm﹕ GC_CONCURRENT freed 391K, 15% free 18053K/21212K, paused 3ms+2ms, total 25ms
+10-12 17:56:01.223  30562-30566/? D/dalvikvm﹕ GC_CONCURRENT freed 428K, 15% free 18137K/21212K, paused 1ms+2ms, total 13ms
+10-12 17:56:01.223  30562-30712/? D/dalvikvm﹕ WAIT_FOR_CONCURRENT_GC blocked 4ms
+10-12 17:56:01.263  30562-30566/? D/dalvikvm﹕ GC_CONCURRENT freed 633K, 16% free 18016K/21212K, paused 1ms+1ms, total 14ms
+10-12 17:56:01.263  30562-30712/? D/dalvikvm﹕ WAIT_FOR_CONCURRENT_GC blocked 4ms
+10-12 17:56:01.303  30562-30566/? D/dalvikvm﹕ GC_CONCURRENT freed 423K, 15% free 18046K/21212K, paused 1ms+1ms, total 13ms
+10-12 17:56:01.353  30562-30712/? D/dalvikvm﹕ GC_EXPLICIT freed 255K, 16% free 17961K/21212K, paused 1ms+1ms, total 21ms
+10-12 17:56:01.363  30562-30712/? I/Gmail﹕ MainSyncRequestProto: lowestBkwdConvoId: 0, highestHandledServerOp: 15253374, normalSync: true
+10-12 17:56:01.713  30562-30566/? D/dalvikvm﹕ GC_CONCURRENT freed 399K, 16% free 18002K/21212K, paused 2ms+2ms, total 17ms
+10-12 17:56:01.903  30562-30566/? D/dalvikvm﹕ GC_CONCURRENT freed 285K, 15% free 18134K/21212K, paused 1ms+1ms, total 19ms
+10-12 17:56:02.043  30562-30712/? D/dalvikvm﹕ GC_EXPLICIT freed 32K, 15% free 18120K/21212K, paused 1ms+2ms, total 23ms
+10-12 17:56:02.053  30562-30712/? I/Gmail﹕ MainSyncRequestProto: lowestBkwdConvoId: 0, highestHandledServerOp: 15253374, normalSync: true
+10-12 17:56:02.053  30562-30712/? I/Gmail﹕ lowestBackward conversation id 0
+10-12 17:56:02.093  10883-10887/? D/dalvikvm﹕ GC_CONCURRENT freed 2680K, 19% free 25482K/31220K, paused 11ms+3ms, total 88ms
+10-12 17:56:02.153  30562-30566/? D/dalvikvm﹕ GC_CONCURRENT freed 435K, 15% free 18171K/21212K, paused 2ms+2ms, total 15ms
+10-12 17:56:02.183  30562-30712/? I/Gmail﹕ Sending provider changed intent: Intent { act=android.intent.action.PROVIDER_CHANGED dat=content://gmail-ls/unread/^sq_ig_i_notification (has extras) }
+10-12 17:56:02.223  30562-30566/? D/dalvikvm﹕ GC_CONCURRENT freed 419K, 14% free 18249K/21212K, paused 3ms+2ms, total 22ms
+10-12 17:56:02.223  30562-30596/? I/GAV2﹕ Thread[GAThread,5,main]: No campaign data found.
+10-12 17:56:02.383  29764-29768/? D/dalvikvm﹕ GC_CONCURRENT freed 473K, 16% free 17419K/20624K, paused 3ms+1ms, total 16ms
+10-12 17:56:02.563  29764-29768/? D/dalvikvm﹕ GC_CONCURRENT freed 392K, 16% free 17424K/20624K, paused 2ms+5ms, total 26ms
+10-12 17:56:02.813     819-1203/? D/dalvikvm﹕ GC_EXPLICIT freed 2926K, 34% free 52460K/79260K, paused 5ms+7ms, total 157ms
+10-12 17:56:02.903  29764-29768/? D/dalvikvm﹕ GC_CONCURRENT freed 422K, 16% free 17420K/20624K, paused 3ms+2ms, total 19ms
+10-12 17:56:03.063  29764-29768/? D/dalvikvm﹕ GC_CONCURRENT freed 444K, 16% free 17419K/20624K, paused 1ms+1ms, total 25ms
+10-12 17:56:03.113  17692-17904/? I/Icing﹕ Indexing 050BD9035CEB0A626A0E123D9B2DF819D30010EF from com.google.android.gm
+10-12 17:56:03.203  29764-29768/? D/dalvikvm﹕ GC_CONCURRENT freed 405K, 16% free 17428K/20624K, paused 1ms+2ms, total 20ms
+10-12 17:56:03.233  30562-30566/? D/dalvikvm﹕ GC_CONCURRENT freed 444K, 15% free 18217K/21252K, paused 1ms+1ms, total 13ms
+10-12 17:56:03.333  17692-17904/? I/Icing﹕ Indexing done 050BD9035CEB0A626A0E123D9B2DF819D30010EF
+10-12 17:56:03.363  29764-29768/? D/dalvikvm﹕ GC_CONCURRENT freed 398K, 16% free 17428K/20624K, paused 2ms+0ms, total 15ms
+10-12 17:56:03.393  30648-30669/? W/ContextImpl﹕ Implicit intents with startService are not safe: Intent { act=com.google.android.gms.analytics.service.START (has extras) } android.content.ContextWrapper.bindService:517 com.google.analytics.tracking.android.d.b:82 com.google.analytics.tracking.android.x.j:279
+10-12 17:56:03.403  30648-30669/? I/GAV2﹕ Thread[GAThread,1,main]: No campaign data found.
+10-12 17:56:03.703  29764-29768/? D/dalvikvm﹕ GC_CONCURRENT freed 420K, 16% free 17423K/20624K, paused 1ms+1ms, total 12ms
+10-12 17:56:03.953  29764-29768/? D/dalvikvm﹕ GC_CONCURRENT freed 414K, 16% free 17427K/20624K, paused 2ms+1ms, total 17ms
+10-12 17:56:04.173     819-1101/? D/dalvikvm﹕ GC_EXPLICIT freed 1508K, 34% free 52411K/79260K, paused 3ms+8ms, total 122ms
+10-12 17:56:04.223  29764-29768/? D/dalvikvm﹕ GC_CONCURRENT freed 420K, 16% free 17431K/20624K, paused 1ms+0ms, total 15ms
+10-12 17:56:04.373  29764-29768/? D/dalvikvm﹕ GC_CONCURRENT freed 398K, 16% free 17419K/20624K, paused 1ms+1ms, total 11ms
+10-12 17:56:04.473  28711-30535/? D/dalvikvm﹕ GC_EXPLICIT freed 7960K, 26% free 85522K/114088K, paused 2ms+5ms, total 109ms
+10-12 17:56:04.623  29764-29768/? D/dalvikvm﹕ GC_CONCURRENT freed 424K, 16% free 17422K/20624K, paused 2ms+2ms, total 15ms
+10-12 17:56:04.893  29764-29768/? D/dalvikvm﹕ GC_CONCURRENT freed 448K, 16% free 17418K/20624K, paused 2ms+1ms, total 19ms
+10-12 17:56:05.033  29764-29768/? D/dalvikvm﹕ GC_CONCURRENT freed 433K, 16% free 17427K/20624K, paused 1ms+1ms, total 16ms
+10-12 17:56:05.193  29764-29768/? D/dalvikvm﹕ GC_CONCURRENT freed 443K, 16% free 17429K/20624K, paused 1ms+1ms, total 22ms
+10-12 17:56:05.283  28117-30760/? D/AlertService﹕ Beginning updateAlertNotification
+10-12 17:56:05.303  28117-28121/? D/dalvikvm﹕ GC_CONCURRENT freed 388K, 15% free 17379K/20324K, paused 1ms+2ms, total 15ms
+10-12 17:56:05.433    819-14447/? D/dalvikvm﹕ GC_EXPLICIT freed 1374K, 34% free 52412K/79260K, paused 3ms+7ms, total 120ms
+10-12 17:56:05.443  28117-30760/? D/AlertService﹕ No fired or scheduled alerts
+10-12 17:56:05.473  28117-30760/? D/AlertService﹕ Scheduling next alarm with AlarmScheduler. sEventReminderReceived: null
+10-12 17:56:05.503  29764-29768/? D/dalvikvm﹕ GC_CONCURRENT freed 449K, 16% free 17423K/20624K, paused 1ms+2ms, total 32ms
+10-12 17:56:05.503    819-30312/? E/qcom_sensors_hal﹕ hal_process_report_ind: Bad item quality: 11
+10-12 17:56:05.513  28117-30760/? D/AlarmScheduler﹕ Query result count for events starting within 1 week: 37
+10-12 17:56:05.653  29764-29768/? D/dalvikvm﹕ GC_CONCURRENT freed 410K, 16% free 17428K/20624K, paused 1ms+1ms, total 15ms
+10-12 17:56:05.843  29764-29768/? D/dalvikvm﹕ GC_CONCURRENT freed 401K, 16% free 17426K/20624K, paused 2ms+1ms, total 23ms
+10-12 17:56:06.183  29764-29768/? D/dalvikvm﹕ GC_CONCURRENT freed 442K, 16% free 17428K/20624K, paused 1ms+1ms, total 33ms
+10-12 17:56:06.253  30562-30566/? D/dalvikvm﹕ GC_CONCURRENT freed 435K, 15% free 18193K/21252K, paused 3ms+2ms, total 30ms
+10-12 17:56:07.633  29764-29768/? D/dalvikvm﹕ GC_CONCURRENT freed 440K, 16% free 17431K/20624K, paused 0ms+1ms, total 14ms
+10-12 17:56:07.753  28711-28715/? D/dalvikvm﹕ GC_CONCURRENT freed 8172K, 26% free 85541K/114088K, paused 3ms+6ms, total 116ms
+10-12 17:56:07.753  28711-28761/? D/dalvikvm﹕ WAIT_FOR_CONCURRENT_GC blocked 87ms
+10-12 17:56:07.753  28711-28711/? D/dalvikvm﹕ WAIT_FOR_CONCURRENT_GC blocked 87ms
+10-12 17:56:07.753  28711-30535/? D/dalvikvm﹕ WAIT_FOR_CONCURRENT_GC blocked 87ms
+10-12 17:56:08.003  29764-29768/? D/dalvikvm﹕ GC_CONCURRENT freed 387K, 16% free 17431K/20624K, paused 1ms+1ms, total 12ms
+10-12 17:56:08.443    819-14448/? D/dalvikvm﹕ GC_EXPLICIT freed 1410K, 34% free 52404K/79260K, paused 3ms+10ms, total 124ms
+10-12 17:56:08.533  29764-29768/? D/dalvikvm﹕ GC_CONCURRENT freed 437K, 16% free 17420K/20624K, paused 2ms+1ms, total 14ms
+10-12 17:56:08.683  29764-29768/? D/dalvikvm﹕ GC_CONCURRENT freed 385K, 16% free 17431K/20624K, paused 0ms+2ms, total 13ms
+10-12 17:56:08.963  29764-29768/? D/dalvikvm﹕ GC_CONCURRENT freed 430K, 16% free 17419K/20624K, paused 3ms+1ms, total 20ms
+10-12 17:56:08.963  11122-11126/? D/dalvikvm﹕ GC_CONCURRENT freed 1000K, 23% free 20185K/26004K, paused 3ms+2ms, total 37ms
+10-12 17:56:08.963  11122-11287/? D/dalvikvm﹕ WAIT_FOR_CONCURRENT_GC blocked 20ms
+10-12 17:56:08.963  11122-11162/? D/dalvikvm﹕ WAIT_FOR_CONCURRENT_GC blocked 20ms
+10-12 17:56:09.013    819-30312/? E/qcom_sensors_hal﹕ hal_process_report_ind: Bad item quality: 11
+10-12 17:56:09.113  29764-29768/? D/dalvikvm﹕ GC_CONCURRENT freed 443K, 16% free 17419K/20624K, paused 1ms+0ms, total 15ms
+10-12 17:56:09.263  29764-29768/? D/dalvikvm﹕ GC_CONCURRENT freed 406K, 16% free 17436K/20624K, paused 2ms+2ms, total 24ms
+10-12 17:56:09.443  29764-29768/? D/dalvikvm﹕ GC_CONCURRENT freed 396K, 16% free 17431K/20624K, paused 1ms+0ms, total 15ms
+10-12 17:56:09.603      819-830/? D/dalvikvm﹕ GC_EXPLICIT freed 1251K, 34% free 52399K/79260K, paused 3ms+7ms, total 117ms
+10-12 17:56:09.713  29764-29768/? D/dalvikvm﹕ GC_CONCURRENT freed 450K, 16% free 17424K/20624K, paused 1ms+2ms, total 21ms
+10-12 17:56:09.863  29764-29768/? D/dalvikvm﹕ GC_CONCURRENT freed 445K, 16% free 17423K/20624K, paused 1ms+1ms, total 18ms
+10-12 17:56:09.873  29764-29770/? D/dalvikvm﹕ null clazz in OP_INSTANCE_OF, single-stepping
+10-12 17:56:09.883    2377-2455/? W/bt-btif﹕ dm_pm_timer expires
+10-12 17:56:09.883    2377-2455/? W/bt-btif﹕ dm_pm_timer expires 0
+10-12 17:56:09.883    2377-2455/? W/bt-btif﹕ proc dm_pm_timer expires
+10-12 17:56:10.103  28711-30535/? D/dalvikvm﹕ GC_EXPLICIT freed 7630K, 26% free 85540K/114088K, paused 4ms+6ms, total 117ms
+10-12 17:56:10.253  29764-29768/? D/dalvikvm﹕ GC_CONCURRENT freed 432K, 16% free 17435K/20624K, paused 0ms+2ms, total 17ms
+10-12 17:56:10.413  29764-29768/? D/dalvikvm﹕ GC_CONCURRENT freed 413K, 16% free 17424K/20624K, paused 1ms+1ms, total 14ms
+10-12 17:56:10.473  17692-17714/? D/dalvikvm﹕ GC_FOR_ALLOC freed 1030K, 22% free 20494K/26092K, paused 23ms, total 23ms
+10-12 17:56:10.503  17692-17696/? D/dalvikvm﹕ GC_CONCURRENT freed 754K, 22% free 20491K/26092K, paused 1ms+3ms, total 25ms
+10-12 17:56:10.513  17692-17714/? W/GA-SERVICE﹕ Thread[Thread-3597,5,main]: Exception sending hit: HttpHostConnectException
+10-12 17:56:10.513  17692-17714/? W/GA-SERVICE﹕ Thread[Thread-3597,5,main]: Connection to https://ssl.google-analytics.com refused
+10-12 17:56:10.513  17692-17714/? W/GA-SERVICE﹕ Thread[Thread-3597,5,main]: Empty hitIds passed to deleteHits.
+10-12 17:56:10.693  29764-29768/? D/dalvikvm﹕ GC_CONCURRENT freed 417K, 16% free 17419K/20624K, paused 2ms+1ms, total 14ms
+10-12 17:56:10.873  29764-29768/? D/dalvikvm﹕ GC_CONCURRENT freed 432K, 16% free 17430K/20624K, paused 1ms+0ms, total 20ms
+10-12 17:56:11.063    819-14447/? D/dalvikvm﹕ GC_EXPLICIT freed 1375K, 34% free 52402K/79260K, paused 3ms+8ms, total 122ms
+10-12 17:56:11.133  29764-29768/? D/dalvikvm﹕ GC_CONCURRENT freed 397K, 16% free 17429K/20624K, paused 1ms+0ms, total 12ms
+10-12 17:56:12.733  29764-29768/? D/dalvikvm﹕ GC_CONCURRENT freed 420K, 16% free 17427K/20624K, paused 1ms+1ms, total 14ms
+10-12 17:56:13.053  29764-29768/? D/dalvikvm﹕ GC_CONCURRENT freed 431K, 16% free 17431K/20624K, paused 1ms+0ms, total 16ms
+10-12 17:56:13.193  29764-29768/? D/dalvikvm﹕ GC_CONCURRENT freed 432K, 16% free 17433K/20624K, paused 2ms+1ms, total 14ms
+10-12 17:56:13.243   29973-2592/? D/AbstractMetricsFactoryImpl﹕ record : No data points in metrics event
+10-12 17:56:13.333  29764-29768/? D/dalvikvm﹕ GC_CONCURRENT freed 392K, 16% free 17431K/20624K, paused 0ms+2ms, total 20ms
+10-12 17:56:13.483  28711-28715/? D/dalvikvm﹕ GC_CONCURRENT freed 8140K, 25% free 85592K/114088K, paused 3ms+5ms, total 112ms
+10-12 17:56:13.483  28711-30535/? D/dalvikvm﹕ WAIT_FOR_CONCURRENT_GC blocked 82ms
+10-12 17:56:13.563  29764-29768/? D/dalvikvm﹕ GC_CONCURRENT freed 443K, 16% free 17431K/20624K, paused 1ms+1ms, total 21ms
+10-12 17:56:13.793     819-1101/? D/dalvikvm﹕ GC_EXPLICIT freed 1354K, 34% free 52394K/79260K, paused 3ms+7ms, total 125ms
+10-12 17:56:13.853  29764-29768/? D/dalvikvm﹕ GC_CONCURRENT freed 428K, 16% free 17421K/20624K, paused 1ms+1ms, total 16ms
+10-12 17:56:14.013  29764-29768/? D/dalvikvm﹕ GC_CONCURRENT freed 426K, 16% free 17419K/20624K, paused 1ms+1ms, total 16ms
+10-12 17:56:14.043    819-30312/? E/qcom_sensors_hal﹕ hal_process_report_ind: Bad item quality: 11
+10-12 17:56:14.193  29764-29768/? D/dalvikvm﹕ GC_CONCURRENT freed 430K, 16% free 17426K/20624K, paused 2ms+1ms, total 16ms
+10-12 17:56:14.343  29764-29768/? D/dalvikvm﹕ GC_CONCURRENT freed 403K, 16% free 17428K/20624K, paused 1ms+2ms, total 17ms
+10-12 17:56:14.663  29764-29768/? D/dalvikvm﹕ GC_CONCURRENT freed 417K, 16% free 17468K/20624K, paused 1ms+4ms, total 19ms
+10-12 17:56:14.833  29764-29768/? D/dalvikvm﹕ GC_CONCURRENT freed 469K, 16% free 17442K/20624K, paused 2ms+2ms, total 16ms
+10-12 17:56:15.043     819-1203/? D/dalvikvm﹕ GC_EXPLICIT freed 1325K, 34% free 52394K/79260K, paused 3ms+8ms, total 122ms
+10-12 17:56:15.103  29764-29768/? D/dalvikvm﹕ GC_CONCURRENT freed 454K, 16% free 17432K/20624K, paused 1ms+1ms, total 20ms
+10-12 17:56:15.253  29764-29768/? D/dalvikvm﹕ GC_CONCURRENT freed 454K, 16% free 17422K/20624K, paused 2ms+1ms, total 22ms
+10-12 17:56:15.433  29764-29768/? D/dalvikvm﹕ GC_CONCURRENT freed 397K, 16% free 17439K/20624K, paused 1ms+1ms, total 16ms
+10-12 17:56:15.473      819-845/? I/ActivityManager﹕ Waited long enough for: ServiceRecord{44c28d80 u0 org.dwallach.calwatch/.WatchCalendarService}
+10-12 17:56:15.583  28711-30535/? D/dalvikvm﹕ GC_EXPLICIT freed 7779K, 26% free 85508K/114088K, paused 4ms+5ms, total 122ms
+10-12 17:56:15.723  29764-29768/? D/dalvikvm﹕ GC_CONCURRENT freed 407K, 16% free 17449K/20624K, paused 1ms+1ms, total 22ms
+10-12 17:56:15.873  29764-29768/? D/dalvikvm﹕ GC_CONCURRENT freed 449K, 16% free 17425K/20624K, paused 1ms+1ms, total 19ms
+10-12 17:56:16.113  29764-29768/? D/dalvikvm﹕ GC_CONCURRENT freed 412K, 16% free 17428K/20624K, paused 1ms+0ms, total 14ms
+10-12 17:56:16.343      819-857/? D/dalvikvm﹕ GC_EXPLICIT freed 1349K, 34% free 52399K/79260K, paused 2ms+7ms, total 117ms
+10-12 17:56:16.393  29764-29768/? D/dalvikvm﹕ GC_CONCURRENT freed 456K, 16% free 17435K/20624K, paused 2ms+3ms, total 35ms
+10-12 17:56:16.553  29764-29768/? D/dalvikvm﹕ GC_CONCURRENT freed 424K, 16% free 17465K/20624K, paused 1ms+1ms, total 17ms
+10-12 17:56:16.713  29764-29768/? D/dalvikvm﹕ GC_CONCURRENT freed 486K, 16% free 17422K/20624K, paused 2ms+1ms, total 18ms
