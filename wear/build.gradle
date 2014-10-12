@@ -9,8 +9,8 @@ android {
         applicationId "org.dwallach.calwatch"
         minSdkVersion 20
         targetSdkVersion 20
-        versionCode 7
-        versionName "beta7"
+        versionCode 8
+        versionName "beta8"
     }
     compileOptions {
         sourceCompatibility JavaVersion.VERSION_1_7
