@@ -17,6 +17,8 @@ public final class WireUpdate extends Message {
   public static final List<WireEvent> DEFAULT_EVENTS = Collections.emptyList();
   public static final Boolean DEFAULT_NEWEVENTS = false;
   public static final Integer DEFAULT_FACEMODE = 0;
+  public static final Boolean DEFAULT_SHOWSECONDHAND = false;
+  public static final Boolean DEFAULT_SHOWDAYDATE = false;
 
   @ProtoField(tag = 1, label = REPEATED)
   public final List<WireEvent> events;
@@ -30,14 +32,22 @@ public final class WireUpdate extends Message {
   @ProtoField(tag = 3, type = INT32, label = REQUIRED)
   public final Integer faceMode;
 
-  public WireUpdate(List<WireEvent> events, Boolean newEvents, Integer faceMode) {
+  @ProtoField(tag = 4, type = BOOL, label = REQUIRED)
+  public final Boolean showSecondHand;
+
+  @ProtoField(tag = 5, type = BOOL, label = REQUIRED)
+  public final Boolean showDayDate;
+
+  public WireUpdate(List<WireEvent> events, Boolean newEvents, Integer faceMode, Boolean showSecondHand, Boolean showDayDate) {
     this.events = immutableCopyOf(events);
     this.newEvents = newEvents;
     this.faceMode = faceMode;
+    this.showSecondHand = showSecondHand;
+    this.showDayDate = showDayDate;
   }
 
   private WireUpdate(Builder builder) {
-    this(builder.events, builder.newEvents, builder.faceMode);
+    this(builder.events, builder.newEvents, builder.faceMode, builder.showSecondHand, builder.showDayDate);
     setBuilder(builder);
   }
 
@@ -48,7 +58,9 @@ public final class WireUpdate extends Message {
     WireUpdate o = (WireUpdate) other;
     return equals(events, o.events)
         && equals(newEvents, o.newEvents)
-        && equals(faceMode, o.faceMode);
+        && equals(faceMode, o.faceMode)
+        && equals(showSecondHand, o.showSecondHand)
+        && equals(showDayDate, o.showDayDate);
   }
 
   @Override
@@ -58,6 +70,8 @@ public final class WireUpdate extends Message {
       result = events != null ? events.hashCode() : 1;
       result = result * 37 + (newEvents != null ? newEvents.hashCode() : 0);
       result = result * 37 + (faceMode != null ? faceMode.hashCode() : 0);
+      result = result * 37 + (showSecondHand != null ? showSecondHand.hashCode() : 0);
+      result = result * 37 + (showDayDate != null ? showDayDate.hashCode() : 0);
       hashCode = result;
     }
     return result;
@@ -68,6 +82,8 @@ public final class WireUpdate extends Message {
     public List<WireEvent> events;
     public Boolean newEvents;
     public Integer faceMode;
+    public Boolean showSecondHand;
+    public Boolean showDayDate;
 
     public Builder() {
     }
@@ -78,6 +94,8 @@ public final class WireUpdate extends Message {
       this.events = copyOf(message.events);
       this.newEvents = message.newEvents;
       this.faceMode = message.faceMode;
+      this.showSecondHand = message.showSecondHand;
+      this.showDayDate = message.showDayDate;
     }
 
     public Builder events(List<WireEvent> events) {
@@ -95,6 +113,16 @@ public final class WireUpdate extends Message {
      */
     public Builder faceMode(Integer faceMode) {
       this.faceMode = faceMode;
+      return this;
+    }
+
+    public Builder showSecondHand(Boolean showSecondHand) {
+      this.showSecondHand = showSecondHand;
+      return this;
+    }
+
+    public Builder showDayDate(Boolean showDayDate) {
+      this.showDayDate = showDayDate;
       return this;
     }
 

@@ -22,6 +22,8 @@ public class ClockState extends Observable {
     public final static int FACE_LITE = 2;
 
     private int faceMode = Constants.DefaultWatchFace;
+    private boolean showSeconds = Constants.DefaultShowSeconds;
+    private boolean showDayDate = Constants.DefaultShowDayDate;
     private List<EventWrapper> eventList = null;
     private List<EventWrapper> visibleEventList = null;
     private int maxLevel = 0;
@@ -65,6 +67,26 @@ public class ClockState extends Observable {
 
     public synchronized int getFaceMode() {
         return faceMode;
+    }
+
+    public synchronized void setShowSeconds(boolean showSeconds) {
+        this.showSeconds = showSeconds;
+
+        pingObservers();
+    }
+
+    public synchronized boolean getShowSeconds() {
+        return showSeconds;
+    }
+
+    public synchronized void setShowDayDate(boolean showDayDate) {
+        this.showDayDate = showDayDate;
+
+        pingObservers();
+    }
+
+    public synchronized boolean getShowDayDate() {
+        return showDayDate;
     }
 
 
@@ -221,6 +243,8 @@ public class ClockState extends Observable {
             setWireEventListHelper(wireUpdate.events);
 
         setFaceMode(wireUpdate.faceMode);
+        setShowSeconds(wireUpdate.showSecondHand);
+        setShowDayDate(wireUpdate.showDayDate);
 
         Log.v(TAG, "event update complete");
     }
@@ -230,7 +254,7 @@ public class ClockState extends Observable {
      * @return the protobuf
      */
     public synchronized byte[] getProtobuf() {
-        WireUpdate wireUpdate = new WireUpdate(getWireEventList(), true, getFaceMode());
+        WireUpdate wireUpdate = new WireUpdate(getWireEventList(), true, getFaceMode(), getShowSeconds(), getShowDayDate());
         byte[] output = wireUpdate.toByteArray();
 
         return output;

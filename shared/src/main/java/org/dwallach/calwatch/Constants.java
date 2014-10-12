@@ -9,4 +9,6 @@ public class Constants {
     public static final String WearDataEvents = "Events";
     public static final String WearDataFaceMode = "FaceMode";
     public static final int DefaultWatchFace = ClockState.FACE_TOOL;
+    public static final boolean DefaultShowSeconds = true;
+    public static final boolean DefaultShowDayDate = true;
 }

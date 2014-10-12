@@ -1,12 +1,14 @@
 package org.dwallach.calwatch;
 import android.app.Activity;
 import android.content.SharedPreferences;
+import android.location.GpsStatus;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.RadioButton;
+import android.widget.Switch;
 
 import java.util.Observable;
 import java.util.Observer;
@@ -17,6 +19,7 @@ public class PhoneActivity extends Activity implements Observer {
 
     private RadioButton toolButton, numbersButton, liteButton;
     private MyViewAnim clockView;
+    private Switch secondsSwitch, dayDateSwitch;
 
     private ClockState clockState;
 
@@ -37,9 +40,9 @@ public class PhoneActivity extends Activity implements Observer {
     // this will be called, eventually, from whatever feature is responsible for
     // restoring saved user preferences
     //
-    public void setFaceModeUI(int mode) {
-        if(toolButton == null || numbersButton == null || liteButton == null) {
-            Log.v(TAG, "trying to set face mode without buttons active yet");
+    public void setFaceModeUI(int mode, boolean showSeconds, boolean showDayDate) {
+        if(toolButton == null || numbersButton == null || liteButton == null || secondsSwitch == null || dayDateSwitch == null) {
+            Log.v(TAG, "trying to set UI mode without buttons active yet");
             return;
         }
 
@@ -57,13 +60,16 @@ public class PhoneActivity extends Activity implements Observer {
                 Log.v(TAG, "bogus face mode: " + mode);
                 break;
         }
+
+        secondsSwitch.setChecked(showSeconds);
+        dayDateSwitch.setChecked(showDayDate);
     }
 
     private void getFaceModeFromUI() {
         int mode = -1;
 
-        if(toolButton == null || numbersButton == null || liteButton == null) {
-            Log.v(TAG, "trying to set face mode without buttons active yet");
+        if(toolButton == null || numbersButton == null || liteButton == null || secondsSwitch == null || dayDateSwitch == null) {
+            Log.v(TAG, "trying to get UI mode without buttons active yet");
             return;
         }
 
@@ -75,9 +81,14 @@ public class PhoneActivity extends Activity implements Observer {
             mode = ClockState.FACE_LITE;
         else Log.v(TAG, "no buttons are selected? weird.");
 
+        boolean showSeconds = secondsSwitch.isChecked();
+        boolean showDayDate = dayDateSwitch.isChecked();
+
         if(mode != -1) {
             getClockState().setFaceMode(mode);
         }
+        getClockState().setShowSeconds(showSeconds);
+        getClockState().setShowDayDate(showDayDate);
     }
 
     @Override
@@ -101,30 +112,26 @@ public class PhoneActivity extends Activity implements Observer {
         toolButton = (RadioButton) findViewById(R.id.toolButton);
         numbersButton = (RadioButton) findViewById(R.id.numbersButton);
         clockView = (MyViewAnim) findViewById(R.id.surfaceView);
+        secondsSwitch = (Switch) findViewById(R.id.showSeconds);
+        dayDateSwitch = (Switch) findViewById(R.id.showDayDate);
 //        clockView.setSleepInEventLoop(true);
 
         Log.v(TAG, "registering callback");
 
-        liteButton.setOnClickListener(new View.OnClickListener() {
+        View.OnClickListener myListener = new View.OnClickListener() {
             public void onClick(View v) {
                 getFaceModeFromUI();
             }
-        });
+        };
 
-        toolButton.setOnClickListener(new View.OnClickListener() {
-            public void onClick(View v) {
-                getFaceModeFromUI();
-            }
-        });
-
-        numbersButton.setOnClickListener(new View.OnClickListener() {
-            public void onClick(View v) {
-                getFaceModeFromUI();
-            }
-        });
+        liteButton.setOnClickListener(myListener);
+        toolButton.setOnClickListener(myListener);
+        numbersButton.setOnClickListener(myListener);
+        secondsSwitch.setOnClickListener(myListener);
+        dayDateSwitch.setOnClickListener(myListener);
 
         WakeupReceiver.kickStart(this);        // bring it up, if it's not already up
-        WatchCalendarService.kickStart(this); // bring it up, if it's not already up
+        WatchCalendarService.kickStart(this);  // bring it up, if it's not already up
 
         loadPreferences();
     }
@@ -193,6 +200,8 @@ public class PhoneActivity extends Activity implements Observer {
 
         ClockState clockState = getClockState();
         editor.putInt("faceMode", clockState.getFaceMode());
+        editor.putBoolean("showSeconds", clockState.getShowSeconds());
+        editor.putBoolean("showDayDate", clockState.getShowDayDate());
 
         if(!editor.commit())
             Log.v(TAG, "savePreferences commit failed ?!");
@@ -204,16 +213,20 @@ public class PhoneActivity extends Activity implements Observer {
         ClockState clockState = getClockState();
 
         SharedPreferences prefs = getSharedPreferences("org.dwallach.calwatch.prefs", MODE_PRIVATE);
-        int faceMode = prefs.getInt("faceMode", ClockState.FACE_TOOL);
+        int faceMode = prefs.getInt("faceMode", Constants.DefaultWatchFace); // ClockState.FACE_TOOL
+        boolean showSeconds = prefs.getBoolean("showSeconds", Constants.DefaultShowSeconds);
+        boolean showDayDate = prefs.getBoolean("showDayDate", Constants.DefaultShowDayDate);
 
         clockState.setFaceMode(faceMode);
+        clockState.setShowSeconds(showSeconds);
+        clockState.setShowDayDate(showDayDate);
 
         if (toolButton == null || numbersButton == null || liteButton == null) {
             Log.v(TAG, "loadPreferences has no widgets to update");
             return;
         }
 
-        setFaceModeUI(faceMode);
+        setFaceModeUI(faceMode, showSeconds, showDayDate);
     }
 
     @Override

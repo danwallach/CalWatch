@@ -42,6 +42,7 @@ public class ClockFace implements Observer {
     private int radius;
     private float shadow;
 
+    private boolean showSeconds = true, showDayDate = true;
 
     private static final float freqUpdate = 5;  // 5 Hz, or 0.20sec for second hand
 
@@ -56,10 +57,6 @@ public class ClockFace implements Observer {
     private Paint white, whiteHour, whiteMinute, yellow, smWhite, smYellow, black, smBlack, smRed, gray, outlineBlack, thickOutlineBlack, superThinBlack, smTextShadow, textShadow;
 
     private ClockState clockState;
-
-    public int getFaceMode() {
-        return faceMode;
-    }
 
     // set for Moto 360
     public void setMissingBottomPixels(int missingBottomPixels) {
@@ -159,7 +156,7 @@ public class ClockFace implements Observer {
         // something a real watch can't do: float the text over the hands
         // this visually conflicts with other notifications, drawn as text above the hands,
         // so it's easiest to just cut it during ambient mode
-        if(!getAmbientMode()) drawMonthBox(canvas);
+        if(!getAmbientMode() && showDayDate) drawMonthBox(canvas);
 
         // and lastly, the battery meter
         // -- note that the watch draws its own battery meter, so this is really just window
@@ -321,7 +318,7 @@ public class ClockFace implements Observer {
                         drawRadialLine(p, strokeWidth, -0.4f, .8f, 1.0f, true, false);
                         drawRadialLine(p, strokeWidth, 0.4f, .8f, 1.0f, true, false);
                     }
-                } else if (i == 45 && !getAmbientMode()) { // 9 o'clock, don't extend into the inside
+                } else if (i == 45 && !getAmbientMode() && showDayDate) { // 9 o'clock, don't extend into the inside
                     drawRadialLine(p, strokeWidth, i, 0.9f, 1.0f, false, false);
                 } else {
                     // we want lines for 1, 2, 4, 5, 7, 8, 10, and 11 no matter what
@@ -425,7 +422,7 @@ public class ClockFace implements Observer {
         drawRadialLine(canvas, hours, 0.1f, 0.6f, whiteHour, superThinBlack);
         drawRadialLine(canvas, minutes, 0.1f, 0.9f, whiteMinute, superThinBlack);
 
-        if(!getAmbientMode()) {
+        if(!getAmbientMode() && showSeconds) {
             // ugly details: we might run 10% or more away from our targets at 4Hz, making the second
             // hand miss the indices. Ugly. Thus, some hackery.
             if(clipSeconds) seconds = Math.floor(seconds * freqUpdate) / freqUpdate;
@@ -639,13 +636,12 @@ public class ClockFace implements Observer {
         }
     }
 
-    public void setAmbientMode(boolean mode) {
-        Log.i(TAG, "Ambient mode: " + mode);
-        ambientMode = mode;
+    public void setAmbientMode(boolean ambientMode) {
+        Log.i(TAG, "Ambient mode: " + ambientMode);
 
-        if(ambientMode == oldAmbientMode) return; // nothing changed, we're done
-        oldAmbientMode = ambientMode;
+        if(ambientMode == this.ambientMode) return; // nothing changed
 
+        this.ambientMode = ambientMode;
         wipeCaches();
     }
 
@@ -738,7 +734,7 @@ public class ClockFace implements Observer {
     }
 
     private int faceMode;
-    private boolean ambientMode = false, oldAmbientMode = false;
+    private boolean ambientMode = false;
     private List<EventWrapper> eventList;
     private int maxLevel;
 
@@ -759,6 +755,8 @@ public class ClockFace implements Observer {
         wipeCaches();
         TimeWrapper.update();
         this.faceMode = clockState.getFaceMode();
+        this.showDayDate = clockState.getShowDayDate();
+        this.showSeconds = clockState.getShowSeconds();
         updateEventList();
     }
 

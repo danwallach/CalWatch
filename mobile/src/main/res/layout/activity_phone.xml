@@ -14,66 +14,105 @@
         android:layout_weight="3"
         android:id="@+id/surfaceView" />
 
-    <GridLayout
+    <ScrollView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        style="@style/AppTheme"
-        android:layout_gravity="center_horizontal">
+        android:id="@+id/scrollView"
+        android:layout_gravity="center">
 
-
-        <TextView
+        <GridLayout
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:textAppearance="?android:attr/textAppearanceMedium"
-            android:text="@string/select_style"
-            android:id="@+id/textView"
-            android:layout_row="0"
-            android:layout_column="0"
-            android:layout_gravity="center|left" />
+            style="@style/AppTheme"
+            android:layout_gravity="center_horizontal"
+            android:layout_margin="5dp">
 
-        <RadioGroup
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_row="0"
-            android:layout_column="1">
 
-            <RadioButton
+            <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="@string/lite"
-                android:id="@+id/liteButton"
-                android:layout_gravity="center_horizontal|left"
-                android:layout_row="2"
-                android:layout_column="1"
-                android:checked="false"
-                android:enabled="true"
-                android:clickable="true" />
+                android:textAppearance="?android:attr/textAppearanceMedium"
+                android:text="@string/select_style"
+                android:id="@+id/textView"
+                android:layout_row="0"
+                android:layout_column="0"
+                android:layout_gravity="center|left" />
 
-            <RadioButton
+            <Switch
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="@string/numbers"
-                android:id="@+id/numbersButton"
-                android:layout_gravity="center_horizontal|left"
+                android:text="@string/show_seconds"
+                android:id="@+id/showSeconds"
                 android:layout_row="1"
-                android:layout_column="2"
-                android:checked="false"
-                android:enabled="true"
-                android:clickable="true" />
-
-            <RadioButton
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="@string/tool"
-                android:id="@+id/toolButton"
-                android:layout_gravity="center_horizontal|left"
-                android:layout_row="3"
-                android:layout_column="2"
+                android:layout_column="0"
+                android:layout_gravity="left|top"
+                android:layout_marginBottom="20dp"
+                android:layout_marginTop="10dp"
                 android:checked="true"
                 android:clickable="true"
-                android:enabled="true" />
-        </RadioGroup>
+                android:enabled="true"
+                android:layout_columnSpan="2" />
 
-    </GridLayout>
+            <Switch
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/show_day_date"
+                android:id="@+id/showDayDate"
+                android:layout_row="2"
+                android:layout_column="0"
+                android:layout_gravity="left|top"
+                android:checked="true"
+                android:clickable="true"
+                android:enabled="true"
+                android:layout_columnSpan="2" />
+
+            <RadioGroup
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_row="0"
+                android:layout_column="1">
+
+                <RadioButton
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/lite"
+                    android:id="@+id/liteButton"
+                    android:layout_gravity="center_horizontal|left"
+                    android:layout_row="2"
+                    android:layout_column="1"
+                    android:checked="false"
+                    android:enabled="true"
+                    android:clickable="true"
+                    android:layout_margin="10dp" />
+
+                <RadioButton
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/numbers"
+                    android:id="@+id/numbersButton"
+                    android:layout_gravity="center_horizontal|left"
+                    android:layout_row="1"
+                    android:layout_column="2"
+                    android:checked="false"
+                    android:enabled="true"
+                    android:clickable="true"
+                    android:layout_margin="10dp" />
+
+                <RadioButton
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/tool"
+                    android:id="@+id/toolButton"
+                    android:layout_gravity="center_horizontal|left"
+                    android:layout_row="3"
+                    android:layout_column="2"
+                    android:checked="true"
+                    android:clickable="true"
+                    android:enabled="true"
+                    android:layout_margin="10dp" />
+            </RadioGroup>
+
+        </GridLayout>
+    </ScrollView>
 
 </LinearLayout>

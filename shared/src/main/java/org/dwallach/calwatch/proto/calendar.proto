@@ -19,4 +19,6 @@ message WireUpdate {
     repeated WireEvent events = 1;
     required bool newEvents = 2; // true: the events are new, have a look; false: ignore the events field
     required int32 faceMode = 3;
+    required bool showSecondHand = 4;
+    required bool showDayDate = 5;
 }
