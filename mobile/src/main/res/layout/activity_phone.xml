@@ -65,7 +65,7 @@
                 android:clickable="true"
                 android:enabled="true"
                 android:layout_columnSpan="2"
-                android:layout_marginBottom="10dp" />
+                android:layout_marginBottom="15dp" />
 
             <RadioGroup
                 android:layout_width="wrap_content"
