@@ -360,7 +360,7 @@ public class ClockFace implements Observer {
             r = 0.9f;
 
             x = clockX(0, r);
-            y = clockY(0, r) - metrics.ascent / 2f;
+            y = clockY(0, r) - metrics.ascent / 1.5f;
 
             white.setTextAlign(Paint.Align.CENTER);
             black.setTextAlign(Paint.Align.CENTER);
@@ -390,7 +390,10 @@ public class ClockFace implements Observer {
             r = 0.9f;
 
             x = clockX(30, r);
-            y = clockY(30, r) + metrics.descent - (missingBottomPixels); // another hack for Moto 360
+            if(missingBottomPixels != 0)
+                y = clockY(30, r) + metrics.descent - (missingBottomPixels); // another hack for Moto 360
+            else
+                y = clockY(30, r) + (0.75f * metrics.descent); // scoot it up a tiny bit
 
             drawShadowText(canvas, "6", x, y, white, textShadow);
 

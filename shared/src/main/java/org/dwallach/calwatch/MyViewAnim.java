@@ -332,8 +332,11 @@ public class MyViewAnim extends SurfaceView implements SurfaceHolder.Callback, O
         ClockState clockState = ClockState.getSingleton();
         if(clockState == null)
             Log.e(TAG, "null ClockState?!!");
-        else
-            setDrawThreadDesired(clockState.getShowSeconds());
+        else {
+            boolean showSeconds = clockState.getShowSeconds();
+            setDrawThreadDesired(showSeconds);
+            if(!showSeconds) redrawClock(); // do this immediately or it will take a while for the alarm to catch up
+        }
     }
 
     class MyTimeListener implements TimeAnimator.TimeListener {
