@@ -190,10 +190,10 @@ public class WearReceiverService extends WearableListenerService implements Goog
                                 Log.v(TAG, "ping delivered!");
                             }
                         }
-
-                        return null;
                     } catch (Throwable t) {
                         Log.e(TAG, "unexpected failure in pingPhone()", t);
+                    } finally {
+                        return null;
                     }
                 }
             }.execute();
