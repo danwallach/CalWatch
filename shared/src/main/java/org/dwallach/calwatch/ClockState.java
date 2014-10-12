@@ -62,7 +62,7 @@ public class ClockState extends Observable {
         // warning: this might come in from another thread!
         this.faceMode = faceMode;
 
-        pingObservers();
+//        pingObservers();
     }
 
     public synchronized int getFaceMode() {
@@ -72,7 +72,7 @@ public class ClockState extends Observable {
     public synchronized void setShowSeconds(boolean showSeconds) {
         this.showSeconds = showSeconds;
 
-        pingObservers();
+//        pingObservers();
     }
 
     public synchronized boolean getShowSeconds() {
@@ -82,7 +82,7 @@ public class ClockState extends Observable {
     public synchronized void setShowDayDate(boolean showDayDate) {
         this.showDayDate = showDayDate;
 
-        pingObservers();
+//        pingObservers();
     }
 
     public synchronized boolean getShowDayDate() {
@@ -246,6 +246,8 @@ public class ClockState extends Observable {
         setShowSeconds(wireUpdate.showSecondHand);
         setShowDayDate(wireUpdate.showDayDate);
 
+        pingObservers();
+
         Log.v(TAG, "event update complete");
     }
 
@@ -260,7 +262,7 @@ public class ClockState extends Observable {
         return output;
     }
 
-    private void pingObservers() {
+    public synchronized void pingObservers() {
         // this incantation will make observers elsewhere aware that there's new content
         setChanged();
         notifyObservers();

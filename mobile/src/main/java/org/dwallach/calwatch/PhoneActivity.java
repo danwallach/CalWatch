@@ -107,6 +107,8 @@ public class PhoneActivity extends Activity implements Observer {
         }
         getClockState().setShowSeconds(showSeconds);
         getClockState().setShowDayDate(showDayDate);
+
+        getClockState().pingObservers(); // we only need to do this once, versus a whole bunch of times when it was happening internally
     }
 
     @Override
@@ -140,6 +142,8 @@ public class PhoneActivity extends Activity implements Observer {
             public void onClick(View v) {
                 if(!disableUICallbacks)
                     getFaceModeFromUI();
+                if(clockView != null)
+                    clockView.redrawClock();
             }
         };
 
@@ -154,7 +158,8 @@ public class PhoneActivity extends Activity implements Observer {
 
         loadPreferences();
 
-        initAlarm();
+        onResume();
+        Log.v(TAG, "activity setup complete");
     }
 
     protected void onStop() {
@@ -190,7 +195,10 @@ public class PhoneActivity extends Activity implements Observer {
     protected void onResume() {
         super.onResume();
         Log.v(TAG, "Resume!");
-        if(clockView != null) clockView.resume(); // shouldn't be necessary, but isn't happening on its own
+        if(clockView != null) {
+            clockView.resume(); // shouldn't be necessary, but isn't happening on its own
+            clockView.redrawClock();
+        }
         watchFaceRunning = true;
         initAlarm();
     }
@@ -252,10 +260,13 @@ public class PhoneActivity extends Activity implements Observer {
         clockState.setShowSeconds(showSeconds);
         clockState.setShowDayDate(showDayDate);
 
+        clockState.pingObservers(); // we only need to do this once, versus multiple times when done internally
+
         if (toolButton == null || numbersButton == null || liteButton == null || secondsSwitch == null || dayDateSwitch == null) {
             Log.v(TAG, "loadPreferences has no widgets to update");
             return;
         }
+
 
         // setFaceModeUI(faceMode, showSeconds, showDayDate);
     }

@@ -108,21 +108,21 @@ public class MyViewAnim extends SurfaceView implements SurfaceHolder.Callback, O
     public void onDraw(Canvas canvas) {
         super.onDraw(canvas);
 
-        // clockFace.drawEverything(canvas);
-        // For now, we're doing *nothing* here. Instead, all the drawing is going
-        // to happen on the PanelThread or Animator (whichever we're doing in the end)
+        redrawClock();
     }
 
     @Override
     public void surfaceChanged(SurfaceHolder holder, int format, int width, int height) {
         Log.v(TAG, "Drawing surface changed!");
         clockFace.setSize(width, height);
+        redrawClock();
 //        resume();
     }
 
     @Override
     public void surfaceCreated(SurfaceHolder holder) {
         Log.v(TAG, "Drawing surface created!");
+        redrawClock();
 //        resume();
     }
 
