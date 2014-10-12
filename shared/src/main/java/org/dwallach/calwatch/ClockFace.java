@@ -398,7 +398,7 @@ public class ClockFace implements Observer {
             // 9 o'clock
             //
 
-            if(getAmbientMode()) {
+            if(getAmbientMode() || !showDayDate) {
                 r = 0.9f;
                 float nineWidth = white.measureText("9");
 

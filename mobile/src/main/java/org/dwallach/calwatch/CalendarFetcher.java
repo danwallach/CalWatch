@@ -79,17 +79,27 @@ public class CalendarFetcher extends Observable implements Runnable {
                 lastGMTOffset = currentGMTOffset;
             }
 
+            CalendarResults tmp = null;
+
             // this boolean could have been made true in a number of ways: either because we hit a new hour (as above) or because our cursor on the calendar detected a change
             if(newContentAvailable) {
-                this.calendarResults = loadContent(); // lots of work happens here... which is why we're on a separate thread
+                try {
+                    tmp = loadContent();
+                } catch (Throwable throwable) {
+                    // most likely, we're not fully initialized yet, so just march along
+                    Log.e(TAG, "failure loading calendar; probably not ready yet, don't panic");
+                }
 
-                // this incantation will make observers elsewhere aware that there's new content
-                setChanged();
-                notifyObservers();
-                clearChanged();
+                if(tmp != null) {
+                    this.calendarResults = tmp;
 
+                    // this incantation will make observers elsewhere aware that there's new content
+                    setChanged();
+                    notifyObservers();
+                    clearChanged();
 
-                newContentAvailable = false;
+                    newContentAvailable = false;
+                }
             }
 
             conditionWait.close();

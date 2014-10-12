@@ -15,7 +15,10 @@ import android.util.Log;
 import android.view.SurfaceHolder;
 import android.view.SurfaceView;
 
-public class MyViewAnim extends SurfaceView implements SurfaceHolder.Callback {
+import java.util.Observable;
+import java.util.Observer;
+
+public class MyViewAnim extends SurfaceView implements SurfaceHolder.Callback, Observer {
     private static final String TAG = "MyViewAnim";
 
     private static final boolean debugTracingDesired = false;
@@ -25,6 +28,8 @@ public class MyViewAnim extends SurfaceView implements SurfaceHolder.Callback {
     private volatile TimeAnimator animator;
     private volatile boolean activeDrawing = false;
     private boolean sleepInEventLoop = false;
+
+    private boolean drawThreadDesired = true;
 
     private static long debugStopTime;
     private static boolean debugTracingOn = false;
@@ -39,6 +44,24 @@ public class MyViewAnim extends SurfaceView implements SurfaceHolder.Callback {
     public MyViewAnim(Context context, AttributeSet attrs) {
         super(context, attrs);
         setup(context);
+    }
+
+    public boolean getDrawThreadDesired() {
+        return drawThreadDesired;
+    }
+
+    private void setDrawThreadDesired(boolean drawThreadDesired) {
+        Log.v(TAG, "draw thread desired: " + drawThreadDesired);
+        if(this.drawThreadDesired == drawThreadDesired) return;
+
+        this.drawThreadDesired = drawThreadDesired;
+
+        // okay, if we get here, the desired state has changed, so we need to
+        // either kill the running thread, or start it back up again
+        if(drawThreadDesired)
+            startDrawThread();
+        else
+            killDrawThread();
     }
 
     private void setup(Context ctx) {
@@ -60,6 +83,13 @@ public class MyViewAnim extends SurfaceView implements SurfaceHolder.Callback {
         if(clockFace == null) {
             Log.v(TAG, "initializing ClockFace");
             clockFace = new ClockFace();
+        }
+
+        ClockState clockState = ClockState.getSingleton();
+        if(clockState == null) {
+            Log.e(TAG, "super bad null clockState!!???!");
+        } else {
+            clockState.addObserver(this);
         }
     }
 
@@ -111,16 +141,20 @@ public class MyViewAnim extends SurfaceView implements SurfaceHolder.Callback {
     }
 
     public void resume() {
-        if(clockFace == null)
+        if (clockFace == null)
             clockFace = new ClockFace();
 
 //        clockFace.setAmbientMode(false);
         clockFace.wipeCaches();
         activeDrawing = true;
 
-        if(surfaceHolder == null)
+        if (surfaceHolder == null)
             surfaceHolder = getHolder();
 
+        startDrawThread();
+    }
+
+    private void startDrawThread() {
         if(animator != null) {
             Log.v(TAG, "resuming old animator!");
             animator.resume();
@@ -157,9 +191,12 @@ public class MyViewAnim extends SurfaceView implements SurfaceHolder.Callback {
 
     public void stop() {
         Log.v(TAG, "stopping animation!");
-
         activeDrawing = false;
+        killDrawThread();
         surfaceHolder = null;
+    }
+
+    private void killDrawThread() {
         if(animator != null) {
             // new experimental ways to maybe quit things
             if(drawThread == null) {
@@ -262,13 +299,6 @@ public class MyViewAnim extends SurfaceView implements SurfaceHolder.Callback {
                     Debug.stopMethodTracing();
                 }
             }
-
-            ClockState clockState = ClockState.getSingleton();
-
-            if (clockState == null) {
-                Log.e(TAG, "whoa, no clock state?!");
-                return;
-            }
         } catch (Throwable t) {
             Log.e(TAG, "something blew up while redrawing", t);
         } finally {
@@ -284,6 +314,22 @@ public class MyViewAnim extends SurfaceView implements SurfaceHolder.Callback {
                 SystemClock.sleep(1000);
 
         }
+    }
+
+    /**
+     * This is called when the ClockState updates itself; we need this to detect and
+     * deal with the case when the user changes whether or not they want a second-hand
+     * @param observable
+     * @param o
+     */
+    @Override
+    public void update(Observable observable, Object o) {
+        Log.v(TAG, "update from ClockState");
+        ClockState clockState = ClockState.getSingleton();
+        if(clockState == null)
+            Log.e(TAG, "null ClockState?!!");
+        else
+            setDrawThreadDesired(clockState.getShowSeconds());
     }
 
     class MyTimeListener implements TimeAnimator.TimeListener {

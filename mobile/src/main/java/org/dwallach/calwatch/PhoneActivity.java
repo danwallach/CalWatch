@@ -1,5 +1,11 @@
 package org.dwallach.calwatch;
 import android.app.Activity;
+import android.app.AlarmManager;
+import android.app.PendingIntent;
+import android.content.BroadcastReceiver;
+import android.content.Context;
+import android.content.Intent;
+import android.content.IntentFilter;
 import android.content.SharedPreferences;
 import android.location.GpsStatus;
 import android.os.Bundle;
@@ -22,6 +28,7 @@ public class PhoneActivity extends Activity implements Observer {
     private Switch secondsSwitch, dayDateSwitch;
 
     private ClockState clockState;
+    private boolean disableUICallbacks = false;
 
     private ClockState getClockState() {
         if(clockState == null) {
@@ -40,32 +47,43 @@ public class PhoneActivity extends Activity implements Observer {
     // this will be called, eventually, from whatever feature is responsible for
     // restoring saved user preferences
     //
-    public void setFaceModeUI(int mode, boolean showSeconds, boolean showDayDate) {
+    private void setFaceModeUI(int mode, boolean showSeconds, boolean showDayDate) {
+        Log.v(TAG, "setFaceModeUI");
         if(toolButton == null || numbersButton == null || liteButton == null || secondsSwitch == null || dayDateSwitch == null) {
             Log.v(TAG, "trying to set UI mode without buttons active yet");
             return;
         }
 
-        switch(mode) {
-            case ClockState.FACE_TOOL:
-                toolButton.performClick();
-                break;
-            case ClockState.FACE_NUMBERS:
-                numbersButton.performClick();
-                break;
-            case ClockState.FACE_LITE:
-                liteButton.performClick();
-                break;
-            default:
-                Log.v(TAG, "bogus face mode: " + mode);
-                break;
+        disableUICallbacks = true;
+
+        try {
+            switch (mode) {
+                case ClockState.FACE_TOOL:
+                    toolButton.performClick();
+                    break;
+                case ClockState.FACE_NUMBERS:
+                    numbersButton.performClick();
+                    break;
+                case ClockState.FACE_LITE:
+                    liteButton.performClick();
+                    break;
+                default:
+                    Log.v(TAG, "bogus face mode: " + mode);
+                    break;
+            }
+
+            secondsSwitch.setChecked(showSeconds);
+            dayDateSwitch.setChecked(showDayDate);
+        } catch(Throwable throwable) {
+            // probably a called-from-wrong-thread-exception, we'll just ignore it
+            Log.v(TAG, "ignoring exception while updating button state");
         }
 
-        secondsSwitch.setChecked(showSeconds);
-        dayDateSwitch.setChecked(showDayDate);
+        disableUICallbacks = false;
     }
 
     private void getFaceModeFromUI() {
+        Log.v(TAG, "getFaceModeFromUI");
         int mode = -1;
 
         if(toolButton == null || numbersButton == null || liteButton == null || secondsSwitch == null || dayDateSwitch == null) {
@@ -120,7 +138,8 @@ public class PhoneActivity extends Activity implements Observer {
 
         View.OnClickListener myListener = new View.OnClickListener() {
             public void onClick(View v) {
-                getFaceModeFromUI();
+                if(!disableUICallbacks)
+                    getFaceModeFromUI();
             }
         };
 
@@ -134,6 +153,8 @@ public class PhoneActivity extends Activity implements Observer {
         WatchCalendarService.kickStart(this);  // bring it up, if it's not already up
 
         loadPreferences();
+
+        initAlarm();
     }
 
     protected void onStop() {
@@ -153,6 +174,7 @@ public class PhoneActivity extends Activity implements Observer {
 
         clockState.deleteObserver(this);
         clockState = null;
+        killAlarm();
     }
 
     protected void onStart() {
@@ -166,12 +188,14 @@ public class PhoneActivity extends Activity implements Observer {
         super.onResume();
         Log.v(TAG, "Resume!");
         if(clockView != null) clockView.resume(); // shouldn't be necessary, but isn't happening on its own
+        initAlarm();
     }
 
     protected void onPause() {
         super.onPause();
         Log.v(TAG, "Pause!");
         if(clockView != null) clockView.pause(); // shouldn't be necessary, but isn't happening on its own
+        killAlarm();
     }
 
     @Override
@@ -217,22 +241,135 @@ public class PhoneActivity extends Activity implements Observer {
         boolean showSeconds = prefs.getBoolean("showSeconds", Constants.DefaultShowSeconds);
         boolean showDayDate = prefs.getBoolean("showDayDate", Constants.DefaultShowDayDate);
 
+        Log.v(TAG, "faceMode: " + faceMode + ", showSeconds: " + showSeconds + ", showDayDate: " + showDayDate);
+
         clockState.setFaceMode(faceMode);
         clockState.setShowSeconds(showSeconds);
         clockState.setShowDayDate(showDayDate);
 
-        if (toolButton == null || numbersButton == null || liteButton == null) {
+        if (toolButton == null || numbersButton == null || liteButton == null || secondsSwitch == null || dayDateSwitch == null) {
             Log.v(TAG, "loadPreferences has no widgets to update");
             return;
         }
 
-        setFaceModeUI(faceMode, showSeconds, showDayDate);
+        // setFaceModeUI(faceMode, showSeconds, showDayDate);
     }
 
     @Override
     public void update(Observable observable, Object data) {
         // somebody changed *something* in the ClockState, causing us to get called
         Log.v(TAG, "Noticed a change in the clock state; saving preferences");
+        setFaceModeUI(getClockState().getFaceMode(), getClockState().getShowSeconds(), getClockState().getShowDayDate());
         savePreferences();
+    }
+
+
+    //
+    // from here on down, this is a stripped version of the alarm management we do on the watch, notably removing all of
+    // the state changes that are delivered by the undocumented apis
+    //
+
+    private AlarmManager alarmManager;
+    private boolean watchFaceRunning = true, alarmSet = false;
+    private BroadcastReceiver tickReceiver;
+    private static final String ACTION_KEEP_WATCHFACE_AWAKE = "intent.action.keep.watchface.awake";
+    private PendingIntent pendingIntent = null;
+
+    private PendingIntent getPendingIntent() {
+        if(pendingIntent == null && clockView != null)
+            pendingIntent =  PendingIntent.getBroadcast(clockView.getContext(), 0, new Intent(ACTION_KEEP_WATCHFACE_AWAKE), 0);
+        return pendingIntent;
+    }
+
+    private void initAlarm() {
+        Log.v(TAG, "initAlarm");
+        if (alarmManager == null) {
+            Log.v(TAG, "initializing second-scale alarm");
+
+            if(clockView == null) {
+                Log.e(TAG, "oops, no clockView");
+            } else {
+                alarmManager = (AlarmManager) clockView.getContext().getSystemService(Context.ALARM_SERVICE);
+
+                // every five seconds, we'll redraw the minute hand while sleeping; this gives us 12 ticks per minute, which should still look smooth
+                // while otherwise saving lots of power
+                alarmManager.setRepeating(AlarmManager.RTC_WAKEUP, System.currentTimeMillis() + 5000, 5000, getPendingIntent());
+                alarmSet = true;
+            }
+        }
+
+        if (!alarmSet) {
+            Log.e(TAG, "failed to initialize alarm");
+        }
+
+        watchFaceRunning = true;
+
+        // Create a broadcast receiver to handle change in time
+        // Source: http://sourabhsoni.com/how-to-use-intent-action_time_tick/
+        // Also: https://github.com/twotoasters/watchface-gears/blob/master/library/src/main/java/com/twotoasters/watchface/gears/widget/Watch.java
+
+        // Note that we don't strictly need this stuff, since we're running a whole separate thread to do the graphics, but this
+        // still serves a purpose. If that thread isn't working, this will still work and we'll get at least *some* updates
+        // on the screen, albeit far less frequent.
+        if (tickReceiver == null) {
+            tickReceiver = new BroadcastReceiver() {
+                @Override
+                public void onReceive(Context context, Intent intent) {
+                    String actionString = intent.getAction();
+
+                    if (!watchFaceRunning) {
+                        // received a timer event but we're not supposed to be doing graphics right now,
+                        // so just quietly return
+
+                        return;
+                    }
+
+                    if (actionString.equals(Intent.ACTION_TIME_CHANGED) || actionString.equals(Intent.ACTION_TIME_TICK)) {
+                        if (clockView == null) {
+                            Log.v(TAG, actionString + " received, but can't redraw");
+                        } else {
+//                            Log.v(TAG, actionString + " received, redrawing");
+                            clockView.redrawClock();
+                        }
+                        initAlarm(); // just in case it's not set up properly
+                    } else if (actionString.equals(ACTION_KEEP_WATCHFACE_AWAKE)) {
+//                        Log.v(TAG, "five second alarm!");
+                        if (clockView != null) {
+                            clockView.redrawClock();
+                        } else {
+                            Log.e(TAG, "tick received, no clock view to redraw");
+                        }
+                    } else {
+                        Log.e(TAG, "Unknown intent received: " + intent.toString());
+                    }
+                }
+            };
+
+            //Register the broadcast receiver to receive TIME_TICK
+            IntentFilter filter = new IntentFilter();
+            filter.addAction(Intent.ACTION_TIME_TICK);
+            filter.addAction(Intent.ACTION_TIME_CHANGED);
+            filter.addAction(ACTION_KEEP_WATCHFACE_AWAKE);
+
+            registerReceiver(tickReceiver, filter);
+        }
+    }
+
+    private void killAlarm() {
+        Log.v(TAG, "killAlarm");
+
+        if(pendingIntent != null) {
+            alarmSet = false;
+            alarmManager.cancel(pendingIntent);
+            pendingIntent = null;
+            alarmManager = null;
+        }
+
+        if(tickReceiver != null) {
+            unregisterReceiver(tickReceiver);
+            tickReceiver = null;
+        }
+
+        watchFaceRunning = false;
     }
 }

@@ -15,6 +15,9 @@ import android.support.wearable.view.WatchViewStub;
 import android.util.Log;
 import android.view.Display;
 
+import java.util.Observable;
+import java.util.Observer;
+
 public class WearActivity extends Activity {
     private static final String TAG = "WearActivity";
 
@@ -73,7 +76,7 @@ public class WearActivity extends Activity {
         initAmbientWatcher();
     }
 
-    boolean alarmSet = false;
+    private boolean alarmSet = false;
 
     @Override
     protected void onResume() {
@@ -111,6 +114,7 @@ public class WearActivity extends Activity {
     private DisplayManager.DisplayListener displayListener = null;
 
     private void killAmbientWatcher() {
+
         Log.v(TAG, "killing ambient watcher & alarm");
         if (displayListener != null) {
             final DisplayManager displayManager = (DisplayManager) getSystemService(Context.DISPLAY_SERVICE);
@@ -122,6 +126,7 @@ public class WearActivity extends Activity {
             alarmSet = false;
             alarmManager.cancel(pendingIntent);
             pendingIntent = null;
+            alarmManager = null;
         }
 
         if(tickReceiver != null) {

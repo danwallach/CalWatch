@@ -40,11 +40,15 @@ public class WearSender implements GoogleApiClient.ConnectionCallbacks, GoogleAp
     }
 
     public void sendAllToWatch() {
-        ClockState clockState = ClockState.getSingleton();
-        wireBytesToSend = clockState.getProtobuf();
+        try {
+            ClockState clockState = ClockState.getSingleton();
+            wireBytesToSend = clockState.getProtobuf();
 
-        Log.v(TAG, "preparing event list for transmission, length(" + wireBytesToSend.length + " bytes)");
-        sendNow();
+            Log.v(TAG, "preparing event list for transmission, length(" + wireBytesToSend.length + " bytes)");
+            sendNow();
+        } catch (Throwable throwable) {
+            Log.e(TAG, "couldn't manage to send to the watch; not a big deal");
+        }
     }
 
     private String nodeId;
