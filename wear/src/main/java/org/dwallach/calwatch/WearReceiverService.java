@@ -167,30 +167,34 @@ public class WearReceiverService extends WearableListenerService implements Goog
     public void pingPhone() {
         Log.v(TAG, "pinging phone for data");
 
-        if (mGoogleApiClient.isConnected()) {
+        if (mGoogleApiClient != null && mGoogleApiClient.isConnected()) {
             new AsyncTask<Void, Void, Void>() {
                 @Override
                 protected Void doInBackground(Void... params) {
-                    NodeApi.GetConnectedNodesResult nodes =
-                            Wearable.NodeApi.getConnectedNodes(mGoogleApiClient).await();
-                    int failures = 0;
+                    try {
+                        NodeApi.GetConnectedNodesResult nodes =
+                                Wearable.NodeApi.getConnectedNodes(mGoogleApiClient).await();
+                        int failures = 0;
 
-                    // TODO: test weird cases when we have one watch associated with >1 phone
-                    // (is that possible?) or one phone associated with more than one phone
-                    for (Node node : nodes.getNodes()) {
-                        Log.v(TAG, "Sending to node: " + node.getDisplayName());
-                        MessageApi.SendMessageResult result = Wearable.MessageApi.sendMessage(
-                                mGoogleApiClient, node.getId(), Constants.WearDataReturnPath, null).await();
-                        if (!result.getStatus().isSuccess()) {
-                            Log.e(TAG, "ERROR: failed to send Message: " + result.getStatus());
-                            failures++;
+                        // TODO: test weird cases when we have one watch associated with >1 phone
+                        // (is that possible?) or one phone associated with more than one phone
+                        for (Node node : nodes.getNodes()) {
+                            Log.v(TAG, "Sending to node: " + node.getDisplayName());
+                            MessageApi.SendMessageResult result = Wearable.MessageApi.sendMessage(
+                                    mGoogleApiClient, node.getId(), Constants.WearDataReturnPath, null).await();
+                            if (!result.getStatus().isSuccess()) {
+                                Log.e(TAG, "ERROR: failed to send Message: " + result.getStatus());
+                                failures++;
+                            }
+                            if (failures == 0) {
+                                Log.v(TAG, "ping delivered!");
+                            }
                         }
-                        if (failures == 0) {
-                            Log.v(TAG, "ping delivered!");
-                        }
+
+                        return null;
+                    } catch (Throwable t) {
+                        Log.e(TAG, "unexpected failure in pingPhone()", t);
                     }
-
-                    return null;
                 }
             }.execute();
         } else {

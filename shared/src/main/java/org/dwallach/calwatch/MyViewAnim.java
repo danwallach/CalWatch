@@ -23,7 +23,6 @@ public class MyViewAnim extends SurfaceView implements SurfaceHolder.Callback {
     private PanelThread drawThread;
     private volatile ClockFace clockFace;
     private volatile TimeAnimator animator;
-    private Context context;
     private volatile boolean activeDrawing = false;
     private boolean sleepInEventLoop = false;
 
@@ -44,7 +43,6 @@ public class MyViewAnim extends SurfaceView implements SurfaceHolder.Callback {
 
     private void setup(Context ctx) {
         Log.v(TAG, "setup!");
-        this.context = ctx;
         getHolder().addCallback(this);
 
         /*
@@ -129,26 +127,30 @@ public class MyViewAnim extends SurfaceView implements SurfaceHolder.Callback {
         } else {
             Log.v(TAG, "new animator starting");
             // surfaceHolder = getHolder();
-            animator = new TimeAnimator();
-            animator.setTimeListener(new MyTimeListener());
-            // animator.setFrameDelay(1000);  // doesn't actually work?
+            try {
+                animator = new TimeAnimator();
+                animator.setTimeListener(new MyTimeListener());
+                // animator.setFrameDelay(1000);  // doesn't actually work?
 
-            if(drawThread == null) {
-                Log.v(TAG, "starting draw thread from scratch");
-                drawThread = new PanelThread(animator); // will start the animator
-                drawThread.start();
-            } else {
-                Log.v(TAG, "asking previous draw thread to start a new animator");
-                // animator.start() needs to happen on the PanelThread, not this one
-                Handler handler = drawThread.getHandler();
-                final Animator fa = animator;
+                if (drawThread == null) {
+                    Log.v(TAG, "starting draw thread from scratch");
+                    drawThread = new PanelThread(animator); // will start the animator
+                    drawThread.start();
+                } else {
+                    Log.v(TAG, "asking previous draw thread to start a new animator");
+                    // animator.start() needs to happen on the PanelThread, not this one
+                    Handler handler = drawThread.getHandler();
+                    final Animator fa = animator;
 
-                handler.post(new Runnable() {
-                    @Override
-                    public void run() {
-                        fa.start();
-                    }
-                });
+                    handler.post(new Runnable() {
+                        @Override
+                        public void run() {
+                            fa.start();
+                        }
+                    });
+                }
+            } catch (Throwable t) {
+                Log.e(TAG, "unexpected failure in resume()", t);
             }
         }
     }
@@ -163,14 +165,18 @@ public class MyViewAnim extends SurfaceView implements SurfaceHolder.Callback {
             if(drawThread == null) {
                 Log.v(TAG, "no draw thread around to kill ?!");
             } else {
-                // animator.start() needs to happen on the PanelThread, not this one
-                Handler handler = drawThread.getHandler();
+                try {
+                    // animator.start() needs to happen on the PanelThread, not this one
+                    Handler handler = drawThread.getHandler();
 
-                // it's weird, but this happens some times
-                if(handler != null) {
-                    Looper looper = handler.getLooper();
-                    if (looper != null)
-                        looper.quitSafely();
+                    // it's weird, but this happens some times
+                    if (handler != null) {
+                        Looper looper = handler.getLooper();
+                        if (looper != null)
+                            looper.quitSafely();
+                    }
+                } catch (Throwable t) {
+                    Log.e(TAG, "unexpected failure in stop()", t);
                 }
 
                 // these seem to be required to happen on the same thread as where the drawing is happening, so does nothing here
