@@ -178,7 +178,7 @@ public class PhoneActivity extends Activity implements Observer {
         if(clockView != null)
             clockView.stop();
 
-        clockState.deleteObserver(this);
+        getClockState().deleteObserver(this);
         clockState = null;
         watchFaceRunning = false;
         killAlarm();
@@ -298,7 +298,7 @@ public class PhoneActivity extends Activity implements Observer {
     }
 
     private void initAlarm() {
-        Log.v(TAG, "initAlarm");
+//        Log.v(TAG, "initAlarm");
         if (alarmManager == null) {
             Log.v(TAG, "initializing second-scale alarm");
 
