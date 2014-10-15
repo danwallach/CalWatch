@@ -8,6 +8,7 @@ import android.util.Log;
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.api.GoogleApiClient;
 import com.google.android.gms.wearable.MessageApi;
+import com.google.android.gms.wearable.MessageEvent;
 import com.google.android.gms.wearable.Node;
 import com.google.android.gms.wearable.NodeApi;
 import com.google.android.gms.wearable.Wearable;
@@ -20,7 +21,7 @@ import java.util.List;
 /**
  * Created by dwallach on 8/25/14.
  */
-public class WearSender implements GoogleApiClient.ConnectionCallbacks, GoogleApiClient.OnConnectionFailedListener {
+public class WearSender implements GoogleApiClient.ConnectionCallbacks, GoogleApiClient.OnConnectionFailedListener, MessageApi.MessageListener {
     private static final String TAG = "WearSender";
     byte[] wireBytesToSend = null;
 
@@ -149,4 +150,22 @@ public class WearSender implements GoogleApiClient.ConnectionCallbacks, GoogleAp
         readyToSend = false;
         mGoogleApiClient.disconnect();
     }
+
+    //
+    // Official documentation: https://developer.android.com/training/wearables/data-layer/events.html
+    // Very, very helpful: http://www.doubleencore.com/2014/07/create-custom-ongoing-notification-android-wear/
+    //
+
+    public void onMessageReceived(MessageEvent messageEvent) {
+        Log.v(TAG, "message received!");
+
+        if (messageEvent.getPath().equals(Constants.WearDataReturnPath)) {
+            // the watch says "hi"; make sure we send it stuff
+
+            sendAllToWatch(); // send the calendar and whatever else we have
+        } else {
+            Log.v(TAG, "received message on unexpected path: " + messageEvent.getPath());
+        }
+    }
+
 }
