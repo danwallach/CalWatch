@@ -13,11 +13,6 @@ import com.google.android.gms.wearable.Node;
 import com.google.android.gms.wearable.NodeApi;
 import com.google.android.gms.wearable.Wearable;
 
-import org.dwallach.calwatch.proto.WireEvent;
-import org.dwallach.calwatch.proto.WireUpdate;
-
-import java.util.List;
-
 /**
  * Created by dwallach on 8/25/14.
  */
@@ -26,17 +21,17 @@ public class WearSender implements GoogleApiClient.ConnectionCallbacks, GoogleAp
     byte[] wireBytesToSend = null;
 
     private Context context;
-    private GoogleApiClient mGoogleApiClient;
+    private GoogleApiClient googleApiClient;
 
     private void initGoogle() {
-        if(mGoogleApiClient == null) {
+        if(googleApiClient == null) {
             readyToSend = false;
-            mGoogleApiClient = new GoogleApiClient.Builder(context).
+            googleApiClient = new GoogleApiClient.Builder(context).
                     addApi(Wearable.API).
                     addConnectionCallbacks(this).
                     addOnConnectionFailedListener(this).
                     build();
-            mGoogleApiClient.connect();
+            googleApiClient.connect();
         }
     }
 
@@ -61,17 +56,17 @@ public class WearSender implements GoogleApiClient.ConnectionCallbacks, GoogleAp
             /*
              * essential code borrowed from WearOngoingNotificationSample
              */
-            if (mGoogleApiClient.isConnected()) {
+            if (googleApiClient.isConnected()) {
                 new AsyncTask<Void, Void, Void>() {
                     @Override
                     protected Void doInBackground(Void... params) {
                         NodeApi.GetConnectedNodesResult nodes =
-                                Wearable.NodeApi.getConnectedNodes(mGoogleApiClient).await();
+                                Wearable.NodeApi.getConnectedNodes(googleApiClient).await();
                         int failures = 0;
                         for (Node node : nodes.getNodes()) {
                             Log.v(TAG, "Sending to node: " + node.getDisplayName());
                             MessageApi.SendMessageResult result = Wearable.MessageApi.sendMessage(
-                                    mGoogleApiClient, node.getId(), Constants.WearDataSendPath, wireBytesToSend).await();
+                                    googleApiClient, node.getId(), Constants.WearDataSendPath, wireBytesToSend).await();
                             if (!result.getStatus().isSuccess()) {
                                 Log.e(TAG, "ERROR: failed to send Message: " + result.getStatus());
                                 failures++;
@@ -126,7 +121,7 @@ public class WearSender implements GoogleApiClient.ConnectionCallbacks, GoogleAp
         // The good stuff goes here.
         readyToSend = true;
 
-        Wearable.MessageApi.addListener(mGoogleApiClient, this);
+        Wearable.MessageApi.addListener(googleApiClient, this);
 
         sendAllToWatch();
     }
@@ -154,13 +149,13 @@ public class WearSender implements GoogleApiClient.ConnectionCallbacks, GoogleAp
     private void cleanup() {
         try {
             readyToSend = false;
-            if (mGoogleApiClient != null) {
-                Wearable.MessageApi.removeListener(mGoogleApiClient, this);
-                if (mGoogleApiClient.isConnected())
-                    mGoogleApiClient.disconnect();
+            if (googleApiClient != null) {
+                Wearable.MessageApi.removeListener(googleApiClient, this);
+                if (googleApiClient.isConnected())
+                    googleApiClient.disconnect();
             }
         } finally {
-            mGoogleApiClient = null;
+            googleApiClient = null;
         }
     }
 

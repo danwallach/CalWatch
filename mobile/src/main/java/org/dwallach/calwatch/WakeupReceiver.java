@@ -68,17 +68,17 @@ public class WakeupReceiver extends BroadcastReceiver {
 
 //    static final String SCHEDULE = "com.android.providers.calendar.SCHEDULE_ALARM";
     private final ExecutorService executor = Executors.newCachedThreadPool();
-    private PowerManager.WakeLock mWakeLock;
+    private PowerManager.WakeLock wakeLock;
 
     private void onReceiveFancy(Context xcontext, Intent intent) {
         final Context context = xcontext; // foolishness to make the inner class work
 
-        if (mWakeLock == null) {
+        if (wakeLock == null) {
             PowerManager pm = (PowerManager) context.getSystemService(Context.POWER_SERVICE);
-            mWakeLock = pm.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, "CalendarReceiver_Provider");
-            mWakeLock.setReferenceCounted(true);
+            wakeLock = pm.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, "CalendarReceiver_Provider");
+            wakeLock.setReferenceCounted(true);
         }
-        mWakeLock.acquire();
+        wakeLock.acquire();
 //        final String action = intent.getAction();
 //        final ContentResolver cr = context.getContentResolver();
         final PendingResult result = goAsync();
@@ -110,7 +110,7 @@ public class WakeupReceiver extends BroadcastReceiver {
 //                    removeScheduledAlarms(cr);
 //                }
                 result.finish();
-                mWakeLock.release();
+                wakeLock.release();
             }
         });
     }

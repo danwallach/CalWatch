@@ -28,7 +28,7 @@ public class WearReceiverService extends WearableListenerService implements Goog
     // private List<EventWrapper> eventList = null;
     // private int maxLevel = 0;
     // private int faceMode = ClockFace.FACE_TOOL;
-    private GoogleApiClient mGoogleApiClient = null;
+    private GoogleApiClient googleApiClient = null;
     private static WearReceiverService singleton;
 
     public WearReceiverService() {
@@ -105,14 +105,14 @@ public class WearReceiverService extends WearableListenerService implements Goog
     }
 
     private void initGoogle() {
-        if(mGoogleApiClient == null) {
+        if(googleApiClient == null) {
             Log.v(TAG, "Trying to connect to GoogleApi");
-            mGoogleApiClient = new GoogleApiClient.Builder(this).
+            googleApiClient = new GoogleApiClient.Builder(this).
                     addApi(Wearable.API).
                     addConnectionCallbacks(this).
                     addOnConnectionFailedListener(this).
                     build();
-            mGoogleApiClient.connect();
+            googleApiClient.connect();
         }
     }
 
@@ -138,8 +138,9 @@ public class WearReceiverService extends WearableListenerService implements Goog
         // Disable any UI components that depend on Google APIs
         // until onConnected() is called.
         Log.v(TAG, "suspended connection!");
-        mGoogleApiClient.disconnect();
-        mGoogleApiClient = null;
+        if(googleApiClient != null && googleApiClient.isConnected())
+            googleApiClient.disconnect();
+        googleApiClient = null;
     }
 
     @Override
@@ -150,8 +151,9 @@ public class WearReceiverService extends WearableListenerService implements Goog
         // More about this in the next section.
 
         Log.v(TAG, "lost connection!");
-        mGoogleApiClient.disconnect();
-        mGoogleApiClient = null;
+        if(googleApiClient != null && googleApiClient.isConnected())
+            googleApiClient.disconnect();
+        googleApiClient = null;
     }
 
     public void onPeerConnected(Node peer) {
@@ -167,13 +169,13 @@ public class WearReceiverService extends WearableListenerService implements Goog
     public void pingPhone() {
         Log.v(TAG, "pinging phone for data");
 
-        if (mGoogleApiClient != null && mGoogleApiClient.isConnected()) {
+        if (googleApiClient != null && googleApiClient.isConnected()) {
             new AsyncTask<Void, Void, Void>() {
                 @Override
                 protected Void doInBackground(Void... params) {
                     try {
                         NodeApi.GetConnectedNodesResult nodes =
-                                Wearable.NodeApi.getConnectedNodes(mGoogleApiClient).await();
+                                Wearable.NodeApi.getConnectedNodes(googleApiClient).await();
                         int failures = 0;
 
                         // TODO: test weird cases when we have one watch associated with >1 phone
@@ -181,7 +183,7 @@ public class WearReceiverService extends WearableListenerService implements Goog
                         for (Node node : nodes.getNodes()) {
                             Log.v(TAG, "Sending to node: " + node.getDisplayName());
                             MessageApi.SendMessageResult result = Wearable.MessageApi.sendMessage(
-                                    mGoogleApiClient, node.getId(), Constants.WearDataReturnPath, null).await();
+                                    googleApiClient, node.getId(), Constants.WearDataReturnPath, null).await();
                             if (!result.getStatus().isSuccess()) {
                                 Log.e(TAG, "ERROR: failed to send Message: " + result.getStatus());
                                 failures++;
