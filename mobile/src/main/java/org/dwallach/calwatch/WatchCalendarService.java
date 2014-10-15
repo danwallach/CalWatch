@@ -27,6 +27,7 @@ public class WatchCalendarService extends Service implements MessageApi.MessageL
     private GoogleApiClient mGoogleApiClient;
 
     private ClockState clockState;
+    private int mGoogleAPIFailureRetryCounter = 0;
 
     private ClockState getClockState() {
         // more on the design of this particular contraption in the comments in PhoneActivity
@@ -148,18 +149,66 @@ public class WatchCalendarService extends Service implements MessageApi.MessageL
     public void onConnected(Bundle connectionHint) {
         Log.v(TAG, "Google API connected!");
 
-        Wearable.MessageApi.addListener(mGoogleApiClient, this);
-        wearSender = new WearSender(this);
+        try {
+            Wearable.MessageApi.addListener(mGoogleApiClient, this);
+            wearSender = new WearSender(this);
+        } catch (NullPointerException e) {
+
+//            Totally rare exception that we're now trying to deal with:
+//
+//            java.lang.NullPointerException
+//            at com.google.android.gms.wearable.internal.ag.a(Unknown Source)
+//            at com.google.android.gms.wearable.internal.ag.addListener(Unknown Source)
+//            at org.dwallach.calwatch.WatchCalendarService.onConnected(WatchCalendarService.java:151)
+//            at com.google.android.gms.common.internal.d.a(Unknown Source)
+//            at com.google.android.gms.common.api.a.bn(Unknown Source)
+//            at com.google.android.gms.common.api.a.d(Unknown Source)
+//            at com.google.android.gms.common.api.a$2.onConnected(Unknown Source)
+//            at com.google.android.gms.common.internal.d.a(Unknown Source)
+//            at com.google.android.gms.common.internal.d.y(Unknown Source)
+//            at com.google.android.gms.common.internal.c$g.a(Unknown Source)
+//            at com.google.android.gms.common.internal.c$g.d(Unknown Source)
+//            at com.google.android.gms.common.internal.c$b.bN(Unknown Source)
+//            at com.google.android.gms.common.internal.c$a.handleMessage(Unknown Source)
+//            at android.os.Handler.dispatchMessage(Handler.java:102)
+//            at android.os.Looper.loop(Looper.java:136)
+//            at android.app.ActivityThread.main(ActivityThread.java:5001)
+//            at java.lang.reflect.Method.invokeNative(Native Method)
+//            at java.lang.reflect.Method.invoke(Method.java:515)
+//            at com.android.internal.os.ZygoteInit$MethodAndArgsCaller.run(ZygoteInit.java:785)
+//            at com.android.internal.os.ZygoteInit.main(ZygoteInit.java:601)
+//            at de.robv.android.xposed.XposedBridge.main(XposedBridge.java:132)
+//            at dalvik.system.NativeStart.main(Native Method)
+
+            mGoogleAPIFailureRetryCounter++;
+            Log.e(TAG, "Rare onConnected NullPointer failure! Disconnecting and retrying.", e);
+
+            // we'll retry this a few times, but after that something is deeply broken and
+            // it's time to just blow up in a user-visible way and hope we get a useful
+            // stack trace
+            if(mGoogleAPIFailureRetryCounter > 10) {
+                throw e;
+            } else {
+                wearSender = null;
+                onConnectionFailed(null);
+                initGoogle();
+            }
+        }
     }
 
     public void onConnectionSuspended(int cause) {
         // The connection has been interrupted.
         // Disable any UI components that depend on Google APIs
         // until onConnected() is called.
-        Log.v(TAG, "suspended connection!");
-        Wearable.MessageApi.removeListener(mGoogleApiClient, this);
-        mGoogleApiClient.disconnect();
-        mGoogleApiClient = null;
+        try {
+            Log.v(TAG, "suspended connection!");
+            Wearable.MessageApi.removeListener(mGoogleApiClient, this);
+            mGoogleApiClient.disconnect();
+        } catch (Throwable t) {
+            Log.e(TAG, "failure trying to clean up; ignored.", t);
+        } finally {
+            mGoogleApiClient = null;
+        }
     }
 
     public void onConnectionFailed(ConnectionResult result) {
@@ -169,9 +218,14 @@ public class WatchCalendarService extends Service implements MessageApi.MessageL
         // More about this in the next section.
 
         Log.v(TAG, "lost connection!");
-        Wearable.MessageApi.removeListener(mGoogleApiClient, this);
-        mGoogleApiClient.disconnect();
-        mGoogleApiClient = null;
+        try {
+            Wearable.MessageApi.removeListener(mGoogleApiClient, this);
+            mGoogleApiClient.disconnect();
+        } catch (Throwable t) {
+            Log.e(TAG, "failure trying to clean up; ignored.", t);
+        } finally {
+            mGoogleApiClient = null;
+        }
     }
 
     public void onPeerConnected(Node peer) {
