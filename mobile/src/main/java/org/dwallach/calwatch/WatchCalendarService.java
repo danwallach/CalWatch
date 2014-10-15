@@ -3,15 +3,8 @@ package org.dwallach.calwatch;
 import android.app.Service;
 import android.content.Context;
 import android.content.Intent;
-import android.os.Bundle;
 import android.os.IBinder;
 import android.util.Log;
-
-import com.google.android.gms.common.ConnectionResult;
-import com.google.android.gms.wearable.MessageApi;
-import com.google.android.gms.wearable.MessageEvent;
-import com.google.android.gms.wearable.Node;
-import com.google.android.gms.wearable.Wearable;
 
 import java.util.Observable;
 import java.util.Observer;
@@ -37,6 +30,40 @@ public class WatchCalendarService extends Service implements Observer {
 
     public WatchCalendarService() {
         super();
+    }
+
+
+    public static WatchCalendarService getSingletonService() {
+        return singletonService;
+    }
+
+    // this is called when there's something new from the calendar DB; we'll be running
+    // on the calendar's thread, not the UI thread. It's also useful to call from elsewhere
+    // when we want to push data to the watch.
+    public void sendAllToWatch() {
+        if (wearSender == null) {
+            Log.e(TAG, "no wear sender?!");
+            return;
+        }
+
+        // and now, send on to the wear device
+        wearSender.sendAllToWatch();
+    }
+
+    @Override
+    public int onStartCommand(Intent intent, int flags, int startId) {
+        super.onStartCommand(intent, flags, startId);
+        Log.v(TAG, "service starting!");
+
+        // We want this service to continue running until it is explicitly
+        // stopped, so return sticky.
+        return START_STICKY;
+    }
+
+    private void initInternal() {
+        BatteryWrapper.init(this);
+        getClockState();
+        wearSender = new WearSender(this);
 
         Log.v(TAG, "starting calendar fetcher");
         if (singletonService != null) {
@@ -66,43 +93,12 @@ public class WatchCalendarService extends Service implements Observer {
             }
         });
     }
-
-    public static WatchCalendarService getSingletonService() {
-        return singletonService;
-    }
-
-    // this is called when there's something new from the calendar DB; we'll be running
-    // on the calendar's thread, not the UI thread. It's also useful to call from elsewhere
-    // when we want to push data to the watch.
-    public void sendAllToWatch() {
-        if (wearSender == null) {
-            Log.e(TAG, "no wear sender?!");
-            return;
-        }
-
-        // and now, send on to the wear device
-        wearSender.sendAllToWatch();
-    }
-
-    @Override
-    public int onStartCommand(Intent intent, int flags, int startId) {
-        super.onStartCommand(intent, flags, startId);
-        Log.v(TAG, "service starting!");
-
-        BatteryWrapper.init(this);
-        getClockState();
-        wearSender = new WearSender(this);
-
-        // We want this service to continue running until it is explicitly
-        // stopped, so return sticky.
-        return START_STICKY;
-    }
     @Override
     public void onCreate() {
         super.onCreate();
         Log.v(TAG, "service created!");
 
-        getClockState();
+        initInternal();
     }
 
     @Override
