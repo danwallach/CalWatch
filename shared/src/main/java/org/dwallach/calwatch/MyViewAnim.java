@@ -234,27 +234,28 @@ public class MyViewAnim extends SurfaceView implements SurfaceHolder.Callback, O
         }
     }
 
-    // called by the timer in WearActivity
+    // Called by everybody on the outside. This one does error checking of various sorts.
     public void redrawClock() {
         if(clockFace == null) {
             Log.e(TAG, "tick without a clock!");
             return;
         }
 
-        ticks++;
-        redrawInternal();
+        if(activeDrawing)
+            redrawInternal();
+        else
+            Log.v(TAG, "redraw called while !activeDrawing; ignoring");
+
         return;
     }
 
     private volatile SurfaceHolder surfaceHolder = null;
     private int ticks = 0;
 
-    // called by redrawClock *and* by the TimeListener contraption which is running a separate thread
-    // at full 60Hz speed
+    // Currently only called from redrawClock(), above; Less error checking here.
     private void redrawInternal() {
-        if(!activeDrawing) return;
-
         LockWrapper.lock();
+        ticks++;
 
         try {
             ClockFace localClockFace = clockFace; // local cached copy, to deal with concurrency issues
@@ -280,12 +281,17 @@ public class MyViewAnim extends SurfaceView implements SurfaceHolder.Callback, O
 
             // Original solution: when the stop() method is called (on the UI thread), it needs to stop the Looper
             // which is doing all of the redrawing. Thus, the whole quitSafely() business and killing the animator.
-            // Yet still, there would be at least one more round-trip through the redrawing.
+            // Yet still, there would sometimes be another round-trip through the redrawing.
 
             // Kludgy solution: stop() now also nulls out the surface holder (a volatile private member variable,
             // so we'll notice this very quickly on the drawing thread). Because this could happen at any time,
-            // we only sample the contents of the variable once at the top of this function. Thereafter, we'll use
-            // it and be happy.
+            // we sample the contents of the variable once at the top of this function. That is, once we're committed
+            // to rendering, we're going to see it through, but subsequent trips through here will do nothing.
+
+            // The *real* solution, hopefully, is the proper use of the activeDrawing flag, also a volatile. Everything
+            // that might be trying to say "whoa, time to be done with drawing" should call stop() on this view, which
+            // will set that flag to false, which will then, in turn, ensure that subsequent redraw calls never even
+            // get into redrawInternal.
 
             try {
                 try {
@@ -361,17 +367,11 @@ public class MyViewAnim extends SurfaceView implements SurfaceHolder.Callback, O
 
         @Override
         public void onTimeUpdate(TimeAnimator animation, long totalTime, long deltaTime) {
-            ticks++;
-
             // sometimes, this still happens even when we don't care, thus the activeDrawing
             // boolean. There are some conditions, not exactly clear what, when this gets
             // called once every three seconds. Why three seconds? Why isn't the PanelThread dead?
             // No idea, so we'll just ignore it.
-            if(!activeDrawing) {
-                return;
-            }
-
-            redrawInternal();
+            redrawClock();
         }
     }
     /**
