@@ -330,6 +330,10 @@ public class MyViewAnim extends SurfaceView implements SurfaceHolder.Callback, O
                     }
                 }
 
+                // Warning Will Robinson! Danger! With the new LockWrapper structure, turning
+                // on this flag is likely to set up all kinds of deadlock action. We should really
+                // just delete sleepInEventLoop altogether since we now get this effect through
+                // the seconds-scale alarm.
                 if (sleepInEventLoop)
                     SystemClock.sleep(1000);
 
