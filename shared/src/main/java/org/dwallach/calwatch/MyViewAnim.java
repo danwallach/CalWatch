@@ -203,34 +203,32 @@ public class MyViewAnim extends SurfaceView implements SurfaceHolder.Callback, O
     }
 
     private void killDrawThread() {
-        if(animator != null) {
-            // new experimental ways to maybe quit things
-            if(drawThread == null) {
-                Log.v(TAG, "no draw thread around to kill ?!");
-            } else {
-                try {
-                    // animator.start() needs to happen on the PanelThread, not this one
-                    Handler handler = drawThread.getHandler();
+        Log.v(TAG, "killDrawThread");
+        if (drawThread == null) {
+            Log.v(TAG, "no draw thread around to kill ?!");
+        } else {
+            try {
+                // animator.start() needs to happen on the PanelThread, not this one
+                Handler handler = drawThread.getHandler();
 
-                    // it's weird, but this happens some times
-                    if (handler != null) {
-                        Looper looper = handler.getLooper();
-                        if (looper != null)
-                            looper.quitSafely();
-                    }
-                } catch (Throwable t) {
-                    Log.e(TAG, "unexpected failure in stop()", t);
+                // it's weird, but this happens some times
+                if (handler != null) {
+                    Looper looper = handler.getLooper();
+                    if (looper != null)
+                        looper.quitSafely();
                 }
+            } catch (Throwable t) {
+                Log.e(TAG, "unexpected failure in stop()", t);
+            }
 
-                // these seem to be required to happen on the same thread as where the drawing is happening, so does nothing here
+            // these seem to be required to happen on the same thread as where the drawing is happening, so does nothing here
 //                animator.end();
 //                animator.cancel();
 
-                animator = null;
-                drawThread = null;
+            animator = null;
+            drawThread = null;
 //                clockFace.destroy();
 //                clockFace = null;
-            }
         }
     }
 
@@ -244,7 +242,7 @@ public class MyViewAnim extends SurfaceView implements SurfaceHolder.Callback, O
         if(activeDrawing)
             redrawInternal();
         else
-            Log.v(TAG, "redraw called while !activeDrawing; ignoring");
+            if(ticks % 1000 == 0) Log.v(TAG, "redraw called while !activeDrawing; ignoring");
 
         return;
     }
@@ -417,15 +415,12 @@ public class MyViewAnim extends SurfaceView implements SurfaceHolder.Callback, O
             } catch (Throwable t) {
                 Log.e(TAG, "looper halted due to an error", t);
 
-                // half-assed cleanup code; it we get here, something went really, really badly wrong
-                // so we'll just hope that by shutting things down and waiting a bit, they'll come back
-                // again after the screen goes to sleep and comes back again
+            } finally {
                 try {
                     localAnimator.cancel();
                 } catch (Throwable t2) {
-                    Log.e(TAG, "can't clean up animator cleanly, either", t2);
+                    Log.e(TAG, "can't clean up animator, ignoring", t2);
                 }
-            } finally {
                 animator = null;
                 drawThread = null;
             }

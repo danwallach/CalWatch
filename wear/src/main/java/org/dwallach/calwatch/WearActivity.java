@@ -132,7 +132,11 @@ public class WearActivity extends Activity {
         if(watchFaceRunning)
             TimeWrapper.frameReport();            // dump performance data *now* before things change
         watchFaceRunning = false;
-        if(view != null) view.stop();
+        if(view != null) {
+            view.stop();
+        } else {
+            Log.e(TAG, "no view to stop?!");
+        }
         killAmbientWatcher();
     }
 
