@@ -23,6 +23,8 @@ public class MyViewAnim extends SurfaceView implements SurfaceHolder.Callback, O
 
     private static final boolean debugTracingDesired = false;
 
+    private static volatile int numViewAnims = 0;
+
     private PanelThread drawThread;
     private volatile ClockFace clockFace;
     private volatile TimeAnimator animator;
@@ -65,7 +67,8 @@ public class MyViewAnim extends SurfaceView implements SurfaceHolder.Callback, O
     }
 
     private void setup(Context ctx) {
-        Log.v(TAG, "setup!");
+        numViewAnims++;
+        Log.v(TAG, "setup! numViewAnims: " + numViewAnims);
         getHolder().addCallback(this);
 
         /*
