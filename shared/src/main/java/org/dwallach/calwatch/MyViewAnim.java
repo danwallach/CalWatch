@@ -143,6 +143,7 @@ public class MyViewAnim extends SurfaceView implements SurfaceHolder.Callback, O
     }
 
     public void resume() {
+        Log.v(TAG, "resume");
         if (clockFace == null)
             clockFace = new ClockFace();
 
@@ -158,6 +159,8 @@ public class MyViewAnim extends SurfaceView implements SurfaceHolder.Callback, O
     }
 
     private void startDrawThread() {
+        if(!activeDrawing) return;
+
         if(animator != null) {
             Log.v(TAG, "resuming old animator!");
             animator.resume();
@@ -249,6 +252,8 @@ public class MyViewAnim extends SurfaceView implements SurfaceHolder.Callback, O
     // called by redrawClock *and* by the TimeListener contraption which is running a separate thread
     // at full 60Hz speed
     private void redrawInternal() {
+        if(!activeDrawing) return;
+
         LockWrapper.lock();
 
         try {
