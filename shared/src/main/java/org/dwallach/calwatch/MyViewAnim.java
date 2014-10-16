@@ -243,8 +243,6 @@ public class MyViewAnim extends SurfaceView implements SurfaceHolder.Callback, O
             redrawInternal();
         else
             if(ticks % 1000 == 0) Log.v(TAG, "redraw called while !activeDrawing; ignoring");
-
-        return;
     }
 
     private volatile SurfaceHolder surfaceHolder = null;
