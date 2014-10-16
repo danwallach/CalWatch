@@ -120,9 +120,12 @@ public class WearActivity extends Activity {
 //        at org.dwallach.calwatch.MyViewAnim$PanelThread.run(MyViewAnim.java:402)
 //        10-15 16:19:52.084  13774-15502/? V/MyViewAnim﹕ looper finished!
 
-        // The proposed maybe of a solution is to tear things down right now, when onStop gets called,
-        // versus letting the rendering thread possibly have another go at it.
-        stopHelper();
+        // We tried doing all the stop-related activity here, but this only caused the exception as above to
+        // happen *more* often. The solution seems to be doing nothing here and doing everything with the
+        // onDisplayChanged callback. The other thing that seemed to help was making watchFaceRunning into
+        // a boolean, so it's going to be noticed immediately on every path through the rendering loop.
+
+//        stopHelper();
     }
 
     private void stopHelper() {
@@ -145,11 +148,11 @@ public class WearActivity extends Activity {
 
     private void killAmbientWatcher() {
         Log.v(TAG, "killing ambient watcher & alarm");
-        if (displayListener != null) {
-            final DisplayManager displayManager = (DisplayManager) getSystemService(Context.DISPLAY_SERVICE);
-            displayManager.unregisterDisplayListener(displayListener);
-            displayListener = null;
-        }
+//        if (displayListener != null) {
+//            final DisplayManager displayManager = (DisplayManager) getSystemService(Context.DISPLAY_SERVICE);
+//            displayManager.unregisterDisplayListener(displayListener);
+//            displayListener = null;
+//        }
 
         if(pendingIntent != null) {
             alarmSet = false;
@@ -288,8 +291,9 @@ public class WearActivity extends Activity {
                             Log.v(TAG, "onDisplayChanged: dozing");
                             break;
                         case Display.STATE_OFF:
+                            // Curiously, this case never seems to execute. Very curious.
                             stopHelper();
-                            clockFace.setAmbientMode(true);
+                            clockFace.setAmbientMode(false);
                             Log.v(TAG, "onDisplayChanged: off!"); // presumably this event will be accompanied by other things that shut us down
                             break;
                         case Display.STATE_ON:
