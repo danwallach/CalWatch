@@ -31,7 +31,10 @@ public class WearActivity extends Activity {
     // that we're not killed outright, which means we'll be around to receive messages from
     // the phone that update our service. This *might* not be necessary, since we've got
     // WearReceiverService running, hypothetically independent of the activity.
-    private boolean watchFaceRunning = true;
+
+    // "volatile" added to this variable since the UI thread might be trying to shut things
+    // down and we want the rendering thread to notice this ASAP.
+    private volatile boolean watchFaceRunning = true;
 
     public static WearActivity getSingletonActivity() {
         return singletonActivity;
@@ -91,15 +94,43 @@ public class WearActivity extends Activity {
     protected void onPause() {
         super.onPause();
         Log.v(TAG, "Pause!");
-//        if(view != null) view.pause();
+        // we're not taking any action here because this handled below by in onDisplayChanged
+        // if(view != null) view.pause();
     }
 
     @Override
     protected void onStop() {
         super.onStop();
         Log.v(TAG, "Stop!");
-//        if(view != null) view.stop();
-//        killAmbientWatcher();
+        
+        // originally, we took no action here, since we were going to handle it below with onDisplayChanged
+        // but this occasionally causes an exception to be thrown (and mysteriously caught) within the Looper
+        // as below:
+
+//        10-15 16:19:52.084  13774-15502/? W/MessageQueue﹕ Handler (android.view.Choreographer$FrameHandler) {adcfe8a0} sending message to a Handler on a dead thread
+//        java.lang.RuntimeException: Handler (android.view.Choreographer$FrameHandler) {adcfe8a0} sending message to a Handler on a dead thread
+//        at android.os.MessageQueue.enqueueMessage(MessageQueue.java:320)
+//        at android.os.Handler.enqueueMessage(Handler.java:626)
+//        at android.os.Handler.sendMessageAtTime(Handler.java:595)
+//        at android.view.Choreographer$FrameDisplayEventReceiver.onVsync(Choreographer.java:741)
+//        at android.view.DisplayEventReceiver.dispatchVsync(DisplayEventReceiver.java:139)
+//        at android.os.MessageQueue.nativePollOnce(Native Method)
+//        at android.os.MessageQueue.next(MessageQueue.java:138)
+//        at android.os.Looper.loop(Looper.java:123)
+//        at org.dwallach.calwatch.MyViewAnim$PanelThread.run(MyViewAnim.java:402)
+//        10-15 16:19:52.084  13774-15502/? V/MyViewAnim﹕ looper finished!
+
+        // The proposed maybe of a solution is to tear things down right now, when onStop gets called,
+        // versus letting the rendering thread possibly have another go at it.
+        stopHelper();
+    }
+
+    private void stopHelper() {
+        if(watchFaceRunning)
+            TimeWrapper.frameReport();            // dump performance data *now* before things change
+        watchFaceRunning = false;
+        if(view != null) view.stop();
+        killAmbientWatcher();
     }
 
     @Override
@@ -107,14 +138,12 @@ public class WearActivity extends Activity {
         super.onDestroy();
         // Hmm... this never seems to actually happen
         Log.v(TAG, "Destroy!");
-        if (view != null) view.stop();
-        killAmbientWatcher();
+        stopHelper();
     }
 
     private DisplayManager.DisplayListener displayListener = null;
 
     private void killAmbientWatcher() {
-
         Log.v(TAG, "killing ambient watcher & alarm");
         if (displayListener != null) {
             final DisplayManager displayManager = (DisplayManager) getSystemService(Context.DISPLAY_SERVICE);
@@ -259,9 +288,8 @@ public class WearActivity extends Activity {
                             Log.v(TAG, "onDisplayChanged: dozing");
                             break;
                         case Display.STATE_OFF:
+                            stopHelper();
                             clockFace.setAmbientMode(true);
-                            view.stop();
-                            watchFaceRunning = false;
                             Log.v(TAG, "onDisplayChanged: off!"); // presumably this event will be accompanied by other things that shut us down
                             break;
                         case Display.STATE_ON:

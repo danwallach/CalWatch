@@ -255,11 +255,12 @@ public class MyViewAnim extends SurfaceView implements SurfaceHolder.Callback, O
             Canvas c = null;
 
             if (localSurfaceHolder == null) {
-                Log.e(TAG, "no surface holder, retrying");
                 localSurfaceHolder = surfaceHolder = getHolder();
                 if (localSurfaceHolder == null) {
                     Log.e(TAG, "still no surface holder, giving up");
                     return;
+                } else {
+                    Log.v(TAG, "success getting new surface holder");
                 }
             }
 
