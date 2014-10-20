@@ -35,6 +35,7 @@
                 android:id="@+id/textView"
                 android:layout_row="0"
                 android:layout_column="0"
+                android:layout_marginRight="10dp"
                 android:layout_gravity="center|left" />
 
             <View
