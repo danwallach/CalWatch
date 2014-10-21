@@ -28,7 +28,8 @@ public class MyViewAnim extends SurfaceView implements SurfaceHolder.Callback, O
     private PanelThread drawThread;
     private volatile ClockFace clockFace;
     private volatile TimeAnimator animator;
-    private volatile boolean activeDrawing = false;
+    private volatile boolean drawingMaxHertz = false;
+    private volatile boolean drawingAmbientMode = false;
     private boolean sleepInEventLoop = false;
 
     private boolean drawThreadDesired = true;
@@ -37,6 +38,10 @@ public class MyViewAnim extends SurfaceView implements SurfaceHolder.Callback, O
     private static boolean debugTracingOn = false;
 
     public ClockFace getClockFace() { return clockFace; }
+
+    public void setAmbientMode(boolean ambientMode) {
+        drawingAmbientMode = ambientMode;
+    }
 
     public MyViewAnim(Context context) {
         super(context);
@@ -149,7 +154,7 @@ public class MyViewAnim extends SurfaceView implements SurfaceHolder.Callback, O
 
 //        clockFace.setAmbientMode(false);
         clockFace.wipeCaches();
-        activeDrawing = true;
+        drawingMaxHertz = true;
 
         if (surfaceHolder == null)
             surfaceHolder = getHolder();
@@ -159,7 +164,7 @@ public class MyViewAnim extends SurfaceView implements SurfaceHolder.Callback, O
     }
 
     private void startDrawThread() {
-        if(!activeDrawing) return;
+        if(!drawingMaxHertz) return;
 
         if(animator != null) {
             Log.v(TAG, "resuming old animator!");
@@ -197,7 +202,7 @@ public class MyViewAnim extends SurfaceView implements SurfaceHolder.Callback, O
 
     public void stop() {
         Log.v(TAG, "stopping animation!");
-        activeDrawing = false;
+        drawingMaxHertz = false;
         killDrawThread();
         surfaceHolder = null;
     }
@@ -239,10 +244,10 @@ public class MyViewAnim extends SurfaceView implements SurfaceHolder.Callback, O
             return;
         }
 
-        if(activeDrawing)
+        if(drawingMaxHertz || drawingAmbientMode)
             redrawInternal();
         else
-            if(ticks % 1000 == 0) Log.v(TAG, "redraw called while !activeDrawing; ignoring");
+            if(ticks % 1000 == 0) Log.v(TAG, "redraw called while !drawingMaxHertz; ignoring");
     }
 
     private volatile SurfaceHolder surfaceHolder = null;
@@ -284,7 +289,7 @@ public class MyViewAnim extends SurfaceView implements SurfaceHolder.Callback, O
             // we sample the contents of the variable once at the top of this function. That is, once we're committed
             // to rendering, we're going to see it through, but subsequent trips through here will do nothing.
 
-            // The *real* solution, hopefully, is the proper use of the activeDrawing flag, also a volatile. Everything
+            // The *real* solution, hopefully, is the proper use of the drawingMaxHertz flag, also a volatile. Everything
             // that might be trying to say "whoa, time to be done with drawing" should call stop() on this view, which
             // will set that flag to false, which will then, in turn, ensure that subsequent redraw calls never even
             // get into redrawInternal.
@@ -367,7 +372,7 @@ public class MyViewAnim extends SurfaceView implements SurfaceHolder.Callback, O
 
         @Override
         public void onTimeUpdate(TimeAnimator animation, long totalTime, long deltaTime) {
-            // sometimes, this still happens even when we don't care, thus the activeDrawing
+            // sometimes, this still happens even when we don't care, thus the drawingMaxHertz
             // boolean. There are some conditions, not exactly clear what, when this gets
             // called once every three seconds. Why three seconds? Why isn't the PanelThread dead?
             // No idea, so we'll just ignore it.

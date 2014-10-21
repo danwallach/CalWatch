@@ -129,11 +129,10 @@ public class WearActivity extends Activity {
     }
 
     private void stopHelper() {
-        if(watchFaceRunning)
-            TimeWrapper.frameReport();            // dump performance data *now* before things change
+        Log.v(TAG, "stopHelper: shutting things down");
         watchFaceRunning = false;
         if(view != null) {
-            view.stop();
+            view.stop();                          // kills the draw thread, if it's active
         } else {
             Log.e(TAG, "no view to stop?!");
         }
@@ -260,6 +259,8 @@ public class WearActivity extends Activity {
             final DisplayManager displayManager = (DisplayManager) getSystemService(Context.DISPLAY_SERVICE);
 
             this.displayListener = new DisplayManager.DisplayListener() {
+                private int oldState = -1;
+
                 @Override
                 public void onDisplayAdded(int displayId) {
                 }
@@ -280,38 +281,57 @@ public class WearActivity extends Activity {
                         return;
                     }
 
-                    if(watchFaceRunning)
-                        TimeWrapper.frameReport();            // dump performance data *now* before things change
-                    else
-                        TimeWrapper.frameReset();             // if we get here, the face isn't running but is about to start, so it's a good time to reset the counters
+                    if(oldState == Display.STATE_DOZING || oldState == Display.STATE_ON) {
+                        // if we'd been previously running for a while, then we're about to change things up,
+                        // so now's a good time to report our status
+                        TimeWrapper.frameReport();
+                    } else {
+                        // we were formerly asleep and now we're coming back awake again
+                        TimeWrapper.frameReset();
+                    }
+                    oldState = newState;
+
 
                     // inspiration: https://gist.github.com/kentarosu/52fb21eb92181716b0ce
 
                     switch (newState) {
                         case Display.STATE_DOZING:
-                            clockFace.setAmbientMode(true);
-                            view.stop();
-                            watchFaceRunning = true;
                             Log.v(TAG, "onDisplayChanged: dozing");
+                            clockFace.setAmbientMode(true);
+                            view.setAmbientMode(true);
+                            view.stop();                          // stops the drawing thread
+                            view.redrawClock();                   // it might take a while for the other bits to get rolling again, so do this immediately
+                            watchFaceRunning = true;
                             break;
+
                         case Display.STATE_OFF:
-                            // Curiously, this case never seems to execute. Very curious.
-                            stopHelper();
+
+                            // Curiously, this case never executes when we're in *ambient mode*, at least on the Moto360
+
+                            Log.v(TAG, "onDisplayChanged: off!");
+                            stopHelper();                         // stopHelper will set watchFaceRunning to false, so we don't need to do anything here
                             clockFace.setAmbientMode(false);
-                            Log.v(TAG, "onDisplayChanged: off!"); // presumably this event will be accompanied by other things that shut us down
+                            view.setAmbientMode(false);
                             break;
+
                         case Display.STATE_ON:
+                            Log.v(TAG, "onDisplayChanged: on!");
                             clockFace.setAmbientMode(false);
+                            view.setAmbientMode(false);
                             view.redrawClock();                   // it might take a while for the other bits to get rolling again, so do this immediately
                             view.resume();
                             watchFaceRunning = true;
-                            Log.v(TAG, "onDisplayChanged: on!");
                             break;
+
                         default:
+
+                            // never seen this happen, ever
+
+                            Log.v(TAG, "onDisplayChanged: unknown state, defaulting to non-ambient mode");
                             clockFace.setAmbientMode(false);
+                            view.setAmbientMode(false);
                             view.resume();
                             watchFaceRunning = true;
-                            Log.v(TAG, "onDisplayChanged: unknown state, defaulting to non-ambient mode");
                             break;
                     }
                 }
