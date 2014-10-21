@@ -85,9 +85,12 @@ public class WearActivity extends Activity {
     protected void onResume() {
         super.onResume();
         Log.v(TAG, "Resume!");
-        if (view != null) view.resume();
-        initAmbientWatcher();
-        initAlarm();
+
+        // we're not taking any action here because this handled below by in onDisplayChanged
+
+        // if (view != null) view.resume();
+        // initAmbientWatcher();
+        // initAlarm();
     }
 
     @Override
@@ -95,48 +98,29 @@ public class WearActivity extends Activity {
         super.onPause();
         Log.v(TAG, "Pause!");
         // we're not taking any action here because this handled below by in onDisplayChanged
-        // if(view != null) view.pause();
     }
 
     @Override
     protected void onStop() {
         super.onStop();
         Log.v(TAG, "Stop!");
-        
-        // originally, we took no action here, since we were going to handle it below with onDisplayChanged
-        // but this occasionally causes an exception to be thrown (and mysteriously caught) within the Looper
-        // as below:
-
-//        10-15 16:19:52.084  13774-15502/? W/MessageQueue﹕ Handler (android.view.Choreographer$FrameHandler) {adcfe8a0} sending message to a Handler on a dead thread
-//        java.lang.RuntimeException: Handler (android.view.Choreographer$FrameHandler) {adcfe8a0} sending message to a Handler on a dead thread
-//        at android.os.MessageQueue.enqueueMessage(MessageQueue.java:320)
-//        at android.os.Handler.enqueueMessage(Handler.java:626)
-//        at android.os.Handler.sendMessageAtTime(Handler.java:595)
-//        at android.view.Choreographer$FrameDisplayEventReceiver.onVsync(Choreographer.java:741)
-//        at android.view.DisplayEventReceiver.dispatchVsync(DisplayEventReceiver.java:139)
-//        at android.os.MessageQueue.nativePollOnce(Native Method)
-//        at android.os.MessageQueue.next(MessageQueue.java:138)
-//        at android.os.Looper.loop(Looper.java:123)
-//        at org.dwallach.calwatch.MyViewAnim$PanelThread.run(MyViewAnim.java:402)
-//        10-15 16:19:52.084  13774-15502/? V/MyViewAnim﹕ looper finished!
-
-        // We tried doing all the stop-related activity here, but this only caused the exception as above to
-        // happen *more* often. The solution seems to be doing nothing here and doing everything with the
-        // onDisplayChanged callback. The other thing that seemed to help was making watchFaceRunning into
-        // a boolean, so it's going to be noticed immediately on every path through the rendering loop.
-
-//        stopHelper();
+        // we're not taking any action here because this handled below by in onDisplayChanged
     }
 
     private void stopHelper() {
         Log.v(TAG, "stopHelper: shutting things down");
-        watchFaceRunning = false;
-        if(view != null) {
-            view.stop();                          // kills the draw thread, if it's active
-        } else {
-            Log.e(TAG, "no view to stop?!");
+        try {
+            LockWrapper.lock();                       // locking, so we wait until redraw is finished
+            watchFaceRunning = false;
+            if (view != null) {
+                view.stop();                          // kills the draw thread, if it's active
+            } else {
+                Log.e(TAG, "no view to stop?!");
+            }
+            killAmbientWatcher();
+        } finally {
+            LockWrapper.unlock();
         }
-        killAmbientWatcher();
     }
 
     @Override

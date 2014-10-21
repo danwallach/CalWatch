@@ -18,6 +18,7 @@ import android.widget.Switch;
 
 import java.util.Observable;
 import java.util.Observer;
+import java.util.concurrent.locks.Lock;
 
 
 public class PhoneActivity extends Activity implements Observer {
@@ -175,13 +176,19 @@ public class PhoneActivity extends Activity implements Observer {
 
         // http://developer.android.com/reference/android/app/Activity.html
 
-        if(clockView != null)
-            clockView.stop();
+        try {
+            LockWrapper.lock();           // locking so we wait until a redraw is finished
 
-        getClockState().deleteObserver(this);
-        clockState = null;
-        watchFaceRunning = false;
-        killAlarm();
+            if (clockView != null)
+                clockView.stop();
+
+            getClockState().deleteObserver(this);
+            clockState = null;
+            watchFaceRunning = false;
+            killAlarm();
+        } finally {
+            LockWrapper.unlock();
+        }
     }
 
     protected void onStart() {
@@ -196,8 +203,8 @@ public class PhoneActivity extends Activity implements Observer {
         super.onResume();
         Log.v(TAG, "Resume!");
         if(clockView != null) {
-            clockView.resume(); // shouldn't be necessary, but isn't happening on its own
             clockView.redrawClock();
+            clockView.resume();
         }
         watchFaceRunning = true;
         initAlarm();
@@ -206,9 +213,18 @@ public class PhoneActivity extends Activity implements Observer {
     protected void onPause() {
         super.onPause();
         Log.v(TAG, "Pause!");
-        if(clockView != null) clockView.pause(); // shouldn't be necessary, but isn't happening on its own
-        watchFaceRunning = false;
-        killAlarm();
+
+        try {
+            LockWrapper.lock();        // locking so we wait until a redraw is finished
+
+            if (clockView != null)
+                clockView.pause();
+
+            watchFaceRunning = false;
+            killAlarm();
+        } finally {
+            LockWrapper.unlock();
+        }
     }
 
     @Override
