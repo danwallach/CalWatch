@@ -21,8 +21,11 @@ BUGS BUGs BUGZ!
   -- the new action with mixing up the 60Hz thread plus the 5-sec alarm seems to be running, but
      it's generating "Android Wear not responding" failures (see logdump-13oct2014.txt).
 
+  TODO we're drawing, in ambient mode, even when we're not on screen (and attempting maxHertz?!!)
+
 
  Daydream?
      http://www.hascode.com/2013/01/using-the-android-daydream-api/
      http://developer.android.com/reference/android/service/dreams/DreamService.html
      -- looks almost exactly the same as implementing an activity, or the watchface API
+
