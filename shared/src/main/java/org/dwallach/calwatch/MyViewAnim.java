@@ -167,37 +167,22 @@ public class MyViewAnim extends SurfaceView implements SurfaceHolder.Callback, O
     private void startDrawThread() {
         if(!drawingMaxHertz) return;
 
-        if(animator != null) {
-            Log.v(TAG, "resuming old animator!");
-            animator.resume();
-        } else {
-            Log.v(TAG, "new animator starting");
-            // surfaceHolder = getHolder();
-            try {
-                animator = new TimeAnimator();
-                animator.setTimeListener(new MyTimeListener());
-                // animator.setFrameDelay(1000);  // doesn't actually work?
+        if(drawThread != null) {
+            Log.v(TAG, "draw thread already exists, doing nothing");
+            return;
+        }
 
-                if (drawThread == null) {
-                    Log.v(TAG, "starting draw thread from scratch");
-                    drawThread = new PanelThread(animator); // will start the animator
-                    drawThread.start();
-                } else {
-                    Log.v(TAG, "asking previous draw thread to start a new animator");
-                    // animator.start() needs to happen on the PanelThread, not this one
-                    Handler handler = drawThread.getHandler();
-                    final Animator fa = animator;
 
-                    handler.post(new Runnable() {
-                        @Override
-                        public void run() {
-                            fa.start();
-                        }
-                    });
-                }
-            } catch (Throwable t) {
-                Log.e(TAG, "unexpected failure in resumeMaxHertz()", t);
-            }
+        try {
+            Log.v(TAG, "starting new animator");
+            animator = new TimeAnimator();
+            animator.setTimeListener(new MyTimeListener());
+
+            Log.v(TAG, "starting new draw thread");
+            drawThread = new PanelThread(animator); // will start the animator
+            drawThread.start();
+        } catch (Throwable t) {
+            Log.e(TAG, "unexpected failure in resumeMaxHertz()", t);
         }
     }
 
@@ -355,7 +340,7 @@ public class MyViewAnim extends SurfaceView implements SurfaceHolder.Callback, O
      */
     @Override
     public void update(Observable observable, Object o) {
-//        Log.v(TAG, "update from ClockState");
+        Log.v(TAG, "update from ClockState");
         ClockState clockState = ClockState.getSingleton();
         if(clockState == null)
             Log.e(TAG, "null ClockState?!!");
