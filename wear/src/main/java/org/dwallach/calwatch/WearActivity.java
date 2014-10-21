@@ -15,9 +15,6 @@ import android.support.wearable.view.WatchViewStub;
 import android.util.Log;
 import android.view.Display;
 
-import java.util.Observable;
-import java.util.Observer;
-
 public class WearActivity extends Activity {
     private static final String TAG = "WearActivity";
 
@@ -88,7 +85,7 @@ public class WearActivity extends Activity {
 
         // we're not taking any action here because this handled below by in onDisplayChanged
 
-        // if (view != null) view.resume();
+        // if (view != null) view.resumeMaxHertz();
         // initAmbientWatcher();
         // initAlarm();
     }
@@ -303,7 +300,7 @@ public class WearActivity extends Activity {
                             clockFace.setAmbientMode(false);
                             view.setAmbientMode(false);
                             view.redrawClock();                   // it might take a while for the other bits to get rolling again, so do this immediately
-                            view.resume();
+                            view.resumeMaxHertz();
                             watchFaceRunning = true;
                             break;
 
@@ -314,7 +311,7 @@ public class WearActivity extends Activity {
                             Log.v(TAG, "onDisplayChanged: unknown state, defaulting to non-ambient mode");
                             clockFace.setAmbientMode(false);
                             view.setAmbientMode(false);
-                            view.resume();
+                            view.resumeMaxHertz();
                             watchFaceRunning = true;
                             break;
                     }

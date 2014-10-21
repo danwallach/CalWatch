@@ -7,7 +7,6 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.SharedPreferences;
-import android.location.GpsStatus;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.Menu;
@@ -18,7 +17,6 @@ import android.widget.Switch;
 
 import java.util.Observable;
 import java.util.Observer;
-import java.util.concurrent.locks.Lock;
 
 
 public class PhoneActivity extends Activity implements Observer {
@@ -204,7 +202,7 @@ public class PhoneActivity extends Activity implements Observer {
         Log.v(TAG, "Resume!");
         if(clockView != null) {
             clockView.redrawClock();
-            clockView.resume();
+            clockView.resumeMaxHertz();
         }
         watchFaceRunning = true;
         initAlarm();

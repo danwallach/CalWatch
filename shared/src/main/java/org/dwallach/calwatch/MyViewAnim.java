@@ -124,14 +124,14 @@ public class MyViewAnim extends SurfaceView implements SurfaceHolder.Callback, O
         Log.v(TAG, "Drawing surface changed!");
         clockFace.setSize(width, height);
         redrawClock();
-//        resume();
+//        resumeMaxHertz();
     }
 
     @Override
     public void surfaceCreated(SurfaceHolder holder) {
         Log.v(TAG, "Drawing surface created!");
         redrawClock();
-//        resume();
+//        resumeMaxHertz();
     }
 
 
@@ -147,8 +147,8 @@ public class MyViewAnim extends SurfaceView implements SurfaceHolder.Callback, O
 //        clockFace.setAmbientMode(true);
     }
 
-    public void resume() {
-        Log.v(TAG, "resume");
+    public void resumeMaxHertz() {
+        Log.v(TAG, "resumeMaxHertz");
         if (clockFace == null)
             clockFace = new ClockFace();
 
@@ -159,6 +159,7 @@ public class MyViewAnim extends SurfaceView implements SurfaceHolder.Callback, O
         if (surfaceHolder == null)
             surfaceHolder = getHolder();
 
+        // we'll only start the drawThread if necessary, which is to say, if we're asked for the seconds hand
         if(drawThreadDesired)
             startDrawThread();
     }
@@ -195,7 +196,7 @@ public class MyViewAnim extends SurfaceView implements SurfaceHolder.Callback, O
                     });
                 }
             } catch (Throwable t) {
-                Log.e(TAG, "unexpected failure in resume()", t);
+                Log.e(TAG, "unexpected failure in resumeMaxHertz()", t);
             }
         }
     }
