@@ -262,6 +262,11 @@ public class WearActivity extends Activity {
                         return;
                     }
 
+                    if(oldState == newState) {
+                        Log.v(TAG, "state didn't actually change; ignoring");
+                        return;
+                    }
+
                     if(oldState == Display.STATE_DOZING || oldState == Display.STATE_ON) {
                         // if we'd been previously running for a while, then we're about to change things up,
                         // so now's a good time to report our status
