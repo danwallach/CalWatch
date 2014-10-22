@@ -248,6 +248,9 @@ public class WearActivity extends Activity {
 
                 @Override
                 public void onDisplayRemoved(int displayId) {
+                    // https://gist.github.com/kentarosu/52fb21eb92181716b0ce suggests that we pay attention here
+                    Log.v(TAG, "Display removed, shutting down");
+                    stopHelper();
                 }
 
                 @Override
