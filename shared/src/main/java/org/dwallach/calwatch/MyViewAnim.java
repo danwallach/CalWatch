@@ -223,112 +223,113 @@ public class MyViewAnim extends SurfaceView implements SurfaceHolder.Callback, O
         }
     }
 
+    private int ticks = 0;
     // Called by everybody on the outside. This one does error checking of various sorts.
     public void redrawClock() {
-        if(clockFace == null) {
-            Log.e(TAG, "tick without a clock!");
-            return;
-        }
+        LockWrapper.lock();
 
-        if(drawingMaxHertz || drawingAmbientMode)
-            redrawInternal();
-        else
-            if(ticks % 1000 == 0) Log.v(TAG, "redraw called while !drawingMaxHertz; ignoring");
+        try {
+            ticks++;
+
+            if (clockFace == null) {
+                Log.e(TAG, "tick without a clock!");
+                return;
+            }
+
+            if (drawingMaxHertz || drawingAmbientMode)
+                redrawInternal();
+            else if (ticks % 1000 == 0)
+                Log.v(TAG, "redraw called while !drawingMaxHertz; ignoring");
+        } finally {
+            LockWrapper.unlock();
+        }
     }
 
     private volatile SurfaceHolder surfaceHolder = null;
-    private int ticks = 0;
 
     // Currently only called from redrawClock(), above; Less error checking here.
     private void redrawInternal() {
-        LockWrapper.lock();
-        ticks++;
+        ClockFace localClockFace = clockFace; // local cached copy, to deal with concurrency issues
+        SurfaceHolder localSurfaceHolder = surfaceHolder; // local cached copy, to deal with concurrency issues
+        TimeWrapper.update();
+        Canvas c = null;
+
+        if (localSurfaceHolder == null) {
+            localSurfaceHolder = surfaceHolder = getHolder();
+            if (localSurfaceHolder == null) {
+                Log.e(TAG, "still no surface holder, giving up");
+                    return;
+            } else {
+                    Log.v(TAG, "success getting new surface holder");
+            }
+        }
+
+        // Digression on surface holders: these seem to be necessary in order to draw anything. The problem
+        // seems to occur when the watch is busy putting itself to sleep while simultaneously we're trying
+        // to draw to the screen on this separate thread. There seem to be one or more redraws that will
+        // be attempted after the canvas and such is long gone. This is a source of weird exceptions and
+        // general badness.
+
+        // Original solution: when the stop() method is called (on the UI thread), it needs to stop the Looper
+        // which is doing all of the redrawing. Thus, the whole quitSafely() business and killing the animator.
+        // Yet still, there would sometimes be another round-trip through the redrawing.
+
+        // Kludgy solution: stop() now also nulls out the surface holder (a volatile private member variable,
+        // so we'll notice this very quickly on the drawing thread). Because this could happen at any time,
+        // we sample the contents of the variable once at the top of this function. That is, once we're committed
+        // to rendering, we're going to see it through, but subsequent trips through here will do nothing.
+
+        // The *real* solution, hopefully, is the proper use of the drawingMaxHertz flag, also a volatile. Everything
+        // that might be trying to say "whoa, time to be done with drawing" should call stop() on this view, which
+        // will set that flag to false, which will then, in turn, ensure that subsequent redraw calls never even
+        // get into redrawInternal.
 
         try {
-            ClockFace localClockFace = clockFace; // local cached copy, to deal with concurrency issues
-            SurfaceHolder localSurfaceHolder = surfaceHolder; // local cached copy, to deal with concurrency issues
-            TimeWrapper.update();
-            Canvas c = null;
-
-            if (localSurfaceHolder == null) {
-                localSurfaceHolder = surfaceHolder = getHolder();
-                if (localSurfaceHolder == null) {
-                    Log.e(TAG, "still no surface holder, giving up");
-                    return;
-                } else {
-                    Log.v(TAG, "success getting new surface holder");
-                }
-            }
-
-            // Digression on surface holders: these seem to be necessary in order to draw anything. The problem
-            // seems to occur when the watch is busy putting itself to sleep while simultaneously we're trying
-            // to draw to the screen on this separate thread. There seem to be one or more redraws that will
-            // be attempted after the canvas and such is long gone. This is a source of weird exceptions and
-            // general badness.
-
-            // Original solution: when the stop() method is called (on the UI thread), it needs to stop the Looper
-            // which is doing all of the redrawing. Thus, the whole quitSafely() business and killing the animator.
-            // Yet still, there would sometimes be another round-trip through the redrawing.
-
-            // Kludgy solution: stop() now also nulls out the surface holder (a volatile private member variable,
-            // so we'll notice this very quickly on the drawing thread). Because this could happen at any time,
-            // we sample the contents of the variable once at the top of this function. That is, once we're committed
-            // to rendering, we're going to see it through, but subsequent trips through here will do nothing.
-
-            // The *real* solution, hopefully, is the proper use of the drawingMaxHertz flag, also a volatile. Everything
-            // that might be trying to say "whoa, time to be done with drawing" should call stop() on this view, which
-            // will set that flag to false, which will then, in turn, ensure that subsequent redraw calls never even
-            // get into redrawInternal.
-
             try {
-                try {
-                    c = localSurfaceHolder.lockCanvas(null);
-                } catch (java.lang.IllegalStateException e) {
-                    if (ticks % 1000 == 0) Log.e(TAG, "Failed to get a canvas for drawing!");
-                    c = null;
-                } catch (Throwable throwable) {
-                    // this should never happen
-                    Log.e(TAG, "unknown exception when trying to lock canvas", throwable);
-                    c = null;
-                }
-
-                if (c == null) {
-                    if (ticks % 1000 == 0) Log.e(TAG, "null canvas, can't draw anything");
-                    return;
-                }
-
-                c.drawColor(Color.TRANSPARENT, PorterDuff.Mode.CLEAR);
-                localClockFace.drawEverything(c);
-
-                if (debugTracingDesired) {
-                    TimeWrapper.update();
-                    long currentTime = TimeWrapper.getGMTTime();
-                    if (currentTime > debugStopTime && debugTracingOn) {
-                        debugTracingOn = false;
-                        Debug.stopMethodTracing();
-                    }
-                }
-            } catch (Throwable t) {
-                Log.e(TAG, "something blew up while redrawing", t);
-            } finally {
-                if (c != null) {
-                    try {
-                        localSurfaceHolder.unlockCanvasAndPost(c);
-                    } catch (Throwable t) {
-                        Log.e(TAG, "something blew up while unlocking the canvas", t);
-                    }
-                }
-
-                // Warning Will Robinson! Danger! With the new LockWrapper structure, turning
-                // on this flag is likely to set up all kinds of deadlock action. We should really
-                // just delete sleepInEventLoop altogether since we now get this effect through
-                // the seconds-scale alarm.
-                if (sleepInEventLoop)
-                    SystemClock.sleep(1000);
-
+                c = localSurfaceHolder.lockCanvas(null);
+            } catch (java.lang.IllegalStateException e) {
+                if (ticks % 1000 == 0) Log.e(TAG, "Failed to get a canvas for drawing!");
+                c = null;
+            } catch (Throwable throwable) {
+                // this should never happen
+                Log.e(TAG, "unknown exception when trying to lock canvas", throwable);
+                c = null;
             }
+
+            if (c == null) {
+                if (ticks % 1000 == 0) Log.e(TAG, "null canvas, can't draw anything");
+                return;
+            }
+
+            c.drawColor(Color.TRANSPARENT, PorterDuff.Mode.CLEAR);
+            localClockFace.drawEverything(c);
+
+            if (debugTracingDesired) {
+                TimeWrapper.update();
+                long currentTime = TimeWrapper.getGMTTime();
+                if (currentTime > debugStopTime && debugTracingOn) {
+                    debugTracingOn = false;
+                    Debug.stopMethodTracing();
+                }
+            }
+        } catch (Throwable t) {
+            Log.e(TAG, "something blew up while redrawing", t);
         } finally {
-            LockWrapper.unlock();
+            if (c != null) {
+                try {
+                    localSurfaceHolder.unlockCanvasAndPost(c);
+                } catch (Throwable t) {
+                    Log.e(TAG, "something blew up while unlocking the canvas", t);
+                }
+            }
+
+            // Warning Will Robinson! Danger! With the new LockWrapper structure, turning
+            // on this flag is likely to set up all kinds of deadlock action. We should really
+            // just delete sleepInEventLoop altogether since we now get this effect through
+            // the seconds-scale alarm.
+            if (sleepInEventLoop)
+                SystemClock.sleep(1000);
+
         }
     }
 
