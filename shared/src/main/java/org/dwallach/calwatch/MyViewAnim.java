@@ -348,7 +348,7 @@ public class MyViewAnim extends SurfaceView implements SurfaceHolder.Callback, O
         else {
             boolean showSeconds = clockState.getShowSeconds();
             setDrawThreadDesired(showSeconds);
-            if(!showSeconds) redrawClock(); // do this immediately or it will take a while for the alarm to catch up
+            redrawClock(); // do this immediately or it will take a while for the alarm to catch up
         }
     }
 
