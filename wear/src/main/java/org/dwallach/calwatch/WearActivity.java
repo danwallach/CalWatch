@@ -84,7 +84,10 @@ public class WearActivity extends Activity {
     protected void onResume() {
         super.onResume();
         Log.v(TAG, "Resume!");
-        // we're not taking any action here because this handled below by in onDisplayChanged
+
+        if(view != null)
+            view.redrawClock(); // this seems useful to do now, since it might be a while before the rest kicks in
+
     }
 
     @Override
@@ -308,7 +311,9 @@ public class WearActivity extends Activity {
                         }
 
                         if (oldState == newState) {
-                            Log.v(TAG, "state didn't actually change; ignoring");
+                            Log.v(TAG, "state didn't actually change");
+                            if(view != null)
+                                view.redrawClock(); // because why not
                             return;
                         }
 

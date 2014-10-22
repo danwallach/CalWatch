@@ -58,7 +58,7 @@ public class MyViewAnim extends SurfaceView implements SurfaceHolder.Callback, O
     }
 
     private void setDrawThreadDesired(boolean drawThreadDesired) {
-//        Log.v(TAG, "draw thread desired: " + drawThreadDesired);
+        Log.v(TAG, "draw thread desired: " + drawThreadDesired);
         if(this.drawThreadDesired == drawThreadDesired) return;
 
         this.drawThreadDesired = drawThreadDesired;
@@ -98,6 +98,8 @@ public class MyViewAnim extends SurfaceView implements SurfaceHolder.Callback, O
             Log.e(TAG, "super bad null clockState!!???!");
         } else {
             clockState.addObserver(this);
+            boolean showSeconds = clockState.getShowSeconds();
+            setDrawThreadDesired(showSeconds);
         }
     }
 
@@ -166,6 +168,7 @@ public class MyViewAnim extends SurfaceView implements SurfaceHolder.Callback, O
 
     private void startDrawThread() {
         if(!drawingMaxHertz) return;
+
 
         if(drawThread != null) {
             Log.v(TAG, "draw thread already exists, doing nothing");
