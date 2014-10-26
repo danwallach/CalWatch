@@ -239,7 +239,9 @@ public class MyViewAnim extends SurfaceView implements SurfaceHolder.Callback, O
                 return;
             }
 
-            if (drawingMaxHertz || drawingAmbientMode)
+            if(drawThread != null && Thread.currentThread() != drawThread)
+                Log.v(TAG, "draw thread already running; redraw from elsewhere being ignored");
+            else if (drawingMaxHertz || drawingAmbientMode)
                 redrawInternal();
             else if (ticks % 1000 == 0)
                 Log.v(TAG, "redraw called while !drawingMaxHertz; ignoring");
