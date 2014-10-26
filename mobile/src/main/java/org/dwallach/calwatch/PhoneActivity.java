@@ -120,6 +120,8 @@ public class PhoneActivity extends Activity implements Observer {
     private void activitySetup() {
         Log.v(TAG, "And in the beginning ...");
 
+        VersionWrapper.logVersion(this);
+
         getClockState(); // initialize it, if it's not already here
 
         BatteryWrapper.init(this);

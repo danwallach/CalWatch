@@ -92,6 +92,7 @@ public class TimeWrapper {
     private static long minRuntime = 0;
     private static long maxRuntime = 0;
     private static long avgRuntimeAccumulator = 0;
+    private static int skippedFrames = 0;
     private static boolean measuringFrame = false;
 
     /**
@@ -104,6 +105,7 @@ public class TimeWrapper {
         avgRuntimeAccumulator = 0;
         measuringFrame = false;
         lastFPSTime = 0;
+        skippedFrames = 0;
     }
 
     /**
@@ -132,6 +134,7 @@ public class TimeWrapper {
             // thread that's outside of the ClockFace rendering methods, and it's also not counting
             // work that happens on other threads
             Log.i(TAG, "Waketime: " + (100f * avgRuntimeAccumulator / elapsedTime) + "%");
+            Log.i(TAG, "Skipped frames: " + skippedFrames);
             lastFPSTime = 0;
         }
         frameReset();
@@ -178,6 +181,20 @@ public class TimeWrapper {
         if(elapsedTime > 60000000000L) { // 60 * 10^9 nanoseconds: one minute
             frameReport(frameEndTime);
         }
+    }
+
+    /**
+     * if a frame was about to be drawn but was aborted (e.g., because it was on the wrong thread), then this counts it
+     */
+    public static void frameSkip() {
+        skippedFrames++;
+
+        if(skippedFrames % 1000 == 0) {
+            Log.e(TAG, "wow, lots of skipped frames!");
+        }
+
+        // NOTE: if we wanted to be awesome, we could keep a HashMap (String -> int) and store reasons
+        // for the frame skipping and then report totals for each reason. Probably overkill.
     }
 
     static {

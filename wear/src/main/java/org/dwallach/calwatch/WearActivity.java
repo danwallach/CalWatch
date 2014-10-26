@@ -48,7 +48,9 @@ public class WearActivity extends Activity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+
         Log.v(TAG, "starting onCreate");
+        VersionWrapper.logVersion(this);
 
         singletonActivity = this;
 
@@ -201,22 +203,28 @@ public class WearActivity extends Activity {
     }
 
     private void initAlarm() {
-        if(view == null) {
-            Log.e(TAG, "initAlarm: no view yet, can't initialize second-scale alarm");
-            return;
-        }
-        if (alarmManager == null) {
-            Log.v(TAG, "initAlarm: setting up");
-            alarmManager = (AlarmManager) view.getContext().getSystemService(Context.ALARM_SERVICE);
+        try {
+            LockWrapper.lock(); // on the off-chance that we have a concurrency issue here
 
-            // every five seconds, we'll redraw the minute hand while sleeping; this gives us 12 ticks per minute, which should still look smooth
-            // while otherwise saving lots of power
-            alarmManager.setRepeating(AlarmManager.RTC_WAKEUP, System.currentTimeMillis() + 5000, 5000, getPendingIntent());
-            alarmSet = true;
-        }
+            if (view == null) {
+                Log.e(TAG, "initAlarm: no view yet, can't initialize second-scale alarm");
+                return;
+            }
+            if (alarmManager == null) {
+                Log.v(TAG, "initAlarm: setting up");
+                alarmManager = (AlarmManager) view.getContext().getSystemService(Context.ALARM_SERVICE);
 
-        if(!alarmSet) {
-            Log.e(TAG, "initAlarm: failure");
+                // every five seconds, we'll redraw the minute hand while sleeping; this gives us 12 ticks per minute, which should still look smooth
+                // while otherwise saving lots of power
+                alarmManager.setRepeating(AlarmManager.RTC_WAKEUP, System.currentTimeMillis() + 5000, 5000, getPendingIntent());
+                alarmSet = true;
+            }
+
+            if (!alarmSet) {
+                Log.e(TAG, "initAlarm: failure");
+            }
+        } finally {
+            LockWrapper.unlock();
         }
     }
 
@@ -247,7 +255,7 @@ public class WearActivity extends Activity {
                             return;
                         }
 
-                        if (actionString.equals(Intent.ACTION_TIME_CHANGED) || actionString.equals(Intent.ACTION_TIME_TICK)) {
+                        if (actionString.equals(Intent.ACTION_TIME_CHANGED) || actionString.equals(Intent.ACTION_TIME_TICK) || actionString.equals(ACTION_KEEP_WATCHFACE_AWAKE)) {
                             if (view == null) {
                                 Log.v(TAG, actionString + " received, but can't redraw");
                             } else {
@@ -255,13 +263,6 @@ public class WearActivity extends Activity {
                                 view.redrawClock();
                             }
                             initAlarm(); // just in case it's not set up properly
-                        } else if (actionString.equals(ACTION_KEEP_WATCHFACE_AWAKE)) {
-//                        Log.v(TAG, "five second alarm!");
-                            if (view != null) {
-                                view.redrawClock();
-                            } else {
-                                Log.e(TAG, "tick received, no clock view to redraw");
-                            }
                         } else {
                             Log.e(TAG, "Unknown intent received: " + intent.toString());
                         }
@@ -337,6 +338,7 @@ public class WearActivity extends Activity {
                                 view.setAmbientMode(true);
                                 view.stop();                          // stops the drawing thread
                                 view.redrawClock();                   // it might take a while for the other bits to get rolling again, so do this immediately
+                                initAlarm();
                                 watchFaceRunning = true;
                                 break;
 
@@ -356,6 +358,7 @@ public class WearActivity extends Activity {
 
                             case Display.STATE_ON:
                                 Log.v(TAG, "onDisplayChanged: on!");
+                                killAlarms();
                                 startHelper();
                                 break;
                         }

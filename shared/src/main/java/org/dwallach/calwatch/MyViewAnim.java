@@ -167,25 +167,31 @@ public class MyViewAnim extends SurfaceView implements SurfaceHolder.Callback, O
     }
 
     private void startDrawThread() {
-        if(!drawingMaxHertz) return;
-
-
-        if(drawThread != null) {
-            Log.v(TAG, "draw thread already exists, doing nothing");
-            return;
-        }
-
-
         try {
-            Log.v(TAG, "starting new animator");
-            animator = new TimeAnimator();
-            animator.setTimeListener(new MyTimeListener());
+            LockWrapper.lock(); // possible weird cases of concurrency here; we want to ensure that there is never more than one drawThread
 
-            Log.v(TAG, "starting new draw thread");
-            drawThread = new PanelThread(animator); // will start the animator
-            drawThread.start();
-        } catch (Throwable t) {
-            Log.e(TAG, "unexpected failure in resumeMaxHertz()", t);
+            if (!drawingMaxHertz) return;
+
+
+            if (drawThread != null) {
+                Log.v(TAG, "draw thread already exists, doing nothing");
+                return;
+            }
+
+
+            try {
+                Log.v(TAG, "starting new animator");
+                animator = new TimeAnimator();
+                animator.setTimeListener(new MyTimeListener());
+
+                Log.v(TAG, "starting new draw thread");
+                drawThread = new PanelThread(animator); // will start the animator
+                drawThread.start();
+            } catch (Throwable t) {
+                Log.e(TAG, "unexpected failure in resumeMaxHertz()", t);
+            }
+        } finally {
+            LockWrapper.unlock();
         }
     }
 
@@ -239,12 +245,18 @@ public class MyViewAnim extends SurfaceView implements SurfaceHolder.Callback, O
                 return;
             }
 
-            if(drawThread != null && Thread.currentThread() != drawThread)
-                Log.v(TAG, "draw thread already running; redraw from elsewhere being ignored");
-            else if (drawingMaxHertz || drawingAmbientMode)
+            if(drawThread != null && Thread.currentThread() != drawThread) {
+                TimeWrapper.frameSkip();
+
+                // this is sufficiently common that it's not worth cluttering up the logs
+//                Log.v(TAG, "draw thread already running; redraw from elsewhere being ignored");
+            } else if (drawingMaxHertz || drawingAmbientMode) {
                 redrawInternal();
-            else if (ticks % 1000 == 0)
-                Log.v(TAG, "redraw called while !drawingMaxHertz; ignoring");
+            } else {
+                TimeWrapper.frameSkip();
+                if (ticks % 1000 == 0)
+                    Log.v(TAG, "redraw called while !drawingMaxHertz; ignoring");
+            }
         } finally {
             LockWrapper.unlock();
         }
