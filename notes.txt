@@ -29,3 +29,12 @@ BUGS BUGs BUGZ!
      http://developer.android.com/reference/android/service/dreams/DreamService.html
      -- looks almost exactly the same as implementing an activity, or the watchface API
 
+
+Version numbering
+  TODO get version numbers automatically linked in with compilation
+  TODO display version number on the phone
+  TODO feed version number from the watch back to the phone for more displaying
+
+  http://stackoverflow.com/questions/17097263/automatically-versioning-android-project-from-git-describe-with-android-studio-g
+  http://blog.android-develop.com/2014/09/automatic-versioning-and-increment.html
+
