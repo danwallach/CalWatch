@@ -2,7 +2,9 @@ Crash around 11:10pm
 10-25 23:10:11.559
 
 Seems like a graphics weirdness, so we've worked in a check that we won't redraw on the UI thread *if* the drawThread is alive.
-Also, seems like things get wonky when we're operating disconnected from the phone for a while.
+Also, seems like things get wonky when we're operating disconnected from the phone for a while, as we were when
+all those exceptions were being thrown.
+
 
 ==================
 

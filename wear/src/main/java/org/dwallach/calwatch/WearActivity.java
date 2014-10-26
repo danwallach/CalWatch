@@ -85,7 +85,7 @@ public class WearActivity extends Activity {
         super.onResume();
         Log.v(TAG, "Resume!");
 
-        if(view != null && )
+        if(view != null)
             view.redrawClock(); // this seems useful to do now, since it might be a while before the rest kicks in
 
     }
