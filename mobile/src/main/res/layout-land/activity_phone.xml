@@ -40,7 +40,7 @@
                 android:layout_column="0"
                 android:layout_marginRight="10dp"
                 android:layout_marginBottom="6dp"
-                android:layout_gravity="center|left" />
+                android:layout_gravity="center_vertical|left" />
 
             <View
                 android:layout_width="1in"
