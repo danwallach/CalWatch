@@ -19,13 +19,20 @@ import java.util.Observable;
 import java.util.Observer;
 
 public class MyViewAnim extends SurfaceView implements SurfaceHolder.Callback, Observer {
+
+    class ZombieException extends RuntimeException {
+        public ZombieException(String s) {
+            super(s);
+        }
+    }
+
     private static final String TAG = "MyViewAnim";
 
     private static final boolean debugTracingDesired = false;
 
     private static volatile int numViewAnims = 0;
 
-    private PanelThread drawThread;
+    private volatile PanelThread drawThread;
     private volatile ClockFace clockFace;
     private volatile TimeAnimator animator;
     private volatile boolean drawingMaxHertz = false;
@@ -118,21 +125,21 @@ public class MyViewAnim extends SurfaceView implements SurfaceHolder.Callback, O
     public void onDraw(Canvas canvas) {
         super.onDraw(canvas);
 
-        redrawClock();
+        redrawClockSlow();
     }
 
     @Override
     public void surfaceChanged(SurfaceHolder holder, int format, int width, int height) {
         Log.v(TAG, "Drawing surface changed!");
         clockFace.setSize(width, height);
-        redrawClock();
+        redrawClockSlow();
 //        resumeMaxHertz();
     }
 
     @Override
     public void surfaceCreated(SurfaceHolder holder) {
         Log.v(TAG, "Drawing surface created!");
-        redrawClock();
+        redrawClockSlow();
 //        resumeMaxHertz();
     }
 
@@ -233,7 +240,23 @@ public class MyViewAnim extends SurfaceView implements SurfaceHolder.Callback, O
     }
 
     private int ticks = 0;
-    // Called by everybody on the outside. This one does error checking of various sorts.
+
+    // redrawClock and redrawClockSlow are called by everybody on the outside. The slow one is meant
+    // to be called occasionally while the other is meant to be called at 60Hz.
+
+    public void redrawClockSlow() {
+        // In the seemingly common case where a timer goes off while we've got the draw thread up
+        // and running, so a redraw is coming in from that timer, we want to do nothing and to fail
+        // fast. No locking to avoid stuttering in the redraw process.
+        if(drawThread != null) {
+            ticks++;
+            TimeWrapper.frameSkip();
+            return;
+        }
+
+        redrawClock();
+    }
+
     public void redrawClock() {
         LockWrapper.lock();
 
@@ -246,10 +269,8 @@ public class MyViewAnim extends SurfaceView implements SurfaceHolder.Callback, O
             }
 
             if(drawThread != null && Thread.currentThread() != drawThread) {
-                TimeWrapper.frameSkip();
-
-                // this is sufficiently common that it's not worth cluttering up the logs
-//                Log.v(TAG, "draw thread already running; redraw from elsewhere being ignored");
+                Log.e(TAG, "Whoa, drawing from multiple draw threads going on! Not good.");
+                throw new ZombieException("zombie draw thread detected");
             } else if (drawingMaxHertz || drawingAmbientMode) {
                 redrawInternal();
             } else {
@@ -365,7 +386,7 @@ public class MyViewAnim extends SurfaceView implements SurfaceHolder.Callback, O
         else {
             boolean showSeconds = clockState.getShowSeconds();
             setDrawThreadDesired(showSeconds);
-            redrawClock(); // do this immediately or it will take a while for the alarm to catch up
+            redrawClockSlow(); // do this immediately or it will take a while for the alarm to catch up
         }
     }
 
@@ -376,11 +397,32 @@ public class MyViewAnim extends SurfaceView implements SurfaceHolder.Callback, O
 
         @Override
         public void onTimeUpdate(TimeAnimator animation, long totalTime, long deltaTime) {
-            // sometimes, this still happens even when we don't care, thus the drawingMaxHertz
-            // boolean. There are some conditions, not exactly clear what, when this gets
-            // called once every three seconds. Why three seconds? Why isn't the PanelThread dead?
-            // No idea, so we'll just ignore it.
-            redrawClock();
+            // this is the one place where we call redrawClock rather than redrawClockSlow,
+            // since this callback comes to us from the animator, from the looper, from the drawThread
+            try {
+                redrawClock();
+            } catch (ZombieException e) {
+                // This generally signals that bad things are afoot and that we, this thread,
+                // isn't meant to exist and must really and truly die. That, in turns, suggests
+                // we've got multiple loopers going on, and life is just all around bad times.
+                // This sounds insane, and nobody every believes in zombies, but then some of the
+                // behavior I've seen suggests that it *might* be happening. Thus zombie paranoia.
+
+                try {
+                    animation.cancel();
+                    PanelThread zombieThread = (PanelThread) Thread.currentThread();
+                    Handler handler = zombieThread.getHandler();
+
+                    if (handler != null) {
+                        Looper looper = handler.getLooper();
+                        if (looper != null)
+                            looper.quitSafely();
+                    }
+                    Log.i(TAG, "zombie apocalypse successfully fended off. For now.");
+                } catch (Throwable t) {
+                    Log.e(TAG, "failed to stop the zombie apocalypse", t);
+                }
+            }
         }
     }
     /**
@@ -425,7 +467,6 @@ public class MyViewAnim extends SurfaceView implements SurfaceHolder.Callback, O
                 Log.v(TAG, "looper finished!");
             } catch (Throwable t) {
                 Log.e(TAG, "looper halted due to an error", t);
-
             } finally {
                 try {
                     localAnimator.cancel();

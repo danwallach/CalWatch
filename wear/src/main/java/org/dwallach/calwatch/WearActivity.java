@@ -88,7 +88,7 @@ public class WearActivity extends Activity {
         Log.v(TAG, "Resume!");
 
         if(view != null)
-            view.redrawClock(); // this seems useful to do now, since it might be a while before the rest kicks in
+            view.redrawClockSlow(); // this seems useful to do now, since it might be a while before the rest kicks in
 
     }
 
@@ -131,7 +131,7 @@ public class WearActivity extends Activity {
 
             clockFace.setAmbientMode(false);
             view.setAmbientMode(false);
-            view.redrawClock();                   // it might take a while for the other bits to get rolling again, so do this immediately
+            view.redrawClockSlow();                   // it might take a while for the other bits to get rolling again, so do this immediately
             view.resumeMaxHertz();
             watchFaceRunning = true;
         } finally {
@@ -260,7 +260,7 @@ public class WearActivity extends Activity {
                                 Log.v(TAG, actionString + " received, but can't redraw");
                             } else {
 //                            Log.v(TAG, actionString + " received, redrawing");
-                                view.redrawClock();
+                                view.redrawClockSlow();
                             }
                             initAlarm(); // just in case it's not set up properly
                         } else {
@@ -314,7 +314,7 @@ public class WearActivity extends Activity {
                         if (oldState == newState) {
                             Log.v(TAG, "state didn't actually change");
                             if(view != null)
-                                view.redrawClock(); // because why not
+                                view.redrawClockSlow(); // because why not
                             return;
                         }
 
@@ -337,7 +337,7 @@ public class WearActivity extends Activity {
                                 clockFace.setAmbientMode(true);
                                 view.setAmbientMode(true);
                                 view.stop();                          // stops the drawing thread
-                                view.redrawClock();                   // it might take a while for the other bits to get rolling again, so do this immediately
+                                view.redrawClockSlow();                   // it might take a while for the other bits to get rolling again, so do this immediately
                                 initAlarm();
                                 watchFaceRunning = true;
                                 break;
