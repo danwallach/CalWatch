@@ -403,9 +403,9 @@ public class MyViewAnim extends SurfaceView implements SurfaceHolder.Callback, O
                 redrawClock();
             } catch (ZombieException e) {
                 // This generally signals that bad things are afoot and that we, this thread,
-                // isn't meant to exist and must really and truly die. That, in turns, suggests
+                // aren't meant to exist and must really and truly die. That, in turns, suggests
                 // we've got multiple loopers going on, and life is just all around bad times.
-                // This sounds insane, and nobody every believes in zombies, but then some of the
+                // This sounds insane, and nobody even believes in zombies, but then some of the
                 // behavior I've seen suggests that it *might* be happening. Thus zombie paranoia.
 
                 try {
