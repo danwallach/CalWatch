@@ -35,7 +35,6 @@
                 android:id="@+id/textView"
                 android:layout_row="0"
                 android:layout_column="0"
-                android:layout_alignBase="@+id/numbersButton"
                 android:layout_marginRight="10dp"
                 android:layout_marginBottom="6dp"
                 android:layout_gravity="center|left" />
@@ -104,6 +103,7 @@
                     android:checked="false"
                     android:enabled="true"
                     android:clickable="true"
+                    android:layout_marginBottom="10dp"
                     android:layout_marginTop="10dp" />
 
                 <RadioButton
@@ -115,7 +115,6 @@
                     android:checked="true"
                     android:clickable="true"
                     android:enabled="true"
-                    android:layout_marginTop="10dp"
                     android:layout_marginBottom="10dp" />
             </RadioGroup>
 
