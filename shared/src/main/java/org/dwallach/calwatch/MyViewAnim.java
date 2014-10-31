@@ -15,6 +15,7 @@ import android.util.Log;
 import android.view.SurfaceHolder;
 import android.view.SurfaceView;
 
+import java.util.HashMap;
 import java.util.Observable;
 import java.util.Observer;
 
@@ -125,21 +126,21 @@ public class MyViewAnim extends SurfaceView implements SurfaceHolder.Callback, O
     public void onDraw(Canvas canvas) {
         super.onDraw(canvas);
 
-        redrawClockSlow();
+        redrawClockSlow("view:onDraw");
     }
 
     @Override
     public void surfaceChanged(SurfaceHolder holder, int format, int width, int height) {
         Log.v(TAG, "Drawing surface changed!");
         clockFace.setSize(width, height);
-        redrawClockSlow();
+        redrawClockSlow("view:surfaceChanged");
 //        resumeMaxHertz();
     }
 
     @Override
     public void surfaceCreated(SurfaceHolder holder) {
         Log.v(TAG, "Drawing surface created!");
-        redrawClockSlow();
+        redrawClockSlow("view:surfaceCreated");
 //        resumeMaxHertz();
     }
 
@@ -242,9 +243,29 @@ public class MyViewAnim extends SurfaceView implements SurfaceHolder.Callback, O
     private int ticks = 0;
 
     // redrawClock and redrawClockSlow are called by everybody on the outside. The slow one is meant
-    // to be called occasionally while the other is meant to be called at 60Hz.
+    // to be called occasionally while the other is meant to be called at 60Hz. The string helps us
+    // keep track of all the many, many different ways that this seems to be called.
 
-    public void redrawClockSlow() {
+    private HashMap<String, Integer> redrawSlowSources = null;
+
+    /**
+     * dump all the sources collected from redrawClockSlow into the logcat, then clear it out
+     */
+    public void reportSlowSources() {
+        for(String key : redrawSlowSources.keySet())
+            Log.v(TAG, "redrawSlow: " + key + " -> " + redrawSlowSources.get(key));
+        redrawSlowSources = null;
+    }
+
+    public void redrawClockSlow(String source) {
+        if (redrawSlowSources == null)
+            redrawSlowSources = new HashMap<String, Integer>();
+
+        if(redrawSlowSources.containsKey(source))
+            redrawSlowSources.put(source, redrawSlowSources.get(source) + 1);
+        else
+            redrawSlowSources.put(source, 1);
+
         // In the seemingly common case where a timer goes off while we've got the draw thread up
         // and running, so a redraw is coming in from that timer, we want to do nothing and to fail
         // fast. No locking to avoid stuttering in the redraw process.
@@ -386,7 +407,7 @@ public class MyViewAnim extends SurfaceView implements SurfaceHolder.Callback, O
         else {
             boolean showSeconds = clockState.getShowSeconds();
             setDrawThreadDesired(showSeconds);
-            redrawClockSlow(); // do this immediately or it will take a while for the alarm to catch up
+            redrawClockSlow("view:update"); // do this immediately or it will take a while for the alarm to catch up
         }
     }
 

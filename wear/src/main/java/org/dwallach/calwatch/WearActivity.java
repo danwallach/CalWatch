@@ -15,8 +15,6 @@ import android.support.wearable.view.WatchViewStub;
 import android.util.Log;
 import android.view.Display;
 
-import java.util.concurrent.locks.Lock;
-
 public class WearActivity extends Activity {
     private static final String TAG = "WearActivity";
 
@@ -88,7 +86,7 @@ public class WearActivity extends Activity {
         Log.v(TAG, "Resume!");
 
         if(view != null)
-            view.redrawClockSlow(); // this seems useful to do now, since it might be a while before the rest kicks in
+            view.redrawClockSlow("resume"); // this seems useful to do now, since it might be a while before the rest kicks in
 
     }
 
@@ -131,7 +129,7 @@ public class WearActivity extends Activity {
 
             clockFace.setAmbientMode(false);
             view.setAmbientMode(false);
-            view.redrawClockSlow();                   // it might take a while for the other bits to get rolling again, so do this immediately
+            view.redrawClockSlow("startHelper");                   // it might take a while for the other bits to get rolling again, so do this immediately
             view.resumeMaxHertz();
             watchFaceRunning = true;
         } finally {
@@ -184,12 +182,13 @@ public class WearActivity extends Activity {
             alarmManager = null;
         }
 
+        watchFaceRunning = false;
+
         if (tickReceiver != null) {
             unregisterReceiver(tickReceiver);
             tickReceiver = null;
         }
 
-        watchFaceRunning = false;
     }
 
     private BroadcastReceiver tickReceiver = null;
@@ -238,9 +237,6 @@ public class WearActivity extends Activity {
             // Source: http://sourabhsoni.com/how-to-use-intent-action_time_tick/
             // Also: https://github.com/twotoasters/watchface-gears/blob/master/library/src/main/java/com/twotoasters/watchface/gears/widget/Watch.java
 
-            // Note that we don't strictly need this stuff, since we're running a whole separate thread to do the graphics, but this
-            // still serves a purpose. If that thread isn't working, this will still work and we'll get at least *some* updates
-            // on the screen, albeit far less frequent.
             if (tickReceiver == null) {
                 Log.v(TAG, "initializing tickReceiver");
                 tickReceiver = new BroadcastReceiver() {
@@ -260,7 +256,7 @@ public class WearActivity extends Activity {
                                 Log.v(TAG, actionString + " received, but can't redraw");
                             } else {
 //                            Log.v(TAG, actionString + " received, redrawing");
-                                view.redrawClockSlow();
+                                view.redrawClockSlow("ambient");
                             }
                             initAlarm(); // just in case it's not set up properly
                         } else {
@@ -314,7 +310,7 @@ public class WearActivity extends Activity {
                         if (oldState == newState) {
                             Log.v(TAG, "state didn't actually change");
                             if(view != null)
-                                view.redrawClockSlow(); // because why not
+                                view.redrawClockSlow("display change without state change"); // because why not
                             return;
                         }
 
@@ -322,6 +318,7 @@ public class WearActivity extends Activity {
                             // if we'd been previously running for a while, then we're about to change things up,
                             // so now's a good time to report our status
                             TimeWrapper.frameReport();
+                            view.reportSlowSources();
                         } else {
                             // we were formerly asleep and now we're coming back awake again
                             TimeWrapper.frameReset();
@@ -337,7 +334,7 @@ public class WearActivity extends Activity {
                                 clockFace.setAmbientMode(true);
                                 view.setAmbientMode(true);
                                 view.stop();                          // stops the drawing thread
-                                view.redrawClockSlow();                   // it might take a while for the other bits to get rolling again, so do this immediately
+                                view.redrawClockSlow("display change, dozing");                   // it might take a while for the other bits to get rolling again, so do this immediately
                                 initAlarm();
                                 watchFaceRunning = true;
                                 break;
