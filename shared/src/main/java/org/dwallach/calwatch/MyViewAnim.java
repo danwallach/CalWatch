@@ -275,10 +275,14 @@ public class MyViewAnim extends SurfaceView implements SurfaceHolder.Callback, O
             return;
         }
 
-        redrawClock();
+        redrawClock(source);
     }
 
     public void redrawClock() {
+        redrawClock(null);
+    }
+
+    public void redrawClock(String source) {
         LockWrapper.lock();
 
         try {
@@ -290,7 +294,7 @@ public class MyViewAnim extends SurfaceView implements SurfaceHolder.Callback, O
             }
 
             if(drawThread != null && Thread.currentThread() != drawThread) {
-                Log.e(TAG, "Whoa, drawing from multiple draw threads going on! Not good.");
+                Log.e(TAG, "Whoa, drawing from multiple draw threads going on! Not good. (Source: " + source + ")");
                 throw new ZombieException("zombie draw thread detected");
             } else if (drawingMaxHertz || drawingAmbientMode) {
                 redrawInternal();

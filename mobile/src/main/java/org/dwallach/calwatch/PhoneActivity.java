@@ -144,7 +144,7 @@ public class PhoneActivity extends Activity implements Observer {
                 if(!disableUICallbacks)
                     getFaceModeFromUI();
                 if(clockView != null)
-                    clockView.redrawClock();
+                    clockView.redrawClockSlow("click listener");
             }
         };
 
@@ -203,7 +203,7 @@ public class PhoneActivity extends Activity implements Observer {
         super.onResume();
         Log.v(TAG, "Resume!");
         if(clockView != null) {
-            clockView.redrawClock();
+            clockView.redrawClockSlow("activity:onResume");
             clockView.resumeMaxHertz();
         }
         watchFaceRunning = true;
@@ -361,13 +361,13 @@ public class PhoneActivity extends Activity implements Observer {
                             Log.v(TAG, actionString + " received, but can't redraw");
                         } else {
 //                            Log.v(TAG, actionString + " received, redrawing");
-                            clockView.redrawClock();
+                            clockView.redrawClockSlow("tickReceiver:" + actionString);
                         }
                         initAlarm(); // just in case it's not set up properly
                     } else if (actionString.equals(ACTION_KEEP_WATCHFACE_AWAKE)) {
 //                        Log.v(TAG, "five second alarm!");
                         if (clockView != null) {
-                            clockView.redrawClock();
+                            clockView.redrawClockSlow("tickReceiver:" + actionString);
                         } else {
                             Log.e(TAG, "tick received, no clock view to redraw");
                         }
