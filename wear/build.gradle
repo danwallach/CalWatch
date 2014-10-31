@@ -32,7 +32,7 @@ def getVersionName = { ->
 
 android {
     compileSdkVersion 20
-    buildToolsVersion "21.0.2"
+    buildToolsVersion "21.1.0"
 
     defaultConfig {
         applicationId "org.dwallach.calwatch"
