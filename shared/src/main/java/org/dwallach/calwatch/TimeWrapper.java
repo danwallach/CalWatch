@@ -26,9 +26,9 @@ public class TimeWrapper {
     private static final long magicOffset = 0;                      // for production use
 
     public static void update() {
-        tz=TimeZone.getDefault();
-        gmtOffset=tz.getRawOffset()+tz.getDSTSavings();
         time=System.currentTimeMillis() + magicOffset;
+        tz=TimeZone.getDefault();
+        gmtOffset=tz.getOffset(time); // includes DST correction
     }
     
     public static TimeZone getTz() { return tz; }
