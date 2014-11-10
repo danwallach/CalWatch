@@ -16,3 +16,5 @@
 -keep class com.squareup.wire.** { *; }                                         
                                                                                 
 -dontwarn okio.**
+
+-dontobfuscate

@@ -88,7 +88,7 @@ public class WearSender implements GoogleApiClient.ConnectionCallbacks, GoogleAp
             }
 
         } catch (Throwable throwable) {
-            Log.e(TAG, "couldn't manage to send to the watch; not a big deal");
+            Log.e(TAG, "couldn't manage to send to the watch; not a big deal", throwable);
         }
     }
 
