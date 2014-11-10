@@ -15,7 +15,8 @@ What's where:
 /images -- screen dumps and assorted graphics
     (note: "resample.csh", at the top level, starts from a high-resolution screen dump and generates
      preview images at all the correct resolutions; these downstream dependencies are all checked
-     in, so unless you're changing the the icon, you don't need to rerun this csh script.)
+     in, so unless you're changing the the icon, you don't need to rerun this csh script. Also note
+     that you'll need the netpbm package installed to run it.)
 
 /logdumps -- logcat plus notes from the various times that CalWatch has blown up
 
