@@ -1,3 +1,10 @@
+/*
+ * CalWatch
+ * Copyright (C) 2014 by Dan Wallach
+ * Home page: http://www.cs.rice.edu/~dwallach/calwatch/
+ * Licensing: http://www.cs.rice.edu/~dwallach/calwatch/licensing.html
+ */
+
 Port to Android Wear
 -- How to set up the damn emulator: http://www.tech-recipes.com/rx/49586/how-do-i-connect-an-android-wear-emulator-to-a-real-phone/
    adb -d forward tcp:5601 tcp:5601
