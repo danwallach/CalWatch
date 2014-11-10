@@ -66,3 +66,7 @@ Refactoring / reengineering
     (this is waiting until we have a final idea of how we're supposed to implement a wear app)
 
     TODO refactor gradle libraries, put git version code in one place (settings.gradle?)
+
+Right-to-left support
+    TODO detect when we're in RTL mode
+    TODO swap day/date block from 9 o'clock to 3 o'clock or leave alone?
