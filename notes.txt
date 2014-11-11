@@ -7,36 +7,7 @@
 
 If you look at the full Git history of this file, you'll see it grew quite large at some points and
 shrank down at others. Mostly it's served as the ongoing to-do list as well as notes for features in
-progress. That functionality is still here, but we've now got a preamble to explain the directory
-structure.
-
-What's where:
-
-/images -- screen dumps and assorted graphics
-    (note: "resample.csh", at the top level, starts from a high-resolution screen dump and generates
-     preview images at all the correct resolutions; these downstream dependencies are all checked
-     in, so unless you're changing the the icon, you don't need to rerun this csh script. Also note
-     that you'll need the netpbm package installed to run it.)
-
-/logdumps -- logcat plus notes from the various times that CalWatch has blown up
-
-/mobile -- code that runs only on the phone
-    src/androidTest/java/ -- some unit tests for event layout
-    src/main/java/ -- CalWatch Java files
-
-/shared -- code that runs on both the phone and on the watch
-    src/main/java/
-        EDU.Washington.grad.gjb.cassowary -- the Cassowary linear constraint solver
-
-        - The code here is essentially unchanged from the original
-          (http://sourceforge.net/projects/cassowary/), but with tweaks to compile under newer
-          Java versions
-
-        org.dwallach.calwatch/ -- CalWatch Java files
-            proto/ -- protocol buffer code for communications between devices
-                calendar.proto contains instructions on how to regenerate the Java files here
-
-/wear -- code that runs only on the watch
+progress.
 
 ==================================================================================================
 
@@ -65,8 +36,6 @@ Daydream?
 Refactoring / reengineering
     TODO alarm code is repeated on phone and wear side: do it in /shared
     (this is waiting until we have a final idea of how we're supposed to implement a wear app)
-
-    TODO refactor gradle libraries, put git version code in one place (settings.gradle?)
 
 Right-to-left support
     TODO detect when we're in RTL mode
