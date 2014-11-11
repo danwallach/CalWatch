@@ -11,6 +11,7 @@
 
 -keep public class org.dwallach.calwatch.WearActivity
 -keep public class org.dwallach.calwatch.WearReceiverService
+-keep public class org.dwallach.calwatch.proto.**
 
 -keep class com.squareup.wire.** { *; }
 

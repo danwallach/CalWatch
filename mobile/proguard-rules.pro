@@ -12,6 +12,7 @@
 -keep public class org.dwallach.calwatch.PhoneActivity
 -keep public class org.dwallach.calwatch.WakeupReceiver
 -keep public class org.dwallach.calwatch.WatchCalendarService
+-keep public class org.dwallach.calwatch.proto.**
 
 -keep class com.squareup.wire.** { *; }                                         
                                                                                 
