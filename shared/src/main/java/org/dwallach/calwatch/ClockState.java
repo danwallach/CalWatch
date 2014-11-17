@@ -135,7 +135,7 @@ public class ClockState extends Observable {
         return output;
     }
 
-    private long lastClipStartTime = 0;
+    private long lastClipTime = 0;
 
     private void computeVisibleEvents() {
 //        if(eventList == null) {
@@ -153,19 +153,23 @@ public class ClockState extends Observable {
         long time = TimeWrapper.getLocalTime();
         int gmtOffset = TimeWrapper.getGmtOffset();
 
-        long clipStartMillis = TimeWrapper.getLocalFloorHour() - gmtOffset; // convert from localtime back to GMT time for looking at events
-        long clipEndMillis = clipStartMillis + 43200000; // 12 hours later
+        long localClipTime = TimeWrapper.getLocalFloorHour();
+        long clipStartMillis = localClipTime - gmtOffset; // convert from localtime back to GMT time for looking at events
+        long clipEndMillis = clipStartMillis + 43200000;  // 12 hours later
 
         if(visibleEventList != null)
             EventLayout.sanityTest(visibleEventList, this.maxLevel, "Before clipping");
 
-        if(lastClipStartTime == clipStartMillis && visibleEventList != null)
+        // this used to compare to the GMT version (clipStartMillis), but this caused incorrect behavior
+        // when the watch suddenly updated itself for a new timezone. Comparing to the *local* time
+        // is the right answer.
+        if(lastClipTime == localClipTime && visibleEventList != null)
             return; // we've already done it, and we've got a cache of the results
 
 //        Log.v(TAG, "clipStart: " + TimeWrapper.formatGMTTime(clipStartMillis) + " (" + clipStartMillis +
 //                "), clipEnd: " + TimeWrapper.formatGMTTime(clipEndMillis) + " (" + clipEndMillis + ")");
 
-        lastClipStartTime = clipStartMillis;
+        lastClipTime = clipStartMillis;
         visibleEventList = new ArrayList<EventWrapper>();
 
         if(eventList != null) {

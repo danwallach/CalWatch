@@ -16,6 +16,13 @@ is happening so damn much. All of them seem to be accompanied by
 a message being received from the phone, leading the question in
 that direction.
 
+It's easy to fix the immediate bug (the missing update) but it's
+going to be a lot more work to debug the deluge of messages that
+came from the phone. 
+
+Tentative test condition: try power cycling the phone and see what
+happens. 
+
 
 --------- beginning of system
 11-16 07:10:01.076 I/ActivityManager( 1752): START u0 {act=android.intent.action.MAIN cat=[android.intent.category.DESK_DOCK] flg=0x10000000 cmp=com.motorola.targetnotif/com.motorola.loop.ChargeActivity (has extras)} from pid 1871 on display 0
