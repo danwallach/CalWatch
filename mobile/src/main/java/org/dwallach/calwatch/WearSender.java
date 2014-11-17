@@ -1,3 +1,9 @@
+/*
+ * CalWatch
+ * Copyright (C) 2014 by Dan Wallach
+ * Home page: http://www.cs.rice.edu/~dwallach/calwatch/
+ * Licensing: http://www.cs.rice.edu/~dwallach/calwatch/licensing.html
+ */
 package org.dwallach.calwatch;
 
 import android.content.Context;
@@ -82,7 +88,7 @@ public class WearSender implements GoogleApiClient.ConnectionCallbacks, GoogleAp
             }
 
         } catch (Throwable throwable) {
-            Log.e(TAG, "couldn't manage to send to the watch; not a big deal");
+            Log.e(TAG, "couldn't manage to send to the watch; not a big deal", throwable);
         }
     }
 

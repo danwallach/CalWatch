@@ -1,13 +1,25 @@
+/*
+ * CalWatch
+ * Copyright (C) 2014 by Dan Wallach
+ * Home page: http://www.cs.rice.edu/~dwallach/calwatch/
+ * Licensing: http://www.cs.rice.edu/~dwallach/calwatch/licensing.html
+ */
+
+If you look at the full Git history of this file, you'll see it grew quite large at some points and
+shrank down at others. Mostly it's served as the ongoing to-do list as well as notes for features in
+progress.
+
+==================================================================================================
+
 Port to Android Wear
--- How to set up the damn emulator: http://www.tech-recipes.com/rx/49586/how-do-i-connect-an-android-wear-emulator-to-a-real-phone/
+-- How to set up the emulator: http://www.tech-recipes.com/rx/49586/how-do-i-connect-an-android-wear-emulator-to-a-real-phone/
    adb -d forward tcp:5601 tcp:5601
 
 -- How to connect to Bluetooth debugging for Moto 360: http://blog.timmattison.com/archives/2014/07/16/common-android-wear-tasks-for-developers/
     adb forward tcp:4444 localabstract:/adb-hub; adb connect localhost:4444
 
-TODO sort out how to compile protobufs automatically via Gradle (vs. known bugs lodged with Google)
+TODO sort out how to compile protobufs automatically via Gradle
 -- At least the Square protobuf runtime is automatically fetched and compiled
--- Seems to be compiling correctly, might even work on the first try (ha!)
 
 Verify all the weird connect/disconnect corner cases
     TODO fresh boot of phone, make sure service is up no matter what
@@ -16,13 +28,15 @@ Verify all the weird connect/disconnect corner cases
     TODO nothing running on phone / fresh watch wants data
     TODO are we recovering properly if the phone kills the service after a long hiatus?
 
-BUGS BUGs BUGZ!
-  TODO incorrect handling of watch lifecycle (shock, horror)
-  -- the new action with mixing up the 60Hz thread plus the 5-sec alarm seems to be running, but
-     it's generating "Android Wear not responding" failures (see logdump-13oct2014.txt).
+Daydream?
+    http://www.hascode.com/2013/01/using-the-android-daydream-api/
+    http://developer.android.com/reference/android/service/dreams/DreamService.html
+    -- looks almost exactly the same as implementing an activity, or the watchface API
 
+Refactoring / reengineering
+    TODO alarm code is repeated on phone and wear side: do it in /shared
+    (this is waiting until we have a final idea of how we're supposed to implement a wear app)
 
- Daydream?
-     http://www.hascode.com/2013/01/using-the-android-daydream-api/
-     http://developer.android.com/reference/android/service/dreams/DreamService.html
-     -- looks almost exactly the same as implementing an activity, or the watchface API
+Right-to-left support
+    TODO detect when we're in RTL mode
+    TODO swap day/date block from 9 o'clock to 3 o'clock or leave alone?

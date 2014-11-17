@@ -1,3 +1,9 @@
+/*
+ * CalWatch
+ * Copyright (C) 2014 by Dan Wallach
+ * Home page: http://www.cs.rice.edu/~dwallach/calwatch/
+ * Licensing: http://www.cs.rice.edu/~dwallach/calwatch/licensing.html
+ */
 package org.dwallach.calwatch;
 import android.app.Activity;
 import android.app.AlarmManager;
@@ -7,7 +13,6 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.SharedPreferences;
-import android.location.GpsStatus;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.Menu;
@@ -121,6 +126,8 @@ public class PhoneActivity extends Activity implements Observer {
     private void activitySetup() {
         Log.v(TAG, "And in the beginning ...");
 
+        VersionWrapper.logVersion(this);
+
         getClockState(); // initialize it, if it's not already here
 
         BatteryWrapper.init(this);
@@ -143,7 +150,7 @@ public class PhoneActivity extends Activity implements Observer {
                 if(!disableUICallbacks)
                     getFaceModeFromUI();
                 if(clockView != null)
-                    clockView.redrawClock();
+                    clockView.redrawClockSlow("click listener");
             }
         };
 
@@ -175,13 +182,19 @@ public class PhoneActivity extends Activity implements Observer {
 
         // http://developer.android.com/reference/android/app/Activity.html
 
-        if(clockView != null)
-            clockView.stop();
+        try {
+            LockWrapper.lock();           // locking so we wait until a redraw is finished
 
-        getClockState().deleteObserver(this);
-        clockState = null;
-        watchFaceRunning = false;
-        killAlarm();
+            if (clockView != null)
+                clockView.stop();
+
+            getClockState().deleteObserver(this);
+            clockState = null;
+            watchFaceRunning = false;
+            killAlarm();
+        } finally {
+            LockWrapper.unlock();
+        }
     }
 
     protected void onStart() {
@@ -196,8 +209,8 @@ public class PhoneActivity extends Activity implements Observer {
         super.onResume();
         Log.v(TAG, "Resume!");
         if(clockView != null) {
-            clockView.resume(); // shouldn't be necessary, but isn't happening on its own
-            clockView.redrawClock();
+            clockView.redrawClockSlow("activity:onResume");
+            clockView.resumeMaxHertz();
         }
         watchFaceRunning = true;
         initAlarm();
@@ -206,9 +219,18 @@ public class PhoneActivity extends Activity implements Observer {
     protected void onPause() {
         super.onPause();
         Log.v(TAG, "Pause!");
-        if(clockView != null) clockView.pause(); // shouldn't be necessary, but isn't happening on its own
-        watchFaceRunning = false;
-        killAlarm();
+
+        try {
+            LockWrapper.lock();        // locking so we wait until a redraw is finished
+
+            if (clockView != null)
+                clockView.pause();
+
+            watchFaceRunning = false;
+            killAlarm();
+        } finally {
+            LockWrapper.unlock();
+        }
     }
 
     @Override
@@ -345,13 +367,13 @@ public class PhoneActivity extends Activity implements Observer {
                             Log.v(TAG, actionString + " received, but can't redraw");
                         } else {
 //                            Log.v(TAG, actionString + " received, redrawing");
-                            clockView.redrawClock();
+                            clockView.redrawClockSlow("tickReceiver:" + actionString);
                         }
                         initAlarm(); // just in case it's not set up properly
                     } else if (actionString.equals(ACTION_KEEP_WATCHFACE_AWAKE)) {
 //                        Log.v(TAG, "five second alarm!");
                         if (clockView != null) {
-                            clockView.redrawClock();
+                            clockView.redrawClockSlow("tickReceiver:" + actionString);
                         } else {
                             Log.e(TAG, "tick received, no clock view to redraw");
                         }

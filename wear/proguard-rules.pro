@@ -11,13 +11,10 @@
 
 -keep public class org.dwallach.calwatch.WearActivity
 -keep public class org.dwallach.calwatch.WearReceiverService
+-keep public class org.dwallach.calwatch.proto.**
 
--dontwarn java.nio.**
--dontwarn org.codehaus.mojo.animal_sniffer.IgnoreJRERequirement
+-keep class com.squareup.wire.** { *; }
 
-# If your project uses WebView with JS, uncomment the following
-# and specify the fully qualified class name to the JavaScript interface
-# class:
-#-keepclassmembers class fqcn.of.javascript.interface.for.webview {
-#   public *;
-#}
+-dontwarn okio.**
+
+-dontobfuscate

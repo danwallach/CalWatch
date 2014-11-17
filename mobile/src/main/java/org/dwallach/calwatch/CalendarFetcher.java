@@ -1,3 +1,9 @@
+/*
+ * CalWatch
+ * Copyright (C) 2014 by Dan Wallach
+ * Home page: http://www.cs.rice.edu/~dwallach/calwatch/
+ * Licensing: http://www.cs.rice.edu/~dwallach/calwatch/licensing.html
+ */
 package org.dwallach.calwatch;
 
 import android.content.Context;
@@ -150,7 +156,7 @@ public class CalendarFetcher extends Observable implements Runnable {
     public void resumeUpdates() {
         // we might get here from the UI thread even though we haven't finished setting things up yet,
         // so the proper answer is to quietly do nothing and return
-        Log.v(TAG, "Calendar: resume update");
+        Log.v(TAG, "Calendar: resumeMaxHertz update");
         if(conditionWait != null) {
             running = true;
             newContentAvailable = true;

@@ -1,16 +1,15 @@
 apply plugin: 'com.android.application'
 
-
 android {
     compileSdkVersion 20
-    buildToolsVersion "20.0.0"
+    buildToolsVersion "21.1.0"
 
     defaultConfig {
         applicationId "org.dwallach.calwatch"
         minSdkVersion 20
         targetSdkVersion 20
-        versionCode 9
-        versionName "beta9"
+        versionCode getVersionCode()
+        versionName getVersionName()
     }
     compileOptions {
         sourceCompatibility JavaVersion.VERSION_1_7
@@ -18,8 +17,9 @@ android {
     }
     buildTypes {
         release {
-            runProguard false
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
+            minifyEnabled true
+            shrinkResources true
         }
     }
 }

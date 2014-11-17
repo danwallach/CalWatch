@@ -1,3 +1,9 @@
+/*
+ * CalWatch
+ * Copyright (C) 2014 by Dan Wallach
+ * Home page: http://www.cs.rice.edu/~dwallach/calwatch/
+ * Licensing: http://www.cs.rice.edu/~dwallach/calwatch/licensing.html
+ */
 package org.dwallach.calwatch;
 
 import android.app.Activity;
@@ -15,9 +21,6 @@ import android.support.wearable.view.WatchViewStub;
 import android.util.Log;
 import android.view.Display;
 
-import java.util.Observable;
-import java.util.Observer;
-
 public class WearActivity extends Activity {
     private static final String TAG = "WearActivity";
 
@@ -31,7 +34,10 @@ public class WearActivity extends Activity {
     // that we're not killed outright, which means we'll be around to receive messages from
     // the phone that update our service. This *might* not be necessary, since we've got
     // WearReceiverService running, hypothetically independent of the activity.
-    private boolean watchFaceRunning = true;
+
+    // "volatile" added to this variable since the UI thread might be trying to shut things
+    // down and we want the rendering thread to notice this ASAP.
+    private volatile boolean watchFaceRunning = true;
 
     public static WearActivity getSingletonActivity() {
         return singletonActivity;
@@ -46,7 +52,9 @@ public class WearActivity extends Activity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+
         Log.v(TAG, "starting onCreate");
+        VersionWrapper.logVersion(this);
 
         singletonActivity = this;
 
@@ -82,59 +90,111 @@ public class WearActivity extends Activity {
     protected void onResume() {
         super.onResume();
         Log.v(TAG, "Resume!");
-        if (view != null) view.resume();
-        initAmbientWatcher();
-        initAlarm();
+
+        if(view != null)
+            view.redrawClockSlow("resume"); // this seems useful to do now, since it might be a while before the rest kicks in
+
     }
 
     @Override
     protected void onPause() {
         super.onPause();
         Log.v(TAG, "Pause!");
-//        if(view != null) view.pause();
+        // we're not taking any action here because this handled below by in onDisplayChanged
     }
 
     @Override
     protected void onStop() {
         super.onStop();
         Log.v(TAG, "Stop!");
-//        if(view != null) view.stop();
-//        killAmbientWatcher();
+        // we're not taking any action here because this handled below by in onDisplayChanged
+    }
+
+    private void startHelper() {
+        Log.v(TAG, "startHelper: putting it all back together again");
+
+        try {
+            LockWrapper.lock();
+
+            if(view == null) {
+                Log.e(TAG, "no view yet, can't start things going");
+                return;
+            }
+
+            initAlarm();
+
+            if (displayListener == null) {
+                initAmbientWatcher();
+            }
+
+            ClockFace clockFace = view.getClockFace();
+            if (clockFace == null) {
+                Log.e(TAG, "startHelper: no clock face!");
+                return;
+            }
+
+            clockFace.setAmbientMode(false);
+            view.setAmbientMode(false);
+            view.redrawClockSlow("startHelper");                   // it might take a while for the other bits to get rolling again, so do this immediately
+            view.resumeMaxHertz();
+            watchFaceRunning = true;
+        } finally {
+            LockWrapper.unlock();
+        }
+    }
+
+    private void stopHelper() {
+        Log.v(TAG, "stopHelper: shutting things down");
+        try {
+            LockWrapper.lock();                       // locking, so we wait until redraw is finished
+            watchFaceRunning = false;
+            if (view != null) {
+                view.stop();                          // kills the draw thread, if it's active
+            } else {
+                Log.e(TAG, "no view to stop?!");
+            }
+            killAlarms();
+        } finally {
+            LockWrapper.unlock();
+        }
     }
 
     @Override
     protected void onDestroy() {
         super.onDestroy();
-        // Hmm... this never seems to actually happen
+        // This happens when the user switches to a different watchface
         Log.v(TAG, "Destroy!");
-        if (view != null) view.stop();
+        stopHelper();
         killAmbientWatcher();
     }
 
     private DisplayManager.DisplayListener displayListener = null;
 
     private void killAmbientWatcher() {
-
-        Log.v(TAG, "killing ambient watcher & alarm");
+        Log.v(TAG, "killing ambient watcher");
         if (displayListener != null) {
             final DisplayManager displayManager = (DisplayManager) getSystemService(Context.DISPLAY_SERVICE);
             displayManager.unregisterDisplayListener(displayListener);
             displayListener = null;
         }
+    }
 
-        if(pendingIntent != null) {
+    private void killAlarms() {
+        Log.v(TAG, "killing alarms");
+        if (pendingIntent != null) {
             alarmSet = false;
             alarmManager.cancel(pendingIntent);
             pendingIntent = null;
             alarmManager = null;
         }
 
-        if(tickReceiver != null) {
+        watchFaceRunning = false;
+
+        if (tickReceiver != null) {
             unregisterReceiver(tickReceiver);
             tickReceiver = null;
         }
 
-        watchFaceRunning = false;
     }
 
     private BroadcastReceiver tickReceiver = null;
@@ -148,139 +208,170 @@ public class WearActivity extends Activity {
     }
 
     private void initAlarm() {
-        if (alarmManager == null && view != null) {
-            Log.v(TAG, "initializing second-scale alarm");
-            alarmManager = (AlarmManager) view.getContext().getSystemService(Context.ALARM_SERVICE);
+        try {
+            LockWrapper.lock(); // on the off-chance that we have a concurrency issue here
 
-            // every five seconds, we'll redraw the minute hand while sleeping; this gives us 12 ticks per minute, which should still look smooth
-            // while otherwise saving lots of power
-            alarmManager.setRepeating(AlarmManager.RTC_WAKEUP, System.currentTimeMillis() + 5000, 5000, getPendingIntent());
-            alarmSet = true;
-        }
+            if (view == null) {
+                Log.e(TAG, "initAlarm: no view yet, can't initialize second-scale alarm");
+                return;
+            }
+            if (alarmManager == null) {
+                Log.v(TAG, "initAlarm: setting up");
+                alarmManager = (AlarmManager) view.getContext().getSystemService(Context.ALARM_SERVICE);
 
-        if(!alarmSet) {
-            Log.e(TAG, "failed to initialize alarm");
+                // every five seconds, we'll redraw the minute hand while sleeping; this gives us 12 ticks per minute, which should still look smooth
+                // while otherwise saving lots of power
+                alarmManager.setRepeating(AlarmManager.RTC_WAKEUP, System.currentTimeMillis() + 5000, 5000, getPendingIntent());
+                alarmSet = true;
+            }
+
+            if (!alarmSet) {
+                Log.e(TAG, "initAlarm: failure");
+            }
+        } finally {
+            LockWrapper.unlock();
         }
     }
 
     private void initAmbientWatcher() {
-        watchFaceRunning = true;
+        Log.v(TAG, "initAmbientWatcher: starting");
+        try {
+            LockWrapper.lock();
+            watchFaceRunning = true;
 
-        // Create a broadcast receiver to handle change in time
-        // Source: http://sourabhsoni.com/how-to-use-intent-action_time_tick/
-        // Also: https://github.com/twotoasters/watchface-gears/blob/master/library/src/main/java/com/twotoasters/watchface/gears/widget/Watch.java
+            // Create a broadcast receiver to handle change in time
+            // Source: http://sourabhsoni.com/how-to-use-intent-action_time_tick/
+            // Also: https://github.com/twotoasters/watchface-gears/blob/master/library/src/main/java/com/twotoasters/watchface/gears/widget/Watch.java
 
-        // Note that we don't strictly need this stuff, since we're running a whole separate thread to do the graphics, but this
-        // still serves a purpose. If that thread isn't working, this will still work and we'll get at least *some* updates
-        // on the screen, albeit far less frequent.
-        if(tickReceiver == null) {
-            tickReceiver = new BroadcastReceiver() {
-                @Override
-                public void onReceive(Context context, Intent intent) {
-                    String actionString = intent.getAction();
+            if (tickReceiver == null) {
+                Log.v(TAG, "initializing tickReceiver");
+                tickReceiver = new BroadcastReceiver() {
+                    @Override
+                    public void onReceive(Context context, Intent intent) {
+                        String actionString = intent.getAction();
 
-                    if(!watchFaceRunning) {
-                        // received a timer event but we're not supposed to be doing graphics right now,
-                        // so just quietly return
+                        if (!watchFaceRunning) {
+                            // received a timer event but we're not supposed to be doing graphics right now,
+                            // so just quietly return
 
-                        return;
-                    }
+                            return;
+                        }
 
-                    if(actionString.equals(Intent.ACTION_TIME_CHANGED) || actionString.equals(Intent.ACTION_TIME_TICK)) {
-                        if(view == null) {
-                            Log.v(TAG, actionString + " received, but can't redraw");
-                        } else {
+                        if (actionString.equals(Intent.ACTION_TIME_CHANGED) || actionString.equals(Intent.ACTION_TIME_TICK) || actionString.equals(ACTION_KEEP_WATCHFACE_AWAKE)) {
+                            if (view == null) {
+                                Log.v(TAG, actionString + " received, but can't redraw");
+                            } else {
 //                            Log.v(TAG, actionString + " received, redrawing");
-                            view.redrawClock();
-                        }
-                        initAlarm(); // just in case it's not set up properly
-                    } else if(actionString.equals(ACTION_KEEP_WATCHFACE_AWAKE)) {
-//                        Log.v(TAG, "five second alarm!");
-                        if(view != null) {
-                            view.redrawClock();
+                                view.redrawClockSlow("ambient");
+                            }
+                            initAlarm(); // just in case it's not set up properly
                         } else {
-                            Log.e(TAG, "tick received, no clock view to redraw");
+                            Log.e(TAG, "Unknown intent received: " + intent.toString());
                         }
-                    } else {
-                        Log.e(TAG, "Unknown intent received: " + intent.toString());
                     }
-                }
-            };
+                };
 
-            //Register the broadcast receiver to receive TIME_TICK
-            IntentFilter filter = new IntentFilter();
-            filter.addAction(Intent.ACTION_TIME_TICK);
-            filter.addAction(Intent.ACTION_TIME_CHANGED);
-            filter.addAction(ACTION_KEEP_WATCHFACE_AWAKE);
+                //Register the broadcast receiver to receive TIME_TICK
+                IntentFilter filter = new IntentFilter();
+                filter.addAction(Intent.ACTION_TIME_TICK);
+                filter.addAction(Intent.ACTION_TIME_CHANGED);
+                filter.addAction(ACTION_KEEP_WATCHFACE_AWAKE);
 
-            registerReceiver(tickReceiver, filter);
-        }
+                registerReceiver(tickReceiver, filter);
+            }
 
-        if (this.displayListener == null) {
-            Log.v(TAG, "initializing ambient watcher");
+            if (displayListener == null) {
+                Log.v(TAG, "initializing displayListener");
 
-            Handler handler = new Handler(Looper.getMainLooper());
+                Handler handler = new Handler(Looper.getMainLooper());
 
-            final DisplayManager displayManager = (DisplayManager) getSystemService(Context.DISPLAY_SERVICE);
+                final DisplayManager displayManager = (DisplayManager) getSystemService(Context.DISPLAY_SERVICE);
 
-            this.displayListener = new DisplayManager.DisplayListener() {
-                @Override
-                public void onDisplayAdded(int displayId) {
-                }
+                displayListener = new DisplayManager.DisplayListener() {
+                    private int oldState = -1;
 
-                @Override
-                public void onDisplayRemoved(int displayId) {
-                }
-
-                @Override
-                public void onDisplayChanged(int displayId) {
-                    int newState = displayManager.getDisplay(displayId).getState();
-                    Log.v(TAG, "display changed: " + displayId + ", new state: " + newState);
-
-                    ClockFace clockFace = view.getClockFace();
-
-                    if (clockFace == null) {
-                        Log.v(TAG, "no clockFace! not good");
-                        return;
+                    @Override
+                    public void onDisplayAdded(int displayId) {
                     }
 
-                    if(watchFaceRunning)
-                        TimeWrapper.frameReport();            // dump performance data *now* before things change
-                    else
-                        TimeWrapper.frameReset();             // if we get here, the face isn't running but is about to start, so it's a good time to reset the counters
-
-                    // inspiration: https://gist.github.com/kentarosu/52fb21eb92181716b0ce
-
-                    switch (newState) {
-                        case Display.STATE_DOZING:
-                            clockFace.setAmbientMode(true);
-                            view.stop();
-                            watchFaceRunning = true;
-                            Log.v(TAG, "onDisplayChanged: dozing");
-                            break;
-                        case Display.STATE_OFF:
-                            clockFace.setAmbientMode(true);
-                            view.stop();
-                            watchFaceRunning = false;
-                            Log.v(TAG, "onDisplayChanged: off!"); // presumably this event will be accompanied by other things that shut us down
-                            break;
-                        case Display.STATE_ON:
-                            clockFace.setAmbientMode(false);
-                            view.redrawClock();                   // it might take a while for the other bits to get rolling again, so do this immediately
-                            view.resume();
-                            watchFaceRunning = true;
-                            Log.v(TAG, "onDisplayChanged: on!");
-                            break;
-                        default:
-                            clockFace.setAmbientMode(false);
-                            view.resume();
-                            watchFaceRunning = true;
-                            Log.v(TAG, "onDisplayChanged: unknown state, defaulting to non-ambient mode");
-                            break;
+                    @Override
+                    public void onDisplayRemoved(int displayId) {
+                        // https://gist.github.com/kentarosu/52fb21eb92181716b0ce suggests that we pay attention here
+                        Log.v(TAG, "Display removed, shutting down");
+                        stopHelper();
                     }
-                }
-            };
-            displayManager.registerDisplayListener(displayListener, handler);
+
+                    @Override
+                    public void onDisplayChanged(int displayId) {
+                        int newState = displayManager.getDisplay(displayId).getState();
+                        Log.v(TAG, "display changed: " + displayId + ", new state: " + newState);
+
+                        ClockFace clockFace = view.getClockFace();
+
+                        if (clockFace == null) {
+                            Log.v(TAG, "no clockFace! not good");
+                            return;
+                        }
+
+                        if (oldState == newState) {
+                            Log.v(TAG, "state didn't actually change");
+                            if(view != null)
+                                view.redrawClockSlow("display change without state change"); // because why not
+                            return;
+                        }
+
+                        if (oldState == Display.STATE_DOZING || oldState == Display.STATE_ON) {
+                            // if we'd been previously running for a while, then we're about to change things up,
+                            // so now's a good time to report our status
+                            TimeWrapper.frameReport();
+                            view.reportSlowSources();
+                        } else {
+                            // we were formerly asleep and now we're coming back awake again
+                            TimeWrapper.frameReset();
+                        }
+                        oldState = newState;
+
+
+                        // inspiration: https://gist.github.com/kentarosu/52fb21eb92181716b0ce
+
+                        switch (newState) {
+                            case Display.STATE_DOZING:
+                                Log.v(TAG, "onDisplayChanged: dozing");
+                                clockFace.setAmbientMode(true);
+                                view.setAmbientMode(true);
+                                view.stop();                          // stops the drawing thread
+                                view.redrawClockSlow("display change, dozing");                   // it might take a while for the other bits to get rolling again, so do this immediately
+                                initAlarm();
+                                watchFaceRunning = true;
+                                break;
+
+                            case Display.STATE_OFF:
+
+                                // Curiously, this case never executes when we're in *ambient mode*, at least on the Moto360
+
+                                Log.v(TAG, "onDisplayChanged: off!");
+                                stopHelper();                         // stopHelper will set watchFaceRunning to false, so we don't need to do anything here
+                                clockFace.setAmbientMode(false);
+                                view.setAmbientMode(false);
+                                break;
+
+                            default:
+                                Log.v(TAG, "unknown state (" + newState + "), treating as \"on\" state");
+                                // pass through
+
+                            case Display.STATE_ON:
+                                Log.v(TAG, "onDisplayChanged: on!");
+                                killAlarms();
+                                startHelper();
+                                break;
+                        }
+                    }
+                };
+                displayManager.registerDisplayListener(displayListener, handler);
+            }
+        } finally {
+            LockWrapper.unlock();
+            Log.v(TAG, "initAmbientWatcher: complete");
         }
     }
 }
