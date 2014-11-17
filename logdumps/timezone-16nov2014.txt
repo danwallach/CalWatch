@@ -1,3 +1,22 @@
+First trip across timezones with CalWatch.
+
+After the plane landed, the phone took a couple minutes to get a signal.
+It updated its time immediately, but it took a few minutes for the watch
+to get the new time (other watch faces were still behind).
+
+Once the timezone update happened, CalWatch updated as well, but the 
+calendar wedges were still old. The cache didn't get flushed.
+
+Further fun: grep "layout time" yields 11 hits, 8 of which happened in a
+two minute period. That's not good.
+
+Tentative conclusion: need to detect when the hour changes and force
+a new layout computation. Also need to sort out why the old layout
+is happening so damn much. All of them seem to be accompanied by
+a message being received from the phone, leading the question in
+that direction.
+
+
 --------- beginning of system
 11-16 07:10:01.076 I/ActivityManager( 1752): START u0 {act=android.intent.action.MAIN cat=[android.intent.category.DESK_DOCK] flg=0x10000000 cmp=com.motorola.targetnotif/com.motorola.loop.ChargeActivity (has extras)} from pid 1871 on display 0
 11-16 07:11:00.835 I/ActivityManager( 1752): START u0 {act=android.intent.action.MAIN cat=[android.intent.category.DESK_DOCK] flg=0x10000000 cmp=com.motorola.targetnotif/com.motorola.loop.ChargeActivity (has extras)} from pid 1871 on display 0
