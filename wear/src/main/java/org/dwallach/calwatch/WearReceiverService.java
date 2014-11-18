@@ -51,6 +51,11 @@ public class WearReceiverService extends WearableListenerService implements Goog
             Log.e(TAG, "whoa, no ClockState yet?!");
             return;
         }
+
+        // once we are able to load something, whether from the saved preferences file or from the
+        // phone, we'll declare ourselves happy and won't bug the user any more
+        NotificationHelper.seenPhone(this);
+
         clockState.setProtobuf(eventBytes);
     }
 

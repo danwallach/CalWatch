@@ -60,6 +60,13 @@ public class WearActivity extends Activity {
 
         BatteryWrapper.init(this);
 
+        // initialize the thing that will bother the user if we can't see the phone
+        NotificationHelper.init(true,
+                                R.drawable.ic_launcher,
+                                getResources().getString(R.string.nophone_title),
+                                getResources().getString(R.string.nophone_text));
+
+
         // start the background service, if it's not already running
         WearReceiverService.kickStart(this);
 

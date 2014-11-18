@@ -150,7 +150,6 @@ public class ClockState extends Observable {
 
 //        Log.v(TAG, "starting event pool: " + eventList.size());
 
-        long time = TimeWrapper.getLocalTime();
         int gmtOffset = TimeWrapper.getGmtOffset();
 
         long localClipTime = TimeWrapper.getLocalFloorHour();

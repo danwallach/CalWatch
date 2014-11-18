@@ -51,6 +51,8 @@ public class MyViewAnim extends SurfaceView implements SurfaceHolder.Callback, O
     private static long debugStopTime;
     private static boolean debugTracingOn = false;
 
+    private Context savedContext;
+
     public ClockFace getClockFace() { return clockFace; }
 
     public void setAmbientMode(boolean ambientMode) {
@@ -89,6 +91,8 @@ public class MyViewAnim extends SurfaceView implements SurfaceHolder.Callback, O
         numViewAnims++;
         Log.v(TAG, "setup! numViewAnims: " + numViewAnims);
         getHolder().addCallback(this);
+
+        savedContext = ctx;
 
         /*
          * Set up debug performance traces
@@ -322,6 +326,8 @@ public class MyViewAnim extends SurfaceView implements SurfaceHolder.Callback, O
         SurfaceHolder localSurfaceHolder = surfaceHolder; // local cached copy, to deal with concurrency issues
         TimeWrapper.update();
         Canvas c = null;
+
+        NotificationHelper.maybeNotify(savedContext);
 
         if (localSurfaceHolder == null) {
             localSurfaceHolder = surfaceHolder = getHolder();

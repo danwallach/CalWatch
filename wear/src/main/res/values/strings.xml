@@ -2,7 +2,7 @@
 <resources>
 
     <string name="app_name">CalWatch</string>
-    <string name="hello_round">Hello Round World!</string>
-    <string name="hello_square">Hello Square World!</string>
+    <string name="nophone_title">CalWatch setup</string>
+    <string name="nophone_text">Please run the CalWatch app on your phone to finish setup.</string>
 
 </resources>
