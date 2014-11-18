@@ -327,7 +327,7 @@ public class MyViewAnim extends SurfaceView implements SurfaceHolder.Callback, O
         TimeWrapper.update();
         Canvas c = null;
 
-        NotificationHelper.maybeNotify(savedContext);
+        WearNotificationHelper.maybeNotify(savedContext);
 
         if (localSurfaceHolder == null) {
             localSurfaceHolder = surfaceHolder = getHolder();

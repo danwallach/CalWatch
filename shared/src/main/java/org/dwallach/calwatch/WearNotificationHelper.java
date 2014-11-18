@@ -1,3 +1,10 @@
+/*
+ * CalWatch
+ * Copyright (C) 2014 by Dan Wallach
+ * Home page: http://www.cs.rice.edu/~dwallach/calwatch/
+ * Licensing: http://www.cs.rice.edu/~dwallach/calwatch/licensing.html
+ */
+
 package org.dwallach.calwatch;
 
 import android.app.Notification;
@@ -9,8 +16,8 @@ import android.util.Log;
 /**
  * Created by dwallach on 11/17/14.
  */
-public class NotificationHelper {
-    private static final String TAG = "NotificationHelper";
+public class WearNotificationHelper {
+    private static final String TAG = "WearNotificationHelper";
 
     private static long firstTimeSeen, lastNotificationTime;
     private static boolean seenMessage = false;
@@ -35,9 +42,9 @@ public class NotificationHelper {
         // type this extra yuck, but I can't quite bring myself to change styles and
         // use extraneous _'s or m's or other prefixes on member variables.
 
-        NotificationHelper.iconID = iconID;
-        NotificationHelper.title = title;
-        NotificationHelper.body = body;
+        WearNotificationHelper.iconID = iconID;
+        WearNotificationHelper.title = title;
+        WearNotificationHelper.body = body;
 
         TimeWrapper.update();
         firstTimeSeen = TimeWrapper.getGMTTime();
@@ -88,6 +95,9 @@ public class NotificationHelper {
     private static final int notificationID = 001;
 
     private static void notifyUser(Context context) {
+        // Google docs for this:
+        // http://developer.android.com/training/notify-user/build-notification.html
+
         NotificationCompat.Builder builder =
                 new NotificationCompat.Builder(context)
                         .setAutoCancel(true)    // nuke if the user touches it, but we'll bring it back later....
@@ -96,17 +106,12 @@ public class NotificationHelper {
                         .setContentText(body);
         Notification notification = builder.build();
 
-        // Google docs for this:
-        //  http://developer.android.com/training/notify-user/build-notification.html
-
         // Gets an instance of the NotificationManager service
         NotificationManager notifyManager = (NotificationManager) context.getSystemService(Context.NOTIFICATION_SERVICE);
         // Builds the notification and issues it.
         notifyManager.notify(notificationID, notification);
 
-        // Android Studio 0.9.3 barfs on the above line; this will hopefully be fixed in 0.9.4
+        // Android Studio 0.9.3 barfs on the above line, sometimes; this will hopefully be fixed in 0.9.4
         // https://code.google.com/p/android/issues/detail?id=79420
-
-
     }
 }

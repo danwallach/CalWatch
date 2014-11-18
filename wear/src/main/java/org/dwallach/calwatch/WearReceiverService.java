@@ -54,7 +54,7 @@ public class WearReceiverService extends WearableListenerService implements Goog
 
         // once we are able to load something, whether from the saved preferences file or from the
         // phone, we'll declare ourselves happy and won't bug the user any more
-        NotificationHelper.seenPhone(this);
+        WearNotificationHelper.seenPhone(this);
 
         clockState.setProtobuf(eventBytes);
     }

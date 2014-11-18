@@ -134,7 +134,7 @@ public class PhoneActivity extends Activity implements Observer {
 
         // the notification helper is only used on the watch, not on the phone, so we have
         // to set it up in "no-op" mode
-        NotificationHelper.init(false, 0, null, null);
+        WearNotificationHelper.init(false, 0, null, null);
 
         setContentView(R.layout.activity_phone);
 
