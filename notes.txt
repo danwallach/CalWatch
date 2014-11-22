@@ -44,3 +44,6 @@ Refactoring / reengineering
 Right-to-left support
     TODO detect when we're in RTL mode
     TODO swap day/date block from 9 o'clock to 3 o'clock or leave alone?
+
+UX fix needed so users will run the phone app
+    TODO if no message *ever* received and X secs have passed, notify user with overlay text. (Need very short text or scrolling. Or a notification. Or something.)
