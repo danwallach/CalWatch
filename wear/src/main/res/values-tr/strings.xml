@@ -3,6 +3,6 @@
 
     <string name="app_name">CalWatch</string>
     <string name="nophone_title">CalWatch düzenle</string>
-    <string name="nophone_text">Düzenlemeyi tamamlamak için telefonunuzda CalWatch app'ini çalıştırın.</string>
+    <string name="nophone_text">Düzenlemeyi tamamlamak için telefonunuzda CalWatch app\'ini çalıştırın.</string>
 
 </resources>
