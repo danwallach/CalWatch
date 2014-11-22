@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <string name="app_name">CalWatch</string>
+    <string name="action_settings">Settings</string>
+    <string name="lite">Simpel</string>
+    <string name="tool">Werktuig</string>
+    <string name="numbers">Cijfers</string>
+    <string name="select_style">Klok-stijl:</string>
+    <string name="show_seconds">Toon secondewijzer?</string>
+    <string name="show_day_date">Toon dag/datum?</string>
+
+</resources>
