@@ -349,6 +349,7 @@ public class WearActivity extends Activity {
                                 view.stop();                          // stops the drawing thread
                                 view.redrawClockSlow("display change, dozing");                   // it might take a while for the other bits to get rolling again, so do this immediately
                                 initAlarm();
+                                initAmbientWatcher();
                                 watchFaceRunning = true;
                                 break;
 

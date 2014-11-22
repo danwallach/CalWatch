@@ -292,7 +292,7 @@ public class MyViewAnim extends SurfaceView implements SurfaceHolder.Callback, O
         redrawClock(null);
     }
 
-    public void redrawClock(String source) {
+    private void redrawClock(String source) {
         LockWrapper.lock();
 
         try {
@@ -311,7 +311,7 @@ public class MyViewAnim extends SurfaceView implements SurfaceHolder.Callback, O
             } else {
                 TimeWrapper.frameSkip();
                 if (ticks % 1000 == 0)
-                    Log.v(TAG, "redraw called while !drawingMaxHertz; ignoring");
+                    Log.v(TAG, "redraw called while !drawingMaxHertz (source " + source + "); ignoring");
             }
         } finally {
             LockWrapper.unlock();
