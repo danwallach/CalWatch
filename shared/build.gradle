@@ -1,6 +1,7 @@
 apply plugin: 'com.android.library'
 
 // idea borrowed from here: http://stackoverflow.com/questions/17097263/automatically-versioning-android-project-from-git-describe-with-android-studio-g
+
 def getVersionCode = { ->
     def versionCode = -1
 
@@ -38,6 +39,7 @@ def getVersionName = { ->
 
     return versionName
 }
+
 
 android {
     compileSdkVersion 19
