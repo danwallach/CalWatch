@@ -18,7 +18,7 @@ Port to Android Wear
 -- How to connect to Bluetooth debugging for Moto 360: http://blog.timmattison.com/archives/2014/07/16/common-android-wear-tasks-for-developers/
     adb forward tcp:4444 localabstract:/adb-hub; adb connect localhost:4444
 
--- How to get a dumb from the watch into a file and see it while it's going
+-- How to get a dump from the watch into a file and see it while it's going
     adb -s localhost:4444 logcat -v time | & tee logdumps/whatever.txt
 
 
@@ -41,9 +41,20 @@ Refactoring / reengineering
     TODO alarm code is repeated on phone and wear side: do it in /shared
     (this is waiting until we have a final idea of how we're supposed to implement a wear app)
 
+    TODO fix Gradle, presently requiring me to have the git version code in three places to work right
+    (I tried putting it just in settings.gradle or the top-level build.gradle and this didn't work)
+
 Right-to-left support
     TODO detect when we're in RTL mode
     TODO swap day/date block from 9 o'clock to 3 o'clock or leave alone?
 
 UX fix needed so users will run the phone app
     TODO if no message *ever* received and X secs have passed, notify user with overlay text. (Need very short text or scrolling. Or a notification. Or something.)
+    (tentatively done)
+
+Add internationalization strings
+    Currently have localized strings for Spanish, Dutch, Turkish, need more
+
+Deal with multiday events that aren't "all day" events
+    TODO idea #1: if they complete cover the visible window, treat as all-day and ignore
+    TODO idea #2: resurrect all-day events by rendering them (and long events) as thin rings, perhaps separate from the main time wedges
