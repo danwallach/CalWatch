@@ -81,8 +81,8 @@ public class WearNotificationHelper {
         try {
 
             long currentTime = TimeWrapper.getGMTTime();
-            // if ten seconds since boot and we've got nothing or ten minutes since last nag, then bug the user
-            if (currentTime - firstTimeSeen > 10000 || currentTime - lastNotificationTime > 600000) {
+            // if ten seconds since boot and and ten minutes since previous nag
+            if (currentTime - firstTimeSeen > 10000 && currentTime - lastNotificationTime > 600000) {
                 lastNotificationTime = currentTime;
 
                 Log.v(TAG, "can't see the phone; nagging the user");
