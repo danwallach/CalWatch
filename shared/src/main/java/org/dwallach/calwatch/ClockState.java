@@ -168,7 +168,7 @@ public class ClockState extends Observable {
 //        Log.v(TAG, "clipStart: " + TimeWrapper.formatGMTTime(clipStartMillis) + " (" + clipStartMillis +
 //                "), clipEnd: " + TimeWrapper.formatGMTTime(clipEndMillis) + " (" + clipEndMillis + ")");
 
-        lastClipTime = clipStartMillis;
+        lastClipTime = localClipTime;
         visibleEventList = new ArrayList<EventWrapper>();
 
         if(eventList != null) {

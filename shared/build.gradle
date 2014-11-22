@@ -2,6 +2,8 @@ apply plugin: 'com.android.library'
 
 // idea borrowed from here: http://stackoverflow.com/questions/17097263/automatically-versioning-android-project-from-git-describe-with-android-studio-g
 def getVersionCode = { ->
+    def versionCode = -1
+
     try {
         def stdout = new ByteArrayOutputStream()
         exec {
@@ -9,18 +11,18 @@ def getVersionCode = { ->
             standardOutput = stdout
         }
 
-        def versionCode = Integer.parseInt(stdout.toString().trim())
+        versionCode = Integer.parseInt(stdout.toString().trim())
 
         println "version code: " + versionCode
 
-        return versionCode
     }
-    catch (ignored) {
-        return -1;
-    }
+    catch (ignored) { }
+
+    return versionCode
 }
 
 def getVersionName = { ->
+    def versionName = "noName"
     try {
         def stdout = new ByteArrayOutputStream()
         exec {
@@ -28,15 +30,13 @@ def getVersionName = { ->
             standardOutput = stdout
         }
 
-        def versionName = stdout.toString().trim()
+        versionName = stdout.toString().trim()
 
         println "version name: " + versionName
+    }
+    catch (ignored) { }
 
-        return versionName
-    }
-    catch (ignored) {
-        return null;
-    }
+    return versionName
 }
 
 android {
