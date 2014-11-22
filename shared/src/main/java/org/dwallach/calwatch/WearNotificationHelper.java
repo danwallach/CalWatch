@@ -10,7 +10,8 @@ package org.dwallach.calwatch;
 import android.app.Notification;
 import android.app.NotificationManager;
 import android.content.Context;
-import android.support.v4.app.NotificationCompat;
+import android.app.Notification;
+import android.app.NotificationManager;
 import android.util.Log;
 
 /**
@@ -98,8 +99,8 @@ public class WearNotificationHelper {
         // Google docs for this:
         // http://developer.android.com/training/notify-user/build-notification.html
 
-        NotificationCompat.Builder builder =
-                new NotificationCompat.Builder(context)
+        Notification.Builder builder =
+                new Notification.Builder(context)
                         .setAutoCancel(true)    // nuke if the user touches it, but we'll bring it back later....
                         .setSmallIcon(iconID)
                         .setContentTitle(title)
