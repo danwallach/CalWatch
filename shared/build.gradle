@@ -8,7 +8,12 @@ def getVersionCode = { ->
             commandLine 'git', 'rev-list', '--first-parent', '--count', 'master'
             standardOutput = stdout
         }
-        return Integer.parseInt(stdout.toString().trim())
+
+        def versionCode = Integer.parseInt(stdout.toString().trim())
+
+        println "version code: " + versionCode
+
+        return versionCode
     }
     catch (ignored) {
         return -1;
@@ -22,7 +27,12 @@ def getVersionName = { ->
             commandLine 'git', 'describe', '--tags', '--dirty'
             standardOutput = stdout
         }
-        return stdout.toString().trim()
+
+        def versionName = stdout.toString().trim()
+
+        println "version name: " + versionName
+
+        return versionName
     }
     catch (ignored) {
         return null;
