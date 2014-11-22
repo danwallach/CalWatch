@@ -18,6 +18,10 @@ Port to Android Wear
 -- How to connect to Bluetooth debugging for Moto 360: http://blog.timmattison.com/archives/2014/07/16/common-android-wear-tasks-for-developers/
     adb forward tcp:4444 localabstract:/adb-hub; adb connect localhost:4444
 
+-- How to get a dumb from the watch into a file and see it while it's going
+    adb -s localhost:4444 logcat -v time | & tee logdumps/whatever.txt
+
+
 TODO sort out how to compile protobufs automatically via Gradle
 -- At least the Square protobuf runtime is automatically fetched and compiled
 
