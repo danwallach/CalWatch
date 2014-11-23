@@ -22,6 +22,7 @@ public class WearNotificationHelper {
 
     private static long firstTimeSeen, lastNotificationTime;
     private static boolean seenMessage = false;
+    private static boolean initialized = false;
 
     private static int iconID;
     private static String title;
@@ -37,7 +38,9 @@ public class WearNotificationHelper {
      * @param body body text for the nag notifications
      */
     public static void init(boolean active, int iconID, String title, String body) {
+        Log.v(TAG, "init: active=" + active);
         seenMessage = !active;
+        initialized = true;
 
         // grumble: normally I'd just say this.foo = foo, but for statics you have to
         // type this extra yuck, but I can't quite bring myself to change styles and
@@ -64,15 +67,16 @@ public class WearNotificationHelper {
 
             } catch (Throwable throwable) {
                 Log.e(TAG, "failed to cancel notifications", throwable);
+            } finally {
+                seenMessage = true;
             }
-
         }
-        seenMessage = true;
     }
 
     public static void maybeNotify(Context context) {
-        // we'll only bug the user if we never got a message from the phone
-        if(seenMessage) return;
+        // we'll only bug the user if we never got a message from the phone, and we'll
+        // wait until we've been initialized before doing anything
+        if(seenMessage || !initialized) return;
 
         // We're running inside the redraw loop, so we're not allowed to blow up, ever.
         // Also note, we only log once we've decided it's time to do a notification. Otherwise
@@ -81,7 +85,7 @@ public class WearNotificationHelper {
         try {
 
             long currentTime = TimeWrapper.getGMTTime();
-            // if ten seconds since boot and and ten minutes since previous nag
+            // if ten seconds since we booted and and ten minutes since previous nag
             if (currentTime - firstTimeSeen > 10000 && currentTime - lastNotificationTime > 600000) {
                 lastNotificationTime = currentTime;
 
@@ -111,8 +115,5 @@ public class WearNotificationHelper {
         NotificationManager notifyManager = (NotificationManager) context.getSystemService(Context.NOTIFICATION_SERVICE);
         // Builds the notification and issues it.
         notifyManager.notify(notificationID, notification);
-
-        // Android Studio 0.9.3 barfs on the above line, sometimes; this will hopefully be fixed in 0.9.4
-        // https://code.google.com/p/android/issues/detail?id=79420
     }
 }

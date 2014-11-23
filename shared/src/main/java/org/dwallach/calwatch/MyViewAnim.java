@@ -310,8 +310,12 @@ public class MyViewAnim extends SurfaceView implements SurfaceHolder.Callback, O
                 redrawInternal();
             } else {
                 TimeWrapper.frameSkip();
-                if (ticks % 1000 == 0)
-                    Log.v(TAG, "redraw called while !drawingMaxHertz (source " + source + "); ignoring");
+                if (ticks % 1000 == 0) {
+                    Log.wtf(TAG, "redraw called while !drawingMaxHertz (source " + source + "); trying to explode");
+                    Log.wtf(TAG, "drawThread =" + drawThread + ", drawingMaxHertz="+drawingMaxHertz+", drawingAmbientMode=" + drawingAmbientMode);
+                    throw new RuntimeException("phantom redraws won't die; why?");
+                }
+
             }
         } finally {
             LockWrapper.unlock();
@@ -512,6 +516,7 @@ public class MyViewAnim extends SurfaceView implements SurfaceHolder.Callback, O
                 }
                 animator = null;
                 drawThread = null;
+                Log.v(TAG, "draw thread termination");
             }
         }
     }
