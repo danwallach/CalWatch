@@ -91,6 +91,8 @@ public class EventLayoutUniform {
                         solver.addConstraint(liq);
 
                         // weak constraint: constrained segments should have the same size (0.5x weight of other weak constraints)
+                        // TODO introduce ratios here based on the time-duration of the event, so longer events are thinner than shorter ones
+                        // -- doing this properly will change up the aesthetics a lot, so not something to be done casually.
                         ClLinearEquation eqSize = new ClLinearEquation(sizes[i], new ClLinearExpression(sizes[j]), ClStrength.weak, 0.5);
                         solver.addConstraint(eqSize);
                     }

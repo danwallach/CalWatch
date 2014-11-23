@@ -194,6 +194,12 @@ public class ClockState extends Observable {
                 if (endTime < clipStartMillis || startTime > clipEndMillis)
                     continue; // this one is off-screen
 
+                if(startTime == clipStartMillis && endTime == clipEndMillis)
+                    continue; // this one covers the full 12-hour face of the watch; ignore for now
+                // TODO if we ever do time-duration weighting of event thickness, then we can consider
+                // bringing these back, as well as doing something more useful with all-day events,
+                // which are similarly also ignored.
+
                 visibleEventList.add((new EventWrapper(new WireEvent(startTime + gmtOffset, endTime + gmtOffset, e.displayColor))));
             }
         }
