@@ -26,14 +26,13 @@ import java.util.Observable;
 import java.util.Observer;
 
 public class MyViewAnim extends SurfaceView implements SurfaceHolder.Callback, Observer {
+    private static final String TAG = "MyViewAnim";
 
     class ZombieException extends RuntimeException {
         public ZombieException(String s) {
             super(s);
         }
     }
-
-    private static final String TAG = "MyViewAnim";
 
     private static final boolean debugTracingDesired = false;
 
@@ -250,7 +249,7 @@ public class MyViewAnim extends SurfaceView implements SurfaceHolder.Callback, O
         }
     }
 
-    private int ticks = 0;
+    private int ticks = 1;
 
     // redrawClock and redrawClockSlow are called by everybody on the outside. The slow one is meant
     // to be called occasionally while the other is meant to be called at 60Hz. The string helps us
@@ -306,14 +305,22 @@ public class MyViewAnim extends SurfaceView implements SurfaceHolder.Callback, O
             if(drawThread != null && Thread.currentThread() != drawThread) {
                 Log.e(TAG, "Whoa, drawing from multiple draw threads going on! Not good. (Source: " + source + ")");
                 throw new ZombieException("zombie draw thread detected");
-            } else if (drawingMaxHertz || drawingAmbientMode) {
+
+            } else if (drawingMaxHertz || drawingAmbientMode || source != null) {
+                // A non-null source means we're coming in on the slow path, and that's just fine.
+                // If the source was null, then we're in zombie territory, and thus the case below.
                 redrawInternal();
+
             } else {
+                // the only way that control flow gets here is in one of these unlikely cases:
+                // - drawThread is null (bad: zombie territory)
+                // - drawThread is on, but drawingMaxHertz was off (weird: logic bug)
+
                 TimeWrapper.frameSkip();
                 if (ticks % 1000 == 0) {
                     Log.wtf(TAG, "redraw called while !drawingMaxHertz (source " + source + "); trying to explode");
-                    Log.wtf(TAG, "drawThread =" + drawThread + ", drawingMaxHertz="+drawingMaxHertz+", drawingAmbientMode=" + drawingAmbientMode);
-                    throw new RuntimeException("phantom redraws won't die; why?");
+                    Log.wtf(TAG, "drawThread=" + drawThread + ", drawingMaxHertz=" + drawingMaxHertz + ", drawingAmbientMode=" + drawingAmbientMode);
+                    throw new ZombieException("phantom redraws won't die; why?");
                 }
 
             }
@@ -440,36 +447,63 @@ public class MyViewAnim extends SurfaceView implements SurfaceHolder.Callback, O
         public void onTimeUpdate(TimeAnimator animation, long totalTime, long deltaTime) {
             // this is the one place where we call redrawClock rather than redrawClockSlow,
             // since this callback comes to us from the animator, from the looper, from the drawThread
+
+            if(drawThread == null) {
+                // so, if control flow ever gets here, that means that somebody called killDrawThread(),
+                // which sent a signal to the looper to die, and it didn't. Thus we start counting
+                // zombies and start trying to kill them. This seems to be a once-per-24-hours phenomenon.
+
+                killZombies(animation, new ZombieException("Zombie draw thread detected in onTimeUpdate"));
+            }
+
             try {
+                // if we get here, then that means that drawThread != null
                 redrawClock();
             } catch (ZombieException e) {
-                // This generally signals that bad things are afoot and that we, this thread,
-                // aren't meant to exist and must really and truly die. That, in turns, suggests
-                // we've got multiple loopers going on, and life is just all around bad times.
-                // This sounds insane, and nobody even believes in zombies, but then some of the
-                // behavior I've seen suggests that it *might* be happening. Thus zombie paranoia.
-
-                try {
-                    animation.cancel();
-                    PanelThread zombieThread = (PanelThread) Thread.currentThread();
-                    Handler handler = zombieThread.getHandler();
-
-                    if (handler != null) {
-                        Looper looper = handler.getLooper();
-                        if (looper != null)
-                            looper.quitSafely();
-                    }
-                    Log.i(TAG, "zombie apocalypse successfully fended off. For now.");
-                } catch (Throwable t) {
-                    Log.e(TAG, "failed to stop the zombie apocalypse", t);
-                }
+                killZombies(animator, e);
             }
+        }
+
+        private void killZombies(TimeAnimator animation, RuntimeException e) {
+            // If we're calling this function, then
+            // this generally signals that bad things are afoot and that we, this thread,
+            // aren't meant to exist and must really and truly die. That, in turns, suggests
+            // we've got multiple loopers going on, or a draw thread that refused to go away
+            // or some other sort of ugly, and life is just all around bad times.
+            // This sounds insane, and nobody even believes in zombies, but then some of the
+            // behavior I've seen suggests that it *might* be happening. Thus zombie paranoia.
+
+            TimeWrapper.frameZombie();
+
+            if(e != null)
+                Log.wtf(TAG, "Zombies!", e);
+            else
+                Log.wtf(TAG, "Zombies!");
+
+            try {
+                if(animation != null)
+                    animation.cancel();
+                PanelThread zombieThread = (PanelThread) Thread.currentThread();
+                Handler handler = zombieThread.getHandler();
+
+                if (handler != null) {
+                    Looper looper = handler.getLooper();
+                    if (looper != null)
+                        looper.quitSafely();
+                }
+                Log.i(TAG, "zombie apocalypse successfully fended off. For now.");
+            } catch (Throwable t) {
+                Log.e(TAG, "failed to stop the zombie apocalypse", t);
+            }
+
+            throw new ZombieException("upstream zombie cleanup!"); // goal: make the animator and looper blow up
         }
     }
     /**
      * Understanding a Looper: http://stackoverflow.com/questions/7597742/what-is-the-purpose-of-looper-and-how-to-use-it
      */
     class PanelThread extends Thread {
+        private final static String TAG = "MyViewAnim/PanelThread";
         Handler handler = null;
         Animator localAnimator;
 
@@ -511,6 +545,7 @@ public class MyViewAnim extends SurfaceView implements SurfaceHolder.Callback, O
             } finally {
                 try {
                     localAnimator.cancel();
+                    localAnimator.end();
                 } catch (Throwable t2) {
                     Log.e(TAG, "can't clean up animator, ignoring", t2);
                 }

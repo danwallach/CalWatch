@@ -99,6 +99,7 @@ public class TimeWrapper {
     private static long maxRuntime = 0;
     private static long avgRuntimeAccumulator = 0;
     private static int skippedFrames = 0;
+    private static int zombieFrames = 0;
     private static boolean measuringFrame = false;
 
     /**
@@ -112,6 +113,7 @@ public class TimeWrapper {
         measuringFrame = false;
         lastFPSTime = 0;
         skippedFrames = 0;
+        zombieFrames = 0;
     }
 
     /**
@@ -140,7 +142,12 @@ public class TimeWrapper {
             // thread that's outside of the ClockFace rendering methods, and it's also not counting
             // work that happens on other threads
             Log.i(TAG, "Waketime: " + (100f * avgRuntimeAccumulator / elapsedTime) + "%");
-            Log.i(TAG, "Skipped frames: " + skippedFrames);
+
+            if(skippedFrames != 0)
+                Log.i(TAG, "Skipped frames: " + skippedFrames);
+            if(zombieFrames != 0)
+                Log.i(TAG, "Zombie frames: " + zombieFrames);
+
             lastFPSTime = 0;
         }
         frameReset();
@@ -198,9 +205,17 @@ public class TimeWrapper {
         if(skippedFrames % 1000 == 0) {
             Log.e(TAG, "wow, lots of skipped frames!");
         }
+    }
 
-        // NOTE: if we wanted to be awesome, we could keep a HashMap (String -> int) and store reasons
-        // for the frame skipping and then report totals for each reason. Probably overkill.
+    /**
+     * if the drawing callbacks are happening when they shouldn't, then we need to debug that...
+     */
+    public static void frameZombie() {
+        zombieFrames++;
+
+        if(zombieFrames % 1000 == 0) {
+            Log.e(TAG, "the zombie hoards encroach!");
+        }
     }
 
     static {
