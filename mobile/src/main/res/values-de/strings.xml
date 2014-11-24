@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">CalWatch</string>
+    <string name="lite">Minimal</string>
+    <string name="numbers">Ziffern</string>
+    <string name="tool">Spezialuhr</string>
+    <string name="show_seconds">Sekunden anzeigen?</string>
+    <string name="select_style">Zifferblatt:</string>
+    <string name="show_day_date">Datum anzeigen?</string>
+</resources>

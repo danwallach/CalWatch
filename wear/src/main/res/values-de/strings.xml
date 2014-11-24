@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">CalWatch</string>
+    <string name="nophone_text">Zum Konfigurieren bitte die CalWatch App auf dem Smartphone starten.</string>
+    <string name="nophone_title">CalWatch Setup</string>
+</resources>
