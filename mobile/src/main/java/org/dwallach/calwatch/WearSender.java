@@ -176,6 +176,14 @@ public class WearSender implements GoogleApiClient.ConnectionCallbacks, GoogleAp
         if (messageEvent.getPath().equals(Constants.WearDataReturnPath)) {
             // the watch says "hi"; make sure we send it stuff
 
+            try {
+                byte[] versionStringBytes = messageEvent.getData();
+                String versionString = new String(versionStringBytes);
+                Log.v(TAG, "watch ping string: " + versionString);
+            } catch (Throwable t) {
+                Log.e(TAG, "failed to decode version string from watch");
+            }
+
             sendAllToWatch(); // send the calendar and whatever else we have
         } else {
             Log.v(TAG, "received message on unexpected path: " + messageEvent.getPath());

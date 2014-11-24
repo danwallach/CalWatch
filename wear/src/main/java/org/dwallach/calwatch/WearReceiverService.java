@@ -185,12 +185,14 @@ public class WearReceiverService extends WearableListenerService implements Goog
                                 Wearable.NodeApi.getConnectedNodes(googleApiClient).await();
                         int failures = 0;
 
+                        byte[] versionStringBytes = VersionWrapper.getVersionString().getBytes();
+
                         // TODO: test weird cases when we have one watch associated with >1 phone
                         // (is that possible?) or one phone associated with more than one phone
                         for (Node node : nodes.getNodes()) {
                             Log.v(TAG, "Sending to node: " + node.getDisplayName());
                             MessageApi.SendMessageResult result = Wearable.MessageApi.sendMessage(
-                                    googleApiClient, node.getId(), Constants.WearDataReturnPath, null).await();
+                                    googleApiClient, node.getId(), Constants.WearDataReturnPath, versionStringBytes).await();
                             if (!result.getStatus().isSuccess()) {
                                 Log.e(TAG, "ERROR: failed to send Message: " + result.getStatus());
                                 failures++;

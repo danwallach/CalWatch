@@ -17,6 +17,8 @@ import android.util.Log;
 public class VersionWrapper {
     private static final String TAG = "VersionWrapper";
 
+    private static String versionString;
+
     public static void logVersion(Context activity) {
         try {
             PackageInfo pinfo = null;
@@ -24,9 +26,15 @@ public class VersionWrapper {
             int versionNumber = pinfo.versionCode;
             String versionName = pinfo.versionName;
 
-            Log.i("VersionWrapper", "Version: " + versionName + " (" + versionNumber + ")");
+            versionString = "Version: " + versionName + " (" + versionNumber + ")";
+
+            Log.i("VersionWrapper", versionString);
         } catch (PackageManager.NameNotFoundException e) {
             Log.e(TAG, "failed to get package manager!");
         }
+    }
+
+    public static String getVersionString() {
+        return versionString;
     }
 }
