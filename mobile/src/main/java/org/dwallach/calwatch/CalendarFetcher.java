@@ -241,7 +241,7 @@ public class CalendarFetcher extends Observable implements Runnable {
             //   (goal: first fill in the outer ring of the display with smaller wedges; the big
             //    ones will end late in the day, and will thus end up on the inside of the watchface)
 
-            // Third-priority sort: startTime, with objects starting earlier appearing first in the sort.
+            // Third-priority sort: startTime, with objects starting later (smaller) appearing first in the sort.
 
 
             Collections.sort(cr.instances, new Comparator<CalendarResults.Instance>() {
@@ -253,8 +253,7 @@ public class CalendarFetcher extends Observable implements Runnable {
                     if (lhs.endTime != rhs.endTime)
                         return Long.compare(lhs.endTime, rhs.endTime);
 
-//                    if (lhs.startTime != rhs.startTime)
-                    return Long.compare(lhs.startTime, lhs.endTime);
+                    return Long.compare(rhs.startTime, lhs.startTime);
                 }
             });
         }
