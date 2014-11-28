@@ -2,6 +2,11 @@ Saw one crash this morning on my phone, and apparently it crashed twice, here in
 entries at all, so this is pretty rough to diagnose. Seems to be related to the service, though,
 and it does seem to be properly restarting.
 
+07:47:... lots of restarting and crashing going on; this is probably when my phone came off the
+          charger and I started using it. I didn't see anything.
+
+08:26:... this is probably the crash that presented itself ("unfortunately, CalWatch has stopped"),
+          again we see a lot of other crashing/restarting at the same time
 
 11-28 01:44:15.127     819-1549/? I/ActivityManager﹕ Killing 12630:com.android.vending/u0a15 (adj 15): empty for 1800s
 11-28 01:44:15.507      819-845/? I/ActivityManager﹕ Killing 12937:de.robv.android.xposed.installer/u0a179 (adj 15): empty for 1800s
