@@ -131,6 +131,8 @@ public class WearSender implements GoogleApiClient.ConnectionCallbacks, GoogleAp
         // shouldn't ever happen, but might explain the weird null pointer exceptions that
         // rarely show up in the logs
         if(googleApiClient == null) {
+            Log.e(TAG, "unexpected null googleApiClient");
+            cleanup();
             initGoogle();
             return;
         }
