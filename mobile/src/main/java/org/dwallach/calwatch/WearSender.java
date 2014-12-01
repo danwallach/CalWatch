@@ -31,6 +31,7 @@ public class WearSender implements GoogleApiClient.ConnectionCallbacks, GoogleAp
 
     private void initGoogle() {
         if(googleApiClient == null) {
+            Log.v(TAG, "initializing GoogleApiClient");
             readyToSend = false;
             googleApiClient = new GoogleApiClient.Builder(context).
                     addApi(Wearable.API).
@@ -127,11 +128,19 @@ public class WearSender implements GoogleApiClient.ConnectionCallbacks, GoogleAp
         // The good stuff goes here.
         readyToSend = true;
 
+        // shouldn't ever happen, but might explain the weird null pointer exceptions that
+        // rarely show up in the logs
+        if(googleApiClient == null) {
+            initGoogle();
+            return;
+        }
+
         try {
             Wearable.MessageApi.addListener(googleApiClient, this);
         } catch (NullPointerException e) {
             Log.e(TAG, "unexpected failure in addListener (googleApiClient = " + googleApiClient + ")", e);
             cleanup();
+            initGoogle();
             return;
         }
 
