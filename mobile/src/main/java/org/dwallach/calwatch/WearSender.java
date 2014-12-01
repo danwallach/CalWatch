@@ -127,7 +127,13 @@ public class WearSender implements GoogleApiClient.ConnectionCallbacks, GoogleAp
         // The good stuff goes here.
         readyToSend = true;
 
-        Wearable.MessageApi.addListener(googleApiClient, this);
+        try {
+            Wearable.MessageApi.addListener(googleApiClient, this);
+        } catch (NullPointerException e) {
+            Log.e(TAG, "unexpected failure in addListener (googleApiClient = " + googleApiClient + ")", e);
+            cleanup();
+            return;
+        }
 
         sendAllToWatch();
     }
