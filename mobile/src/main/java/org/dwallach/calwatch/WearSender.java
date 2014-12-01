@@ -138,7 +138,7 @@ public class WearSender implements GoogleApiClient.ConnectionCallbacks, GoogleAp
         try {
             Wearable.MessageApi.addListener(googleApiClient, this);
         } catch (NullPointerException e) {
-            Log.e(TAG, "unexpected failure in addListener (googleApiClient = " + googleApiClient + ")", e);
+            Log.e(TAG, "unexpected failure in onConnected (googleApiClient = " + googleApiClient + ")", e);
             cleanup();
             initGoogle();
             return;
@@ -169,6 +169,7 @@ public class WearSender implements GoogleApiClient.ConnectionCallbacks, GoogleAp
 
     private void cleanup() {
         try {
+            Log.v(TAG, "cleaning up Google API");
             readyToSend = false;
             if (googleApiClient != null) {
                 Wearable.MessageApi.removeListener(googleApiClient, this);
