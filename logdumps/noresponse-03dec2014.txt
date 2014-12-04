@@ -1,3 +1,9 @@
+The watch displayed that CalWatch was not responding at 22:17. The phone was
+out of Bluetooth range at the time and had been for maybe 45 minutes.
+
+Hypothesis: we're currently killing the draw thread *before* killing the
+alarms, and this is what's causing the problems.
+
 --------- beginning of system
 12-03 15:31:01.842 I/ActivityManager( 1754): START u0 {act=android.intent.action.MAIN cat=[android.intent.category.HOME] flg=0x10000000 cmp=com.google.android.wearable.app/com.google.android.clockwork.home.HomeActivity (has extras)} from pid 1872 on display 0
 12-03 15:31:23.249 I/ActivityManager( 1754): Delay finish: com.motorola.targetnotif/com.motorola.omni.NotificationAlarmReceiver

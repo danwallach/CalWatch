@@ -154,13 +154,13 @@ public class WearActivity extends Activity {
         Log.v(TAG, "stopHelper: shutting things down");
         try {
             LockWrapper.lock();                       // locking, so we wait until redraw is finished
+            killAlarms();
             watchFaceRunning = false;
             if (view != null) {
                 view.stop();                          // kills the draw thread, if it's active
             } else {
                 Log.e(TAG, "no view to stop?!");
             }
-            killAlarms();
         } finally {
             LockWrapper.unlock();
         }
