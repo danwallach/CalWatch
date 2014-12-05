@@ -103,6 +103,7 @@ public class WearReceiverService extends WearableListenerService implements Goog
                 Log.e(TAG, "zero-length message received from phone; asking for a retry");
                 pingPhone(); // something went awfully wrong here
             } else {
+                Log.v(TAG, "message length: " + messageData.length + " bytes");
                 newEventBytes(messageData);
                 savePreferences(messageData); // save this for subsequent restarts
             }
@@ -222,7 +223,7 @@ public class WearReceiverService extends WearableListenerService implements Goog
         if(eventBytes == null || eventBytes.length < 1)
             return;
 
-        Log.v(TAG, "savePreferences");
+        Log.v(TAG, "savePreferences: " + eventBytes.length + " bytes");
         SharedPreferences prefs = getSharedPreferences("org.dwallach.calwatch.prefs", MODE_PRIVATE);
         SharedPreferences.Editor editor = prefs.edit();
 
