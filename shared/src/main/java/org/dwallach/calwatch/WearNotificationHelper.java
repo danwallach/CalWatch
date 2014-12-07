@@ -39,7 +39,8 @@ public class WearNotificationHelper {
      */
     public static void init(boolean active, int iconID, String title, String body) {
         Log.v(TAG, "init: active=" + active);
-        seenMessage = !active;
+        if(!active)
+            seenMessage = true; // disables further notifications
         initialized = true;
 
         // grumble: normally I'd just say this.foo = foo, but for statics you have to
