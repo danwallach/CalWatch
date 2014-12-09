@@ -46,7 +46,7 @@ android {
     buildToolsVersion "21.1.0"
 
     defaultConfig {
-        applicationId "org.dwallach.calwatch.shared"
+        // applicationId "org.dwallach.calwatch.shared"
         minSdkVersion 19
         targetSdkVersion 19
         versionCode getVersionCode()
