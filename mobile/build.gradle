@@ -72,7 +72,8 @@ dependencies {
 
     // compile 'com.android.support:appcompat-v7:+'
     // compile 'com.google.android.gms:play-services:5.2.08'
-    compile 'com.google.android.gms:play-services-wearable:+'
+    // compile 'com.google.android.gms:play-services-wearable:+'
+    compile 'com.google.android.gms:play-services-all-wear:+'
     // compile 'com.android.support:appcompat-v7:+'
     // compile 'com.squareup.wire:wire-runtime:1.5.1'
 }
