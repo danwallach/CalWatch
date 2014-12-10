@@ -3,7 +3,7 @@
 
     <string name="app_name">CalWatch</string>
     <string name="lite">Simpel</string>
-    <string name="tool">Werktuig</string>
+    <string name="tool">Functioneel</string>
     <string name="numbers">Cijfers</string>
     <string name="select_style">Klok-stijl:</string>
     <string name="show_seconds">Toon secondewijzer?</string>
