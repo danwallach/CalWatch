@@ -60,6 +60,7 @@ Deal with multiday events that aren't "all day" events
     TODO idea #2: resurrect all-day events by rendering them (and long events) as thin rings, perhaps separate from the main time wedges
 
 FINAL ANDROID WATCHFACE API !!!
+    TODO Does the existing APK break on Wear 5?
     TODO Migrate functionality from MyViewAnim and WearActivity into CalWatchFaceService
         TODO initially get 1Hz refresh rate, then sort out how to go faster
         TODO companion configuration activity
@@ -80,3 +81,4 @@ FINAL ANDROID WATCHFACE API !!!
         TODO specify where the battery-charging indicator goes
             - http://developer.android.com/training/wearables/watch-faces/issues.html
         TODO extra screen squish when a peek card is visible?
+        TODO update the slides
