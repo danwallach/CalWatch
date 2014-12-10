@@ -3,7 +3,6 @@
     package="org.dwallach.calwatch">
 
     <uses-feature android:name="android.hardware.type.watch" />
-    <uses-permission android:name="android.permission.READ_CALENDAR" />
     <uses-permission android:name="android.permission.WAKE_LOCK" />
     <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" />
     <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
@@ -18,20 +17,28 @@
         android:label="@string/app_name"
         android:theme="@android:style/Theme.DeviceDefault" >
 
-        <activity
-            android:theme="@android:style/Theme.DeviceDefault.NoActionBar"
-            android:name=".WearActivity"
+        <service
+            android:name=".CalWatchFaceService"
             android:label="@string/app_name"
+            android:allowEmbedded="true"
             android:taskAffinity=""
-            android:allowEmbedded="true" >
-
-            <meta-data android:name="com.google.android.clockwork.home.preview" android:resource="@drawable/preview" />
-
+            android:permission="android.permission.BIND_WALLPAPER" >
+            <meta-data
+                android:name="android.service.wallpaper"
+                android:resource="@xml/watch_face" />
+            <meta-data
+                android:name="com.google.android.wearable.watchface.preview"
+                android:resource="@drawable/preview" />
+            <meta-data
+                android:name="com.google.android.wearable.watchface.preview_circular"
+                android:resource="@drawable/preview" />
             <intent-filter>
-                <action android:name="android.intent.action.MAIN" />
-                <category android:name="com.google.android.clockwork.home.category.HOME_BACKGROUND" />
+                <action android:name="android.service.wallpaper.WallpaperService" />
+                <category
+                    android:name=
+                        "com.google.android.wearable.watchface.category.WATCH_FACE" />
             </intent-filter>
-        </activity>
+        </service>
 
         <service android:name=".WearReceiverService">
             <intent-filter>

@@ -69,7 +69,8 @@ dependencies {
     compile fileTree(dir: 'libs', include: ['*.jar'])
     compile project(':shared')
     // compile 'com.google.android.gms:play-services:5.2.08'
-    compile 'com.google.android.gms:play-services-all-wear:+'
-    compile 'com.google.android.support:wearable:+'
+    compile 'com.google.android.support:wearable:1.1.+'
+    compile 'com.google.android.gms:play-services-wearable:6.1.+'
+    // compile 'com.google.android.gms:play-services-all-wear:+'
     // compile 'com.squareup.wire:wire-runtime:1.5.1'
 }
