@@ -49,6 +49,8 @@ public class ClockFace implements Observer {
     private float shadow;
 
     private boolean showSeconds = true, showDayDate = true;
+    private boolean ambientLowBit = false;
+    private boolean muteMode = false;
 
     private static final float freqUpdate = 5;  // 5 Hz, or 0.20sec for second hand
 
@@ -76,6 +78,22 @@ public class ClockFace implements Observer {
         p.setTextAlign(Paint.Align.CENTER);
 
         return p;
+    }
+
+    /**
+     * Tell the clock face if we're in "mute" mode. Unclear we want to actually do anything different
+     * @param muteMode
+     */
+    public void setMuteMode(boolean muteMode) {
+        this.muteMode = muteMode;
+    }
+
+    /**
+     * If true, ambient redrawing will be purely black and white, without any anti-aliasing (default: off)
+     * @param ambientLowBit
+     */
+    public void setAmbientLowBit(boolean ambientLowBit) {
+        this.ambientLowBit = ambientLowBit;
     }
 
     public ClockFace() {

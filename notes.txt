@@ -56,11 +56,12 @@ Deal with multiday events that aren't "all day" events
     TODO idea: resurrect all-day events by rendering them (and long events) as thin rings, perhaps separate from the main time wedges
 
 FINAL ANDROID WATCHFACE API !!!
-    TODO task 0: prior work
-        TODO boot Wear 5 emulator, paired with tablet
-        TODO Does the existing release1c APK break on Wear 5?
+    DONE! task 0: prior work
+        DONE! boot Wear 5 emulator, paired with tablet
+        DONE! Does the existing release1c APK break on Wear 5? IT WORKS!
+        TODO ambient mode seems broken (based on hitting "F7"), probably not worth fixing
     TODO task 1: graphics
-        TODO Identify best starting place (*not* CalendarWatchFaceService)
+        DONE! Identify best starting place (*not* CalendarWatchFaceService)
         TODO 1Hz refresh (no calendar at all)
         TODO 40Hz refresh main (built into SweepWatchFace ?!!)
         TODO drawing calendar (with old-school data forwarding)
