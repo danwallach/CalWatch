@@ -22,26 +22,10 @@ import java.util.Observer;
 
 public class ClockFace implements Observer {
     private static final String TAG = "ClockFace";
-    //
-    // A couple performance notes:
-    //
-    // We want to be able to render the watchface and calendar wedges at 60Hz. The naive thing to
-    // do is a whole lot of trig, which has a very real performance impact at 60Hz. However, neither
-    // the watch face nor the calendar wedges actually change very often.
-    //
-    // I initially tried rendering to a bitmap once and then blitting that bitmap at 60Hz, but even that
-    // turns out to have a non-trivial performance load. The solution used here is modestly clever.
-    // We render the calendar wedges and the time indices into a Path, and then render that path
-    // at 60Hz. This means we do all the trig exactly once and the path (hopefully) is copied over
-    // to the GPU, where it's small enough that it's going to avoid putting much if any load on anything
-    // and should render stupid fast.
-    //
-    // Open question: whether this still holds true once we hit the wristwatch, where we're running
-    // with a whole lot less horsepower than on the phone. Hopefully this will do the job. Also of
-    // note: you can't render text to a path, only a canvas, so we can't cache the text
-    // part if the user wants a watchface with text on it. Presumably, text rendering is otherwise
-    // optimized and is *not our problem*.
-    //
+
+    // force ambient low bit on, for testing purposes, otherwise leave this as false
+    private final boolean forceAmbientLowBit = true;
+
 
     private int cx, oldCx = -1;
     private int cy, oldCy = -1;
@@ -49,7 +33,7 @@ public class ClockFace implements Observer {
     private float shadow;
 
     private boolean showSeconds = true, showDayDate = true;
-    private boolean ambientLowBit = false;
+    private boolean ambientLowBit = forceAmbientLowBit;
     private boolean muteMode = false;
 
     private static final float freqUpdate = 5;  // 5 Hz, or 0.20sec for second hand
@@ -105,6 +89,9 @@ public class ClockFace implements Observer {
     public void setAmbientLowBit(boolean ambientLowBit) {
         Log.v(TAG, "ambient low bit: " + ambientLowBit);
         this.ambientLowBit = ambientLowBit;
+
+        if(forceAmbientLowBit)
+            this.ambientLowBit = true;
     }
 
     public ClockFace() {
@@ -301,8 +288,8 @@ public class ClockFace implements Observer {
             RectF midOvalDelta = getRectRadius((startRadius + endRadius) / 2f - 0.025f);
             RectF startOval = getRectRadius(startRadius);
             RectF endOval = getRectRadius(endRadius);
-            if(getAmbientMode()) {
-                // in ambient mode, we're going to draw some slender arcs of fixed width at roughly the center of the big
+            if(getAmbientMode() && ambientLowBit) {
+                // in ambient low-bit mode, we're going to draw some slender arcs of fixed width at roughly the center of the big
                 // colored pie wedge which we normally show when we're not in ambient mode
                 p.arcTo(midOval, (float) (secondsStart * 6 - 90), (float) ((secondsEnd - secondsStart) * 6), true);
                 p.arcTo(midOvalDelta, (float) (secondsEnd * 6 - 90), (float) (-(secondsEnd - secondsStart) * 6));
