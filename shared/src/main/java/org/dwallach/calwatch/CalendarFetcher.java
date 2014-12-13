@@ -15,6 +15,7 @@ import android.os.AsyncTask;
 import android.os.ConditionVariable;
 import android.os.PowerManager;
 import android.provider.CalendarContract;
+import android.support.wearable.provider.WearableCalendarContract;
 import android.text.format.DateUtils;
 import android.util.Log;
 
@@ -47,16 +48,16 @@ public class CalendarFetcher extends AsyncTask<Void, Void, Integer> {
                 PowerManager.PARTIAL_WAKE_LOCK, "CalWatchFaceWakeLock");
         wakeLock.acquire();
 
-        return loadMaybe(ctx);
+//        return loadMaybe(ctx);
 
-//        long begin = System.currentTimeMillis();
-//        Uri.Builder builder =
-//                WearableCalendarContract.Instances.CONTENT_URI.buildUpon();
-//        ContentUris.appendId(builder, begin);
-//        ContentUris.appendId(builder, begin + DateUtils.DAY_IN_MILLIS);
-//        final Cursor cursor = getContentResolver().query(builder.build(),
-//                null, null, null, null);
-//        int numMeetings = cursor.getCount();
+        long begin = System.currentTimeMillis();
+        Uri.Builder builder =
+                WearableCalendarContract.Instances.CONTENT_URI.buildUpon();
+        ContentUris.appendId(builder, begin);
+        ContentUris.appendId(builder, begin + DateUtils.DAY_IN_MILLIS);
+        final Cursor cursor = ctx.getContentResolver().query(builder.build(),
+                null, null, null, null);
+        int numMeetings = cursor.getCount();
     }
 
         @Override
