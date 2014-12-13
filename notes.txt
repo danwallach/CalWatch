@@ -59,20 +59,20 @@ FINAL ANDROID WATCHFACE API !!!
     DONE! task 0: prior work
         DONE! boot Wear 5 emulator, paired with tablet
         DONE! Does the existing release1c APK break on Wear 5? IT WORKS!
-        TODO ambient mode seems broken (based on hitting "F7"), probably not worth fixing
+        TODO ambient mode on original APK seems broken (based on hitting "F7"), probably not worth fixing
     TODO task 1: graphics
         DONE! Identify best starting place (*not* CalendarWatchFaceService)
         DONE! 1Hz refresh (no calendar at all)
         DONE! 40Hz refresh main (built into SweepWatchFace ?!!)
         DONE! drawing calendar (with old-school data forwarding)
-        TODO redo ambient mode
+        DONE! redo ambient mode
             DONE! greyscale ambient
             DONE! one-bit ambient
                 DONE! hollow out the hands
                 DONE! hollow out the time wedges
                 DONE! disable anti-aliasing
-            TODO distinct behavior for "mute" mode?
-        TODO specify where the battery-charging indicator goes
+            NO! distinct behavior for "mute" mode? Do we care? No!
+        DONE! specify where the battery-charging indicator goes
             - http://developer.android.com/training/wearables/watch-faces/issues.html
         TODO companion configuration activity
             TODO intents
@@ -82,6 +82,7 @@ FINAL ANDROID WATCHFACE API !!!
             - probably not, since we want to be there at boot time; but worth investigating
             - we can definitely nuke notifications once we're done with task 2
         TODO >1 refresh/minute ambient
+        TODO remove MyViewAnim and WearActivity from wear build (mobile only, for now)
     TODO task 2: calendar
         TODO Move from calendar multithreading to ASyncTask (as in the provided example)
         - this is probably the place to start, as it's going to be more power efficient and
