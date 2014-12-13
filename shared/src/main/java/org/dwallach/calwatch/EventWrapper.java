@@ -18,13 +18,14 @@ public class EventWrapper {
     private final static String TAG = "EventWrapper";
     private WireEvent wireEvent;
     private PathCache pathCache;
-    private Paint paint;
+    private Paint paint, greyPaint;
     private int minLevel, maxLevel;
 
     public EventWrapper(WireEvent wireEvent) {
         this.wireEvent = wireEvent;
         this.pathCache = new PathCache();
         this.paint = PaintCan.getPaint(wireEvent.displayColor);
+        this.greyPaint = PaintCan.getGreyPaint(wireEvent.displayColor);
         this.minLevel = this.maxLevel = 0;  // fill this in later on...
     }
 
@@ -37,6 +38,8 @@ public class EventWrapper {
     }
 
     public Paint getPaint() { return paint; }
+
+    public Paint getGreyPaint() { return greyPaint; }
 
     public int getMinLevel() { return minLevel; }
 

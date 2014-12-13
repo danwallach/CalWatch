@@ -40,4 +40,15 @@ public class PaintCan {
 
         return retPaint;
     }
+
+    public static Paint getGreyPaint(int argb) {
+        int a =  argb & 0xff000000;
+        int r = (argb & 0xff0000) >> 16;
+        int g = (argb & 0xff00) >> 8;
+        int b = argb & 0xff;
+
+        int grey = (r+g+b) / 3;
+
+        return getPaint(a | (grey<<16) | (grey << 8) | grey);
+    }
 }

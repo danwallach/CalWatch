@@ -63,6 +63,7 @@ public class ClockFace implements Observer {
     private int missingBottomPixels = 0; // Moto 360 hack; set to non-zero number to pull up the indicia
 
     private Paint white, whiteHour, whiteMinute, yellow, smWhite, smYellow, black, smBlack, smRed, gray, outlineBlack, thickOutlineBlack, superThinBlack, smTextShadow, textShadow;
+    private Paint whiteNoAA, whiteHourNoAA, whiteMinuteNoAA, smWhiteNoAA, blackNoAA, smBlackNoAA, outlineBlackNoAA, thickOutlineBlackNoAA, superThinBlackNoAA, smTextShadowNoAA, textShadowNoAA;
 
     private ClockState clockState;
 
@@ -72,7 +73,16 @@ public class ClockFace implements Observer {
     }
 
     private Paint newPaint() {
-        Paint p = new Paint(Paint.ANTI_ALIAS_FLAG | Paint.SUBPIXEL_TEXT_FLAG | Paint.HINTING_ON);
+        return newPaint(true);
+    }
+
+    private Paint newPaint(boolean antialias) {
+        Paint p;
+        if(antialias)
+            p = new Paint(Paint.ANTI_ALIAS_FLAG | Paint.SUBPIXEL_TEXT_FLAG | Paint.HINTING_ON);
+        else
+            p = new Paint(Paint.SUBPIXEL_TEXT_FLAG | Paint.HINTING_ON);
+
         p.setStyle(Paint.Style.FILL);
         p.setColor(Color.WHITE);
         p.setTextAlign(Paint.Align.CENTER);
@@ -105,47 +115,77 @@ public class ClockFace implements Observer {
         update(null, null); // initialize variables from initial constants, or whatever else is hanging out in ClockState
 
         white = newPaint();
+        whiteNoAA = newPaint(false);
         whiteHour = newPaint();
+        whiteHourNoAA = newPaint(false);
         whiteMinute = newPaint();
+        whiteMinuteNoAA = newPaint(false);
         yellow = newPaint();
         smWhite = newPaint();
+        smWhiteNoAA = newPaint(false);
         smYellow = newPaint();
         black = newPaint();
+        blackNoAA = newPaint(false);
         smBlack = newPaint();
+        smBlackNoAA = newPaint(false);
         smRed = newPaint();
         gray = newPaint();
         outlineBlack = newPaint();
+        outlineBlackNoAA = newPaint(false);
         thickOutlineBlack = newPaint();
+        thickOutlineBlackNoAA = newPaint(false);
         smTextShadow = newPaint();
+        smTextShadowNoAA = newPaint(false);
         textShadow = newPaint();
+        textShadowNoAA = newPaint(false);
         superThinBlack = newPaint();
+        superThinBlackNoAA = newPaint(false);
 
         yellow.setColor(Color.YELLOW);
         smYellow.setColor(Color.YELLOW);
         black.setColor(Color.BLACK);
+        blackNoAA.setColor(Color.BLACK);
         smBlack.setColor(Color.BLACK);
+        smBlackNoAA.setColor(Color.BLACK);
         outlineBlack.setColor(Color.BLACK);
+        outlineBlackNoAA.setColor(Color.BLACK);
         thickOutlineBlack.setColor(Color.BLACK);
+        thickOutlineBlackNoAA.setColor(Color.BLACK);
         smTextShadow.setColor(Color.BLACK);
+        smTextShadowNoAA.setColor(Color.BLACK);
         textShadow.setColor(Color.BLACK);
+        textShadowNoAA.setColor(Color.BLACK);
         superThinBlack.setColor(Color.BLACK);
+        superThinBlackNoAA.setColor(Color.BLACK);
         smRed.setColor(Color.RED);
         gray.setColor(Color.GRAY);
 
         smYellow.setTextAlign(Paint.Align.LEFT);
         smWhite.setTextAlign(Paint.Align.LEFT);
+        smWhiteNoAA.setTextAlign(Paint.Align.LEFT);
         smTextShadow.setTextAlign(Paint.Align.LEFT);
+        smTextShadowNoAA.setTextAlign(Paint.Align.LEFT);
         smBlack.setTextAlign(Paint.Align.LEFT);
+        smBlackNoAA.setTextAlign(Paint.Align.LEFT);
         white.setTextAlign(Paint.Align.CENTER);
+        whiteNoAA.setTextAlign(Paint.Align.CENTER);
         whiteHour.setTextAlign(Paint.Align.CENTER);
+        whiteHourNoAA.setTextAlign(Paint.Align.CENTER);
         whiteMinute.setTextAlign(Paint.Align.CENTER);
+        whiteMinuteNoAA.setTextAlign(Paint.Align.CENTER);
         black.setTextAlign(Paint.Align.CENTER);
+        blackNoAA.setTextAlign(Paint.Align.CENTER);
 
         outlineBlack.setStyle(Paint.Style.STROKE);
+        outlineBlackNoAA.setStyle(Paint.Style.STROKE);
         thickOutlineBlack.setStyle(Paint.Style.STROKE);
+        thickOutlineBlackNoAA.setStyle(Paint.Style.STROKE);
         smTextShadow.setStyle(Paint.Style.STROKE);
+        smTextShadowNoAA.setStyle(Paint.Style.STROKE);
         textShadow.setStyle(Paint.Style.STROKE);
+        textShadowNoAA.setStyle(Paint.Style.STROKE);
         superThinBlack.setStyle(Paint.Style.STROKE);
+        superThinBlackNoAA.setStyle(Paint.Style.STROKE);
 
         // Now, to detect a Moto 360 and install the hack. FYI, here's what all the Build.MODEL strings
         // are, at least on my own Moto 360:
@@ -296,6 +336,8 @@ public class ClockFace implements Observer {
 //        Paint paint = (ambientMode)? smWhite : smYellow;
         Paint paint = smWhite; // yellow just doesn't look right, so we'll keep it monochromatic
 
+        // AA note: we only draw the month box when in normal mode, not ambient, so no AA gymnastics here
+
         Paint.FontMetrics metrics = paint.getFontMetrics();
         float dybottom = -metrics.ascent-metrics.leading; // smidge it up a bunch
         float dytop = -metrics.descent; // smidge it down a little
@@ -319,22 +361,40 @@ public class ClockFace implements Observer {
 
         boolean bottomHack = (missingBottomPixels > 0);
 
+        Paint mySmWhite, myWhite, mySuperThinBlack, myBlack, myTextShadow;
+
+        if(ambientLowBit && getAmbientMode()) {
+            mySmWhite = smWhiteNoAA;
+            myWhite = whiteNoAA;
+            mySuperThinBlack = superThinBlackNoAA;
+            myBlack = blackNoAA;
+            myTextShadow = textShadowNoAA;
+        } else {
+            mySmWhite = smWhite;
+            myWhite = white;
+            mySuperThinBlack = superThinBlack;
+            myBlack = black;
+            myTextShadow = textShadow;
+        }
+
+
         // check if we've already rendered the face
         if(faceMode != facePathCacheMode || p == null) {
+
             p = new Path();
             Log.v(TAG, "rendering new face, faceMode(" + faceMode + ")");
 
             if (faceMode == ClockState.FACE_TOOL)
                 for (int i = 1; i < 60; i++)
                     if(i%5 != 0)
-                        drawRadialLine(p, smWhite.getStrokeWidth(), i, .9f, 1.0f, false, bottomHack);
+                        drawRadialLine(p, mySmWhite.getStrokeWidth(), i, .9f, 1.0f, false, bottomHack);
 
             float strokeWidth;
 
             if (faceMode == ClockState.FACE_LITE || faceMode == ClockState.FACE_NUMBERS)
-                strokeWidth = smWhite.getStrokeWidth();
+                strokeWidth = mySmWhite.getStrokeWidth();
             else
-                strokeWidth = white.getStrokeWidth();
+                strokeWidth = myWhite.getStrokeWidth();
 
 
             for (int i = 0; i < 60; i += 5) {
@@ -365,8 +425,8 @@ public class ClockFace implements Observer {
 
         // concurrency note: even if some other thread sets the facePathCache to null,
         // the local copy we allocated here will survive for the drawPath we're about to do
-        canvas.drawPath(p, smWhite);
-        canvas.drawPath(p, superThinBlack);
+        canvas.drawPath(p, mySmWhite);
+        canvas.drawPath(p, mySuperThinBlack);
 
         if(faceMode == ClockState.FACE_NUMBERS) {
             // in this case, we'll draw "12", "3", and "6". No "9" because that's where the
@@ -376,7 +436,7 @@ public class ClockFace implements Observer {
             //
             // note: metrics.ascent is a *negative* number while metrics.descent is a *positive* number
             //
-            Paint.FontMetrics metrics = white.getFontMetrics();
+            Paint.FontMetrics metrics = myWhite.getFontMetrics();
 
 
             //
@@ -387,9 +447,9 @@ public class ClockFace implements Observer {
             x = clockX(0, r);
             y = clockY(0, r) - metrics.ascent / 1.5f;
 
-            white.setTextAlign(Paint.Align.CENTER);
-            black.setTextAlign(Paint.Align.CENTER);
-            drawShadowText(canvas, "12", x, y, white, textShadow);
+            myWhite.setTextAlign(Paint.Align.CENTER);
+            myBlack.setTextAlign(Paint.Align.CENTER);
+            drawShadowText(canvas, "12", x, y, myWhite, myTextShadow);
 
             if(!debugMetricsPrinted) {
                 debugMetricsPrinted = true;
@@ -401,12 +461,12 @@ public class ClockFace implements Observer {
             //
 
             r = 0.9f;
-            float threeWidth = white.measureText("3");
+            float threeWidth = myWhite.measureText("3");
 
             x = clockX(15, r) - threeWidth / 2f;
             y = clockY(15, r) - metrics.ascent / 2f - metrics.descent / 2f; // empirically gets the middle of the "3" -- actually a smidge off with Roboto but close enough for now and totally font-dependent with no help from metrics
 
-            drawShadowText(canvas, "3", x, y, white, textShadow);
+            drawShadowText(canvas, "3", x, y, myWhite, myTextShadow);
 
             //
             // 6 o'clock
@@ -420,7 +480,7 @@ public class ClockFace implements Observer {
             else
                 y = clockY(30, r) + (0.75f * metrics.descent); // scoot it up a tiny bit
 
-            drawShadowText(canvas, "6", x, y, white, textShadow);
+            drawShadowText(canvas, "6", x, y, myWhite, myTextShadow);
 
             //
             // 9 o'clock
@@ -428,12 +488,12 @@ public class ClockFace implements Observer {
 
             if(getAmbientMode() || !showDayDate) {
                 r = 0.9f;
-                float nineWidth = white.measureText("9");
+                float nineWidth = myWhite.measureText("9");
 
                 x = clockX(45, r) + nineWidth / 2f;
                 y = clockY(45, r) - metrics.ascent / 2f - metrics.descent / 2f;
 
-                drawShadowText(canvas, "9", x, y, white, textShadow);
+                drawShadowText(canvas, "9", x, y, myWhite, myTextShadow);
 
 
             }
@@ -447,8 +507,20 @@ public class ClockFace implements Observer {
         double minutes = seconds / 60.0;
         double hours = minutes / 12.0;  // because drawRadialLine is scaled to a 60-unit circle
 
-        drawRadialLine(canvas, hours, 0.1f, 0.6f, whiteHour, superThinBlack);
-        drawRadialLine(canvas, minutes, 0.1f, 0.9f, whiteMinute, superThinBlack);
+        Paint myWhiteHour, myWhiteMinute, myBlack;
+
+        if(getAmbientMode() && ambientLowBit) {
+            myWhiteHour = whiteHour;
+            myWhiteMinute = whiteMinute;
+            myBlack = superThinBlack;
+        } else {
+            myWhiteHour = whiteHourNoAA;
+            myWhiteMinute = whiteMinuteNoAA;
+            myBlack = superThinBlackNoAA;
+        }
+
+        drawRadialLine(canvas, hours, 0.1f, 0.6f, myWhiteHour, myBlack);
+        drawRadialLine(canvas, minutes, 0.1f, 0.9f, myWhiteMinute, myBlack);
 
         if(!getAmbientMode() && showSeconds) {
             // ugly details: we might run 10% or more away from our targets at 4Hz, making the second
@@ -514,11 +586,22 @@ public class ClockFace implements Observer {
             arcEnd = endTime / 720000.0;
 
             // path caching happens inside drawRadialArc
+            Paint arcColor, arcShadow;
+
+            if(!getAmbientMode()) {
+                arcColor = eventWrapper.getPaint();
+                arcShadow = outlineBlack;
+            } else if(ambientLowBit) {
+                arcColor = whiteNoAA;
+                arcShadow = outlineBlackNoAA;
+            } else {
+                arcColor = eventWrapper.getGreyPaint();
+                arcShadow = outlineBlack;
+            }
             drawRadialArc(canvas, eventWrapper.getPathCache(), arcStart, arcEnd,
                     calendarRingMaxRadius - evMinLevel * calendarRingWidth / (maxLevel + 1),
                     calendarRingMaxRadius - (evMaxLevel + 1) * calendarRingWidth / (maxLevel + 1),
-                    (getAmbientMode())?white:eventWrapper.getPaint(),
-                    outlineBlack);
+                    arcColor, arcShadow);
         }
 
         // Lastly, draw a stippled pattern at the current hour mark to delineate where the
@@ -599,7 +682,10 @@ public class ClockFace implements Observer {
 //                            ")");
             }
         }
-        canvas.drawPath(stipplePathCache, black);
+        if(getAmbientMode() && ambientLowBit)
+            canvas.drawPath(stipplePathCache, blackNoAA);
+        else
+            canvas.drawPath(stipplePathCache, black);
     }
 
     private Path batteryPathCache = null;
@@ -694,35 +780,54 @@ public class ClockFace implements Observer {
         shadow = lineWidth / 20f;  // for drop shadows
 
         white.setTextSize(textSize);
+        whiteNoAA.setTextSize(textSize);
         whiteHour.setTextSize(textSize);
+        whiteHourNoAA.setTextSize(textSize);
         whiteMinute.setTextSize(textSize);
+        whiteMinuteNoAA.setTextSize(textSize);
         yellow.setTextSize(textSize);
         gray.setTextSize(textSize);
         black.setTextSize(textSize);
+        blackNoAA.setTextSize(textSize);
         textShadow.setTextSize(textSize);
+        textShadowNoAA.setTextSize(textSize);
 
         white.setStrokeWidth(lineWidth);
+        whiteNoAA.setStrokeWidth(lineWidth);
         whiteHour.setStrokeWidth(lineWidth * 1.5f);
+        whiteHourNoAA.setStrokeWidth(lineWidth * 1.5f);
         whiteMinute.setStrokeWidth(lineWidth);
+        whiteMinuteNoAA.setStrokeWidth(lineWidth);
         yellow.setStrokeWidth(lineWidth);
         gray.setStrokeWidth(lineWidth);
         black.setStrokeWidth(lineWidth);
+        blackNoAA.setStrokeWidth(lineWidth);
 
         smWhite.setTextSize(smTextSize);
+        smWhiteNoAA.setTextSize(smTextSize);
         smYellow.setTextSize(smTextSize);
         smBlack.setTextSize(smTextSize);
+        smBlackNoAA.setTextSize(smTextSize);
         smTextShadow.setTextSize(smTextSize);
+        smTextShadowNoAA.setTextSize(smTextSize);
 
         smWhite.setStrokeWidth(lineWidth /3);
+        smWhiteNoAA.setStrokeWidth(lineWidth /3);
         smYellow.setStrokeWidth(lineWidth /3);
         smBlack.setStrokeWidth(lineWidth /4);
+        smBlackNoAA.setStrokeWidth(lineWidth /4);
         smRed.setStrokeWidth(lineWidth /3);
 
         smTextShadow.setStrokeWidth(lineWidth / 4);
+        smTextShadowNoAA.setStrokeWidth(lineWidth / 4);
         textShadow.setStrokeWidth(lineWidth / 2);
+        textShadowNoAA.setStrokeWidth(lineWidth / 2);
         outlineBlack.setStrokeWidth(lineWidth /6);
+        outlineBlackNoAA.setStrokeWidth(lineWidth /6);
         thickOutlineBlack.setStrokeWidth(lineWidth*1.2f);
+        thickOutlineBlackNoAA.setStrokeWidth(lineWidth*1.2f);
         superThinBlack.setStrokeWidth(lineWidth / 8);
+        superThinBlackNoAA.setStrokeWidth(lineWidth / 8);
 
         wipeCaches();
     }

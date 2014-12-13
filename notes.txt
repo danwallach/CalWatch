@@ -64,12 +64,13 @@ FINAL ANDROID WATCHFACE API !!!
         DONE! Identify best starting place (*not* CalendarWatchFaceService)
         DONE! 1Hz refresh (no calendar at all)
         DONE! 40Hz refresh main (built into SweepWatchFace ?!!)
-        TODO drawing calendar (with old-school data forwarding)
+        DONE! drawing calendar (with old-school data forwarding)
         TODO redo ambient mode
-            TODO hollow out the hands
-            TODO hollow out the time wedges
-            TODO disable anti-aliasing
-            TODO don't render the power-remaining dot at all
+            TODO greyscale ambient
+            TODO one-bit ambient
+                TODO hollow out the hands
+                TODO hollow out the time wedges
+                TODO disable anti-aliasing
             TODO distinct behavior for "mute" mode?
         TODO specify where the battery-charging indicator goes
             - http://developer.android.com/training/wearables/watch-faces/issues.html
