@@ -93,7 +93,7 @@ public class ClockFace implements Observer {
      * @param ambientLowBit
      */
     public void setAmbientLowBit(boolean ambientLowBit) {
-        Log.v(TAG, "ambient low bit: " + ambientLowBit)
+        Log.v(TAG, "ambient low bit: " + ambientLowBit);
         this.ambientLowBit = ambientLowBit;
     }
 
