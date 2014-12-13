@@ -24,6 +24,7 @@ Port to Android Wear
 
 TODO sort out how to compile protobufs automatically via Gradle
 -- At least the Square protobuf runtime is automatically fetched and compiled
+-- probably not worth the bother: long term plan is to kill protobufs, once we have reliable calendar on the wear side
 
 Verify all the weird connect/disconnect corner cases
     TODO fresh boot of phone, make sure service is up no matter what
@@ -48,37 +49,39 @@ Right-to-left support
     TODO detect when we're in RTL mode
     TODO swap day/date block from 9 o'clock to 3 o'clock or leave alone?
 
-UX fix needed so users will run the phone app
-    TODO if no message *ever* received and X secs have passed, notify user with overlay text. (Need very short text or scrolling. Or a notification. Or something.)
-    (tentatively done)
-
 Add internationalization strings
-    Currently have localized strings for Spanish, Dutch, Turkish, need more
+    Currently have localized strings for Spanish, Dutch, Turkish, German; need more
 
 Deal with multiday events that aren't "all day" events
-    TODO idea #1: if they complete cover the visible window, treat as all-day and ignore
-    TODO idea #2: resurrect all-day events by rendering them (and long events) as thin rings, perhaps separate from the main time wedges
+    TODO idea: resurrect all-day events by rendering them (and long events) as thin rings, perhaps separate from the main time wedges
 
 FINAL ANDROID WATCHFACE API !!!
-    TODO Does the existing APK break on Wear 5?
-    TODO Migrate functionality from MyViewAnim and WearActivity into CalWatchFaceService
-        TODO initially get 1Hz refresh rate, then sort out how to go faster
-        TODO companion configuration activity
-            TODO intents
-            TODO XML manifest stuff
-            - http://developer.android.com/training/wearables/watch-faces/configuration.html
+    TODO task 1: graphics
+        TODO Does the existing APK break on Wear 5?
+        TODO Identify best starting place (*not* CalendarWatchFaceService)
+        TODO 1Hz refresh (no calendar at all)
+        TODO 1Hz refresh (with calendar)
         TODO redo ambient mode
             TODO hollow out the hands
             TODO hollow out the time wedges
             TODO disable anti-aliasing
             TODO don't render the power-remaining dot at all
-    TODO Verify that enough of the calendar exists on watch side to avoid transmission from phone
-        TODO Kill off serialization and transmission of calendar data (built into the watch now!)
-        TODO Kill off notifications on watch side (since they'll get a perfectly useful default)
-    Secondary porting issues
-        TODO Kill off Protobufs? All we've got is a couple small integers and booleans left
-            - Low priority. We want to get the port up and running.
+        TODO companion configuration activity
+            TODO intents
+            TODO XML manifest stuff
+            - http://developer.android.com/training/wearables/watch-faces/configuration.html
         TODO specify where the battery-charging indicator goes
             - http://developer.android.com/training/wearables/watch-faces/issues.html
+        TODO 40Hz refresh main
+        TODO >1 refresh/minute ambient
+    TODO task 2: calendar
+        TODO WearableCalendarContract vs. CalendarContract: what's exactly missing here?
+        TODO Verify that enough of the calendar exists on watch side to avoid transmission from phone
+        TODO Kill off serialization and transmission of calendar data (built into the watch now!)
+        TODO Kill off notifications on watch side (since they'll get a perfectly useful default)
+        TODO Move from calendar multithreading to ASyncTask (as in the provided example)
+    Secondary porting issues
+        TODO Kill off Protobufs? All we've got is a couple small integers and booleans left
         TODO extra screen squish when a peek card is visible?
+        - perhaps generalize the existing Moto360 bottom hack?
         TODO update the slides
