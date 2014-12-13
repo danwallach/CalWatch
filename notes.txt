@@ -62,8 +62,8 @@ FINAL ANDROID WATCHFACE API !!!
         TODO ambient mode seems broken (based on hitting "F7"), probably not worth fixing
     TODO task 1: graphics
         DONE! Identify best starting place (*not* CalendarWatchFaceService)
-        TODO 1Hz refresh (no calendar at all)
-        TODO 40Hz refresh main (built into SweepWatchFace ?!!)
+        DONE! 1Hz refresh (no calendar at all)
+        DONE! 40Hz refresh main (built into SweepWatchFace ?!!)
         TODO drawing calendar (with old-school data forwarding)
         TODO redo ambient mode
             TODO hollow out the hands

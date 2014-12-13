@@ -21,6 +21,8 @@ import android.content.IntentFilter;
 import android.content.res.Resources;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
+import android.graphics.Color;
+import android.graphics.PorterDuff;
 import android.graphics.Rect;
 import android.os.Bundle;
 import android.support.wearable.watchface.CanvasWatchFaceService;
@@ -29,6 +31,8 @@ import android.support.wearable.watchface.WatchFaceStyle;
 import android.util.Log;
 import android.view.SurfaceHolder;
 
+import java.util.Observable;
+import java.util.Observer;
 import java.util.TimeZone;
 
 /**
@@ -42,8 +46,20 @@ public class CalWatchFaceService extends CanvasWatchFaceService {
         return new Engine();
     }
 
-    private class Engine extends CanvasWatchFaceService.Engine {
+    private class Engine extends CanvasWatchFaceService.Engine implements Observer {
         private ClockFace clockFace;
+        private ClockState clockState;
+
+        /**
+         * Callback from ClockState if something changes, which means we'll need
+         * to redraw.
+         * @param observable
+         * @param data
+         */
+        @Override
+        public void update(Observable observable, Object data) {
+            invalidate();
+        }
 
         /**
          * Whether the display supports fewer bits for each color in ambient mode. When true, we
@@ -60,6 +76,9 @@ public class CalWatchFaceService extends CanvasWatchFaceService {
             }
             super.onCreate(holder);
 
+            // announce our version number to the logs
+            VersionWrapper.logVersion(CalWatchFaceService.this);
+
             setWatchFaceStyle(new WatchFaceStyle.Builder(CalWatchFaceService.this)
                     .setCardPeekMode(WatchFaceStyle.PEEK_MODE_SHORT)
                     .setBackgroundVisibility(WatchFaceStyle.BACKGROUND_VISIBILITY_INTERRUPTIVE)
@@ -67,11 +86,16 @@ public class CalWatchFaceService extends CanvasWatchFaceService {
                     .build());
 
             BatteryWrapper.init(CalWatchFaceService.this);
-
             Resources resources = CalWatchFaceService.this.getResources();
+
             if (resources == null) {
                 Log.e(TAG, "no resources? not good");
             }
+
+            clockFace = new ClockFace();
+            clockState = ClockState.getSingleton();
+
+            clockState.addObserver(this); // callbacks if something changes
 
             // initialize the thing that will bother the user if we can't see the phone
             WearNotificationHelper.init(true,
@@ -112,6 +136,14 @@ public class CalWatchFaceService extends CanvasWatchFaceService {
             }
             clockFace.setAmbientMode(inAmbientMode);
 
+            // If we just switched *to* ambient mode, then we've got some FPS data to report
+            // to the logs. Otherwise, we're coming *back* from ambient mode, so it's a good
+            // time to reset the counters.
+            if(inAmbientMode)
+                TimeWrapper.frameReport();
+            else
+                TimeWrapper.frameReset();
+
             invalidate();
         }
 
@@ -122,32 +154,59 @@ public class CalWatchFaceService extends CanvasWatchFaceService {
             invalidate();
         }
 
+        private long drawCounter = 0;
         @Override
         public void onDraw(Canvas canvas, Rect bounds) {
 //            if (Log.isLoggable(TAG, Log.VERBOSE)) {
 //                Log.v(TAG, "onDraw");
 //            }
+            drawCounter++;
 
             int width = bounds.width();
             int height = bounds.height();
 
-            // hey, wow, this will be super cool if it does the job for us
-            clockFace.setSize(width, height);
-            clockFace.drawEverything(canvas);
+            try {
+                // clear the screen
+                canvas.drawColor(Color.TRANSPARENT, PorterDuff.Mode.CLEAR);
+                clockFace.setSize(width, height);
+
+                TimeWrapper.update(); // fetch the time
+                clockFace.drawEverything(canvas);
+            } catch (Throwable t) {
+                if(drawCounter % 1000 == 0)
+                    Log.e(TAG, "Something blew up while drawing", t);
+            }
 
             // Draw every frame as long as we're visible and in interactive mode.
-            if (isVisible() && !isInAmbientMode()) {
+            if (isVisible() && !isInAmbientMode() && ClockState.getSingleton().getShowSeconds()) {
                 invalidate();
             }
+
         }
 
         @Override
         public void onVisibilityChanged(boolean visible) {
             super.onVisibilityChanged(visible);
 
+
             if (visible) {
+                // We might need to yell at the user to run the phone-side of the app
+                // so it can send us calendar data. We don't want to do this check
+                // during the onDraw loop, but it's fine here, since this only happens
+                // when our watchface becomes visibile -- a perfectly reasonable time
+                // to do a notification.
+                WearNotificationHelper.maybeNotify(CalWatchFaceService.this);
                 invalidate();
             }
+
+            // If we just switched *to* not visible mode, then we've got some FPS data to report
+            // to the logs. Otherwise, we're coming *back* from invisible mode, so it's a good
+            // time to reset the counters.
+            if(!visible)
+                TimeWrapper.frameReport();
+            else
+                TimeWrapper.frameReset();
+
         }
     }
 }

@@ -93,11 +93,12 @@ public class ClockFace implements Observer {
      * @param ambientLowBit
      */
     public void setAmbientLowBit(boolean ambientLowBit) {
+        Log.v(TAG, "ambient low bit: " + ambientLowBit)
         this.ambientLowBit = ambientLowBit;
     }
 
     public ClockFace() {
-        Log.v("ClockFace", "ClockFace setup!");
+        Log.v(TAG, "ClockFace setup!");
 
         this.clockState = ClockState.getSingleton();
         setupObserver();
@@ -321,7 +322,7 @@ public class ClockFace implements Observer {
         // check if we've already rendered the face
         if(faceMode != facePathCacheMode || p == null) {
             p = new Path();
-            Log.v("ClockFace", "rendering new face, faceMode(" + faceMode + ")");
+            Log.v(TAG, "rendering new face, faceMode(" + faceMode + ")");
 
             if (faceMode == ClockState.FACE_TOOL)
                 for (int i = 1; i < 60; i++)
@@ -392,7 +393,7 @@ public class ClockFace implements Observer {
 
             if(!debugMetricsPrinted) {
                 debugMetricsPrinted = true;
-                Log.v("ClockFace", "x(" + Float.toString(x) + "), y(" + Float.toString(y) + "), metrics.descent(" + Float.toString(metrics.descent) + "), metrics.ascent(" + Float.toString(metrics.ascent) + ")");
+                Log.v(TAG, "x(" + Float.toString(x) + "), y(" + Float.toString(y) + "), metrics.descent(" + Float.toString(metrics.descent) + "), metrics.ascent(" + Float.toString(metrics.ascent) + ")");
             }
 
             //
@@ -537,7 +538,7 @@ public class ClockFace implements Observer {
             stippleTimeCache = stippleTime;
 
 //            if(calendarTicker % 1000 == 0)
-//                Log.v("ClockFace", "StippleTime(" + stippleTime +
+//                Log.v(TAG, "StippleTime(" + stippleTime +
 //                        "),  currentTime(" + Float.toString((time) / 720000f) + ")");
 
             float r1=calendarRingMinRadius, r2;
@@ -591,7 +592,7 @@ public class ClockFace implements Observer {
                 // canvas.drawPath(p, black);
 
 //                if(calendarTicker % 1000 == 0)
-//                    Log.v("ClockFace", "x1(" + Float.toString(x1) + "), y1(" + Float.toString(y1) +
+//                    Log.v(TAG, "x1(" + Float.toString(x1) + "), y1(" + Float.toString(y1) +
 //                            "), x2(" + Float.toString(x1) + "), y2(" + Float.toString(y2) +
 //                            "), xlow(" + Float.toString(xlow) + "), ylow(" + Float.toString(ylow) +
 //                            "), xhigh(" + Float.toString(xhigh) + "), yhigh(" + Float.toString(yhigh) +
