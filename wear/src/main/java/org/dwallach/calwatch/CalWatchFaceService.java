@@ -11,7 +11,6 @@ import android.graphics.Color;
 import android.graphics.Rect;
 import android.net.Uri;
 import android.os.AsyncTask;
-import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
 import android.os.PowerManager;
@@ -20,13 +19,13 @@ import android.support.wearable.watchface.CanvasWatchFaceService;
 import android.support.wearable.watchface.WatchFaceStyle;
 import android.text.DynamicLayout;
 import android.text.Editable;
-import android.text.Html;
 import android.text.Layout;
 import android.text.SpannableStringBuilder;
 import android.text.TextPaint;
 import android.text.format.DateUtils;
 import android.util.Log;
 import android.view.SurfaceHolder;
+
 
 public class CalWatchFaceService extends CanvasWatchFaceService {
     private static final String TAG = "CalWatchFaceService";
@@ -36,7 +35,7 @@ public class CalWatchFaceService extends CanvasWatchFaceService {
         return new Engine();
     }
 
-    private class Engine extends CanvasWatchFaceService.Engine {
+    public class Engine extends CanvasWatchFaceService.Engine {
 
         static final int BACKGROUND_COLOR = Color.BLACK;
         static final int FOREGROUND_COLOR = Color.WHITE;
@@ -57,7 +56,9 @@ public class CalWatchFaceService extends CanvasWatchFaceService {
 
         int mNumMeetings;
 
-        private AsyncTask<Void, Void, Integer> mLoadMeetingsTask;
+        private CalendarFetcher calendarFetcher;
+
+        private AsyncTask<Void, Void, Integer> calendarFetcherTask;
 
         /** Handler to load the meetings once a minute in interactive mode. */
         final Handler mLoadMeetingsHandler = new Handler() {
@@ -65,9 +66,9 @@ public class CalWatchFaceService extends CanvasWatchFaceService {
             public void handleMessage(Message message) {
                 switch (message.what) {
                     case MSG_LOAD_MEETINGS:
-                        cancelLoadMeetingTask();
-                        mLoadMeetingsTask = new LoadMeetingsTask();
-                        mLoadMeetingsTask.execute();
+                        cancelCalendarFetcherTask();
+                        calendarFetcherTask = new LoadMeetingsTask();
+                        calendarFetcherTask.execute();
                         break;
                 }
             }
@@ -80,7 +81,8 @@ public class CalWatchFaceService extends CanvasWatchFaceService {
             public void onReceive(Context context, Intent intent) {
                 if (Intent.ACTION_PROVIDER_CHANGED.equals(intent.getAction())
                         && WearableCalendarContract.CONTENT_URI.equals(intent.getData())) {
-                    cancelLoadMeetingTask();
+                    CalendarFetcher
+                    cancelCalendarFetcherTask();
                     mLoadMeetingsHandler.sendEmptyMessage(MSG_LOAD_MEETINGS);
                 }
             }
@@ -107,7 +109,7 @@ public class CalWatchFaceService extends CanvasWatchFaceService {
         @Override
         public void onDestroy() {
             mLoadMeetingsHandler.removeMessages(MSG_LOAD_MEETINGS);
-            cancelLoadMeetingTask();
+            cancelCalendarFetcherTask();
             super.onDestroy();
         }
 
@@ -158,56 +160,9 @@ public class CalWatchFaceService extends CanvasWatchFaceService {
             }
         }
 
-        private void cancelLoadMeetingTask() {
-            if (mLoadMeetingsTask != null) {
-                mLoadMeetingsTask.cancel(true);
-            }
-        }
-
-        /**
-         * Asynchronous task to load the meetings from the content provider and report the number of
-         * meetings back via {@link #onMeetingsLoaded}.
-         */
-        private class LoadMeetingsTask extends AsyncTask<Void, Void, Integer> {
-            private PowerManager.WakeLock mWakeLock;
-
-            @Override
-            protected Integer doInBackground(Void... voids) {
-                PowerManager powerManager = (PowerManager) getSystemService(POWER_SERVICE);
-                mWakeLock = powerManager.newWakeLock(
-                        PowerManager.PARTIAL_WAKE_LOCK, "CalendarWatchFaceWakeLock");
-                mWakeLock.acquire();
-
-                long begin = System.currentTimeMillis();
-                Uri.Builder builder =
-                        WearableCalendarContract.Instances.CONTENT_URI.buildUpon();
-                ContentUris.appendId(builder, begin);
-                ContentUris.appendId(builder, begin + DateUtils.DAY_IN_MILLIS);
-                final Cursor cursor = getContentResolver().query(builder.build(),
-                        null, null, null, null);
-                int numMeetings = cursor.getCount();
-                if (Log.isLoggable(TAG, Log.VERBOSE)) {
-                    Log.v(TAG, "Num meetings: " + numMeetings);
-                }
-                return numMeetings;
-            }
-
-            @Override
-            protected void onPostExecute(Integer result) {
-                releaseWakeLock();
-                onMeetingsLoaded(result);
-            }
-
-            @Override
-            protected void onCancelled() {
-                releaseWakeLock();
-            }
-
-            private void releaseWakeLock() {
-                if (mWakeLock != null) {
-                    mWakeLock.release();
-                    mWakeLock = null;
-                }
+        private void cancelCalendarFetcherTask() {
+            if (calendarFetcherTask != null) {
+                calendarFetcherTask.cancel(true);
             }
         }
     }

@@ -110,31 +110,6 @@ public class ClockState extends Observable {
         }
     }
 
-    private void setWireEventListHelper(List<WireEvent> wireEventList) {
-        List<EventWrapper> results = new ArrayList<EventWrapper>();
-
-        for (WireEvent wireEvent : wireEventList)
-            results.add(new EventWrapper(wireEvent));
-
-        setEventList(results);
-        Log.v(TAG, "new calendar event list, " + results.size() + " entries");
-    }
-
-    /**
-     * This fetches *every* event present in the ClockState (typically 24 hours worth),
-     * and does it *without* clipping to the visible watchface. These will be in GMT time.
-     */
-    public List<WireEvent> getWireEventList() {
-        List<WireEvent> output = new ArrayList<WireEvent>();
-
-        if(eventList == null) return null;
-
-        for(EventWrapper event: eventList)
-            output.add(event.getWireEvent());
-
-        return output;
-    }
-
     private long lastClipTime = 0;
 
     private void computeVisibleEvents() {
@@ -260,8 +235,8 @@ public class ClockState extends Observable {
                 return;
             }
 
-            if (wireUpdate.newEvents)
-                setWireEventListHelper(wireUpdate.events);
+//            if (wireUpdate.newEvents)
+//                setWireEventListHelper(wireUpdate.events);
 
             setFaceMode(wireUpdate.faceMode);
             setShowSeconds(wireUpdate.showSecondHand);
@@ -280,7 +255,7 @@ public class ClockState extends Observable {
      * @return the protobuf
      */
     public byte[] getProtobuf() {
-        WireUpdate wireUpdate = new WireUpdate(getWireEventList(), true, getFaceMode(), getShowSeconds(), getShowDayDate());
+        WireUpdate wireUpdate = new WireUpdate(null, true, getFaceMode(), getShowSeconds(), getShowDayDate());
         byte[] output = wireUpdate.toByteArray();
 
         return output;

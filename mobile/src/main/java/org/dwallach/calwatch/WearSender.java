@@ -19,10 +19,13 @@ import com.google.android.gms.wearable.Node;
 import com.google.android.gms.wearable.NodeApi;
 import com.google.android.gms.wearable.Wearable;
 
+import java.util.Observable;
+import java.util.Observer;
+
 /**
  * Created by dwallach on 8/25/14.
  */
-public class WearSender implements GoogleApiClient.ConnectionCallbacks, GoogleApiClient.OnConnectionFailedListener, MessageApi.MessageListener {
+public class WearSender implements GoogleApiClient.ConnectionCallbacks, GoogleApiClient.OnConnectionFailedListener, MessageApi.MessageListener, Observer {
     private static final String TAG = "WearSender";
     byte[] wireBytesToSend = null;
 
@@ -45,6 +48,11 @@ public class WearSender implements GoogleApiClient.ConnectionCallbacks, GoogleAp
     public void sendAllToWatch() {
         try {
             ClockState clockState = ClockState.getSingleton();
+            if(clockState == null) {
+                Log.e(TAG, "can't send null clockState to watch");
+                return;
+            }
+
             wireBytesToSend = clockState.getProtobuf();
 
             Log.v(TAG, "preparing event list for transmission, length(" + wireBytesToSend.length + " bytes)");
@@ -97,11 +105,13 @@ public class WearSender implements GoogleApiClient.ConnectionCallbacks, GoogleAp
 
     private static WearSender singleton = null;
     public WearSender(Context context) {
+        Log.v(TAG, "constructor");
         this.context = context;
 
         if(singleton == null)
             singleton = this;
-        onCreate();
+
+        onResume();
     }
 
     public static WearSender getSingleton() {
@@ -113,11 +123,6 @@ public class WearSender implements GoogleApiClient.ConnectionCallbacks, GoogleAp
         Log.v(TAG, "connection inactive, retrying");
         initGoogle();
         return false;
-    }
-
-    protected void onCreate() {
-        Log.v(TAG, "onCreate!");
-        initGoogle();
     }
 
     private boolean readyToSend = false;
@@ -169,6 +174,32 @@ public class WearSender implements GoogleApiClient.ConnectionCallbacks, GoogleAp
         closeGoogle();
     }
 
+    public void onStop() {
+        Log.v(TAG, "closing down WearSender");
+        ClockState clockState = ClockState.getSingleton();
+
+        if(clockState == null) {
+            Log.e(TAG, "-- no clock state?!");
+        } else {
+            clockState.deleteObserver(this);
+        }
+
+        closeGoogle();
+    }
+
+    public void onResume() {
+        Log.v(TAG, "resuming WearSender");
+        ClockState clockState = ClockState.getSingleton();
+
+        if(clockState == null) {
+            Log.e(TAG, "-- no clock state?!");
+        } else {
+            clockState.addObserver(this);
+        }
+
+        initGoogle();
+    }
+
     private void closeGoogle() {
         try {
             Log.v(TAG, "cleaning up Google API");
@@ -208,4 +239,10 @@ public class WearSender implements GoogleApiClient.ConnectionCallbacks, GoogleAp
         }
     }
 
+    @Override
+    public void update(Observable observable, Object data) {
+        // if this got called, then there's an update in the clockstate, so we need to
+        // transmit it to the watch
+        sendAllToWatch();
+    }
 }

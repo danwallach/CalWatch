@@ -275,10 +275,6 @@ public class MyViewAnim extends SurfaceView implements SurfaceHolder.Callback, O
         else
             redrawSlowSources.put(source, 1);
 
-        // Check if the user never started up the app on their phone and, if so, generate
-        // a notification on the watch.
-        WearNotificationHelper.maybeNotify(savedContext);
-
         // In the seemingly common case where a timer goes off while we've got the draw thread up
         // and running, so a redraw is coming in from that timer, we want to do nothing and to fail
         // fast. No locking to avoid stuttering in the redraw process.

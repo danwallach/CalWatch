@@ -33,6 +33,7 @@ public class PhoneActivity extends Activity implements Observer {
     private Switch secondsSwitch, dayDateSwitch;
 
     private ClockState clockState;
+    private WearSender wearSender;
     private boolean disableUICallbacks = false;
 
     private ClockState getClockState() {
@@ -123,6 +124,12 @@ public class PhoneActivity extends Activity implements Observer {
 
     }
 
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        Log.v(TAG, "Destroy!");
+    }
+
     private void activitySetup() {
         Log.v(TAG, "And in the beginning ...");
 
@@ -131,10 +138,7 @@ public class PhoneActivity extends Activity implements Observer {
         getClockState(); // initialize it, if it's not already here
 
         BatteryWrapper.init(this);
-
-        // the notification helper is only used on the watch, not on the phone, so we have
-        // to set it up in "no-op" mode
-        WearNotificationHelper.init(false, 0, null, null);
+        wearSender = new WearSender(this);
 
         setContentView(R.layout.activity_phone);
 
@@ -193,6 +197,8 @@ public class PhoneActivity extends Activity implements Observer {
                 clockView.stop();
 
             getClockState().deleteObserver(this);
+            wearSender.onStop();
+
             clockState = null;
             watchFaceRunning = false;
             killAlarm();
