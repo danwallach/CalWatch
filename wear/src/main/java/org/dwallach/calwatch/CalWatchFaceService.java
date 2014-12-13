@@ -187,6 +187,19 @@ public class CalWatchFaceService extends CanvasWatchFaceService {
         }
 
         @Override
+        public void onPeekCardPositionUpdate(Rect bounds) {
+            super.onPeekCardPositionUpdate(bounds);
+            if (Log.isLoggable(TAG, Log.DEBUG)) {
+                Log.d(TAG, "onPeekCardPositionUpdate: " + bounds);
+            }
+
+            // TODO: do something with the peek card bounds
+
+            invalidate();
+        }
+
+
+        @Override
         public void onVisibilityChanged(boolean visible) {
             super.onVisibilityChanged(visible);
 
