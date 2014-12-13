@@ -56,30 +56,39 @@ Deal with multiday events that aren't "all day" events
     TODO idea: resurrect all-day events by rendering them (and long events) as thin rings, perhaps separate from the main time wedges
 
 FINAL ANDROID WATCHFACE API !!!
+    TODO task 0: prior work
+        TODO boot Wear 5 emulator, paired with tablet
+        TODO Does the existing release1c APK break on Wear 5?
     TODO task 1: graphics
-        TODO Does the existing APK break on Wear 5?
         TODO Identify best starting place (*not* CalendarWatchFaceService)
         TODO 1Hz refresh (no calendar at all)
-        TODO 1Hz refresh (with calendar)
+        TODO 40Hz refresh main (built into SweepWatchFace ?!!)
+        TODO drawing calendar (with old-school data forwarding)
         TODO redo ambient mode
             TODO hollow out the hands
             TODO hollow out the time wedges
             TODO disable anti-aliasing
             TODO don't render the power-remaining dot at all
+            TODO distinct behavior for "mute" mode?
+        TODO specify where the battery-charging indicator goes
+            - http://developer.android.com/training/wearables/watch-faces/issues.html
         TODO companion configuration activity
             TODO intents
             TODO XML manifest stuff
             - http://developer.android.com/training/wearables/watch-faces/configuration.html
-        TODO specify where the battery-charging indicator goes
-            - http://developer.android.com/training/wearables/watch-faces/issues.html
-        TODO 40Hz refresh main
+            TODO can this eliminate the need for notifications?
+            - probably not, since we want to be there at boot time; but worth investigating
+            - we can definitely nuke notifications once we're done with task 2
         TODO >1 refresh/minute ambient
     TODO task 2: calendar
+        TODO Move from calendar multithreading to ASyncTask (as in the provided example)
+        - this is probably the place to start, as it's going to be more power efficient and
+          yield cleaner code. Also a nice warm-up before diving into the next bits.
         TODO WearableCalendarContract vs. CalendarContract: what's exactly missing here?
+        - notably, the "AgendaData" example is doing a bunch of phone-side work, just like CalWatch
         TODO Verify that enough of the calendar exists on watch side to avoid transmission from phone
         TODO Kill off serialization and transmission of calendar data (built into the watch now!)
         TODO Kill off notifications on watch side (since they'll get a perfectly useful default)
-        TODO Move from calendar multithreading to ASyncTask (as in the provided example)
     Secondary porting issues
         TODO Kill off Protobufs? All we've got is a couple small integers and booleans left
         TODO extra screen squish when a peek card is visible?
