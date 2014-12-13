@@ -113,8 +113,8 @@ public class CalendarFetcher extends Observable implements Runnable {
                 // we were signalled
                 Log.v(TAG, "Wakeup signal received");
             } // else {
-                // the timeout happened
-                // Log.v(TAG, " Wakeup timeout");
+            // the timeout happened
+            // Log.v(TAG, " Wakeup timeout");
             // }
 
             if(!running && observer != null) {

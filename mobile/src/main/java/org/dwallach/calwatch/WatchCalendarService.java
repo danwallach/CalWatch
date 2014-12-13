@@ -20,7 +20,7 @@ public class WatchCalendarService extends Service implements Observer {
 
     private static WatchCalendarService singletonService;
     private WearSender wearSender;
-    private CalendarFetcher calendarFetcher;
+    private OldCalendarFetcher oldCalendarFetcher;
 
     private ClockState clockState;
 
@@ -74,15 +74,15 @@ public class WatchCalendarService extends Service implements Observer {
         Log.v(TAG, "starting calendar fetcher");
         if (singletonService != null) {
             Log.v(TAG, "whoa, multiple services!");
-            if (calendarFetcher != null)
-                calendarFetcher.haltUpdates();
+            if (oldCalendarFetcher != null)
+                oldCalendarFetcher.haltUpdates();
         }
 
         singletonService = this;
 
-        calendarFetcher = new CalendarFetcher(); // automatically allocates a thread and runs
+        oldCalendarFetcher = new OldCalendarFetcher(); // automatically allocates a thread and runs
 
-        calendarFetcher.addObserver(new Observer() {
+        oldCalendarFetcher.addObserver(new Observer() {
             @Override
             public void update(Observable observable, Object data) {
                 Log.v(TAG, "New calendar state to send to watch!");
@@ -94,7 +94,7 @@ public class WatchCalendarService extends Service implements Observer {
                 // then decide it's time to send everything to the watch. So, no need to call
                 // sendAllToWatch() right just yet.
 
-                getClockState().setEventList(calendarFetcher.getContent().getWrappedEvents());
+                getClockState().setEventList(oldCalendarFetcher.getContent().getWrappedEvents());
                 // sendAllToWatch();
             }
         });
