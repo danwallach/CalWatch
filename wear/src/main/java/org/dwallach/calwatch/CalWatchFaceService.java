@@ -190,7 +190,7 @@ public class CalWatchFaceService extends CanvasWatchFaceService {
         public void onPeekCardPositionUpdate(Rect bounds) {
             super.onPeekCardPositionUpdate(bounds);
             if (Log.isLoggable(TAG, Log.DEBUG)) {
-                Log.d(TAG, "onPeekCardPositionUpdate: " + bounds);
+                Log.d(TAG, "onPeekCardPositionUpdate: " + bounds + " (" + bounds.width() + ", " + bounds.height() + ")");
             }
 
             // TODO: do something with the peek card bounds
