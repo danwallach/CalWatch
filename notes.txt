@@ -81,9 +81,15 @@ FINAL ANDROID WATCHFACE API !!!
             - Given how large the cards are, we probably don't want to mess with the Moto 360 hack
               but instead just want to draw the face small, completely round, and be done with it.
 
-        TODO companion configuration activity
-            TODO intents
-            TODO XML manifest stuff
+        TODO general-purpose solution to the flat-bottom Moto360 hack
+        http://developer.android.com/training/wearables/watch-faces/issues.html
+
+            - Tried this, gets an error about the superclass not having the proper method. Fail!
+              See onApplyWindowInsets() in CalWatchFaceService (currently commented out)
+
+        DONE? companion configuration activity
+            DONE? intents
+            DONE? XML manifest stuff
             - http://developer.android.com/training/wearables/watch-faces/configuration.html
 
             - Notes: added the relevant bits to the XML, need to test. Kinda sucky that I have

@@ -31,6 +31,7 @@ import android.support.wearable.watchface.WatchFaceStyle;
 import android.util.Log;
 import android.view.Gravity;
 import android.view.SurfaceHolder;
+import android.view.WindowInsets;
 
 import java.util.Observable;
 import java.util.Observer;
@@ -198,6 +199,23 @@ public class CalWatchFaceService extends CanvasWatchFaceService {
             invalidate();
         }
 
+        // The below code is *supposed* to let us capture the "chin size" to deal with the Moto 360's
+        // flat tire bottom. Naturally, this fails to compile, saying there's no such method as
+        // onApplyWindowInsets in the superclass.
+        //
+        // Sigh.
+        //
+        // TODO: make onApplyWindowInsets work
+
+        /*
+        @Override
+        public void onApplyWindowInsets(WindowInsets insets) {
+            super.onApplyWindowInsets(insets);
+
+            boolean isRound = insets.isRound();
+            int chinSize = insets.getSystemWindowInsetBottom();
+        }
+        */
 
         @Override
         public void onVisibilityChanged(boolean visible) {
