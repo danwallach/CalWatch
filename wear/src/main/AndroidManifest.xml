@@ -32,6 +32,9 @@
             <meta-data
                 android:name="com.google.android.wearable.watchface.preview_circular"
                 android:resource="@drawable/preview" />
+            <meta-data
+                android:name="com.google.android.wearable.watchface.companionConfigurationAction"
+                android:value="org.dwallach.calwatch.CONFIG_ANALOG" />
             <intent-filter>
                 <action android:name="android.service.wallpaper.WallpaperService" />
                 <category

@@ -75,16 +75,36 @@ FINAL ANDROID WATCHFACE API !!!
         DONE! specify where the battery-charging indicator goes
             - http://developer.android.com/training/wearables/watch-faces/issues.html
         TODO reshape around peek card?
+            - Notes: the rect we get back is the rect *covered* by the card. Using the "top"
+              of the rect, we'll know that from (0,0) - (full-width, rect-top) we're good to draw.
+
+            - Given how large the cards are, we probably don't want to mess with the Moto 360 hack
+              but instead just want to draw the face small, completely round, and be done with it.
 
         TODO companion configuration activity
             TODO intents
             TODO XML manifest stuff
             - http://developer.android.com/training/wearables/watch-faces/configuration.html
+
+            - Notes: added the relevant bits to the XML, need to test. Kinda sucky that I have
+              to do with the emulator rather than my phone.
+
             TODO can this eliminate the need for notifications?
             - probably not, since we want to be there at boot time; but worth investigating
             - we can definitely nuke notifications once we're done with task 2
+
         TODO >1 refresh/minute ambient
+            - The standard way of doing the sweeping second hand is to just call invalidate()
+              right after the end of onDraw(). If we do nothing, onDraw() gets called once per
+              minute. We *could* set up an alarm and go to all the trouble that's in MyViewAnim.
+              Is it worth it? Not right away. The power measurement gestapo won't stand for it.
+
         TODO remove MyViewAnim and WearActivity from wear build (mobile only, for now)
+            - Hypothetically we could just keep this around and add more stuff to the manifest
+              to allow "old school" and "new school" watchfaces to run, but given that all the
+              4.4W2 watches are being forcibly upgraded to 5.0, it's just not worth the engineering
+              to make this work.
+
     TODO task 2: calendar
         TODO Move from calendar multithreading to ASyncTask (as in the provided example)
         - this is probably the place to start, as it's going to be more power efficient and
@@ -96,11 +116,11 @@ FINAL ANDROID WATCHFACE API !!!
         TODO Kill off notifications on watch side (since they'll get a perfectly useful default)
     Secondary porting issues
         TODO Kill off Protobufs? All we've got is a couple small integers and booleans left
-        TODO extra screen squish when a peek card is visible?
-        - perhaps generalize the existing Moto360 bottom hack?
         TODO update the slides
 
 Longer-term items
     Way, way, way too many colors in ClockFace
     TODO have a handful of colors, named for where they're used, centralize how they're set & reset
+        - The low-bit ambient mode graphics are, at best, tolerable. Some cleanup in ClockFace
+          would make it easier to modify this in one place.
     TODO custom background images?
