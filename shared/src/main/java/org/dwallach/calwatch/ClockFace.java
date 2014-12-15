@@ -372,8 +372,7 @@ public class ClockFace implements Observer {
             mySuperThinBlack = shadowInverseNoAA;
             myBlack = blackNoAA;
             myTextShadow = textShadowNoAA;
-            if(faceMode == ClockState.FACE_TOOL)
-                localFaceMode = ClockState.FACE_LITE;  // in low-bit ambient mode, simplify
+            localFaceMode = ClockState.FACE_LITE;  // in low-bit ambient mode, simplify
         } else {
             mySmWhite = smWhite;
             myWhite = white;
