@@ -85,7 +85,9 @@ FINAL ANDROID WATCHFACE API !!!
         http://developer.android.com/training/wearables/watch-faces/issues.html
 
             - Tried this, gets an error about the superclass not having the proper method. Fail!
-              See onApplyWindowInsets() in CalWatchFaceService (currently commented out)
+              See onApplyWindowInsets() in CalWatchFaceService (currently commented out -- this
+              seems to only be a feature on the OpenGL version of the watch class, similar issues
+              for reading whether the face is round or square... hmm...)
 
         DONE? companion configuration activity
             DONE? intents
