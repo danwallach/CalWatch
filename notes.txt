@@ -99,11 +99,13 @@ FINAL ANDROID WATCHFACE API !!!
             - probably not, since we want to be there at boot time; but worth investigating
             - we can definitely nuke notifications once we're done with task 2
 
-        TODO >1 refresh/minute ambient
+        DONE? >1 refresh/minute ambient
             - The standard way of doing the sweeping second hand is to just call invalidate()
               right after the end of onDraw(). If we do nothing, onDraw() gets called once per
               minute. We *could* set up an alarm and go to all the trouble that's in MyViewAnim.
               Is it worth it? Not right away. The power measurement gestapo won't stand for it.
+            - The example code for the one-second-ticking hand was easy to repurpose to
+              tick once every twelve hands when we're *not* doing the whole sweeping second hand
 
         TODO remove MyViewAnim and WearActivity from wear build (mobile only, for now)
             - Hypothetically we could just keep this around and add more stuff to the manifest

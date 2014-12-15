@@ -16,6 +16,8 @@
 
 package org.dwallach.calwatch;
 
+import android.content.BroadcastReceiver;
+import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.res.Resources;
@@ -25,6 +27,8 @@ import android.graphics.Color;
 import android.graphics.PorterDuff;
 import android.graphics.Rect;
 import android.os.Bundle;
+import android.os.Handler;
+import android.os.Message;
 import android.support.wearable.watchface.CanvasWatchFaceService;
 import android.support.wearable.watchface.WatchFaceService;
 import android.support.wearable.watchface.WatchFaceStyle;
@@ -36,6 +40,7 @@ import android.view.WindowInsets;
 import java.util.Observable;
 import java.util.Observer;
 import java.util.TimeZone;
+import java.util.concurrent.TimeUnit;
 
 /**
  * Drawn heavily from the Android Wear SweepWatchFaceService example code.
@@ -43,14 +48,80 @@ import java.util.TimeZone;
 public class CalWatchFaceService extends CanvasWatchFaceService {
     private static final String TAG = "CalWatchFaceService";
 
+    /**
+     * Update rate in milliseconds for NON-interactive mode. We update once every 12 seconds
+     * to advance the minute hand when we're not otherwise sweeping the second hand.
+     *
+     * The default of one update per minute is ugly so we'll do better.
+     */
+    private static final long INTERACTIVE_UPDATE_RATE_MS = TimeUnit.SECONDS.toMillis(12);
+
     @Override
     public Engine onCreateEngine() {
         return new Engine();
     }
 
     private class Engine extends CanvasWatchFaceService.Engine implements Observer {
+        static final int MSG_UPDATE_TIME = 0;
+
         private ClockFace clockFace;
         private ClockState clockState;
+
+        /**
+         * Handler to tick once every 12 seconds.
+         * Used only if the second hand is turned off
+         * or in ambient mode so we get smooth minute-hand
+         * motion.
+         */
+        private final Handler mUpdateTimeHandler = new Handler() {
+            @Override
+            public void handleMessage(Message message) {
+                switch (message.what) {
+                    case MSG_UPDATE_TIME:
+                        if (Log.isLoggable(TAG, Log.VERBOSE)) {
+                            Log.v(TAG, "updating time");
+                        }
+                        invalidate();
+                        if (shouldTimerBeRunning()) {
+                            long timeMs = System.currentTimeMillis();
+                            long delayMs = INTERACTIVE_UPDATE_RATE_MS
+                                    - (timeMs % INTERACTIVE_UPDATE_RATE_MS);
+                            mUpdateTimeHandler.sendEmptyMessageDelayed(MSG_UPDATE_TIME, delayMs);
+                        }
+                        break;
+                }
+            }
+        };
+
+        private boolean shouldTimerBeRunning() {
+            boolean timerNeeded = false;
+
+            // run the timer if we're in ambient mode
+            if(clockFace != null) {
+                timerNeeded = clockFace.getAmbientMode();
+            }
+
+            // or run the timer if we're not showing the seconds hand
+            if(clockState != null) {
+                timerNeeded = timerNeeded || !clockState.getShowSeconds();
+            }
+
+            return timerNeeded;
+        }
+
+        /**
+         * Starts the {@link #mUpdateTimeHandler} timer if it should be running and isn't currently
+         * or stops it if it shouldn't be running but currently is.
+         */
+        private void updateTimer() {
+            if (Log.isLoggable(TAG, Log.DEBUG)) {
+                Log.d(TAG, "updateTimer");
+            }
+            mUpdateTimeHandler.removeMessages(MSG_UPDATE_TIME);
+            if (shouldTimerBeRunning()) {
+                mUpdateTimeHandler.sendEmptyMessage(MSG_UPDATE_TIME);
+            }
+        }
 
         /**
          * Callback from ClockState if something changes, which means we'll need
@@ -148,6 +219,10 @@ public class CalWatchFaceService extends CanvasWatchFaceService {
                 TimeWrapper.frameReset();
 
             invalidate();
+
+            // Whether the timer should be running depends on whether we're in ambient mode (as well
+            // as whether we're visible), so we may need to start or stop the timer.
+            updateTimer();
         }
 
         @Override
@@ -158,6 +233,8 @@ public class CalWatchFaceService extends CanvasWatchFaceService {
         }
 
         private long drawCounter = 0;
+        private int peekHeight = 0;
+
         @Override
         public void onDraw(Canvas canvas, Rect bounds) {
 //            if (Log.isLoggable(TAG, Log.VERBOSE)) {
@@ -180,11 +257,16 @@ public class CalWatchFaceService extends CanvasWatchFaceService {
                     Log.e(TAG, "Something blew up while drawing", t);
             }
 
-            // Draw every frame as long as we're visible and in interactive mode.
-            if (isVisible() && !isInAmbientMode() && ClockState.getSingleton().getShowSeconds()) {
+            // Draw every frame as long as we're visible and doing the sweeping second hand,
+            // otherwise the timer will take care of it.
+            if (isVisible() && !shouldTimerBeRunning())
                 invalidate();
-            }
+        }
 
+        @Override
+        public void onDestroy() {
+            mUpdateTimeHandler.removeMessages(MSG_UPDATE_TIME);
+            super.onDestroy();
         }
 
         @Override
@@ -240,6 +322,35 @@ public class CalWatchFaceService extends CanvasWatchFaceService {
             else
                 TimeWrapper.frameReset();
 
+        }
+
+        final BroadcastReceiver mTimeZoneReceiver = new BroadcastReceiver() {
+            @Override
+            public void onReceive(Context context, Intent intent) {
+                // When we redraw, we ask the system to convert to local time and we
+                // do it every time. The only reason we're registering for this callback
+                // is so we'll know right the second that there's a new timezone and
+                // we'll be slightly more reactive about it.
+                invalidate();
+            }
+        };
+        boolean mRegisteredTimeZoneReceiver = false;
+
+        private void registerReceiver() {
+            if (mRegisteredTimeZoneReceiver) {
+                return;
+            }
+            mRegisteredTimeZoneReceiver = true;
+            IntentFilter filter = new IntentFilter(Intent.ACTION_TIMEZONE_CHANGED);
+            CalWatchFaceService.this.registerReceiver(mTimeZoneReceiver, filter);
+        }
+
+        private void unregisterReceiver() {
+            if (!mRegisteredTimeZoneReceiver) {
+                return;
+            }
+            mRegisteredTimeZoneReceiver = false;
+            CalWatchFaceService.this.unregisterReceiver(mTimeZoneReceiver);
         }
     }
 }
