@@ -115,6 +115,8 @@ FINAL ANDROID WATCHFACE API !!!
               4.4W2 watches are being forcibly upgraded to 5.0, it's just not worth the engineering
               to make this work.
 
+        TODO fix second-hand mode resetting itself (external bug report, can't reproduce yet in emulator)
+
     TODO task 2: calendar
         TODO Move from calendar multithreading to ASyncTask (as in the provided example)
         - this is probably the place to start, as it's going to be more power efficient and

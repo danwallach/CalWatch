@@ -26,6 +26,7 @@ import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.PorterDuff;
 import android.graphics.Rect;
+import android.hardware.location.GeofenceHardwareRequest;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
@@ -157,7 +158,7 @@ public class CalWatchFaceService extends CanvasWatchFaceService {
                     .setBackgroundVisibility(WatchFaceStyle.BACKGROUND_VISIBILITY_INTERRUPTIVE)
                     .setShowSystemUiTime(false)
                     .setStatusBarGravity(Gravity.CENTER)
-                    .setHotwordIndicatorGravity(Gravity.CENTER)
+                    .setHotwordIndicatorGravity(Gravity.CENTER_HORIZONTAL | Gravity.TOP)
                     .build());
 
             BatteryWrapper.init(CalWatchFaceService.this);
