@@ -167,7 +167,7 @@ public class PhoneActivity extends Activity implements Observer {
         WakeupReceiver.kickStart(this);        // bring it up, if it's not already up
         WatchCalendarService.kickStart(this);  // bring it up, if it's not already up
 
-        loadPreferences();
+        PreferencesHelper.loadPreferences(this);
 
         onResume();
         Log.v(TAG, "activity setup complete");
@@ -252,53 +252,12 @@ public class PhoneActivity extends Activity implements Observer {
         return super.onOptionsItemSelected(item);
     }
 
-    public void savePreferences() {
-        Log.v(TAG, "savePreferences");
-        SharedPreferences prefs = getSharedPreferences("org.dwallach.calwatch.prefs", MODE_PRIVATE);
-        SharedPreferences.Editor editor = prefs.edit();
-
-        ClockState clockState = getClockState();
-        editor.putInt("faceMode", clockState.getFaceMode());
-        editor.putBoolean("showSeconds", clockState.getShowSeconds());
-        editor.putBoolean("showDayDate", clockState.getShowDayDate());
-
-        if(!editor.commit())
-            Log.v(TAG, "savePreferences commit failed ?!");
-    }
-
-    public void loadPreferences() {
-        Log.v(TAG, "loadPreferences");
-
-        ClockState clockState = getClockState();
-
-        SharedPreferences prefs = getSharedPreferences("org.dwallach.calwatch.prefs", MODE_PRIVATE);
-        int faceMode = prefs.getInt("faceMode", Constants.DefaultWatchFace); // ClockState.FACE_TOOL
-        boolean showSeconds = prefs.getBoolean("showSeconds", Constants.DefaultShowSeconds);
-        boolean showDayDate = prefs.getBoolean("showDayDate", Constants.DefaultShowDayDate);
-
-        Log.v(TAG, "faceMode: " + faceMode + ", showSeconds: " + showSeconds + ", showDayDate: " + showDayDate);
-
-        clockState.setFaceMode(faceMode);
-        clockState.setShowSeconds(showSeconds);
-        clockState.setShowDayDate(showDayDate);
-
-        clockState.pingObservers(); // we only need to do this once, versus multiple times when done internally
-
-        if (toolButton == null || numbersButton == null || liteButton == null || secondsSwitch == null || dayDateSwitch == null) {
-            Log.v(TAG, "loadPreferences has no widgets to update");
-            return;
-        }
-
-
-        // setFaceModeUI(faceMode, showSeconds, showDayDate);
-    }
-
     @Override
     public void update(Observable observable, Object data) {
         // somebody changed *something* in the ClockState, causing us to get called
         Log.v(TAG, "Noticed a change in the clock state; saving preferences");
         setFaceModeUI(getClockState().getFaceMode(), getClockState().getShowSeconds(), getClockState().getShowDayDate());
-        savePreferences();
+        PreferencesHelper.savePreferences(this);
     }
 
 

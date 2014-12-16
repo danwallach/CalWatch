@@ -71,6 +71,8 @@ public class WatchCalendarService extends Service implements Observer {
         getClockState();
         wearSender = new WearSender(this);
 
+        PreferencesHelper.loadPreferences(this);
+
         Log.v(TAG, "starting calendar fetcher");
         if (singletonService != null) {
             Log.v(TAG, "whoa, multiple services!");
