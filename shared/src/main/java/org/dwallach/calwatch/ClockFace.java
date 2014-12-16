@@ -225,6 +225,16 @@ public class ClockFace implements Observer {
         // draw the calendar wedges first, at the bottom of the stack, then the face indices
         drawCalendar(canvas);
         drawFace(canvas);
+
+        // Temporary kludge for peek card until we come up with something better:
+        // if there's a peek card *and* we're in low-bit ambient mode, *then* draw
+        // a solid black box behind the peek card, which would otherwise be transparent.
+        // Note that we're doing this *before* drawing the hands but *after* drawing
+        // everything else. I want the hands to not be chopped off, even though everything
+        // else will be.
+        if(peekCardRect != null && ambientLowBit && getAmbientMode())
+            canvas.drawRect(peekCardRect, black);
+
         drawHands(canvas);
 
         // something a real watch can't do: float the text over the hands
@@ -236,10 +246,6 @@ public class ClockFace implements Observer {
         // -- note that the watch draws its own battery meter, so this is really just window
         //    dressing, unnecessary in ambient mode
         if(!getAmbientMode()) drawBattery(canvas);
-
-        // temporary kludge for peek card until we come up with something better
-        if(peekCardRect != null)
-            canvas.drawRect(peekCardRect, black);
 
         TimeWrapper.frameEnd();
     }
