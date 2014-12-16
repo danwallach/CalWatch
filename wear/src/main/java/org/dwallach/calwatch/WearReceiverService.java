@@ -46,6 +46,7 @@ public class WearReceiverService extends WearableListenerService implements Goog
     public static WearReceiverService getSingleton() { return singleton; }
 
     private void newEventBytes(byte[] eventBytes) {
+        Log.v(TAG, "newEventBytes: " + eventBytes.length);
         ClockState clockState = ClockState.getSingleton();
         if(clockState == null) {
             Log.e(TAG, "whoa, no ClockState yet?!");
@@ -260,11 +261,12 @@ public class WearReceiverService extends WearableListenerService implements Goog
 
 
     public static void kickStart(Context context) {
+        Log.v(TAG, "kickStart");
         // start the calendar service, if it's not already running
         if(getSingleton() == null) {
+            Log.v(TAG, "launching WearReceiverService via intent");
             Intent serviceIntent = new Intent(context, WearReceiverService.class);
             context.startService(serviceIntent);
         }
-
     }
 }
