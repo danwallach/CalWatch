@@ -235,7 +235,6 @@ public class CalWatchFaceService extends CanvasWatchFaceService {
         }
 
         private long drawCounter = 0;
-        private int peekHeight = 0;
 
         @Override
         public void onDraw(Canvas canvas, Rect bounds) {
@@ -277,8 +276,7 @@ public class CalWatchFaceService extends CanvasWatchFaceService {
             if (Log.isLoggable(TAG, Log.DEBUG)) {
                 Log.d(TAG, "onPeekCardPositionUpdate: " + bounds + " (" + bounds.width() + ", " + bounds.height() + ")");
             }
-
-            // TODO: do something with the peek card bounds
+            clockFace.setPeekCard(bounds);
 
             invalidate();
         }

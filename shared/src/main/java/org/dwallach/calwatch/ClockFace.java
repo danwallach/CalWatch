@@ -10,6 +10,7 @@ import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
 import android.graphics.Path;
+import android.graphics.Rect;
 import android.graphics.RectF;
 import android.os.Build;
 import android.util.Log;
@@ -52,9 +53,15 @@ public class ClockFace implements Observer {
 
     private ClockState clockState;
 
+    private Rect peekCardRect;
+
     // set for Moto 360
     public void setMissingBottomPixels(int missingBottomPixels) {
         this.missingBottomPixels = missingBottomPixels;
+    }
+
+    public void setPeekCardRect(Rect rect) {
+        peekCardRect = rect;
     }
 
     private Paint newPaint() {
@@ -230,6 +237,9 @@ public class ClockFace implements Observer {
         //    dressing, unnecessary in ambient mode
         if(!getAmbientMode()) drawBattery(canvas);
 
+        // temporary kludge for peek card until we come up with something better
+        if(peekCardRect != null)
+            canvas.drawRect(peekCardRect, blackNoAA);
 
         TimeWrapper.frameEnd();
     }
