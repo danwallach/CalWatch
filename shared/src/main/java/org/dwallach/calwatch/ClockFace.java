@@ -239,7 +239,7 @@ public class ClockFace implements Observer {
 
         // temporary kludge for peek card until we come up with something better
         if(peekCardRect != null)
-            canvas.drawRect(peekCardRect, blackNoAA);
+            canvas.drawRect(peekCardRect, black);
 
         TimeWrapper.frameEnd();
     }
