@@ -276,7 +276,7 @@ public class CalWatchFaceService extends CanvasWatchFaceService {
             if (Log.isLoggable(TAG, Log.DEBUG)) {
                 Log.d(TAG, "onPeekCardPositionUpdate: " + bounds + " (" + bounds.width() + ", " + bounds.height() + ")");
             }
-            clockFace.setPeekCard(bounds);
+            clockFace.setPeekCardRect(bounds);
 
             invalidate();
         }
