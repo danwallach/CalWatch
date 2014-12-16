@@ -79,9 +79,8 @@ public class CalWatchFaceService extends CanvasWatchFaceService {
             public void handleMessage(Message message) {
                 switch (message.what) {
                     case MSG_UPDATE_TIME:
-                        if (Log.isLoggable(TAG, Log.VERBOSE)) {
-                            Log.v(TAG, "updating time");
-                        }
+                        Log.v(TAG, "updating time");
+
                         invalidate();
                         if (shouldTimerBeRunning()) {
                             long timeMs = System.currentTimeMillis();
@@ -115,9 +114,8 @@ public class CalWatchFaceService extends CanvasWatchFaceService {
          * or stops it if it shouldn't be running but currently is.
          */
         private void updateTimer() {
-            if (Log.isLoggable(TAG, Log.DEBUG)) {
-                Log.d(TAG, "updateTimer");
-            }
+            Log.d(TAG, "updateTimer");
+
             mUpdateTimeHandler.removeMessages(MSG_UPDATE_TIME);
             if (shouldTimerBeRunning()) {
                 mUpdateTimeHandler.sendEmptyMessage(MSG_UPDATE_TIME);
@@ -135,19 +133,10 @@ public class CalWatchFaceService extends CanvasWatchFaceService {
             invalidate();
         }
 
-        /**
-         * Whether the display supports fewer bits for each color in ambient mode. When true, we
-         * disable anti-aliasing in ambient mode.
-         */
-        boolean lowBitAmbientMode;
-        boolean muteMode;
-
-
         @Override
         public void onCreate(SurfaceHolder holder) {
-            if (Log.isLoggable(TAG, Log.DEBUG)) {
-                Log.d(TAG, "onCreate");
-            }
+            Log.d(TAG, "onCreate");
+
             super.onCreate(holder);
 
             // announce our version number to the logs
@@ -188,28 +177,27 @@ public class CalWatchFaceService extends CanvasWatchFaceService {
         @Override
         public void onPropertiesChanged(Bundle properties) {
             super.onPropertiesChanged(properties);
-            lowBitAmbientMode = properties.getBoolean(PROPERTY_LOW_BIT_AMBIENT, false);
+
+            boolean lowBitAmbientMode = properties.getBoolean(PROPERTY_LOW_BIT_AMBIENT, false);
+            boolean burnInProtection = properties.getBoolean(PROPERTY_BURN_IN_PROTECTION, false);
             clockFace.setAmbientLowBit(lowBitAmbientMode);
-            if (Log.isLoggable(TAG, Log.DEBUG)) {
-                Log.d(TAG, "onPropertiesChanged: low-bit ambient = " + lowBitAmbientMode);
-            }
+            clockFace.setBurnInProtection(burnInProtection);
+            Log.d(TAG, "onPropertiesChanged: low-bit ambient = " + lowBitAmbientMode + ", burn-in protection = " + burnInProtection);
         }
 
         @Override
         public void onTimeTick() {
             super.onTimeTick();
-            if (Log.isLoggable(TAG, Log.DEBUG)) {
-                Log.d(TAG, "onTimeTick: ambient = " + isInAmbientMode());
-            }
+            Log.d(TAG, "onTimeTick: ambient = " + isInAmbientMode());
+
             invalidate();
         }
 
         @Override
         public void onAmbientModeChanged(boolean inAmbientMode) {
             super.onAmbientModeChanged(inAmbientMode);
-            if (Log.isLoggable(TAG, Log.DEBUG)) {
-                Log.d(TAG, "onAmbientModeChanged: " + inAmbientMode);
-            }
+
+            Log.d(TAG, "onAmbientModeChanged: " + inAmbientMode);
             clockFace.setAmbientMode(inAmbientMode);
 
             // If we just switched *to* ambient mode, then we've got some FPS data to report
@@ -238,9 +226,7 @@ public class CalWatchFaceService extends CanvasWatchFaceService {
 
         @Override
         public void onDraw(Canvas canvas, Rect bounds) {
-//            if (Log.isLoggable(TAG, Log.VERBOSE)) {
 //                Log.v(TAG, "onDraw");
-//            }
             drawCounter++;
 
             int width = bounds.width();
@@ -273,9 +259,8 @@ public class CalWatchFaceService extends CanvasWatchFaceService {
         @Override
         public void onPeekCardPositionUpdate(Rect bounds) {
             super.onPeekCardPositionUpdate(bounds);
-            if (Log.isLoggable(TAG, Log.DEBUG)) {
-                Log.d(TAG, "onPeekCardPositionUpdate: " + bounds + " (" + bounds.width() + ", " + bounds.height() + ")");
-            }
+            Log.d(TAG, "onPeekCardPositionUpdate: " + bounds + " (" + bounds.width() + ", " + bounds.height() + ")");
+
             clockFace.setPeekCardRect(bounds);
 
             invalidate();

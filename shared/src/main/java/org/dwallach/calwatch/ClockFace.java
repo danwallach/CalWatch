@@ -35,6 +35,7 @@ public class ClockFace implements Observer {
 
     private boolean showSeconds = true, showDayDate = true;
     private boolean ambientLowBit = forceAmbientLowBit;
+    private boolean burnInProtection = false;
     private boolean muteMode = false;
 
     private static final float freqUpdate = 5;  // 5 Hz, or 0.20sec for second hand
@@ -922,5 +923,9 @@ public class ClockFace implements Observer {
         // this is cheap enough that we can afford to do it at 60Hz
         this.maxLevel = clockState.getMaxLevel();
         this.eventList = clockState.getVisibleLocalEventList();
+    }
+
+    public void setBurnInProtection(boolean burnInProtection) {
+        this.burnInProtection = burnInProtection;
     }
 }

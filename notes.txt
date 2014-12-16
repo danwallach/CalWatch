@@ -72,6 +72,8 @@ FINAL ANDROID WATCHFACE API !!!
                 DONE! hollow out the time wedges
                 DONE! disable anti-aliasing
             NO! distinct behavior for "mute" mode? Do we care? No!
+        TODO burn-in detection
+            TODO bring in watchface inside 10 pixel boundary when burn-in protection is necessary
         DONE! specify where the battery-charging indicator goes
             - http://developer.android.com/training/wearables/watch-faces/issues.html
         TODO reshape around peek card?
@@ -80,6 +82,8 @@ FINAL ANDROID WATCHFACE API !!!
 
             - Given how large the cards are, we probably don't want to mess with the Moto 360 hack
               but instead just want to draw the face small, completely round, and be done with it.
+
+            - Current kludge: draw a solid black rectangle inside the rect we're given
 
         TODO general-purpose solution to the flat-bottom Moto360 hack
         http://developer.android.com/training/wearables/watch-faces/issues.html
