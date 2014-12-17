@@ -236,7 +236,7 @@ public class ClockFace implements Observer {
         // Note that we're doing this *before* drawing the hands but *after* drawing
         // everything else. I want the hands to not be chopped off, even though everything
         // else will be.
-        if(peekCardRect != null && ambientLowBit && getAmbientMode())
+        if(peekCardRect != null && getAmbientMode())
             canvas.drawRect(peekCardRect, black);
 
         drawHands(canvas);
