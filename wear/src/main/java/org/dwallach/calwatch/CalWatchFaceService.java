@@ -144,7 +144,7 @@ public class CalWatchFaceService extends CanvasWatchFaceService {
                     .setBackgroundVisibility(WatchFaceStyle.BACKGROUND_VISIBILITY_INTERRUPTIVE)
                     .setShowSystemUiTime(false)
                     .setStatusBarGravity(Gravity.CENTER)
-                    .setHotwordIndicatorGravity(Gravity.CENTER)
+                    .setHotwordIndicatorGravity(Gravity.CENTER_HORIZONTAL) // I'd really like vertical to be 30% from top but can't say that here
                     .setViewProtection(WatchFaceStyle.PROTECT_HOTWORD_INDICATOR)
                     .build());
 
