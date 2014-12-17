@@ -21,12 +21,10 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.res.Resources;
-import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.PorterDuff;
 import android.graphics.Rect;
-import android.hardware.location.GeofenceHardwareRequest;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
@@ -40,7 +38,6 @@ import android.view.WindowInsets;
 
 import java.util.Observable;
 import java.util.Observer;
-import java.util.TimeZone;
 import java.util.concurrent.TimeUnit;
 
 /**
@@ -266,23 +263,18 @@ public class CalWatchFaceService extends CanvasWatchFaceService {
             invalidate();
         }
 
-        // The below code is *supposed* to let us capture the "chin size" to deal with the Moto 360's
-        // flat tire bottom. Naturally, this fails to compile, saying there's no such method as
-        // onApplyWindowInsets in the superclass.
-        //
-        // Sigh.
-        //
-        // TODO: make onApplyWindowInsets work
-
-        /*
         @Override
         public void onApplyWindowInsets(WindowInsets insets) {
             super.onApplyWindowInsets(insets);
 
             boolean isRound = insets.isRound();
             int chinSize = insets.getSystemWindowInsetBottom();
+
+            Log.v(TAG, "onApplyWindowInsets (round: " + isRound + "), (chinSize: " + chinSize + ")");
+
+            clockFace.setRound(isRound);
+            clockFace.setMissingBottomPixels(chinSize);
         }
-        */
 
         @Override
         public void onVisibilityChanged(boolean visible) {

@@ -42,13 +42,13 @@ def getVersionName = { ->
 
 
 android {
-    compileSdkVersion 20
+    compileSdkVersion 21
     buildToolsVersion "21.1.0"
 
     defaultConfig {
         applicationId "org.dwallach.calwatch"
-        minSdkVersion 20
-        targetSdkVersion 20
+        minSdkVersion 21
+        targetSdkVersion 21
         versionCode getVersionCode()
         versionName getVersionName()
     }

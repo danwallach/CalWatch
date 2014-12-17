@@ -36,6 +36,7 @@ public class ClockFace implements Observer {
     private boolean showSeconds = true, showDayDate = true;
     private boolean ambientLowBit = forceAmbientLowBit;
     private boolean burnInProtection = false;
+    private boolean round = false;
     private boolean muteMode = false;
 
     private static final float freqUpdate = 5;  // 5 Hz, or 0.20sec for second hand
@@ -210,6 +211,8 @@ public class ClockFace implements Observer {
         // PRODUCT: metallica
         // TYPE: user
 
+        // hypothetically this isn't necessary any more in the Wear 5 universe, where there's
+        // a callback to tell you the number, but we'll leave it here for now.
         if(Build.MODEL.contains("Moto 360") || Build.PRODUCT.contains("metallica")) {
             Log.v(TAG, "Moto 360 detected. Flat bottom hack enabled.");
             setMissingBottomPixels(30);
@@ -927,5 +930,9 @@ public class ClockFace implements Observer {
 
     public void setBurnInProtection(boolean burnInProtection) {
         this.burnInProtection = burnInProtection;
+    }
+
+    public void setRound(boolean round) {
+        this.round = round;
     }
 }
