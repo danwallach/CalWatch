@@ -186,8 +186,11 @@ public class CalWatchFaceService extends CanvasWatchFaceService {
         @Override
         public void onTimeTick() {
             super.onTimeTick();
-            Log.d(TAG, "onTimeTick: ambient = " + isInAmbientMode());
+//            Log.d(TAG, "onTimeTick: ambient = " + isInAmbientMode());
 
+            // this happens exactly once per minute; we're redrawing more often than that,
+            // regardless, but this also provides a backstop if something is busted or buggy,
+            // so we'll keep it in.
             invalidate();
         }
 
