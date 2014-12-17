@@ -9,7 +9,8 @@
 
 # Add any project specific keep options here:
 
--keep public class org.dwallach.calwatch.WearActivity
+-keep public class org.dwallach.calwatch.CalWatchFaceService
+-keep public class org.dwallach.calwatch.CalWatchFaceService.Engine
 -keep public class org.dwallach.calwatch.WearReceiverService
 -keep public class org.dwallach.calwatch.proto.**
 
