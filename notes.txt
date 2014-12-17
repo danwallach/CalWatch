@@ -85,6 +85,11 @@ FINAL ANDROID WATCHFACE API !!!
 
             - Current kludge: draw a solid black rectangle inside the rect we're given
 
+            - Potential real solution: extend the Moto 360 flat-bottom hack
+              - Option 1: same watch center, just increase missingBottomPixels
+              - Option 2: move watch center up partly
+
+
         DONE? general-purpose solution to the flat-bottom Moto360 hack
         http://developer.android.com/training/wearables/watch-faces/issues.html
 
