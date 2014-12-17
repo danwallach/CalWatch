@@ -73,8 +73,7 @@ FINAL ANDROID WATCHFACE API !!!
                 DONE! hollow out the time wedges
                 DONE! disable anti-aliasing
             NO! distinct behavior for "mute" mode? Do we care? No!
-        TODO burn-in detection
-            TODO bring in watchface inside 10 pixel boundary when burn-in protection is necessary
+        DONE? bring in watchface inside 10 pixel boundary when burn-in protection is necessary
         DONE! specify where the battery-charging indicator goes
             - http://developer.android.com/training/wearables/watch-faces/issues.html
         TODO reshape around peek card?
@@ -114,7 +113,7 @@ FINAL ANDROID WATCHFACE API !!!
             - The example code for the one-second-ticking hand was easy to repurpose to
               tick once every twelve hands when we're *not* doing the whole sweeping second hand
 
-        TODO remove MyViewAnim and WearActivity from wear build (mobile only, for now)
+        DONE! remove MyViewAnim and WearActivity from wear build (mobile only, for now)
             - Hypothetically we could just keep this around and add more stuff to the manifest
               to allow "old school" and "new school" watchfaces to run, but given that all the
               4.4W2 watches are being forcibly upgraded to 5.0, it's just not worth the engineering

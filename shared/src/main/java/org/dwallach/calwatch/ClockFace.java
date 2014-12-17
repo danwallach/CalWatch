@@ -406,12 +406,19 @@ public class ClockFace implements Observer {
         if(localFaceMode != facePathCacheMode || p == null) {
 
             p = new Path();
-            Log.v(TAG, "rendering new face, faceMode(" + localFaceMode + ")");
+
+            // when burn-in protection is enabled, Wear reserves the right to shove the watchface around +/- ten
+            // pixels in any given direction, so we're going to pull the radius in by ten pixels. This requires
+            // the whole 10.0/radius business to convert back to our unit-radius circle thing.
+
+            float strokeOuterRadius = 1.0f - ((burnInProtection && getAmbientMode())? 10.0f/radius : 0.0f);
+
+            Log.v(TAG, "rendering new face, faceMode(" + localFaceMode + "), strokeOuterRadius(" + strokeOuterRadius + ")");
 
             if (localFaceMode == ClockState.FACE_TOOL)
                 for (int i = 1; i < 60; i++)
                     if(i%5 != 0)
-                        drawRadialLine(p, mySmWhite.getStrokeWidth(), i, .9f, 1.0f, false, bottomHack);
+                        drawRadialLine(p, mySmWhite.getStrokeWidth(), i, .9f, strokeOuterRadius, false, bottomHack);
 
             float strokeWidth;
 
@@ -421,14 +428,15 @@ public class ClockFace implements Observer {
                 strokeWidth = myWhite.getStrokeWidth();
 
 
+
             for (int i = 0; i < 60; i += 5) {
                 if (i == 0) { // top of watch: special
                     if (localFaceMode != ClockState.FACE_NUMBERS) {
-                        drawRadialLine(p, strokeWidth, -0.4f, .8f, 1.0f, true, false);
-                        drawRadialLine(p, strokeWidth, 0.4f, .8f, 1.0f, true, false);
+                        drawRadialLine(p, strokeWidth, -0.4f, .8f, strokeOuterRadius, true, false);
+                        drawRadialLine(p, strokeWidth, 0.4f, .8f, strokeOuterRadius, true, false);
                     }
                 } else if (i == 45 && !getAmbientMode() && showDayDate) { // 9 o'clock, don't extend into the inside
-                    drawRadialLine(p, strokeWidth, i, 0.9f, 1.0f, false, false);
+                    drawRadialLine(p, strokeWidth, i, 0.9f, strokeOuterRadius, false, false);
                 } else {
                     // we want lines for 1, 2, 4, 5, 7, 8, 10, and 11 no matter what
                     if (localFaceMode != ClockState.FACE_NUMBERS || !(i == 15 || i == 30 || i == 45)) {
@@ -436,9 +444,9 @@ public class ClockFace implements Observer {
                         // going to make the 6 o'clock index line the same length as the other lines
                         // so it doesn't stand out as much
                         if (i == 30 && bottomHack)
-                            drawRadialLine(p, strokeWidth, i, .9f, 1.0f, false, bottomHack);
+                            drawRadialLine(p, strokeWidth, i, .9f, strokeOuterRadius, false, bottomHack);
                         else
-                            drawRadialLine(p, strokeWidth, i, .8f, 1.0f, false, bottomHack);
+                            drawRadialLine(p, strokeWidth, i, .8f, strokeOuterRadius, false, bottomHack);
                     }
                 }
             }
