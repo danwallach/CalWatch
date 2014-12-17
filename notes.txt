@@ -60,7 +60,7 @@ FINAL ANDROID WATCHFACE API !!!
     DONE! task 0: prior work
         DONE! boot Wear 5 emulator, paired with tablet
         DONE! Does the existing release1c APK break on Wear 5? IT WORKS!
-        TODO ambient mode on original APK seems broken (based on hitting "F7"), probably not worth fixing
+        WONTFIX ambient mode on original APK seems broken (based on hitting "F7"), probably not worth fixing
     TODO task 1: graphics
         DONE! Identify best starting place (*not* CalendarWatchFaceService)
         DONE! 1Hz refresh (no calendar at all)

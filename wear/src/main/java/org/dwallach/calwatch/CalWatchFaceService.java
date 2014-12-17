@@ -76,7 +76,7 @@ public class CalWatchFaceService extends CanvasWatchFaceService {
             public void handleMessage(Message message) {
                 switch (message.what) {
                     case MSG_UPDATE_TIME:
-                        Log.v(TAG, "updating time");
+//                        Log.v(TAG, "updating time");
 
                         invalidate();
                         if (shouldTimerBeRunning()) {
