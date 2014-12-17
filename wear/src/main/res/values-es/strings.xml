@@ -3,6 +3,6 @@
 
     <string name="app_name">CalWatch</string>
     <string name="nophone_title">Configuración de CalWatch</string>
-    <string name="nophone_text">Por favor, para completar la configuración,, ejecutar CalWatch esde dentro Android Wear en tu móvil.</string>
+    <string name="nophone_text">Por favor, para completar la configuración, ejecutar CalWatch esde dentro Android Wear en tu móvil.</string>
 
 </resources>
