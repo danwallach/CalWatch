@@ -231,7 +231,7 @@ public class ClockFace implements Observer {
         drawFace(canvas);
 
         // Temporary kludge for peek card until we come up with something better:
-        // if there's a peek card *and* we're in low-bit ambient mode, *then* draw
+        // if there's a peek card *and* we're in ambient mode, *then* draw
         // a solid black box behind the peek card, which would otherwise be transparent.
         // Note that we're doing this *before* drawing the hands but *after* drawing
         // everything else. I want the hands to not be chopped off, even though everything

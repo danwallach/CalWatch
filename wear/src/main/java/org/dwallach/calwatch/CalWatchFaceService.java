@@ -144,7 +144,8 @@ public class CalWatchFaceService extends CanvasWatchFaceService {
                     .setBackgroundVisibility(WatchFaceStyle.BACKGROUND_VISIBILITY_INTERRUPTIVE)
                     .setShowSystemUiTime(false)
                     .setStatusBarGravity(Gravity.CENTER)
-                    .setHotwordIndicatorGravity(Gravity.CENTER_HORIZONTAL | Gravity.TOP)
+                    .setHotwordIndicatorGravity(Gravity.CENTER)
+                    .setViewProtection(WatchFaceStyle.PROTECT_HOTWORD_INDICATOR)
                     .build());
 
             BatteryWrapper.init(CalWatchFaceService.this);
