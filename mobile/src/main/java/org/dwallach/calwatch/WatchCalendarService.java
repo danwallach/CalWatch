@@ -96,7 +96,7 @@ public class WatchCalendarService extends Service implements Observer {
                 // then decide it's time to send everything to the watch. So, no need to call
                 // sendAllToWatch() right just yet.
 
-                getClockState().setEventList(calendarFetcher.getContent().getWrappedEvents());
+                getClockState().setEventWrapperList(calendarFetcher.getContent().getWrappedEvents());
                 // sendAllToWatch();
             }
         });

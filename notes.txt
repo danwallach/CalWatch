@@ -127,16 +127,21 @@ FINAL ANDROID WATCHFACE API !!!
         DONE! fix second-hand mode resetting itself (external bug report, can't reproduce yet in emulator)
 
     TODO task 2: calendar
+        DONE! Verify that enough of the calendar exists on watch side to avoid transmission from phone
+            DONE! hack up BuildID project to dump calendar data
+        DONE! WearableCalendarContract vs. CalendarContract: what's exactly missing here?
+        - notably, the "AgendaData" example is doing a bunch of phone-side work, just like CalWatch
+        - G+ post indicates that everything I need is present, so experiments should be good
         TODO Move from calendar multithreading to ASyncTask (as in the provided example)
         - this is probably the place to start, as it's going to be more power efficient and
           yield cleaner code. Also a nice warm-up before diving into the next bits.
-        TODO WearableCalendarContract vs. CalendarContract: what's exactly missing here?
-        - notably, the "AgendaData" example is doing a bunch of phone-side work, just like CalWatch
-        TODO Verify that enough of the calendar exists on watch side to avoid transmission from phone
+        - should work on both sides
+            TODO move CalendarFetcher and CalendarResults to /shared
+            TODO deal with Wearable vs. not CalendarContract (pass one relevant value in constructor?)
         TODO Kill off serialization and transmission of calendar data (built into the watch now!)
         TODO Kill off notifications on watch side (since they'll get a perfectly useful default)
-    Secondary porting issues
         TODO Kill off Protobufs? All we've got is a couple small integers and booleans left
+    Secondary porting issues
         TODO update the slides
 
 Longer-term items

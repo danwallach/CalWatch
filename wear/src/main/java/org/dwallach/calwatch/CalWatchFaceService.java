@@ -1,4 +1,14 @@
 /*
+ * CalWatch
+ * Copyright (C) 2014 by Dan Wallach
+ * Home page: http://www.cs.rice.edu/~dwallach/calwatch/
+ * Licensing: http://www.cs.rice.edu/~dwallach/calwatch/licensing.html
+ */
+
+/*
+ * Portions of this file derived from Google's example code,
+ * subject to the following:
+ *
  * Copyright (C) 2014 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -21,13 +31,19 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.res.Resources;
+import android.database.ContentObserver;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.PorterDuff;
 import android.graphics.Rect;
+import android.net.Uri;
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
+import android.os.PowerManager;
+import android.provider.CalendarContract;
+import android.support.wearable.provider.WearableCalendarContract;
 import android.support.wearable.watchface.CanvasWatchFaceService;
 import android.support.wearable.watchface.WatchFaceService;
 import android.support.wearable.watchface.WatchFaceStyle;
@@ -36,6 +52,9 @@ import android.view.Gravity;
 import android.view.SurfaceHolder;
 import android.view.WindowInsets;
 
+import org.dwallach.calwatch.proto.WireEvent;
+
+import java.util.List;
 import java.util.Observable;
 import java.util.Observer;
 import java.util.concurrent.TimeUnit;
@@ -61,9 +80,51 @@ public class CalWatchFaceService extends CanvasWatchFaceService {
 
     private class Engine extends CanvasWatchFaceService.Engine implements Observer {
         static final int MSG_UPDATE_TIME = 0;
+        static final int MSG_LOAD_CAL = 1;
 
         private ClockFace clockFace;
         private ClockState clockState;
+
+        private AsyncTask<Void,Void,List<WireEvent>> loaderTask;
+
+        // this will fire when it's time to (re)load the calendar, launching an asynchronous
+        // task to do all the dirty work and eventually update ClockState
+        final Handler loaderHandler = new Handler() {
+            @Override
+            public void handleMessage(Message message) {
+                switch (message.what) {
+                    case MSG_LOAD_CAL:
+                        cancelLoaderTask();
+                        Log.v(TAG, "launching calendar loader task");
+                        loaderTask = new CalLoaderTask();
+                        loaderTask.execute();
+                        break;
+                    default:
+                        Log.e(TAG, "unexpected message: " + message.toString());
+                }
+            }
+        };
+
+        private boolean isReceiverRegistered;
+
+        private BroadcastReceiver broadcastReceiver = new BroadcastReceiver() {
+            @Override
+            public void onReceive(Context context, Intent intent) {
+                Log.v(TAG, "receiver: got intent message");
+                if (Intent.ACTION_PROVIDER_CHANGED.equals(intent.getAction())
+                        && WearableCalendarContract.CONTENT_URI.equals(intent.getData())) {
+                    cancelLoaderTask();
+                    loaderHandler.sendEmptyMessage(MSG_LOAD_CAL);
+                }
+            }
+        };
+
+        private void cancelLoaderTask() {
+            if (loaderTask != null) {
+                loaderTask.cancel(true);
+            }
+        }
+
 
         /**
          * Handler to tick once every 12 seconds.
@@ -170,7 +231,41 @@ public class CalWatchFaceService extends CanvasWatchFaceService {
             // start the background service, if it's not already running
             WearReceiverService.kickStart(CalWatchFaceService.this);
 
+            // hook into watching the calendar (code borrowed from Google's calendar wear app)
+            IntentFilter filter = new IntentFilter(Intent.ACTION_PROVIDER_CHANGED);
+            filter.addDataScheme("content");
+            filter.addDataAuthority(WearableCalendarContract.AUTHORITY, null);
+            registerReceiver(broadcastReceiver, filter);
+            isReceiverRegistered = true;
+
+//            ctx.getContentResolver().registerContentObserver(CalendarContract.Events.CONTENT_URI, true, observer);
+
         }
+
+        /*
+         * code stolen from: http://www.grokkingandroid.com/use-contentobserver-to-listen-to-changes/
+         */
+        /*
+        class CalendarObserver extends ContentObserver {
+            public CalendarObserver() {
+                super(null);
+            }
+
+
+            @Override
+            public void onChange(boolean selfChange) {
+
+                this.onChange(selfChange, null);
+            }
+
+            @Override
+
+            public void onChange(boolean selfChange, Uri uri) {
+                if(loaderHandler != null)
+                    loaderHandler.sendEmptyMessage(MSG_LOAD_CAL);
+            }
+        }
+        */
 
         @Override
         public void onPropertiesChanged(Bundle properties) {
@@ -254,6 +349,13 @@ public class CalWatchFaceService extends CanvasWatchFaceService {
         @Override
         public void onDestroy() {
             mUpdateTimeHandler.removeMessages(MSG_UPDATE_TIME);
+
+            if (isReceiverRegistered) {
+                unregisterReceiver(broadcastReceiver);
+                isReceiverRegistered = false;
+            }
+            loaderHandler.removeMessages(MSG_LOAD_CAL);
+
             super.onDestroy();
         }
 
@@ -295,6 +397,10 @@ public class CalWatchFaceService extends CanvasWatchFaceService {
                 invalidate();
             }
 
+            if (visible) {
+            } else {
+            }
+
             // If we just switched *to* not visible mode, then we've got some FPS data to report
             // to the logs. Otherwise, we're coming *back* from invisible mode, so it's a good
             // time to reset the counters.
@@ -305,33 +411,45 @@ public class CalWatchFaceService extends CanvasWatchFaceService {
 
         }
 
-        final BroadcastReceiver mTimeZoneReceiver = new BroadcastReceiver() {
+        /**
+         * Asynchronous task to load the calendar instances.
+         */
+        private class CalLoaderTask extends AsyncTask<Void, Void, List<WireEvent>> {
+            private PowerManager.WakeLock wakeLock;
+
             @Override
-            public void onReceive(Context context, Intent intent) {
-                // When we redraw, we ask the system to convert to local time and we
-                // do it every time. The only reason we're registering for this callback
-                // is so we'll know right the second that there's a new timezone and
-                // we'll be slightly more reactive about it.
+            protected List<WireEvent> doInBackground(Void... voids) {
+                PowerManager powerManager = (PowerManager) getSystemService(POWER_SERVICE);
+                wakeLock = powerManager.newWakeLock(
+                        PowerManager.PARTIAL_WAKE_LOCK, "CalWatchWakeLock");
+                wakeLock.acquire();
+
+                return CalendarFetcher.loadContent(CalWatchFaceService.this);
+            }
+
+            @Override
+            protected void onPostExecute(List<WireEvent> results) {
+                releaseWakeLock();
+
+                try {
+                    ClockState.getSingleton().setWireEventList(results);
+                } catch(Throwable t) {
+                    Log.e(TAG, "unexpected failure setting wire event list from calendar");
+                }
                 invalidate();
             }
-        };
-        boolean mRegisteredTimeZoneReceiver = false;
 
-        private void registerReceiver() {
-            if (mRegisteredTimeZoneReceiver) {
-                return;
+            @Override
+            protected void onCancelled() {
+                releaseWakeLock();
             }
-            mRegisteredTimeZoneReceiver = true;
-            IntentFilter filter = new IntentFilter(Intent.ACTION_TIMEZONE_CHANGED);
-            CalWatchFaceService.this.registerReceiver(mTimeZoneReceiver, filter);
-        }
 
-        private void unregisterReceiver() {
-            if (!mRegisteredTimeZoneReceiver) {
-                return;
+            private void releaseWakeLock() {
+                if (wakeLock != null) {
+                    wakeLock.release();
+                    wakeLock = null;
+                }
             }
-            mRegisteredTimeZoneReceiver = false;
-            CalWatchFaceService.this.unregisterReceiver(mTimeZoneReceiver);
         }
     }
 }

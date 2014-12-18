@@ -6,8 +6,6 @@
  */
 package org.dwallach.calwatch;
 
-import android.content.Context;
-import android.text.format.DateUtils;
 import android.util.Log;
 
 import com.squareup.wire.Wire;
@@ -19,7 +17,6 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Observable;
-import java.util.concurrent.locks.Lock;
 
 public class ClockState extends Observable {
     private final static String TAG = "ClockState";
@@ -99,7 +96,7 @@ public class ClockState extends Observable {
      * which is in GMT time, *not* local time.
      * @param eventList list of events (GMT time)
      */
-    public void setEventList(List<EventWrapper> eventList) {
+    public void setEventWrapperList(List<EventWrapper> eventList) {
         LockWrapper.lock();
         try {
             this.eventList = eventList;
@@ -110,13 +107,13 @@ public class ClockState extends Observable {
         }
     }
 
-    private void setWireEventListHelper(List<WireEvent> wireEventList) {
+    public void setWireEventList(List<WireEvent> wireEventList) {
         List<EventWrapper> results = new ArrayList<EventWrapper>();
 
         for (WireEvent wireEvent : wireEventList)
             results.add(new EventWrapper(wireEvent));
 
-        setEventList(results);
+        setEventWrapperList(results);
         Log.v(TAG, "new calendar event list, " + results.size() + " entries");
     }
 
@@ -260,8 +257,8 @@ public class ClockState extends Observable {
                 return;
             }
 
-            if (wireUpdate.newEvents)
-                setWireEventListHelper(wireUpdate.events);
+//            if (wireUpdate.newEvents)
+//                setWireEventList(wireUpdate.events);
 
             setFaceMode(wireUpdate.faceMode);
             setShowSeconds(wireUpdate.showSecondHand);
