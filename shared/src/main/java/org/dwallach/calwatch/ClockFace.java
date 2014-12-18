@@ -15,7 +15,7 @@ import android.graphics.RectF;
 import android.os.Build;
 import android.util.Log;
 
-import org.dwallach.calwatch.proto.WireEvent;
+import org.dwallach.calwatch.WireEvent;
 
 import java.util.List;
 import java.util.Observable;

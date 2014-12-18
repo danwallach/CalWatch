@@ -9,7 +9,7 @@ package org.dwallach.calwatch;
 import android.graphics.Paint;
 import android.util.Log;
 
-import org.dwallach.calwatch.proto.WireEvent;
+import org.dwallach.calwatch.WireEvent;
 
 /**
  * Created by dwallach on 8/25/14.

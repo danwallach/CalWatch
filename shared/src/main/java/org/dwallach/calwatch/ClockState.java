@@ -8,10 +8,8 @@ package org.dwallach.calwatch;
 
 import android.util.Log;
 
-import com.squareup.wire.Wire;
-
-import org.dwallach.calwatch.proto.WireEvent;
-import org.dwallach.calwatch.proto.WireUpdate;
+import org.dwallach.calwatch.WireEvent;
+import org.dwallach.calwatch.WireUpdate;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -240,23 +238,23 @@ public class ClockState extends Observable {
         LockWrapper.lock();
 
         try {
-            Wire wire = new Wire();
             WireUpdate wireUpdate = null;
 
             try {
-                wireUpdate = (WireUpdate) wire.parseFrom(eventBytes, WireUpdate.class);
+                wireUpdate = WireUpdate.parseFrom(eventBytes);
                 wireInitialized = true;
             } catch (IOException ioe) {
-                Log.e(TAG, "parse failure on protobuf: nbytes(" + eventBytes.length + "), error(" + ioe.toString() + ")");
+                Log.e(TAG, "parse failure on protobuf: nbytes(" + eventBytes.length + ")", ioe);
                 return;
             } catch (Exception e) {
                 if (eventBytes.length == 0)
                     Log.e(TAG, "zero-length message received!");
                 else
-                    Log.e(TAG, "some other weird failure on protobuf: nbytes(" + eventBytes.length + "), error(" + e.toString() + ")");
+                    Log.e(TAG, "some other weird failure on protobuf: nbytes(" + eventBytes.length + ")", e);
                 return;
             }
 
+            // note: we're no longer getting calendar events from the wire; we're just reading them locally
 //            if (wireUpdate.newEvents)
 //                setWireEventList(wireUpdate.events);
 
@@ -277,7 +275,8 @@ public class ClockState extends Observable {
      * @return the protobuf
      */
     public byte[] getProtobuf() {
-        WireUpdate wireUpdate = new WireUpdate(getWireEventList(), true, getFaceMode(), getShowSeconds(), getShowDayDate());
+        // note: we're now *not* sending calendar events; just the UI state
+        WireUpdate wireUpdate = new WireUpdate(getFaceMode(), getShowSeconds(), getShowDayDate());
         byte[] output = wireUpdate.toByteArray();
 
         return output;

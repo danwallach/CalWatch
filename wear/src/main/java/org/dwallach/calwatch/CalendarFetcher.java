@@ -17,7 +17,7 @@ import android.text.format.DateUtils;
 import android.util.Log;
 
 import org.dwallach.calwatch.TimeWrapper;
-import org.dwallach.calwatch.proto.WireEvent;
+import org.dwallach.calwatch.WireEvent;
 
 import java.util.ArrayList;
 import java.util.Collections;

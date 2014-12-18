@@ -52,7 +52,7 @@ import android.view.Gravity;
 import android.view.SurfaceHolder;
 import android.view.WindowInsets;
 
-import org.dwallach.calwatch.proto.WireEvent;
+import org.dwallach.calwatch.WireEvent;
 
 import java.util.List;
 import java.util.Observable;

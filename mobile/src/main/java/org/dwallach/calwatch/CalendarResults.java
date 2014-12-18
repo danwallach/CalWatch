@@ -10,7 +10,7 @@ import android.graphics.Paint;
 import android.graphics.Path;
 import android.util.SparseArray;
 
-import org.dwallach.calwatch.proto.WireEvent;
+import org.dwallach.calwatch.WireEvent;
 
 import java.util.ArrayList;
 import java.util.HashMap;

@@ -2,7 +2,7 @@ package org.dwallach.calwatch;
 
 import junit.framework.TestCase;
 
-import org.dwallach.calwatch.proto.WireEvent;
+import org.dwallach.calwatch.WireEvent;
 
 import java.util.LinkedList;
 import java.util.List;

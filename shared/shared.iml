@@ -84,8 +84,6 @@
     </content>
     <orderEntry type="jdk" jdkName="Android API 19 Platform" jdkType="Android SDK" />
     <orderEntry type="sourceFolder" forTests="false" />
-    <orderEntry type="library" exported="" name="wire-runtime-1.5.1" level="project" />
-    <orderEntry type="library" exported="" name="okio-1.0.0" level="project" />
   </component>
 </module>
 
