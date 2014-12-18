@@ -132,10 +132,6 @@ public class PhoneActivity extends Activity implements Observer {
 
         BatteryWrapper.init(this);
 
-        // the notification helper is only used on the watch, not on the phone, so we have
-        // to set it up in "no-op" mode
-        WearNotificationHelper.init(false, 0, null, null);
-
         setContentView(R.layout.activity_phone);
 
         // Core UI widgets: find 'em

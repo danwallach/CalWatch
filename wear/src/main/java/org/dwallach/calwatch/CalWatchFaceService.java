@@ -221,22 +221,19 @@ public class CalWatchFaceService extends CanvasWatchFaceService {
 
             clockState.addObserver(this); // callbacks if something changes
 
-            // initialize the thing that will bother the user if we can't see the phone
-            WearNotificationHelper.init(true,
-                    R.drawable.ic_launcher,
-                    resources.getString(R.string.nophone_title),
-                    resources.getString(R.string.nophone_text));
-
-
             // start the background service, if it's not already running
             WearReceiverService.kickStart(CalWatchFaceService.this);
 
             // hook into watching the calendar (code borrowed from Google's calendar wear app)
+            Log.v(TAG, "setting up intent receiver");
             IntentFilter filter = new IntentFilter(Intent.ACTION_PROVIDER_CHANGED);
             filter.addDataScheme("content");
             filter.addDataAuthority(WearableCalendarContract.AUTHORITY, null);
             registerReceiver(broadcastReceiver, filter);
             isReceiverRegistered = true;
+
+            // kick off initial loading of calendar state
+            loaderHandler.sendEmptyMessage(MSG_LOAD_CAL);
 
 //            ctx.getContentResolver().registerContentObserver(CalendarContract.Events.CONTENT_URI, true, observer);
 
@@ -348,6 +345,7 @@ public class CalWatchFaceService extends CanvasWatchFaceService {
 
         @Override
         public void onDestroy() {
+            Log.v(TAG, "onDestroy");
             mUpdateTimeHandler.removeMessages(MSG_UPDATE_TIME);
 
             if (isReceiverRegistered) {
@@ -388,17 +386,7 @@ public class CalWatchFaceService extends CanvasWatchFaceService {
 
 
             if (visible) {
-                // We might need to yell at the user to run the phone-side of the app
-                // so it can send us calendar data. We don't want to do this check
-                // during the onDraw loop, but it's fine here, since this only happens
-                // when our watchface becomes visibile -- a perfectly reasonable time
-                // to do a notification.
-                WearNotificationHelper.maybeNotify(CalWatchFaceService.this);
                 invalidate();
-            }
-
-            if (visible) {
-            } else {
             }
 
             // If we just switched *to* not visible mode, then we've got some FPS data to report

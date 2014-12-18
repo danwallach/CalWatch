@@ -66,6 +66,10 @@ public class CalendarFetcher {
 
         // now, get the list of events
         long begin = System.currentTimeMillis();
+
+        // The URI builder stuff here is just enough different that this code isn't going to
+        // be obviously portable between phone and watch. Long term, we obviously want to
+        // deal with this.
         Uri.Builder builder = WearableCalendarContract.Instances.CONTENT_URI.buildUpon();
         ContentUris.appendId(builder, queryStartMillis);
         ContentUris.appendId(builder, queryEndMillis);

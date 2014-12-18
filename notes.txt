@@ -137,7 +137,7 @@ FINAL ANDROID WATCHFACE API !!!
           yield cleaner code. Also a nice warm-up before diving into the next bits.
         - should work on both sides
             TODO move CalendarFetcher and CalendarResults to /shared
-            TODO deal with Wearable vs. not CalendarContract (pass one relevant value in constructor?)
+            DONE! deal with Wearable vs. not CalendarContract (pass one relevant value in constructor?)
         TODO Kill off serialization and transmission of calendar data (built into the watch now!)
         TODO Kill off notifications on watch side (since they'll get a perfectly useful default)
         TODO Kill off Protobufs? All we've got is a couple small integers and booleans left

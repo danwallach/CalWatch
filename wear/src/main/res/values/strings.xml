@@ -1,8 +1,4 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-
     <string name="app_name">CalWatch</string>
-    <string name="nophone_title">CalWatch setup</string>
-    <string name="nophone_text">Please configure CalWatch from the Android Wear app on your phone to finish setup.</string>
-
 </resources>
