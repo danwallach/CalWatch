@@ -51,7 +51,6 @@ Right-to-left support
 
 Add internationalization strings
     Currently have localized strings for Spanish, Dutch, Turkish, German; need more
-    TODO update instructions for nophone_text for non-English languages
 
 Deal with multiday events that aren't "all day" events
     TODO idea: resurrect all-day events by rendering them (and long events) as thin rings, perhaps separate from the main time wedges
@@ -106,7 +105,7 @@ FINAL ANDROID WATCHFACE API !!!
             - Notes: added the relevant bits to the XML, need to test. Kinda sucky that I have
               to do with the emulator rather than my phone.
 
-            TODO can this eliminate the need for notifications?
+            DONE! can this eliminate the need for notifications?
             - probably not, since we want to be there at boot time; but worth investigating
             - we can definitely nuke notifications once we're done with task 2
 
@@ -141,7 +140,7 @@ FINAL ANDROID WATCHFACE API !!!
             DONE! deal with Wearable vs. not CalendarContract (pass one relevant value in constructor?)
         DONE! Kill off serialization and transmission of calendar data (built into the watch now!)
         DONE! Kill off notifications on watch side (since they'll get a perfectly useful default)
-        TODO Kill off Protobufs? All we've got is a couple small integers and booleans left
+        DONE! Kill off Protobufs? All we've got is a couple small integers and booleans left
     Secondary porting issues
         TODO update the slides
 
