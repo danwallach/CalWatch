@@ -49,6 +49,9 @@ public class ClockFace implements Observer {
 
     private int missingBottomPixels = 0; // Moto 360 hack; set to non-zero number to pull up the indicia
 
+    // having all these specific colors started out making sense and has grown to a monstrosity
+    // TODO: redo all of this, probably a getter backed by a hashtable or something, e.g., get(int faceMode, int argb, boolean solid, boolean antialias, ...)
+
     private Paint white, whiteHour, whiteMinute, yellow, smWhite, smYellow, black, smBlack, smRed, gray, outlineBlack, thickOutlineBlack, superThinBlack, smTextShadow, textShadow;
     private Paint whiteNoAA, whiteHourNoAA, whiteMinuteNoAA, smWhiteNoAA, blackNoAA, smBlackNoAA, outlineBlackNoAA, thickOutlineBlackNoAA, superThinBlackNoAA, smTextShadowNoAA, textShadowNoAA;
     private Paint whiteHourInverseNoAA, whiteMinuteInverseNoAA, shadowInverseNoAA;

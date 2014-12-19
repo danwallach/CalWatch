@@ -206,7 +206,7 @@ public class CalWatchFaceService extends CanvasWatchFaceService {
                     .setShowSystemUiTime(false)
                     .setStatusBarGravity(Gravity.CENTER)
                     .setHotwordIndicatorGravity(Gravity.CENTER_HORIZONTAL) // I'd really like vertical to be 30% from top but can't say that here
-                    .setViewProtection(WatchFaceStyle.PROTECT_HOTWORD_INDICATOR)
+                    .setViewProtection(WatchFaceStyle.PROTECT_HOTWORD_INDICATOR | WatchFaceStyle.PROTECT_STATUS_BAR)
                     .build());
 
             BatteryWrapper.init(CalWatchFaceService.this);
