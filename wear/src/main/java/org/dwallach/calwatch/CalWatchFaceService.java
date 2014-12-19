@@ -239,31 +239,6 @@ public class CalWatchFaceService extends CanvasWatchFaceService {
 
         }
 
-        /*
-         * code stolen from: http://www.grokkingandroid.com/use-contentobserver-to-listen-to-changes/
-         */
-        /*
-        class CalendarObserver extends ContentObserver {
-            public CalendarObserver() {
-                super(null);
-            }
-
-
-            @Override
-            public void onChange(boolean selfChange) {
-
-                this.onChange(selfChange, null);
-            }
-
-            @Override
-
-            public void onChange(boolean selfChange, Uri uri) {
-                if(loaderHandler != null)
-                    loaderHandler.sendEmptyMessage(MSG_LOAD_CAL);
-            }
-        }
-        */
-
         @Override
         public void onPropertiesChanged(Bundle properties) {
             super.onPropertiesChanged(properties);
