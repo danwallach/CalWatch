@@ -587,7 +587,12 @@ public class ClockFace implements Observer {
             }
     }
 
+    // This counter increments once on every redraw and is used to log things that might otherwise
+    // happen too frequently and fill the logs with crap.
+    //
+    // Typical usage: if(calendarTicker % 100 == 0) Log.v(...)
     private static int calendarTicker = 0;
+
     private long stippleTimeCache = -1;
     private Path stipplePathCache = null;
 
@@ -601,6 +606,7 @@ public class ClockFace implements Observer {
 
         if(eventList == null) {
             if (calendarTicker % 1000 == 0) Log.v(TAG, "drawCalendar starting, eventList is null");
+
             update(null, null); // probably won't accomplish any more than the updateEventList above...
 
             if(eventList == null) {
@@ -727,25 +733,28 @@ public class ClockFace implements Observer {
     }
 
     private Path batteryPathCache = null;
+    private long batteryCacheTime = 0;
+    private long batteryCurrentTime = 0;
+    private float batteryPct = 1f;
     private boolean batteryCritical = false;
+
+    private void updateBattery() {
+        Log.v(TAG, "fetching new battery status");
+        BatteryWrapper batteryWrapper = BatteryWrapper.getSingleton();
+        if(batteryWrapper != null) {
+            batteryWrapper.fetchStatus();
+            batteryPct = batteryWrapper.getBatteryPct();
+            batteryCurrentTime = TimeWrapper.getGMTTime();
+        }
+    }
 
     private void drawBattery(Canvas canvas) {
         BatteryWrapper batteryWrapper = BatteryWrapper.getSingleton();
-        float batteryPct;
-
-        if(batteryWrapper == null) {
-            // Whoops, not initialized yet, so we'll just return and wait for it to come
-            // around later. We're initializing this from the service *and* from the activity,
-            // so it *should* be around, but paranoia says check your errors...
-            return;
-        }
 
         // we don't want to poll *too* often; this translates to about once per five minute
-        if(batteryPathCache == null ||
-                (calendarTicker % 300000 == 0)) {
-            batteryWrapper.fetchStatus();
-            Log.v(TAG, "fetching new battery status (" + calendarTicker + ")");
-            batteryPct = batteryWrapper.getBatteryPct();
+        if(batteryPathCache == null || (batteryCurrentTime - batteryCacheTime > 300000)) {
+            updateBattery();
+            batteryCacheTime = batteryCurrentTime;
             batteryPathCache = new Path();
 
             //
@@ -772,7 +781,7 @@ public class ClockFace implements Observer {
         }
 
         // note that we'll flip the color from white to red once the battery gets below 10%
-        // TODO except if we're in ambient mode?
+        // (but we don't draw this at all in ambient mode so it doesn't matter)
         if(batteryPathCache != null) {
             Paint paint;
 
