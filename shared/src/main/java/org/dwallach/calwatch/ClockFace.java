@@ -734,27 +734,24 @@ public class ClockFace implements Observer {
 
     private Path batteryPathCache = null;
     private long batteryCacheTime = 0;
-    private long batteryCurrentTime = 0;
-    private float batteryPct = 1f;
-    private boolean batteryCritical = false;
-
-    private void updateBattery() {
-        Log.v(TAG, "fetching new battery status");
-        BatteryWrapper batteryWrapper = BatteryWrapper.getSingleton();
-        if(batteryWrapper != null) {
-            batteryWrapper.fetchStatus();
-            batteryPct = batteryWrapper.getBatteryPct();
-            batteryCurrentTime = TimeWrapper.getGMTTime();
-        }
-    }
 
     private void drawBattery(Canvas canvas) {
         BatteryWrapper batteryWrapper = BatteryWrapper.getSingleton();
 
+        if(batteryWrapper == null) {
+            return; // we're not ready yet, for whatever reason
+        }
+
+        long time = TimeWrapper.getGMTTime();
+        boolean batteryCritical = false;
+        float batteryPct = 1f;
+
         // we don't want to poll *too* often; this translates to about once per five minute
-        if(batteryPathCache == null || (batteryCurrentTime - batteryCacheTime > 300000)) {
-            updateBattery();
-            batteryCacheTime = batteryCurrentTime;
+        if(batteryPathCache == null || (time - batteryCacheTime > 300000)) {
+            Log.v(TAG, "fetching new battery status");
+            batteryWrapper.fetchStatus();
+            batteryPct = batteryWrapper.getBatteryPct();
+            batteryCacheTime = time;
             batteryPathCache = new Path();
 
             //
@@ -781,7 +778,7 @@ public class ClockFace implements Observer {
         }
 
         // note that we'll flip the color from white to red once the battery gets below 10%
-        // (but we don't draw this at all in ambient mode so it doesn't matter)
+        // (in ambient mode, we can't show it at all because of burn-in issues)
         if(batteryPathCache != null) {
             Paint paint;
 
@@ -790,10 +787,8 @@ public class ClockFace implements Observer {
             else
                 paint = smYellow;
 
-            if(getAmbientMode())
-                paint = smWhite;
-
-            canvas.drawPath(batteryPathCache, paint);
+            if(!getAmbientMode())
+                canvas.drawPath(batteryPathCache, paint);
         }
     }
 
