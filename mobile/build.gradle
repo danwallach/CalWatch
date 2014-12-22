@@ -47,8 +47,9 @@ android {
 
     defaultConfig {
         applicationId "org.dwallach.calwatch"
-        minSdkVersion 19
-        targetSdkVersion 19
+        // minSdkVersion 18      // Android 4.3, the lowest that supports Android Wear
+        minSdkVersion 9       // Android 2.3, Gingerbread (will this work?)
+        targetSdkVersion 19   // Android 4.4, which I expect to be the real minimum in the wild
         versionCode getVersionCode()
         versionName getVersionName()
     }

@@ -34,22 +34,6 @@
             android:enabled="true"
             android:exported="false" >
         </service>
-
-
-        <receiver
-            android:name=".WakeupReceiver"
-            android:enabled="true"
-            android:exported="true">
-            <intent-filter>
-                <action android:name="android.intent.action.BOOT_COMPLETED" />
-                <action android:name="org.dwallach.calwatch.WAKE" />
-            </intent-filter>
-            <intent-filter>
-                <action android:name="android.intent.action.PROVIDER_CHANGED"/>
-                <data android:scheme="content"/>
-                <data android:host="com.android.calendar"/>
-            </intent-filter>
-        </receiver>
     </application>
 
 </manifest>

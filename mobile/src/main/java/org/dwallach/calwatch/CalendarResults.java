@@ -50,14 +50,6 @@ public class CalendarResults {
         instances = new ArrayList<Instance>();
     }
 
-    public List<WireEvent> getWireEvents() {
-        List<WireEvent> wireList = new ArrayList<WireEvent>();
-        for(Instance instance : instances) {
-            wireList.add(instance.toWireEvent());
-        }
-        return wireList;
-    }
-
     public List<EventWrapper> getWrappedEvents() {
         List<EventWrapper> wireList = new ArrayList<EventWrapper>();
         for(Instance instance : instances) {

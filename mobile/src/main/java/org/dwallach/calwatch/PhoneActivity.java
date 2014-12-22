@@ -160,7 +160,6 @@ public class PhoneActivity extends Activity implements Observer {
         secondsSwitch.setOnClickListener(myListener);
         dayDateSwitch.setOnClickListener(myListener);
 
-        WakeupReceiver.kickStart(this);        // bring it up, if it's not already up
         WatchCalendarService.kickStart(this);  // bring it up, if it's not already up
 
         PreferencesHelper.loadPreferences(this);
@@ -317,7 +316,7 @@ public class PhoneActivity extends Activity implements Observer {
                         return;
                     }
 
-                    if (actionString.equals(Intent.ACTION_TIME_CHANGED) || actionString.equals(Intent.ACTION_TIME_TICK)) {
+                    if (actionString.equals(Intent.ACTION_TIME_CHANGED) || actionString.equals(Intent.ACTION_TIME_TICK) || actionString.equals(ACTION_KEEP_WATCHFACE_AWAKE)) {
                         if (clockView == null) {
                             Log.v(TAG, actionString + " received, but can't redraw");
                         } else {
@@ -325,13 +324,6 @@ public class PhoneActivity extends Activity implements Observer {
                             clockView.redrawClockSlow("tickReceiver:" + actionString);
                         }
                         initAlarm(); // just in case it's not set up properly
-                    } else if (actionString.equals(ACTION_KEEP_WATCHFACE_AWAKE)) {
-//                        Log.v(TAG, "five second alarm!");
-                        if (clockView != null) {
-                            clockView.redrawClockSlow("tickReceiver:" + actionString);
-                        } else {
-                            Log.e(TAG, "tick received, no clock view to redraw");
-                        }
                     } else {
                         Log.e(TAG, "Unknown intent received: " + intent.toString());
                     }
