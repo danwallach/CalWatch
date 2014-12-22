@@ -47,7 +47,7 @@ android {
 
     defaultConfig {
         // applicationId "org.dwallach.calwatch.shared"
-        minSdkVersion 9      // Android 2.3 Gingerbread (will this work?)
+        minSdkVersion 17      // Android 4.2, Jelly Bean
         targetSdkVersion 19
         versionCode getVersionCode()
         versionName getVersionName()
