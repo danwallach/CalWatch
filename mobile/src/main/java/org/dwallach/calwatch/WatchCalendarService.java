@@ -116,6 +116,11 @@ public class WatchCalendarService extends Service implements Observer {
 
         clockState.deleteObserver(this);
         clockState = null;
+
+        if (calendarFetcher != null) {
+            calendarFetcher.haltUpdates();
+            calendarFetcher = null;
+        }
     }
 
     @Override
