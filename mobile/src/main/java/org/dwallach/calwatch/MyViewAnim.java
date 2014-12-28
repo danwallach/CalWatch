@@ -155,6 +155,10 @@ public class MyViewAnim extends SurfaceView implements Observer {
         clockState = ClockState.getSingleton();
 
         clockState.addObserver(this); // callbacks if something changes
+
+        if(calendarFetcher != null)
+            calendarFetcher.kill();
+
         calendarFetcher = new CalendarFetcher(context, CalendarContract.Instances.CONTENT_URI);
 
 

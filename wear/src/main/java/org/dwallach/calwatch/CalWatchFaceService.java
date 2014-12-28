@@ -180,6 +180,9 @@ public class CalWatchFaceService extends CanvasWatchFaceService {
 
             clockState.addObserver(this); // callbacks if something changes
 
+            if(calendarFetcher != null)
+                calendarFetcher.kill();
+
             calendarFetcher = new CalendarFetcher(CalWatchFaceService.this, WearableCalendarContract.Instances.CONTENT_URI);
 
             // start the background service, if it's not already running
