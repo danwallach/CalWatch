@@ -50,13 +50,6 @@ public class TimeWrapper {
         return (long) (Math.floor(getLocalTime() / 3600000.0) * 3600000.0);
     }
 
-    public static String formatGMTTime(long millis) {
-        DateFormat df = DateFormat.getDateTimeInstance();
-        df.setTimeZone(TimeZone.getDefault());
-
-        return df.format(new Date(millis));
-    }
-
     private static String localMonthDayCache, localDayOfWeekCache;
     private static long monthDayCacheTime = 0;
 
@@ -193,28 +186,6 @@ public class TimeWrapper {
         // if at least one minute has elapsed, then it's time to print all the things
         if(elapsedTime > 60000000000L) { // 60 * 10^9 nanoseconds: one minute
             frameReport(frameEndTime);
-        }
-    }
-
-    /**
-     * if a frame was about to be drawn but was aborted (e.g., because it was on the wrong thread), then this counts it
-     */
-    public static void frameSkip() {
-        skippedFrames++;
-
-        if(skippedFrames % 1000 == 0) {
-            Log.e(TAG, "wow, lots of skipped frames!");
-        }
-    }
-
-    /**
-     * if the drawing callbacks are happening when they shouldn't, then we need to debug that...
-     */
-    public static void frameZombie() {
-        zombieFrames++;
-
-        if(zombieFrames % 1000 == 0) {
-            Log.e(TAG, "the zombie hoards encroach!");
         }
     }
 
