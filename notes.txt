@@ -22,25 +22,14 @@ Port to Android Wear
     adb -s localhost:4444 logcat -v time | & tee logdumps/whatever.txt
 
 
-TODO sort out how to compile protobufs automatically via Gradle
--- At least the Square protobuf runtime is automatically fetched and compiled
--- probably not worth the bother: long term plan is to kill protobufs, once we have reliable calendar on the wear side
-
-Verify all the weird connect/disconnect corner cases
-    TODO fresh boot of phone, make sure service is up no matter what
-    TODO disconnect / reconnect of phone from watch
-    TODO fresh boot of watch / reconnect to old phone app
-    TODO nothing running on phone / fresh watch wants data
-    TODO are we recovering properly if the phone kills the service after a long hiatus?
-
 Daydream?
     http://www.hascode.com/2013/01/using-the-android-daydream-api/
     http://developer.android.com/reference/android/service/dreams/DreamService.html
     -- looks almost exactly the same as implementing an activity, or the watchface API
 
 Refactoring / reengineering
-    TODO alarm code is repeated on phone and wear side: do it in /shared
-    (this is waiting until we have a final idea of how we're supposed to implement a wear app)
+    TODO significant code overlap between mobile/MyViewAnim and wear/CalWatchFaceService
+    - but differences are significant enough that it's not going to be very easy to move to /shared
 
     TODO fix Gradle, presently requiring me to have the git version code in three places to work right
     (I tried putting it just in settings.gradle or the top-level build.gradle and this didn't work)
@@ -55,94 +44,20 @@ Add internationalization strings
 Deal with multiday events that aren't "all day" events
     TODO idea: resurrect all-day events by rendering them (and long events) as thin rings, perhaps separate from the main time wedges
 
-FINAL ANDROID WATCHFACE API !!!
-    DONE! task 0: prior work
-        DONE! boot Wear 5 emulator, paired with tablet
-        DONE! Does the existing release1c APK break on Wear 5? IT WORKS!
-        WONTFIX ambient mode on original APK seems broken (based on hitting "F7"), probably not worth fixing
-    TODO task 1: graphics
-        DONE! Identify best starting place (*not* CalendarWatchFaceService)
-        DONE! 1Hz refresh (no calendar at all)
-        DONE! 40Hz refresh main (built into SweepWatchFace ?!!)
-        DONE! drawing calendar (with old-school data forwarding)
-        DONE! redo ambient mode
-            DONE! greyscale ambient
-            DONE! one-bit ambient
-                DONE! hollow out the hands
-                DONE! hollow out the time wedges
-                DONE! disable anti-aliasing
-            NO! distinct behavior for "mute" mode? Do we care? No!
-        DONE? bring in watchface inside 10 pixel boundary when burn-in protection is necessary
-        DONE! specify where the battery-charging indicator goes
-            - http://developer.android.com/training/wearables/watch-faces/issues.html
-        TODO reshape around peek card?
-            - Notes: the rect we get back is the rect *covered* by the card. Using the "top"
-              of the rect, we'll know that from (0,0) - (full-width, rect-top) we're good to draw.
+TODO reshape around peek card?
+    - Notes: the rect we get back is the rect *covered* by the card. Using the "top"
+      of the rect, we'll know that from (0,0) - (full-width, rect-top) we're good to draw.
 
-            - Given how large the cards are, we probably don't want to mess with the Moto 360 hack
-              but instead just want to draw the face small, completely round, and be done with it.
+    - Given how large the cards are, we probably don't want to mess with the Moto 360 hack
+      but instead just want to draw the face small, completely round, and be done with it.
 
-            - Current kludge: draw a solid black rectangle inside the rect we're given
+    - Current kludge: draw a solid black rectangle inside the rect we're given
 
-            - Potential real solution: extend the Moto 360 flat-bottom hack
-              - Option 1: same watch center, just increase missingBottomPixels
-              - Option 2: move watch center up partly
+    - Potential real solution: extend the Moto 360 flat-bottom hack
+      - Option 1: same watch center, just increase missingBottomPixels
+      - Option 2: move watch center up partly
 
-
-        DONE? general-purpose solution to the flat-bottom Moto360 hack
-        http://developer.android.com/training/wearables/watch-faces/issues.html
-
-            - Tried this, gets an error about the superclass not having the proper method. Fail!
-              See onApplyWindowInsets() in CalWatchFaceService (currently commented out -- this
-              seems to only be a feature on the OpenGL version of the watch class, similar issues
-              for reading whether the face is round or square... hmm...)
-
-        DONE? companion configuration activity
-            DONE? intents
-            DONE? XML manifest stuff
-            - http://developer.android.com/training/wearables/watch-faces/configuration.html
-
-            - Notes: added the relevant bits to the XML, need to test. Kinda sucky that I have
-              to do with the emulator rather than my phone.
-
-            DONE! can this eliminate the need for notifications?
-            - probably not, since we want to be there at boot time; but worth investigating
-            - we can definitely nuke notifications once we're done with task 2
-
-        DONE? >1 refresh/minute ambient
-            - The standard way of doing the sweeping second hand is to just call invalidate()
-              right after the end of onDraw(). If we do nothing, onDraw() gets called once per
-              minute. We *could* set up an alarm and go to all the trouble that's in MyViewAnim.
-              Is it worth it? Not right away. The power measurement gestapo won't stand for it.
-            - The example code for the one-second-ticking hand was easy to repurpose to
-              tick once every twelve hands when we're *not* doing the whole sweeping second hand
-
-        DONE! remove MyViewAnim and WearActivity from wear build (mobile only, for now)
-            - Hypothetically we could just keep this around and add more stuff to the manifest
-              to allow "old school" and "new school" watchfaces to run, but given that all the
-              4.4W2 watches are being forcibly upgraded to 5.0, it's just not worth the engineering
-              to make this work.
-
-        DONE! fix second-hand mode resetting itself (external bug report, can't reproduce yet in emulator)
-
-    TODO task 2: calendar
-        DONE! Verify that enough of the calendar exists on watch side to avoid transmission from phone
-            DONE! hack up BuildID project to dump calendar data
-        DONE! WearableCalendarContract vs. CalendarContract: what's exactly missing here?
-        - notably, the "AgendaData" example is doing a bunch of phone-side work, just like CalWatch
-        - G+ post indicates that everything I need is present, so experiments should be good
-        TODO Move from calendar multithreading to ASyncTask (as in the provided example)
-        - DONE on watch, TODO on phone
-        - this is probably the place to start, as it's going to be more power efficient and
-          yield cleaner code. Also a nice warm-up before diving into the next bits.
-        - should work on both sides
-            TODO move CalendarFetcher and CalendarResults to /shared
-            DONE! deal with Wearable vs. not CalendarContract (pass one relevant value in constructor?)
-        DONE! Kill off serialization and transmission of calendar data (built into the watch now!)
-        DONE! Kill off notifications on watch side (since they'll get a perfectly useful default)
-        DONE! Kill off Protobufs? All we've got is a couple small integers and booleans left
-    Secondary porting issues
-        TODO update the slides
+TODO update the slides
 
 Longer-term items
     Way, way, way too many colors in ClockFace

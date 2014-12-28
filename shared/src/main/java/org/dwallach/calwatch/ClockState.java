@@ -95,14 +95,9 @@ public class ClockState extends Observable {
      * @param eventList list of events (GMT time)
      */
     public void setEventWrapperList(List<EventWrapper> eventList) {
-        LockWrapper.lock();
-        try {
-            this.eventList = eventList;
-            this.visibleEventList = null;
-            pingObservers();
-        } finally {
-            LockWrapper.unlock();
-        }
+        this.eventList = eventList;
+        this.visibleEventList = null;
+        pingObservers();
     }
 
     public void setWireEventList(List<WireEvent> wireEventList) {
@@ -235,39 +230,33 @@ public class ClockState extends Observable {
      * @param eventBytes a marshalled protobuf of type WireUpdate
      */
     public void setProtobuf(byte[] eventBytes) {
-        LockWrapper.lock();
+        WireUpdate wireUpdate = null;
 
         try {
-            WireUpdate wireUpdate = null;
+            wireUpdate = WireUpdate.parseFrom(eventBytes);
+            wireInitialized = true;
+        } catch (IOException ioe) {
+            Log.e(TAG, "parse failure on protobuf: nbytes(" + eventBytes.length + ")", ioe);
+            return;
+        } catch (Exception e) {
+            if (eventBytes.length == 0)
+                Log.e(TAG, "zero-length message received!");
+            else
+                Log.e(TAG, "some other weird failure on protobuf: nbytes(" + eventBytes.length + ")", e);
+            return;
+        }
 
-            try {
-                wireUpdate = WireUpdate.parseFrom(eventBytes);
-                wireInitialized = true;
-            } catch (IOException ioe) {
-                Log.e(TAG, "parse failure on protobuf: nbytes(" + eventBytes.length + ")", ioe);
-                return;
-            } catch (Exception e) {
-                if (eventBytes.length == 0)
-                    Log.e(TAG, "zero-length message received!");
-                else
-                    Log.e(TAG, "some other weird failure on protobuf: nbytes(" + eventBytes.length + ")", e);
-                return;
-            }
-
-            // note: we're no longer getting calendar events from the wire; we're just reading them locally
+        // note: we're no longer getting calendar events from the wire; we're just reading them locally
 //            if (wireUpdate.newEvents)
 //                setWireEventList(wireUpdate.events);
 
-            setFaceMode(wireUpdate.faceMode);
-            setShowSeconds(wireUpdate.showSecondHand);
-            setShowDayDate(wireUpdate.showDayDate);
+        setFaceMode(wireUpdate.faceMode);
+        setShowSeconds(wireUpdate.showSecondHand);
+        setShowDayDate(wireUpdate.showDayDate);
 
-            pingObservers();
+        pingObservers();
 
-            Log.v(TAG, "event update complete");
-        } finally {
-            LockWrapper.unlock();
-        }
+        Log.v(TAG, "event update complete");
     }
 
     /**

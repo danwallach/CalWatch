@@ -181,17 +181,11 @@ public class PhoneActivity extends Activity implements Observer {
 
         // http://developer.android.com/reference/android/app/Activity.html
 
-        try {
-            LockWrapper.lock();           // locking so we wait until a redraw is finished
+        if (clockView != null)
+            clockView.kill(this);
 
-            if (clockView != null)
-                clockView.kill(this);
-
-            getClockState().deleteObserver(this);
-            clockState = null;
-        } finally {
-            LockWrapper.unlock();
-        }
+        getClockState().deleteObserver(this);
+        clockState = null;
     }
 
     protected void onStart() {
