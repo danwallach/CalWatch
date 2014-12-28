@@ -6,8 +6,6 @@
  */
 package org.dwallach.calwatch;
 
-import android.animation.Animator;
-import android.animation.TimeAnimator;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
@@ -16,25 +14,16 @@ import android.content.res.Resources;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.PorterDuff;
-import android.graphics.Rect;
 import android.os.AsyncTask;
-import android.os.Bundle;
-import android.os.Debug;
 import android.os.Handler;
-import android.os.Looper;
 import android.os.Message;
 import android.os.PowerManager;
-import android.os.SystemClock;
 import android.provider.CalendarContract;
 import android.util.AttributeSet;
 import android.util.Log;
-import android.view.Gravity;
-import android.view.SurfaceHolder;
 import android.view.SurfaceView;
 import android.view.View;
-import android.view.WindowInsets;
 
-import java.util.HashMap;
 import java.util.List;
 import java.util.Observable;
 import java.util.Observer;
@@ -46,6 +35,7 @@ public class MyViewAnim extends SurfaceView implements Observer {
     public MyViewAnim(Context context, AttributeSet attrs) {
         super(context, attrs);
 
+        setWillNotDraw(false);
         init(context);
     }
 
@@ -89,10 +79,8 @@ public class MyViewAnim extends SurfaceView implements Observer {
                 case MSG_LOAD_CAL:
                     cancelLoaderTask();
                     Log.v(TAG, "launching calendar loader task");
-                    if(loaderTask == null) {
-                        Log.e(TAG, "no loaderTask");
-                        return;
-                    }
+
+                    loaderTask = new CalLoaderTask();
                     loaderTask.execute();
                     break;
                 default:
@@ -212,7 +200,6 @@ public class MyViewAnim extends SurfaceView implements Observer {
 
         savedContext = context;       // used rarely
 
-        loaderTask = new CalLoaderTask();
 
         // hook into watching the calendar (code borrowed from Google's calendar wear app)
         Log.v(TAG, "setting up intent receiver");
@@ -299,6 +286,8 @@ public class MyViewAnim extends SurfaceView implements Observer {
                     PowerManager.PARTIAL_WAKE_LOCK, "CalWatchWakeLock");
             wakeLock.acquire();
 
+            Log.v(TAG, "wake lock acquired");
+
             return CalendarFetcher.loadContent(CalendarContract.Instances.CONTENT_URI, savedContext);
         }
 
@@ -306,11 +295,14 @@ public class MyViewAnim extends SurfaceView implements Observer {
         protected void onPostExecute(List<WireEvent> results) {
             releaseWakeLock();
 
+            Log.v(TAG, "wake lock released");
+
             try {
                 ClockState.getSingleton().setWireEventList(results);
             } catch(Throwable t) {
                 Log.e(TAG, "unexpected failure setting wire event list from calendar");
             }
+
             invalidate();
         }
 

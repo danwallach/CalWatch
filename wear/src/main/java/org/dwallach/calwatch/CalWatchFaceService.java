@@ -387,7 +387,7 @@ public class CalWatchFaceService extends CanvasWatchFaceService {
                         PowerManager.PARTIAL_WAKE_LOCK, "CalWatchWakeLock");
                 wakeLock.acquire();
 
-                return CalendarFetcher.loadContent(CalWatchFaceService.this);
+                return CalendarFetcher.loadContent(WearableCalendarContract.Instances.CONTENT_URI, CalWatchFaceService.this);
             }
 
             @Override

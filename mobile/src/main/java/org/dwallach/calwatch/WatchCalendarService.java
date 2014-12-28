@@ -20,8 +20,6 @@ public class WatchCalendarService extends Service implements Observer {
 
     private static WatchCalendarService singletonService;
     private WearSender wearSender;
-    private CalendarFetcher calendarFetcher;
-
     private ClockState clockState;
 
     private ClockState getClockState() {
@@ -43,9 +41,7 @@ public class WatchCalendarService extends Service implements Observer {
         return singletonService;
     }
 
-    // this is called when there's something new from the calendar DB; we'll be running
-    // on the calendar's thread, not the UI thread. It's also useful to call from elsewhere
-    // when we want to push data to the watch.
+    // this is called when there's something new from the calendar DB
     public void sendAllToWatch() {
         if (wearSender == null) {
             Log.e(TAG, "no wear sender?!");
@@ -72,35 +68,8 @@ public class WatchCalendarService extends Service implements Observer {
         wearSender = new WearSender(this);
 
         PreferencesHelper.loadPreferences(this);
-
-        Log.v(TAG, "starting calendar fetcher");
-        if (singletonService != null) {
-            Log.v(TAG, "whoa, multiple services!");
-            if (calendarFetcher != null)
-                calendarFetcher.haltUpdates();
-        }
-
-        singletonService = this;
-
-        calendarFetcher = new CalendarFetcher(); // automatically allocates a thread and runs
-
-        calendarFetcher.addObserver(new Observer() {
-            @Override
-            public void update(Observable observable, Object data) {
-                Log.v(TAG, "New calendar state to send to watch!");
-
-                // the following line is important: this is where we bridge the output of the phone-side
-                // calendar fetcher (running as a separate thread inside the phone-side Service)
-                // into the ClockState central repo (shared by many things). This change will
-                // later on trigger a callback to the update method (below), which will
-                // then decide it's time to send everything to the watch. So, no need to call
-                // sendAllToWatch() right just yet.
-
-                getClockState().setEventWrapperList(calendarFetcher.getContent().getWrappedEvents());
-                // sendAllToWatch();
-            }
-        });
     }
+
     @Override
     public void onCreate() {
         super.onCreate();
@@ -116,11 +85,6 @@ public class WatchCalendarService extends Service implements Observer {
 
         clockState.deleteObserver(this);
         clockState = null;
-
-        if (calendarFetcher != null) {
-            calendarFetcher.haltUpdates();
-            calendarFetcher = null;
-        }
     }
 
     @Override
