@@ -162,9 +162,9 @@ public class PhoneActivity extends Activity implements Observer {
         Log.v(TAG, "activity setup complete");
     }
 
-    protected void onStop() {
-        super.onStop();
-        Log.v(TAG, "Stop!");
+    protected void onPause() {
+        super.onPause();
+        Log.v(TAG, "Pause!");
 
         // perhaps incorrect assumption: if our activity is being killed, onStop will happen beforehand,
         // so we'll deregister our clockState observer, allowing this Activity object to become

@@ -165,10 +165,13 @@ public class MyViewAnim extends SurfaceView implements Observer {
     }
 
     public void kill(Context context) {
+        Log.d(TAG, "kill");
         mUpdateTimeHandler.removeMessages(MSG_UPDATE_TIME);
 
-        if(calendarFetcher != null)
+        if(calendarFetcher != null) {
             calendarFetcher.kill();
+            calendarFetcher = null;
+        }
     }
 
 
