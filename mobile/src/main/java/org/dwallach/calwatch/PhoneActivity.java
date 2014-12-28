@@ -198,7 +198,11 @@ public class PhoneActivity extends Activity implements Observer {
     protected void onResume() {
         super.onResume();
         Log.v(TAG, "Resume!");
+
+        getClockState(); // side-effects: re-initializes observer
+
         if(clockView != null) {
+            clockView.init(this);
             clockView.invalidate();
         }
     }

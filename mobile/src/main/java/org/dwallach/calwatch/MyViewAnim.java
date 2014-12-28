@@ -180,7 +180,7 @@ public class MyViewAnim extends SurfaceView implements Observer {
 
     private Context savedContext = null;
 
-    private void init(Context context) {
+    public void init(Context context) {
         Log.d(TAG, "init");
 
         // announce our version number to the logs
