@@ -80,51 +80,10 @@ public class CalWatchFaceService extends CanvasWatchFaceService {
 
     private class Engine extends CanvasWatchFaceService.Engine implements Observer {
         static final int MSG_UPDATE_TIME = 0;
-        static final int MSG_LOAD_CAL = 1;
 
         private ClockFace clockFace;
         private ClockState clockState;
-
-        private AsyncTask<Void,Void,List<WireEvent>> loaderTask;
-
-        // this will fire when it's time to (re)load the calendar, launching an asynchronous
-        // task to do all the dirty work and eventually update ClockState
-        final Handler loaderHandler = new Handler() {
-            @Override
-            public void handleMessage(Message message) {
-                switch (message.what) {
-                    case MSG_LOAD_CAL:
-                        cancelLoaderTask();
-                        Log.v(TAG, "launching calendar loader task");
-                        loaderTask = new CalLoaderTask();
-                        loaderTask.execute();
-                        break;
-                    default:
-                        Log.e(TAG, "unexpected message: " + message.toString());
-                }
-            }
-        };
-
-        private boolean isReceiverRegistered;
-
-        private BroadcastReceiver broadcastReceiver = new BroadcastReceiver() {
-            @Override
-            public void onReceive(Context context, Intent intent) {
-                Log.v(TAG, "receiver: got intent message");
-                if (Intent.ACTION_PROVIDER_CHANGED.equals(intent.getAction())
-                        && WearableCalendarContract.CONTENT_URI.equals(intent.getData())) {
-                    cancelLoaderTask();
-                    loaderHandler.sendEmptyMessage(MSG_LOAD_CAL);
-                }
-            }
-        };
-
-        private void cancelLoaderTask() {
-            if (loaderTask != null) {
-                loaderTask.cancel(true);
-            }
-        }
-
+        private CalendarFetcher calendarFetcher;
 
         /**
          * Handler to tick once every 12 seconds.
@@ -221,22 +180,10 @@ public class CalWatchFaceService extends CanvasWatchFaceService {
 
             clockState.addObserver(this); // callbacks if something changes
 
+            calendarFetcher = new CalendarFetcher(CalWatchFaceService.this, WearableCalendarContract.Instances.CONTENT_URI);
+
             // start the background service, if it's not already running
             WearReceiverService.kickStart(CalWatchFaceService.this);
-
-            // hook into watching the calendar (code borrowed from Google's calendar wear app)
-            Log.v(TAG, "setting up intent receiver");
-            IntentFilter filter = new IntentFilter(Intent.ACTION_PROVIDER_CHANGED);
-            filter.addDataScheme("content");
-            filter.addDataAuthority(WearableCalendarContract.AUTHORITY, null);
-            registerReceiver(broadcastReceiver, filter);
-            isReceiverRegistered = true;
-
-            // kick off initial loading of calendar state
-            loaderHandler.sendEmptyMessage(MSG_LOAD_CAL);
-
-//            ctx.getContentResolver().registerContentObserver(CalendarContract.Events.CONTENT_URI, true, observer);
-
         }
 
         @Override
@@ -323,11 +270,8 @@ public class CalWatchFaceService extends CanvasWatchFaceService {
             Log.v(TAG, "onDestroy");
             mUpdateTimeHandler.removeMessages(MSG_UPDATE_TIME);
 
-            if (isReceiverRegistered) {
-                unregisterReceiver(broadcastReceiver);
-                isReceiverRegistered = false;
-            }
-            loaderHandler.removeMessages(MSG_LOAD_CAL);
+            if(calendarFetcher != null)
+                calendarFetcher.kill();
 
             super.onDestroy();
         }
@@ -372,47 +316,6 @@ public class CalWatchFaceService extends CanvasWatchFaceService {
             else
                 TimeWrapper.frameReset();
 
-        }
-
-        /**
-         * Asynchronous task to load the calendar instances.
-         */
-        private class CalLoaderTask extends AsyncTask<Void, Void, List<WireEvent>> {
-            private PowerManager.WakeLock wakeLock;
-
-            @Override
-            protected List<WireEvent> doInBackground(Void... voids) {
-                PowerManager powerManager = (PowerManager) getSystemService(POWER_SERVICE);
-                wakeLock = powerManager.newWakeLock(
-                        PowerManager.PARTIAL_WAKE_LOCK, "CalWatchWakeLock");
-                wakeLock.acquire();
-
-                return CalendarFetcher.loadContent(WearableCalendarContract.Instances.CONTENT_URI, CalWatchFaceService.this);
-            }
-
-            @Override
-            protected void onPostExecute(List<WireEvent> results) {
-                releaseWakeLock();
-
-                try {
-                    ClockState.getSingleton().setWireEventList(results);
-                } catch(Throwable t) {
-                    Log.e(TAG, "unexpected failure setting wire event list from calendar");
-                }
-                invalidate();
-            }
-
-            @Override
-            protected void onCancelled() {
-                releaseWakeLock();
-            }
-
-            private void releaseWakeLock() {
-                if (wakeLock != null) {
-                    wakeLock.release();
-                    wakeLock = null;
-                }
-            }
         }
     }
 }

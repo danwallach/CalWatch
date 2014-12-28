@@ -48,12 +48,10 @@ public class MyViewAnim extends SurfaceView implements Observer {
     private static final long INTERACTIVE_UPDATE_RATE_MS = TimeUnit.SECONDS.toMillis(12);
 
     private static final int MSG_UPDATE_TIME = 0;
-    private static final int MSG_LOAD_CAL = 1;
 
     private ClockFace clockFace;
     private ClockState clockState;
 
-    private AsyncTask<Void,Void,List<WireEvent>> loaderTask;
 
     private boolean visible = false;
 
@@ -69,46 +67,6 @@ public class MyViewAnim extends SurfaceView implements Observer {
             invalidate();
         }
     }
-
-    // this will fire when it's time to (re)load the calendar, launching an asynchronous
-    // task to do all the dirty work and eventually update ClockState
-    final Handler loaderHandler = new Handler() {
-        @Override
-        public void handleMessage(Message message) {
-            switch (message.what) {
-                case MSG_LOAD_CAL:
-                    cancelLoaderTask();
-                    Log.v(TAG, "launching calendar loader task");
-
-                    loaderTask = new CalLoaderTask();
-                    loaderTask.execute();
-                    break;
-                default:
-                    Log.e(TAG, "unexpected message: " + message.toString());
-            }
-        }
-    };
-
-    private boolean isReceiverRegistered;
-
-    private BroadcastReceiver broadcastReceiver = new BroadcastReceiver() {
-        @Override
-        public void onReceive(Context context, Intent intent) {
-            Log.v(TAG, "receiver: got intent message");
-            if (Intent.ACTION_PROVIDER_CHANGED.equals(intent.getAction())
-                    && CalendarContract.CONTENT_URI.equals(intent.getData())) {
-                cancelLoaderTask();
-                loaderHandler.sendEmptyMessage(MSG_LOAD_CAL);
-            }
-        }
-    };
-
-    private void cancelLoaderTask() {
-        if (loaderTask != null) {
-            loaderTask.cancel(true);
-        }
-    }
-
 
     /**
      * Handler to tick once every 12 seconds.
@@ -178,7 +136,7 @@ public class MyViewAnim extends SurfaceView implements Observer {
         invalidate();
     }
 
-    private Context savedContext = null;
+    private CalendarFetcher calendarFetcher;
 
     public void init(Context context) {
         Log.d(TAG, "init");
@@ -197,34 +155,16 @@ public class MyViewAnim extends SurfaceView implements Observer {
         clockState = ClockState.getSingleton();
 
         clockState.addObserver(this); // callbacks if something changes
+        calendarFetcher = new CalendarFetcher(context, CalendarContract.Instances.CONTENT_URI);
 
-        savedContext = context;       // used rarely
-
-
-        // hook into watching the calendar (code borrowed from Google's calendar wear app)
-        Log.v(TAG, "setting up intent receiver");
-        IntentFilter filter = new IntentFilter(Intent.ACTION_PROVIDER_CHANGED);
-        filter.addDataScheme("content");
-        filter.addDataAuthority(CalendarContract.AUTHORITY, null);
-        context.registerReceiver(broadcastReceiver, filter);
-        isReceiverRegistered = true;
-
-        // kick off initial loading of calendar state
-        loaderHandler.sendEmptyMessage(MSG_LOAD_CAL);
-
-//            ctx.getContentResolver().registerContentObserver(CalendarContract.Events.CONTENT_URI, true, observer);
 
     }
 
     public void kill(Context context) {
-        Log.v(TAG, "kill");
         mUpdateTimeHandler.removeMessages(MSG_UPDATE_TIME);
 
-        if (isReceiverRegistered) {
-            context.unregisterReceiver(broadcastReceiver);
-            isReceiverRegistered = false;
-        }
-        loaderHandler.removeMessages(MSG_LOAD_CAL);
+        if(calendarFetcher != null)
+            calendarFetcher.kill();
     }
 
 
@@ -268,56 +208,6 @@ public class MyViewAnim extends SurfaceView implements Observer {
             invalidate();
     }
 
-    /**
-     * Asynchronous task to load the calendar instances.
-     */
-    private class CalLoaderTask extends AsyncTask<Void, Void, List<WireEvent>> {
-        private PowerManager.WakeLock wakeLock;
-
-        @Override
-        protected List<WireEvent> doInBackground(Void... voids) {
-            if(savedContext == null) {
-                Log.e(TAG, "no saved context: can't do background loader");
-                return null;
-            }
-
-            PowerManager powerManager = (PowerManager) savedContext.getSystemService(Context.POWER_SERVICE);
-            wakeLock = powerManager.newWakeLock(
-                    PowerManager.PARTIAL_WAKE_LOCK, "CalWatchWakeLock");
-            wakeLock.acquire();
-
-            Log.v(TAG, "wake lock acquired");
-
-            return CalendarFetcher.loadContent(CalendarContract.Instances.CONTENT_URI, savedContext);
-        }
-
-        @Override
-        protected void onPostExecute(List<WireEvent> results) {
-            releaseWakeLock();
-
-            Log.v(TAG, "wake lock released");
-
-            try {
-                ClockState.getSingleton().setWireEventList(results);
-            } catch(Throwable t) {
-                Log.e(TAG, "unexpected failure setting wire event list from calendar");
-            }
-
-            invalidate();
-        }
-
-        @Override
-        protected void onCancelled() {
-            releaseWakeLock();
-        }
-
-        private void releaseWakeLock() {
-            if (wakeLock != null) {
-                wakeLock.release();
-                wakeLock = null;
-            }
-        }
-    }
 }
 
 

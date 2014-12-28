@@ -7,16 +7,20 @@
 
 package org.dwallach.calwatch;
 
+import android.content.BroadcastReceiver;
 import android.content.ContentUris;
 import android.content.Context;
+import android.content.Intent;
+import android.content.IntentFilter;
 import android.database.Cursor;
 import android.net.Uri;
+import android.os.AsyncTask;
+import android.os.Handler;
+import android.os.Message;
+import android.os.PowerManager;
 import android.provider.CalendarContract;
 import android.text.format.DateUtils;
 import android.util.Log;
-
-import org.dwallach.calwatch.TimeWrapper;
-import org.dwallach.calwatch.WireEvent;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -25,11 +29,49 @@ import java.util.List;
 
 public class CalendarFetcher {
     private static final String TAG = "CalendarFetcher";
+
+    private Uri contentUri;
+
+    // yes, saving a Context is evil, but we need to keep it around for the loadContent
+    // task, which runs asynchronously
+    private Context context;
+
+    public CalendarFetcher(Context context, Uri contentUri) {
+        this.contentUri = contentUri;
+        this.context = context;
+
+        // hook into watching the calendar (code borrowed from Google's calendar wear app)
+        Log.v(TAG, "setting up intent receiver");
+        IntentFilter filter = new IntentFilter(Intent.ACTION_PROVIDER_CHANGED);
+        filter.addDataScheme("content");
+        filter.addDataAuthority(CalendarContract.AUTHORITY, null);
+        context.registerReceiver(broadcastReceiver, filter);
+        isReceiverRegistered = true;
+
+        // kick off initial loading of calendar state
+        loaderHandler.sendEmptyMessage(MSG_LOAD_CAL);
+
+//            ctx.getContentResolver().registerContentObserver(CalendarContract.Events.CONTENT_URI, true, observer);
+
+    }
+
+    public void kill() {
+        Log.v(TAG, "kill");
+
+        if (isReceiverRegistered) {
+            context.unregisterReceiver(broadcastReceiver);
+            isReceiverRegistered = false;
+        }
+
+        cancelLoaderTask();
+        loaderHandler.removeMessages(MSG_LOAD_CAL);
+    }
+
     /**
      * queries the calendar database with proper Android APIs (ugly stuff)
      */
-    public static List<WireEvent> loadContent(Uri uri, Context context) {
-        // local copy; don't overwrite the class variable until we're done!
+    public List<WireEvent> loadContent() {
+        // local state which we'll eventually return
         List<WireEvent> cr = new ArrayList<WireEvent>();
 
         // first, get the list of calendars
@@ -70,7 +112,7 @@ public class CalendarFetcher {
         // be obviously portable between phone and watch. Long term, we obviously want to
         // deal with this.
 //        Uri.Builder builder = CalendarContract.Instances.CONTENT_URI.buildUpon();
-        Uri.Builder builder = uri.buildUpon();
+        Uri.Builder builder = contentUri.buildUpon();
         ContentUris.appendId(builder, queryStartMillis);
         ContentUris.appendId(builder, queryEndMillis);
         final Cursor iCursor = context.getContentResolver().query(builder.build(),
@@ -116,16 +158,118 @@ public class CalendarFetcher {
                 @Override
                 public int compare(WireEvent lhs, WireEvent rhs) {
                     if (lhs.displayColor != rhs.displayColor)
-                        return Long.compare(lhs.displayColor, rhs.displayColor);
+                        return lcompare(lhs.displayColor, rhs.displayColor);
 
                     if (lhs.endTime != rhs.endTime)
-                        return Long.compare(lhs.endTime, rhs.endTime);
+                        return lcompare(lhs.endTime, rhs.endTime);
 
-                    return Long.compare(rhs.startTime, lhs.startTime);
+                    return lcompare(rhs.startTime, lhs.startTime);
                 }
             });
         }
 
         return cr;
     }
+
+    // Arrgghh: java.util.Long.compare() isn't defined until API level 19 and we're trying
+    // to hit API level 17, thus we need this.
+    private static int lcompare(long a, long b) {
+        if(a<b)
+            return -1;
+        if(a>b)
+            return 1;
+        return 0;
+    }
+
+    /**
+     * Asynchronous task to load the calendar instances.
+     */
+    private class CalLoaderTask extends AsyncTask<Void, Void, List<WireEvent>> {
+        private PowerManager.WakeLock wakeLock;
+
+        @Override
+        protected List<WireEvent> doInBackground(Void... voids) {
+            if(context == null) {
+                Log.e(TAG, "no saved context: can't do background loader");
+                return null;
+            }
+
+            PowerManager powerManager = (PowerManager) context.getSystemService(Context.POWER_SERVICE);
+            wakeLock = powerManager.newWakeLock(
+                    PowerManager.PARTIAL_WAKE_LOCK, "CalWatchWakeLock");
+            wakeLock.acquire();
+
+            Log.v(TAG, "wake lock acquired");
+
+            return loadContent();
+        }
+
+        @Override
+        protected void onPostExecute(List<WireEvent> results) {
+            releaseWakeLock();
+
+            Log.v(TAG, "wake lock released");
+
+            try {
+                ClockState.getSingleton().setWireEventList(results);
+            } catch(Throwable t) {
+                Log.e(TAG, "unexpected failure setting wire event list from calendar");
+            }
+        }
+
+        @Override
+        protected void onCancelled() {
+            releaseWakeLock();
+        }
+
+        private void releaseWakeLock() {
+            if (wakeLock != null) {
+                wakeLock.release();
+                wakeLock = null;
+            }
+        }
+    }
+
+    private static final int MSG_LOAD_CAL = 1;
+    private AsyncTask<Void,Void,List<WireEvent>> loaderTask;
+
+    // this will fire when it's time to (re)load the calendar, launching an asynchronous
+    // task to do all the dirty work and eventually update ClockState
+    final Handler loaderHandler = new Handler() {
+        @Override
+        public void handleMessage(Message message) {
+            switch (message.what) {
+                case MSG_LOAD_CAL:
+                    cancelLoaderTask();
+                    Log.v(TAG, "launching calendar loader task");
+
+                    loaderTask = new CalLoaderTask();
+                    loaderTask.execute();
+                    break;
+                default:
+                    Log.e(TAG, "unexpected message: " + message.toString());
+            }
+        }
+    };
+
+    private boolean isReceiverRegistered;
+
+    private BroadcastReceiver broadcastReceiver = new BroadcastReceiver() {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            Log.v(TAG, "receiver: got intent message");
+            if (Intent.ACTION_PROVIDER_CHANGED.equals(intent.getAction())
+                    && CalendarContract.CONTENT_URI.equals(intent.getData())) {
+                cancelLoaderTask();
+                loaderHandler.sendEmptyMessage(MSG_LOAD_CAL);
+            }
+        }
+    };
+
+    private void cancelLoaderTask() {
+        if (loaderTask != null) {
+            loaderTask.cancel(true);
+        }
+    }
+
 }
