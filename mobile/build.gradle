@@ -47,7 +47,7 @@ android {
 
     defaultConfig {
         applicationId "org.dwallach.calwatch"
-        minSdkVersion 17      // Android 4.2, Jelly Bean
+        minSdkVersion 18      // Android 4.3, Jelly Bean, which is the minimum for the Android Wear app
         targetSdkVersion 19   // Android 4.4, which I expect to be the real minimum in the wild
         versionCode getVersionCode()
         versionName getVersionName()
