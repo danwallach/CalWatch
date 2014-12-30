@@ -50,9 +50,6 @@ public class CalendarFetcher {
 
         // kick off initial loading of calendar state
         loaderHandler.sendEmptyMessage(MSG_LOAD_CAL);
-
-//            ctx.getContentResolver().registerContentObserver(CalendarContract.Events.CONTENT_URI, true, observer);
-
     }
 
     public void kill() {
