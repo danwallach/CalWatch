@@ -159,7 +159,7 @@ public class MyViewAnim extends SurfaceView implements Observer {
         if(calendarFetcher != null)
             calendarFetcher.kill();
 
-        calendarFetcher = new CalendarFetcher(context, CalendarContract.Instances.CONTENT_URI);
+        calendarFetcher = new CalendarFetcher(context, CalendarContract.Instances.CONTENT_URI, CalendarContract.AUTHORITY);
 
 
     }

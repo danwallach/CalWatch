@@ -183,7 +183,7 @@ public class CalWatchFaceService extends CanvasWatchFaceService {
             if(calendarFetcher != null)
                 calendarFetcher.kill();
 
-            calendarFetcher = new CalendarFetcher(CalWatchFaceService.this, WearableCalendarContract.Instances.CONTENT_URI);
+            calendarFetcher = new CalendarFetcher(CalWatchFaceService.this, WearableCalendarContract.Instances.CONTENT_URI, WearableCalendarContract.AUTHORITY);
 
             // start the background service, if it's not already running
             WearReceiverService.kickStart(CalWatchFaceService.this);

@@ -36,7 +36,7 @@ public class CalendarFetcher {
     // task, which runs asynchronously
     private Context context;
 
-    public CalendarFetcher(Context context, Uri contentUri) {
+    public CalendarFetcher(Context context, Uri contentUri, String authority) {
         this.contentUri = contentUri;
         this.context = context;
 
@@ -44,7 +44,7 @@ public class CalendarFetcher {
         Log.v(TAG, "setting up intent receiver");
         IntentFilter filter = new IntentFilter(Intent.ACTION_PROVIDER_CHANGED);
         filter.addDataScheme("content");
-        filter.addDataAuthority(CalendarContract.AUTHORITY, null);
+        filter.addDataAuthority(authority, null);
         context.registerReceiver(broadcastReceiver, filter);
         isReceiverRegistered = true;
 
