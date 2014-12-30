@@ -105,10 +105,6 @@ public class CalendarFetcher {
         // now, get the list of events
         long begin = System.currentTimeMillis();
 
-        // The URI builder stuff here is just enough different that this code isn't going to
-        // be obviously portable between phone and watch. Long term, we obviously want to
-        // deal with this.
-//        Uri.Builder builder = CalendarContract.Instances.CONTENT_URI.buildUpon();
         Uri.Builder builder = contentUri.buildUpon();
         ContentUris.appendId(builder, queryStartMillis);
         ContentUris.appendId(builder, queryEndMillis);
@@ -256,7 +252,7 @@ public class CalendarFetcher {
         public void onReceive(Context context, Intent intent) {
             Log.v(TAG, "receiver: got intent message");
             if (Intent.ACTION_PROVIDER_CHANGED.equals(intent.getAction())
-                    && CalendarContract.CONTENT_URI.equals(intent.getData())) {
+                    && contentUri.equals(intent.getData())) {
                 cancelLoaderTask();
                 loaderHandler.sendEmptyMessage(MSG_LOAD_CAL);
             }
