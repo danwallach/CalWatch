@@ -250,9 +250,10 @@ public class CalendarFetcher {
     private BroadcastReceiver broadcastReceiver = new BroadcastReceiver() {
         @Override
         public void onReceive(Context context, Intent intent) {
-            Log.v(TAG, "receiver: got intent message");
+            Log.v(TAG, "receiver: got intent message.  action(" + intent.getAction() + "), data(" + intent.getData() + "), toString(" + intent.toString() + ")");
             if (Intent.ACTION_PROVIDER_CHANGED.equals(intent.getAction())
                     && contentUri.equals(intent.getData())) {
+                Log.v(TAG, "receiver: time to load new calendar data");
                 cancelLoaderTask();
                 loaderHandler.sendEmptyMessage(MSG_LOAD_CAL);
             }
