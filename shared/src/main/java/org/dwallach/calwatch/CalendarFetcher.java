@@ -251,8 +251,16 @@ public class CalendarFetcher {
         @Override
         public void onReceive(Context context, Intent intent) {
             Log.v(TAG, "receiver: got intent message.  action(" + intent.getAction() + "), data(" + intent.getData() + "), toString(" + intent.toString() + ")");
-            if (Intent.ACTION_PROVIDER_CHANGED.equals(intent.getAction())
-                    && contentUri.equals(intent.getData())) {
+            if (Intent.ACTION_PROVIDER_CHANGED.equals(intent.getAction())) {
+
+                // Google's reference code also checks that the Uri matches intent.getData(), but the URI we're getting back via intent.getData() is:
+                // content://com.google.android.wearable.provider.calendar
+                //
+                // versus the URL we're looking for in the first place:
+                // content://com.google.android.wearable.provider.calendar/instances/when
+
+                // Solution? Screw it. Whatever we get, we don't care, we'll reload the calendar.
+
                 Log.v(TAG, "receiver: time to load new calendar data");
                 cancelLoaderTask();
                 loaderHandler.sendEmptyMessage(MSG_LOAD_CAL);
