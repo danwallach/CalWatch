@@ -98,8 +98,11 @@ public class PaintCan {
     public static final int colorBlackFill = 9;
     public static final int colorSmallShadow = 10;
     public static final int colorBigShadow = 11;
-    public static final int colorBlack = 12;
-    public static final int colorMax = 12;
+    public static final int colorStopwatchStroke = 12;
+    public static final int colorStopwatchFill = 13;
+    public static final int colorTimerStroke = 14;
+    public static final int colorTimerFill = 15;
+    public static final int colorMax = 15;
 
 
     /**
@@ -131,13 +134,19 @@ public class PaintCan {
             palette[style][colorBlackFill] = newPaint(Color.BLACK, style, textSize, lineWidth);
             palette[style][colorSmallShadow] = newPaint(Color.BLACK, style, smTextSize, lineWidth / 4f);
             palette[style][colorBigShadow] = newPaint(Color.BLACK, style, smTextSize, lineWidth / 2f);
-            palette[style][colorBlack] = newPaint(Color.BLACK, style, smTextSize, lineWidth);
+
+            palette[style][colorStopwatchStroke] = newPaint(0xFF80A3F2, style, smTextSize, lineWidth / 3f);  // light blue
+            palette[style][colorStopwatchFill] = newPaint(0x5080A3F2, style, smTextSize, lineWidth / 3f);  // light blue + transparency
+            palette[style][colorTimerStroke] = newPaint(0xFFF2CF80, style, smTextSize, lineWidth / 3f); // orange-ish
+            palette[style][colorTimerFill] = newPaint(0x50F2CF80, style, smTextSize, lineWidth / 3f); // orange-ish + transparency
 
             // shadows are stroke, not fill, so we fix that here
             palette[style][colorSecondHandShadow].setStyle(Paint.Style.STROKE);
             palette[style][colorArcShadow].setStyle(Paint.Style.STROKE);
             palette[style][colorSmallShadow].setStyle(Paint.Style.STROKE);
             palette[style][colorBigShadow].setStyle(Paint.Style.STROKE);
+            palette[style][colorStopwatchStroke].setStyle(Paint.Style.STROKE);
+            palette[style][colorTimerStroke].setStyle(Paint.Style.STROKE);
 
             // by default, text is centered, but some styles want it on the left
             // (these are the places where we'll eventually have to do more work for RTL languages)

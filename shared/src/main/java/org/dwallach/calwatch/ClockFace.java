@@ -148,7 +148,7 @@ public class ClockFace implements Observer {
         // everything else. I want the hands to not be chopped off, even though everything
         // else will be.
         if(peekCardRect != null && ambientMode)
-            canvas.drawRect(peekCardRect, PaintCan.get(ambientLowBit, ambientMode, PaintCan.colorBlack));
+            canvas.drawRect(peekCardRect, PaintCan.get(ambientLowBit, ambientMode, PaintCan.colorBlackFill));
 
         drawHands(canvas);
 
@@ -173,7 +173,8 @@ public class ClockFace implements Observer {
         Path p = new Path();
         drawRadialLine(p, paint.getStrokeWidth(), seconds, startRadius, endRadius, forceVertical, false);
         canvas.drawPath(p, paint);
-        canvas.drawPath(p, shadowPaint);
+        if(shadowPaint != null)
+            canvas.drawPath(p, shadowPaint);
     }
     private void drawRadialLine(Path path, float strokeWidth, double seconds, float startRadius, float endRadius, boolean forceVertical, boolean flatBottomHack) {
         float x1, x2, y1, y2;
@@ -608,7 +609,7 @@ public class ClockFace implements Observer {
 //                            ")");
             }
         }
-        canvas.drawPath(stipplePathCache, PaintCan.get(ambientLowBit, ambientMode, PaintCan.colorBlack));
+        canvas.drawPath(stipplePathCache, PaintCan.get(ambientLowBit, ambientMode, PaintCan.colorBlackFill));
     }
 
     private Path batteryPathCache = null;
@@ -671,6 +672,67 @@ public class ClockFace implements Observer {
         }
     }
 
+    public void drawTimers(Canvas canvas) {
+        long currentTime = TimeWrapper.getGMTTime(); // note that we're *not* using local time here
+
+        Paint colorStopwatchStroke = PaintCan.get(ambientLowBit, ambientMode, PaintCan.colorStopwatchStroke);
+        Paint colorStopwatchFill = PaintCan.get(ambientLowBit, ambientMode, PaintCan.colorStopwatchFill);
+        Paint colorTimerStroke = PaintCan.get(ambientLowBit, ambientMode, PaintCan.colorTimerStroke);
+        Paint colorTimerFill = PaintCan.get(ambientLowBit, ambientMode, PaintCan.colorTimerFill);
+
+        // Radius 0.9 is the start of the tick marks and the end of the normal minute hand. The normal
+        // second hand goes to 0.95. If there's a stopwatch but no timer, then the stopwatch second and minute
+        // hand will *both* go to 1.0 and the minute arc will be drawn from 0.9 to 1.0.
+
+        // If there's a timer and no stopwatch, then the timer arc will be drawn from 0.9 to 1.0.
+
+        // If there's a timer *and* a stopwatch active, then the timer wins with the outer ring and the
+        // stopwatch has the inner ring. Outer ring is 0.95 to 1.0, inner ring is 0.9 to 0.95.
+
+
+        // we don't draw anything if the stopwatch is non-moving and at 00:00.00
+        long stopwatchRenderTime = 0;
+
+        if(!XDrawTimers.stopwatchIsReset) {
+            if (!XDrawTimers.stopwatchIsRunning) {
+                stopwatchRenderTime = XDrawTimers.stopwatchPriorTime;
+            } else {
+                stopwatchRenderTime = currentTime - XDrawTimers.stopwatchStartTime + XDrawTimers.stopwatchPriorTime;
+            }
+
+            // code borrowed/derived from SweepWatchFace
+
+            float seconds = stopwatchRenderTime / 1000.0f;
+            float minutes = stopwatchRenderTime / 60000.0f;
+
+            // Stopwatch second hand only drawn if we're not in ambient mode.
+            if(!ambientMode)
+                drawRadialLine(canvas, seconds, 0.1f, 0.95f, colorStopwatchStroke, null);
+
+            // Stopwatch minute hand. Same thin gauge as second hand, but will be attached to the arc,
+            // and thus look super cool.
+            drawRadialLine(canvas, minutes, 0.1f, 1f, colorStopwatchStroke, null);
+
+            // TODO draw minutes arc. Uggh, must deal with flat bottom of Moto 360.
+        }
+
+        long timerRemaining = 0; // should go from 0 to timerDuration, where 0 means we're done
+        if(!XDrawTimers.timerIsReset) {
+            if (!XDrawTimers.timerIsRunning) {
+                timerRemaining = XDrawTimers.timerDuration - XDrawTimers.timerPauseDelta;
+            } else {
+                timerRemaining = XDrawTimers.timerDuration  - currentTime + XDrawTimers.timerStartTime;
+            }
+            if(timerRemaining < 0) timerRemaining = 0;
+
+            // timer hand will sweep counterclockwise from 12 o'clock back to 12 again when it's done
+            float angle = (float) timerRemaining / (float) XDrawTimers.timerDuration * (float) 60;
+
+            // TODO replace line with minutes arc. Deal with Moto 360 flat bottom.
+            drawRadialLine(canvas, angle, 0.1f, 0.95f, colorTimerStroke, null);
+        }
+    }
+
     public void setAmbientMode(boolean ambientMode) {
         Log.i(TAG, "Ambient mode: " + ambientMode);
 
@@ -694,10 +756,10 @@ public class ClockFace implements Observer {
         oldCy = cy;
 
         radius = (cx > cy) ? cy : cx; // minimum of the two
-        float textSize = radius / 3f;
-        float smTextSize = radius / 6f;
-        float lineWidth = radius / 20f;
 
+        // This creates all the Paint objects used throughout the draw routines
+        // here. Everything scales with the radius of the watchface, which is why
+        // we're calling it from here.
         PaintCan.initPaintBucket(radius);
 
         wipeCaches();
