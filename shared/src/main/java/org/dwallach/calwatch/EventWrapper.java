@@ -7,9 +7,6 @@
 package org.dwallach.calwatch;
 
 import android.graphics.Paint;
-import android.util.Log;
-
-import org.dwallach.calwatch.WireEvent;
 
 /**
  * Created by dwallach on 8/25/14.
@@ -24,8 +21,8 @@ public class EventWrapper {
     public EventWrapper(WireEvent wireEvent) {
         this.wireEvent = wireEvent;
         this.pathCache = new PathCache();
-        this.paint = PaintCan.getPaint(wireEvent.displayColor);
-        this.greyPaint = PaintCan.getGreyPaint(wireEvent.displayColor);
+        this.paint = PaintCan.getCalendarPaint(wireEvent.displayColor);
+        this.greyPaint = PaintCan.getCalendarGreyPaint(wireEvent.displayColor);
         this.minLevel = this.maxLevel = 0;  // fill this in later on...
     }
 

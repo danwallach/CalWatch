@@ -52,7 +52,7 @@ public class ClockFace implements Observer {
     // having all these specific colors started out making sense and has grown to a monstrosity
     // TODO: redo all of this, probably a getter backed by a hashtable or something, e.g., get(int faceMode, int argb, boolean solid, boolean antialias, ...)
 
-    private Paint white, whiteHour, whiteMinute, yellow, smWhite, smYellow, black, smBlack, smRed, gray, outlineBlack, thickOutlineBlack, superThinBlack, smTextShadow, textShadow;
+    private Paint white, whiteHour, whiteMinute, smWhite, black, smBlack, gray, outlineBlack, thickOutlineBlack, superThinBlack, smTextShadow, textShadow;
     private Paint whiteNoAA, whiteHourNoAA, whiteMinuteNoAA, smWhiteNoAA, blackNoAA, smBlackNoAA, outlineBlackNoAA, thickOutlineBlackNoAA, superThinBlackNoAA, smTextShadowNoAA, textShadowNoAA;
     private Paint whiteHourInverseNoAA, whiteMinuteInverseNoAA, shadowInverseNoAA;
 
@@ -125,15 +125,12 @@ public class ClockFace implements Observer {
         whiteMinute = newPaint();
         whiteMinuteNoAA = newPaint(false);
         whiteMinuteInverseNoAA = newPaint(false);
-        yellow = newPaint();
         smWhite = newPaint();
         smWhiteNoAA = newPaint(false);
-        smYellow = newPaint();
         black = newPaint();
         blackNoAA = newPaint(false);
         smBlack = newPaint();
         smBlackNoAA = newPaint(false);
-        smRed = newPaint();
         gray = newPaint();
         outlineBlack = newPaint();
         outlineBlackNoAA = newPaint(false);
@@ -148,8 +145,6 @@ public class ClockFace implements Observer {
         superThinBlackNoAA = newPaint(false);
 
         whiteNoAA.setColor(Color.BLACK);
-        yellow.setColor(Color.YELLOW);
-        smYellow.setColor(Color.YELLOW);
         black.setColor(Color.BLACK);
         blackNoAA.setColor(Color.WHITE);
         smBlack.setColor(Color.BLACK);
@@ -168,10 +163,8 @@ public class ClockFace implements Observer {
         textShadowNoAA.setColor(Color.WHITE);
         superThinBlack.setColor(Color.BLACK);
         superThinBlackNoAA.setColor(Color.WHITE);
-        smRed.setColor(Color.RED);
         gray.setColor(Color.GRAY);
 
-        smYellow.setTextAlign(Paint.Align.LEFT);
         smWhite.setTextAlign(Paint.Align.LEFT);
         smWhiteNoAA.setTextAlign(Paint.Align.LEFT);
         smTextShadow.setTextAlign(Paint.Align.LEFT);
@@ -366,8 +359,7 @@ public class ClockFace implements Observer {
         x1 = clockX(45, .85f);
         y1 = clockY(45, .85f);
 
-//        Paint paint = (ambientMode)? smWhite : smYellow;
-        Paint paint = smWhite; // yellow just doesn't look right, so we'll keep it monochromatic
+        Paint paint = smWhite;
 
         // AA note: we only draw the month box when in normal mode, not ambient, so no AA gymnastics here
 
@@ -394,20 +386,20 @@ public class ClockFace implements Observer {
 
         boolean bottomHack = (missingBottomPixels > 0);
 
-        Paint mySmWhite, myWhite, mySuperThinBlack, myBlack, myTextShadow;
+        Paint mySmWhite, myWhite, myTickShadow, myBlack, myTextShadow;
         int localFaceMode = faceMode;
+
+        myTickShadow = PaintCan.get(ambientLowBit, getAmbientMode(), PaintCan.colorSecondHandShadow);
 
         if(ambientLowBit && getAmbientMode()) {
             mySmWhite = smWhiteNoAA;
             myWhite = whiteNoAA;
-            mySuperThinBlack = shadowInverseNoAA;
             myBlack = blackNoAA;
             myTextShadow = textShadowNoAA;
             localFaceMode = ClockState.FACE_LITE;  // in low-bit ambient mode, simplify
         } else {
             mySmWhite = smWhite;
             myWhite = white;
-            mySuperThinBlack = superThinBlack;
             myBlack = black;
             myTextShadow = textShadow;
         }
@@ -464,7 +456,7 @@ public class ClockFace implements Observer {
 
         // only draw the shadows when we're in high-bit mode
         if(!ambientLowBit || !getAmbientMode())
-            canvas.drawPath(p, mySuperThinBlack);
+            canvas.drawPath(p, myTickShadow);
 
         if(localFaceMode == ClockState.FACE_NUMBERS) {
             // in this case, we'll draw "12", "3", and "6". No "9" because that's where the
@@ -547,14 +539,14 @@ public class ClockFace implements Observer {
 
         Paint myWhiteHour, myWhiteMinute, myBlack;
 
+        myBlack = PaintCan.get(ambientLowBit, getAmbientMode(), PaintCan.colorSecondHandShadow);
+
         if(getAmbientMode() && ambientLowBit) {
             myWhiteHour = whiteHourInverseNoAA;
             myWhiteMinute = whiteMinuteInverseNoAA;
-            myBlack = shadowInverseNoAA;
         } else {
             myWhiteHour = whiteHour;
             myWhiteMinute = whiteMinute;
-            myBlack = superThinBlack;
         }
 
         drawRadialLine(canvas, hours, 0.1f, 0.6f, myWhiteHour, myBlack);
@@ -564,7 +556,8 @@ public class ClockFace implements Observer {
             // ugly details: we might run 10% or more away from our targets at 4Hz, making the second
             // hand miss the indices. Ugly. Thus, some hackery.
             if(clipSeconds) seconds = Math.floor(seconds * freqUpdate) / freqUpdate;
-            drawRadialLine(canvas, seconds, 0.1f, 0.95f, smRed, superThinBlack);
+            drawRadialLine(canvas, seconds, 0.1f, 0.95f,
+                    PaintCan.get(PaintCan.styleNormal, PaintCan.colorSecondHand), superThinBlack);
         }
     }
 
@@ -783,9 +776,9 @@ public class ClockFace implements Observer {
             Paint paint;
 
             if(batteryCritical)
-                paint = smRed;
+                paint = PaintCan.get(PaintCan.styleNormal, PaintCan.colorBatteryCritical);
             else
-                paint = smYellow;
+                paint = PaintCan.get(PaintCan.styleNormal, PaintCan.colorBatteryLow);
 
             if(!getAmbientMode())
                 canvas.drawPath(batteryPathCache, paint);
@@ -829,7 +822,6 @@ public class ClockFace implements Observer {
         whiteMinute.setTextSize(textSize);
         whiteMinuteNoAA.setTextSize(textSize);
         whiteMinuteInverseNoAA.setTextSize(textSize);
-        yellow.setTextSize(textSize);
         gray.setTextSize(textSize);
         black.setTextSize(textSize);
         blackNoAA.setTextSize(textSize);
@@ -843,14 +835,12 @@ public class ClockFace implements Observer {
         whiteHourInverseNoAA.setStrokeWidth(lineWidth * 1.5f);
         whiteMinute.setStrokeWidth(lineWidth);
         whiteMinuteInverseNoAA.setStrokeWidth(lineWidth);
-        yellow.setStrokeWidth(lineWidth);
         gray.setStrokeWidth(lineWidth);
         black.setStrokeWidth(lineWidth);
         blackNoAA.setStrokeWidth(lineWidth);
 
         smWhite.setTextSize(smTextSize);
         smWhiteNoAA.setTextSize(smTextSize);
-        smYellow.setTextSize(smTextSize);
         smBlack.setTextSize(smTextSize);
         smBlackNoAA.setTextSize(smTextSize);
         smTextShadow.setTextSize(smTextSize);
@@ -858,10 +848,8 @@ public class ClockFace implements Observer {
 
         smWhite.setStrokeWidth(lineWidth /3);
         smWhiteNoAA.setStrokeWidth(lineWidth /3);
-        smYellow.setStrokeWidth(lineWidth /3);
         smBlack.setStrokeWidth(lineWidth /4);
         smBlackNoAA.setStrokeWidth(lineWidth /4);
-        smRed.setStrokeWidth(lineWidth /3);
 
         smTextShadow.setStrokeWidth(lineWidth / 4);
         smTextShadowNoAA.setStrokeWidth(lineWidth / 4);
