@@ -42,7 +42,7 @@ public class PaintCan {
         return retPaint;
     }
 
-    private static Paint palette[][];
+    private static Paint[][] palette;
 
     public static final int styleNormal = 0;
     public static final int styleAmbient = 1;
@@ -51,9 +51,8 @@ public class PaintCan {
 
     private static final float gamma = 2.2f;
 
-    private static Paint getPaint(int argb, int style, float textSize, float strokeWidth) {
+    private static Paint newPaint(int argb, int style, float textSize, float strokeWidth) {
         Paint retPaint = new Paint(Paint.SUBPIXEL_TEXT_FLAG | Paint.HINTING_ON);
-        retPaint.setAntiAlias(true);
         retPaint.setStrokeCap(Paint.Cap.SQUARE);
         retPaint.setStrokeWidth(strokeWidth);
         retPaint.setTextSize(textSize);
@@ -62,23 +61,25 @@ public class PaintCan {
 
         switch(style) {
             case styleNormal:
+                retPaint.setAntiAlias(true);
                 retPaint.setColor(argb);
                 break;
 
             case styleLowBit:
+                retPaint.setAntiAlias(false);
                 if((argb & 0xffffff) > 0)
-                    retPaint.setColor(0xffffffff);
+                    retPaint.setColor(0xffffffff); // any non-black color mapped to pure white
                 else
                     retPaint.setColor(0xff000000);
-                retPaint.setAntiAlias(false);
                 break;
 
             case styleAmbient:
+                retPaint.setAntiAlias(true);
                 retPaint.setColor(argbToGrey(argb));
                 break;
 
             default:
-                Log.e(TAG, "getPaint: unknown style: " + style);
+                Log.e(TAG, "newPaint: unknown style: " + style);
                 break;
         }
 
@@ -89,10 +90,26 @@ public class PaintCan {
     public static final int colorBatteryCritical = 1;
     public static final int colorSecondHand = 2;
     public static final int colorSecondHandShadow = 3;
-    public static final int colorMax = 2;
+    public static final int colorMinuteHand = 4;
+    public static final int colorHourHand = 5;
+    public static final int colorArcShadow = 6;
+    public static final int colorSmallTextAndLines = 7;
+    public static final int colorBigTextAndLines = 8;
+    public static final int colorBlackFill = 9;
+    public static final int colorSmallShadow = 10;
+    public static final int colorBigShadow = 11;
+    public static final int colorBlack = 12;
+    public static final int colorMax = 12;
 
 
-    private static void initPaintBucket(float radius) {
+    /**
+     * Create all the Paint instances used in the watch face. Call this every time the
+     * watch radius changes, perhaps because of a resize event on the phone. Make sure
+     * to call this *before* trying to get() any colors, or you'll get a NullPointerException.
+     *
+     * @param radius Radius of the watch face, used to scale all of the line widths
+     */
+    public static void initPaintBucket(float radius) {
         Log.v(TAG, "initPaintBucket");
 
         float textSize = radius / 3f;
@@ -102,15 +119,40 @@ public class PaintCan {
         palette = new Paint[styleMax+1][colorMax+1];
 
         for(int style=0; style <= styleMax; style++) {
-            palette[style][colorBatteryLow] = getPaint(Color.YELLOW, style, smTextSize, lineWidth / 3f);
-            palette[style][colorBatteryCritical] = getPaint(Color.RED, style, smTextSize, lineWidth / 3f);
-            palette[style][colorSecondHand] = getPaint(Color.RED, style, smTextSize, lineWidth / 3f);
-            palette[style][colorSecondHandShadow] = getPaint(Color.BLACK, style, smTextSize, lineWidth / 8f);
+            palette[style][colorBatteryLow] = newPaint(Color.YELLOW, style, smTextSize, lineWidth / 3f);
+            palette[style][colorBatteryCritical] = newPaint(Color.RED, style, smTextSize, lineWidth / 3f);
+            palette[style][colorSecondHand] = newPaint(Color.RED, style, smTextSize, lineWidth / 3f);
+            palette[style][colorSecondHandShadow] = newPaint(Color.BLACK, style, smTextSize, lineWidth / 8f);
+            palette[style][colorMinuteHand] = newPaint(Color.WHITE, style, textSize, lineWidth);
+            palette[style][colorHourHand] = newPaint(Color.WHITE, style, textSize, lineWidth * 1.5f);
+            palette[style][colorArcShadow] = newPaint(Color.BLACK, style, smTextSize, lineWidth / 6f);
+            palette[style][colorSmallTextAndLines] = newPaint(Color.WHITE, style, smTextSize, lineWidth / 3f);
+            palette[style][colorBigTextAndLines] = newPaint(Color.WHITE, style, textSize, lineWidth);
+            palette[style][colorBlackFill] = newPaint(Color.BLACK, style, textSize, lineWidth);
+            palette[style][colorSmallShadow] = newPaint(Color.BLACK, style, smTextSize, lineWidth / 4f);
+            palette[style][colorBigShadow] = newPaint(Color.BLACK, style, smTextSize, lineWidth / 2f);
+            palette[style][colorBlack] = newPaint(Color.BLACK, style, smTextSize, lineWidth);
+
+            // shadows are stroke, not fill, so we fix that here
             palette[style][colorSecondHandShadow].setStyle(Paint.Style.STROKE);
+            palette[style][colorArcShadow].setStyle(Paint.Style.STROKE);
+            palette[style][colorSmallShadow].setStyle(Paint.Style.STROKE);
+            palette[style][colorBigShadow].setStyle(Paint.Style.STROKE);
+
+            // by default, text is centered, but some styles want it on the left
+            // (these are the places where we'll eventually have to do more work for RTL languages)
+            palette[style][colorSmallTextAndLines].setTextAlign(Paint.Align.LEFT);
+            palette[style][colorSmallShadow].setTextAlign(Paint.Align.LEFT);
         }
 
-        // a couple things that are backwards for low-bit mode
+        // a couple things that are backwards for low-bit mode: we'll be drawing some "shadows" as
+        // white outlines around black centers, "hollowing out" the hands as we're supposed to do
         palette[styleLowBit][colorSecondHandShadow].setColor(Color.WHITE);
+        palette[styleLowBit][colorMinuteHand].setColor(Color.BLACK);
+        palette[styleLowBit][colorHourHand].setColor(Color.BLACK);
+        palette[styleLowBit][colorArcShadow].setColor(Color.WHITE);
+        palette[styleLowBit][colorSmallShadow].setColor(Color.WHITE);
+        palette[styleLowBit][colorBigShadow].setColor(Color.WHITE);
     }
 
     public static Paint get(int style, int colorID) {
