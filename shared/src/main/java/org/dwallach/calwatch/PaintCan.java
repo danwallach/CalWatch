@@ -162,6 +162,8 @@ public class PaintCan {
         palette[styleLowBit][colorArcShadow].setColor(Color.WHITE);
         palette[styleLowBit][colorSmallShadow].setColor(Color.WHITE);
         palette[styleLowBit][colorBigShadow].setColor(Color.WHITE);
+        palette[styleLowBit][colorTimerFill].setColor(Color.BLACK);
+        palette[styleLowBit][colorStopwatchFill].setColor(Color.BLACK);
     }
 
     public static Paint get(int style, int colorID) {

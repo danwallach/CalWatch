@@ -34,6 +34,14 @@
             android:enabled="true"
             android:exported="false" >
         </service>
+
+        <receiver android:name=".XWatchfaceReceiver">
+            <intent-filter>
+                <action android:name="org.dwallach.x.stopwatch.update" />
+                <action android:name="org.dwallach.x.timer.update" />
+            </intent-filter>
+        </receiver>
+
     </application>
 
 </manifest>

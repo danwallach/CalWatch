@@ -48,7 +48,6 @@ public class ClockFace implements Observer {
 
     private int missingBottomPixels = 0; // Moto 360 hack; set to non-zero number to pull up the indicia
     private float missingBottomPixelTime = 30f; // Moto 360 hack: set to < 30.0 seconds for where the flat bottom starts
-    private float missingX1, missingY1, missingX2, missingY2; // coordintes of each corner where the flat tire begins
 
     private ClockState clockState;
 
@@ -145,6 +144,11 @@ public class ClockFace implements Observer {
         drawCalendar(canvas);
         drawFace(canvas);
 
+        // okay, we're drawing the stopwatch and countdown timers next: they've got partial transparency
+        // that will let the watchface tick marks show through, except they're opaque in low-bit mode
+
+        drawTimers(canvas);
+
         // Temporary kludge for peek card until we come up with something better:
         // if there's a peek card *and* we're in ambient mode, *then* draw
         // a solid black box behind the peek card, which would otherwise be transparent.
@@ -157,13 +161,11 @@ public class ClockFace implements Observer {
         drawHands(canvas);
 
         // something a real watch can't do: float the text over the hands
-        // this visually conflicts with other notifications, drawn as text above the hands,
-        // so it's easiest to just cut it during ambient mode
+        // (note that we don't do this at all in ambient mode)
         if(!ambientMode && showDayDate) drawMonthBox(canvas);
 
         // and lastly, the battery meter
-        // -- note that the watch draws its own battery meter, so this is really just window
-        //    dressing, unnecessary in ambient mode
+        // (not in ambient mode, because we don't want to cause burn-in)
         if(!ambientMode) drawBattery(canvas);
 
         TimeWrapper.frameEnd();
@@ -305,13 +307,29 @@ public class ClockFace implements Observer {
                 // next case: we're inside the flat-bottom region
                 p.arcTo(startOval, -90f, missingBottomPixelTime * 6f, true);
 
-                // linear interpolation time!
-                float t = (float) ((seconds - missingBottomPixelTime) / (60 - 2 * missingBottomPixelTime));
+                // lines left then down
+                p.lineTo(flatBottomX(seconds, startRadius), flatBottomY(seconds, startRadius)); // sideways
+                p.lineTo(flatBottomX(seconds, endRadius), flatBottomY(seconds, endRadius)); // change levels
 
-                p.arcTo(endOval, (float) (missingBottomPixelTime * 6 - 90), (float) (-missingBottomPixelTime * 6));
+                // this will automatically jump us back to the right before going back up again
+                p.arcTo(endOval, missingBottomPixelTime * 6f - 90f, -missingBottomPixelTime * 6f);
 
+            } else {
+                // final case, we're covering the entire initial arc, all the way across the flat bottom
+                // (with a linear discontinuity, but arcTo() will bridge the gap with a lineTo())
+                // then up the other side
+                p.arcTo(startOval, -90f, missingBottomPixelTime * 6f, true);
+                p.arcTo(startOval, -90f + 6f * (60 - missingBottomPixelTime), 6f * (seconds - 60 + missingBottomPixelTime));
+
+                // okay, we're up on the left side, need to work our way back down again
+                p.arcTo(endOval, -90f + 6f * seconds, 6f * (60 - missingBottomPixelTime - seconds));
+                p.arcTo(endOval, -90f + 6f * missingBottomPixelTime, -6f * missingBottomPixelTime);
             }
             p.close();
+
+            canvas.drawPath(p, paint);
+            if(outlinePaint != null)
+                canvas.drawPath(p, outlinePaint);
         }
     }
 
@@ -753,6 +771,9 @@ public class ClockFace implements Observer {
             float seconds = stopwatchRenderTime / 1000.0f;
             float minutes = stopwatchRenderTime / 60000.0f;
 
+            float stopWatchR1 = 0.90f;
+            float stopWatchR2 =  (XWatchfaceReceiver.timerIsReset) ? 1f : 0.95f;
+
             // Stopwatch second hand only drawn if we're not in ambient mode.
             if(!ambientMode)
                 drawRadialLine(canvas, seconds, 0.1f, 0.95f, colorStopwatchStroke, null);
@@ -760,8 +781,7 @@ public class ClockFace implements Observer {
             // Stopwatch minute hand. Same thin gauge as second hand, but will be attached to the arc,
             // and thus look super cool.
             drawRadialLine(canvas, minutes, 0.1f, 1f, colorStopwatchStroke, null);
-
-            // TODO draw minutes arc. Uggh, must deal with flat bottom of Moto 360.
+            drawRadialArcFlatBottom(canvas, minutes, stopWatchR1, stopWatchR2, colorStopwatchFill, colorStopwatchStroke);
         }
 
         long timerRemaining = 0; // should go from 0 to timerDuration, where 0 means we're done
@@ -776,8 +796,12 @@ public class ClockFace implements Observer {
             // timer hand will sweep counterclockwise from 12 o'clock back to 12 again when it's done
             float angle = (float) timerRemaining / (float) XWatchfaceReceiver.timerDuration * (float) 60;
 
+            float timerR1 = (XWatchfaceReceiver.stopwatchIsReset) ? 0.90f : 0.95f;
+            float timerR2 =  1f;
+
             // TODO replace line with minutes arc. Deal with Moto 360 flat bottom.
             drawRadialLine(canvas, angle, 0.1f, 0.95f, colorTimerStroke, null);
+            drawRadialArcFlatBottom(canvas, angle, timerR1, timerR2, colorTimerFill, colorTimerStroke);
         }
     }
 
@@ -815,6 +839,14 @@ public class ClockFace implements Observer {
         wipeCaches();
     }
 
+    // coordinates of each corner where the flat tire begins.
+    // (x1, y1) is before 6 o'clock
+    // (x2, y2) is after 6 o'clock
+    // _R100 is at a radius of 1
+    // _R80 is at a radius of 0.80
+    private float missingX1_R100, missingY1_R100, missingX2_R100, missingY2_R100;
+    private float missingX1_R80, missingY1_R80, missingX2_R80, missingY2_R80;
+
     private void computeMissingBottomPixels() {
         // What angle does the flat bottom begin and end?
         //
@@ -837,17 +869,46 @@ public class ClockFace implements Observer {
             double angle = Math.asin(1.0 - missingBottomPixels / cy);
             missingBottomPixelTime = (float) (angle * 30.0 / Math.PI + 15);
 
-            missingX1 = clockX(missingBottomPixelTime, 1);
-            missingY1 = clockY(missingBottomPixelTime, 1);
-            missingX2 = clockX(60-missingBottomPixelTime, 1);
-            missingY2 = clockY(60 - missingBottomPixelTime, 1);
+            missingX1_R100 = clockX(missingBottomPixelTime, 1);
+            missingY1_R100 = clockY(missingBottomPixelTime, 1);
+            missingX2_R100 = clockX(60 - missingBottomPixelTime, 1);
+            missingY2_R100 = clockY(60 - missingBottomPixelTime, 1);
+
+            missingX1_R80 = clockX(missingBottomPixelTime, 0.80f);
+            missingY1_R80 = clockY(missingBottomPixelTime, 0.80f);
+            missingX2_R80 = clockX(60 - missingBottomPixelTime, 0.80f);
+            missingY2_R80 = clockY(60 - missingBottomPixelTime, 0.80f);
         }
     }
 
-    // t == 0, you get x1
-    // t == 1, you get x2
-    private static float interpolate(float x1, float x2, float t) {
-        return x1 * (1-t) + x2 * t;
+    // given two values x1 and x2 associated with time parameters t1 and t2, find the
+    // interpolated value for x given the time t
+    //
+    // example: x1 = 4, x2 = 10, t1=10, t2=30
+    // interpolateT: t -> x
+    //    10 -> 4
+    //    20 -> 7
+    //    30 -> 10
+    //    50 -> 16  (we keep extrapolating on either end)
+    private float interpolate(float x1, float t1, float x2, float t2, float t) {
+        float dx = x2 - x1;
+        float dt = t2 - t1;
+        float ratio = (t - t1) / dt;
+        return x1 + dx * ratio;
+    }
+
+    private float flatBottomX(float time, float radius) {
+        // first find the right and left side values of X
+        float x1 = interpolate(missingX1_R80, 0.8f, missingX1_R100, 1f, radius);
+        float x2 = interpolate(missingX2_R80, 0.8f, missingX2_R100, 1f, radius);
+        return interpolate(x1, missingBottomPixelTime, x2, 60 - missingBottomPixelTime, time);
+    }
+
+    private float flatBottomY(float time, float radius) {
+        // first find the right and left side values of Y
+        float y1 = interpolate(missingY1_R80, 0.8f, missingY1_R100, 1f, radius);
+        float y2 = interpolate(missingY2_R80, 0.8f, missingY2_R100, 1f, radius);
+        return interpolate(y1, missingBottomPixelTime, y2, 60 - missingBottomPixelTime, time);
     }
 
 
