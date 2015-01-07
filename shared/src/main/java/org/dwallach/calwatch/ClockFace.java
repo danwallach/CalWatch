@@ -47,6 +47,8 @@ public class ClockFace implements Observer {
     private boolean clipSeconds = false; // force second hand to align with FPS boundaries (good for low-FPS drawing)
 
     private int missingBottomPixels = 0; // Moto 360 hack; set to non-zero number to pull up the indicia
+    private float missingBottomPixelTime = 30f; // Moto 360 hack: set to < 30.0 seconds for where the flat bottom starts
+    private float missingX1, missingY1, missingX2, missingY2; // coordintes of each corner where the flat tire begins
 
     private ClockState clockState;
 
@@ -55,6 +57,8 @@ public class ClockFace implements Observer {
     // set for Moto 360
     public void setMissingBottomPixels(int missingBottomPixels) {
         this.missingBottomPixels = missingBottomPixels;
+
+        computeMissingBottomPixels();
     }
 
     public void setPeekCardRect(Rect rect) {
@@ -235,7 +239,10 @@ public class ClockFace implements Observer {
                             "), seconds(" + Float.toString((float) secondsStart) + "," + Float.toString((float) secondsEnd) + ")");
         }
 
-        Path p = pc.get();
+        Path p = null;
+
+        if(pc != null) p = pc.get();
+
         if(p == null) {
             p = new Path();
 
@@ -260,11 +267,52 @@ public class ClockFace implements Observer {
 //            Log.e(TAG, "--> arcTo: endOval, " + Float.toString((float) (secondsEnd * 6 - 90)) + ", " +  Float.toString((float) (-(secondsEnd - secondsStart) * 6)));
             }
 
-            pc.set(p);
+            if(pc != null) pc.set(p);
         }
 
         canvas.drawPath(p, paint);
         canvas.drawPath(p, outlinePaint);
+    }
+
+    private void drawRadialArcFlatBottom(Canvas canvas, float seconds, float startRadius, float endRadius, Paint paint, Paint outlinePaint) {
+        if(startRadius < 0 || startRadius > 1 || endRadius < 0 || endRadius > 1) {
+            Log.e(TAG, "drawRadialArcFlatBottom: arc too big! radius(" + startRadius + "," + endRadius +
+                    "), seconds(" + seconds + ")");
+            return;
+        }
+
+        if(seconds < 0 || seconds > 60) {
+            Log.e(TAG, "drawRadialArcFlatBottom: seconds out of range: " + seconds);
+            return;
+        }
+
+        // This one always starts at the top and goes clockwise to the time indicated (seconds).
+        // This computation is much easier than doing it for the general case.
+
+        if(missingBottomPixels == 0)
+            drawRadialArc(canvas, null, 0, seconds, startRadius, endRadius, paint, outlinePaint);
+        else {
+            Path p = new Path();
+
+            RectF startOval = getRectRadius(startRadius);
+            RectF endOval = getRectRadius(endRadius);
+
+            if(seconds < missingBottomPixelTime) {
+                // trivial case: we don't run into the flat tire region
+                p.arcTo(startOval, (-90f), seconds * 6f, true);
+                p.arcTo(endOval, seconds * 6f - 90f, -seconds * 6f);
+            } else if (seconds < 60 - missingBottomPixelTime) {
+                // next case: we're inside the flat-bottom region
+                p.arcTo(startOval, -90f, missingBottomPixelTime * 6f, true);
+
+                // linear interpolation time!
+                float t = (float) ((seconds - missingBottomPixelTime) / (60 - 2 * missingBottomPixelTime));
+
+                p.arcTo(endOval, (float) (missingBottomPixelTime * 6 - 90), (float) (-missingBottomPixelTime * 6));
+
+            }
+            p.close();
+        }
     }
 
     private void drawMonthBox(Canvas canvas) {
@@ -693,11 +741,11 @@ public class ClockFace implements Observer {
         // we don't draw anything if the stopwatch is non-moving and at 00:00.00
         long stopwatchRenderTime = 0;
 
-        if(!XDrawTimers.stopwatchIsReset) {
-            if (!XDrawTimers.stopwatchIsRunning) {
-                stopwatchRenderTime = XDrawTimers.stopwatchPriorTime;
+        if(!XWatchfaceReceiver.stopwatchIsReset) {
+            if (!XWatchfaceReceiver.stopwatchIsRunning) {
+                stopwatchRenderTime = XWatchfaceReceiver.stopwatchBase;
             } else {
-                stopwatchRenderTime = currentTime - XDrawTimers.stopwatchStartTime + XDrawTimers.stopwatchPriorTime;
+                stopwatchRenderTime = currentTime - XWatchfaceReceiver.stopwatchStart + XWatchfaceReceiver.stopwatchBase;
             }
 
             // code borrowed/derived from SweepWatchFace
@@ -717,16 +765,16 @@ public class ClockFace implements Observer {
         }
 
         long timerRemaining = 0; // should go from 0 to timerDuration, where 0 means we're done
-        if(!XDrawTimers.timerIsReset) {
-            if (!XDrawTimers.timerIsRunning) {
-                timerRemaining = XDrawTimers.timerDuration - XDrawTimers.timerPauseDelta;
+        if(!XWatchfaceReceiver.timerIsReset) {
+            if (!XWatchfaceReceiver.timerIsRunning) {
+                timerRemaining = XWatchfaceReceiver.timerDuration - XWatchfaceReceiver.timerPauseElapsed;
             } else {
-                timerRemaining = XDrawTimers.timerDuration  - currentTime + XDrawTimers.timerStartTime;
+                timerRemaining = XWatchfaceReceiver.timerDuration  - currentTime + XWatchfaceReceiver.timerStart;
             }
             if(timerRemaining < 0) timerRemaining = 0;
 
             // timer hand will sweep counterclockwise from 12 o'clock back to 12 again when it's done
-            float angle = (float) timerRemaining / (float) XDrawTimers.timerDuration * (float) 60;
+            float angle = (float) timerRemaining / (float) XWatchfaceReceiver.timerDuration * (float) 60;
 
             // TODO replace line with minutes arc. Deal with Moto 360 flat bottom.
             drawRadialLine(canvas, angle, 0.1f, 0.95f, colorTimerStroke, null);
@@ -762,8 +810,46 @@ public class ClockFace implements Observer {
         // we're calling it from here.
         PaintCan.initPaintBucket(radius);
 
+        computeMissingBottomPixels();
+
         wipeCaches();
     }
+
+    private void computeMissingBottomPixels() {
+        // What angle does the flat bottom begin and end?
+        //
+        // We want to solve for clockY(seconds, 1.0) = height - missingBottomPixels
+        //
+        // cy + radius * sin(angle) = height - missingBottomPixels
+        // if (width == height)
+        //    radius = cy = height / 2
+        //    cy + cy * sin(angle) = 2 * cy - missingBottomPixels
+        //    cy * sin(angle) = cy - missingBottomPixels
+        //    sin(angle) = 1 - missingBottomPixels / cy
+        //    angle = arcsin(1 - missingBottomPixels / cy)
+        //    ((seconds - 15) * PI * 2) / 60 = arcsin(1 - missing / cy)
+        //    seconds = arcsin(...) * 60 / (2*PI) + 15
+        //    seconds = arcsin(...) * 30 / PI + 15
+        // else
+        //    it's a non-rectangular screen, and (to date anyway) no flat tire to worry about
+
+        if (missingBottomPixels != 0) {
+            double angle = Math.asin(1.0 - missingBottomPixels / cy);
+            missingBottomPixelTime = (float) (angle * 30.0 / Math.PI + 15);
+
+            missingX1 = clockX(missingBottomPixelTime, 1);
+            missingY1 = clockY(missingBottomPixelTime, 1);
+            missingX2 = clockX(60-missingBottomPixelTime, 1);
+            missingY2 = clockY(60 - missingBottomPixelTime, 1);
+        }
+    }
+
+    // t == 0, you get x1
+    // t == 1, you get x2
+    private static float interpolate(float x1, float x2, float t) {
+        return x1 * (1-t) + x2 * t;
+    }
+
 
     // clock math
     private float clockX(double seconds, float fractionFromCenter) {
