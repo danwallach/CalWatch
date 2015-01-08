@@ -187,5 +187,7 @@ public class XWatchfaceReceiver extends BroadcastReceiver {
             Log.v(TAG, "sending broadcast query for external timers");
             context.sendBroadcast(new Intent(timerQueryIntent));
         }
+
+        // todo: work out a call to context.bindService() to wake up the stopwatch/timer if they're inactive
     }
 }
