@@ -73,7 +73,7 @@ public class XWatchfaceReceiver extends BroadcastReceiver {
      * Is the stopwatch reset? If so, you can assume it's not running and the value is zero.
      * You can furthermore not bother rendering it at all.
      */
-    public static boolean stopwatchIsReset;
+    public static boolean stopwatchIsReset = true; // default until we get a useful broadcast message
 
     /**
      * The last time at which we received an update to the stopwatch status. If the user is,
@@ -113,7 +113,7 @@ public class XWatchfaceReceiver extends BroadcastReceiver {
      * Is the timer reset? If so, you can assume its value is equal to the duration.
      * You can also assume it's not running and you may choose not to display anything at all.
      */
-    public static boolean timerIsReset;
+    public static boolean timerIsReset = true; // default until we get a useful broadcast message
 
     /**
      * The last time at which we received an update to the timer status. If the user is,
@@ -187,7 +187,5 @@ public class XWatchfaceReceiver extends BroadcastReceiver {
             Log.v(TAG, "sending broadcast query for external timers");
             context.sendBroadcast(new Intent(timerQueryIntent));
         }
-
-        // todo: work out a call to context.bindService() to wake up the stopwatch/timer if they're inactive
     }
 }

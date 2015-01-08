@@ -777,8 +777,6 @@ public class ClockFace implements Observer {
                 stopwatchRenderTime = currentTime - XWatchfaceReceiver.stopwatchStart + XWatchfaceReceiver.stopwatchBase;
             }
 
-            // code borrowed/derived from SweepWatchFace
-
             float seconds = stopwatchRenderTime / 1000.0f;
             float minutes = stopwatchRenderTime / 60000.0f;
 
