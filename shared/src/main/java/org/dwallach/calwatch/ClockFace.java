@@ -741,6 +741,7 @@ public class ClockFace implements Observer {
     public void drawTimers(Canvas canvas) {
         long currentTime = TimeWrapper.getGMTTime(); // note that we're *not* using local time here
 
+        Paint colorStopwatchSeconds = PaintCan.get(ambientLowBit, ambientMode, PaintCan.colorStopwatchSeconds);
         Paint colorStopwatchStroke = PaintCan.get(ambientLowBit, ambientMode, PaintCan.colorStopwatchStroke);
         Paint colorStopwatchFill = PaintCan.get(ambientLowBit, ambientMode, PaintCan.colorStopwatchFill);
         Paint colorTimerStroke = PaintCan.get(ambientLowBit, ambientMode, PaintCan.colorTimerStroke);
@@ -776,11 +777,11 @@ public class ClockFace implements Observer {
 
             // Stopwatch second hand only drawn if we're not in ambient mode.
             if(!ambientMode)
-                drawRadialLine(canvas, seconds, 0.1f, 0.95f, colorStopwatchStroke, null);
+                drawRadialLine(canvas, seconds, 0.1f, 0.95f, colorStopwatchSeconds, null);
 
             // Stopwatch minute hand. Same thin gauge as second hand, but will be attached to the arc,
             // and thus look super cool.
-            drawRadialLine(canvas, minutes, 0.1f, 1f, colorStopwatchStroke, null);
+            drawRadialLine(canvas, minutes, 0.1f, stopWatchR2, colorStopwatchStroke, null);
             drawRadialArcFlatBottom(canvas, minutes, stopWatchR1, stopWatchR2, colorStopwatchFill, colorStopwatchStroke);
         }
 
@@ -800,7 +801,7 @@ public class ClockFace implements Observer {
             float timerR2 =  1f;
 
             // TODO replace line with minutes arc. Deal with Moto 360 flat bottom.
-            drawRadialLine(canvas, angle, 0.1f, 0.95f, colorTimerStroke, null);
+            drawRadialLine(canvas, angle, 0.1f, timerR2, colorTimerStroke, null);
             drawRadialArcFlatBottom(canvas, angle, timerR1, timerR2, colorTimerFill, colorTimerStroke);
         }
     }
