@@ -182,6 +182,7 @@ public class MyViewAnim extends SurfaceView implements Observer {
         Log.v(TAG, "size change: " + w + ", " + h);
         this.width = w;
         this.height = h;
+        clockFace.setSize(width, height);
     }
 
     private int width, height;
@@ -200,7 +201,6 @@ public class MyViewAnim extends SurfaceView implements Observer {
         try {
             // clear the screen
             canvas.drawColor(Color.TRANSPARENT, PorterDuff.Mode.CLEAR);
-            clockFace.setSize(width, height);
 
             TimeWrapper.update(); // fetch the time
             clockFace.drawEverything(canvas);

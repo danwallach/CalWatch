@@ -22,17 +22,20 @@ import java.util.Observer;
 public class ClockFace implements Observer {
     private static final String TAG = "ClockFace";
 
-    // force ambient low bit on, for testing purposes, otherwise leave this as false
-    private final boolean forceAmbientLowBit = false;
+    // for testing purposes, turn these things on; disable for production
+    private final boolean forceAmbientLowBit = true;
+    private final boolean forceBurnInProtection = true;
+    private final boolean forceMotoFlatBottom = true;
 
 
-    private int cx, oldCx = -1;
-    private int cy, oldCy = -1;
+    // initial values to get the ball rolling (avoids a div by zero problem in computeFlatBottomCorners)
+    private int cx = 140, oldCx = -1;
+    private int cy = 140, oldCy = -1;
     private int radius;
 
     private boolean showSeconds = true, showDayDate = true;
     private boolean ambientLowBit = forceAmbientLowBit;
-    private boolean burnInProtection = false;
+    private boolean burnInProtection = forceBurnInProtection;
     private boolean round = false;
     private boolean muteMode = false;
 
@@ -51,9 +54,12 @@ public class ClockFace implements Observer {
 
     private Rect peekCardRect;
 
-    // set for Moto 360
+    // dealing with the "flat tire" a.k.a. "chin" of Moto 360 and any other watches that pull the same trick
     public void setMissingBottomPixels(int missingBottomPixels) {
-        this.missingBottomPixels = missingBottomPixels;
+        if(forceMotoFlatBottom)
+            this.missingBottomPixels = 30;
+        else
+            this.missingBottomPixels = missingBottomPixels;
 
         computeFlatBottomCorners();
     }
@@ -97,10 +103,7 @@ public class ClockFace implements Observer {
      */
     public void setAmbientLowBit(boolean ambientLowBit) {
         Log.v(TAG, "ambient low bit: " + ambientLowBit);
-        this.ambientLowBit = ambientLowBit;
-
-        if(forceAmbientLowBit)
-            this.ambientLowBit = true;
+        this.ambientLowBit = ambientLowBit || forceAmbientLowBit;
     }
 
     public ClockFace() {
@@ -128,6 +131,10 @@ public class ClockFace implements Observer {
         if(Build.MODEL.contains("Moto 360") || Build.PRODUCT.contains("metallica")) {
             Log.v(TAG, "Moto 360 detected. Flat bottom hack enabled.");
             setMissingBottomPixels(30);
+        } else {
+            // This is just to get things started. Because of Wear 5, there will be another call
+            // once the watchface is set up and running.
+            setMissingBottomPixels(0);
         }
     }
 
@@ -229,6 +236,9 @@ public class ClockFace implements Observer {
     }
 
     private void drawRadialArc(Canvas canvas, PathCache pc, double secondsStart, double secondsEnd, float startRadius, float endRadius, Paint paint, Paint outlinePaint) {
+        drawRadialArc(canvas, pc, secondsStart, secondsEnd, startRadius, endRadius, paint, outlinePaint, true);
+    }
+    private void drawRadialArc(Canvas canvas, PathCache pc, double secondsStart, double secondsEnd, float startRadius, float endRadius, Paint paint, Paint outlinePaint, boolean lowBitSquish) {
         /*
          * Below is an attempt to do this "correctly" using the arc functionality supported natively
          * by Android's Path.
@@ -237,6 +247,15 @@ public class ClockFace implements Observer {
         if(startRadius < 0 || startRadius > 1 || endRadius < 0 || endRadius > 1) {
             Log.e(TAG, "arc too big! radius(" + Float.toString((float) startRadius) + "," + Float.toString((float) endRadius) +
                             "), seconds(" + Float.toString((float) secondsStart) + "," + Float.toString((float) secondsEnd) + ")");
+        }
+
+        if(burnInProtection && ambientMode) {
+            // scale down everything to leave a 10 pixel margin
+
+            float ratio = (radius - 10f) / radius;
+
+            startRadius *= ratio;
+            endRadius *= ratio;
         }
 
         Path p = null;
@@ -250,7 +269,7 @@ public class ClockFace implements Observer {
             RectF midOvalDelta = getRectRadius((startRadius + endRadius) / 2f - 0.025f);
             RectF startOval = getRectRadius(startRadius);
             RectF endOval = getRectRadius(endRadius);
-            if(ambientMode && ambientLowBit) {
+            if(ambientMode && ambientLowBit && lowBitSquish) {
                 // in ambient low-bit mode, we're going to draw some slender arcs of fixed width at roughly the center of the big
                 // colored pie wedge which we normally show when we're not in ambient mode
                 p.arcTo(midOval, (float) (secondsStart * 6 - 90), (float) ((secondsEnd - secondsStart) * 6), true);
@@ -274,7 +293,10 @@ public class ClockFace implements Observer {
         canvas.drawPath(p, outlinePaint);
     }
 
+    private int flatCounter = 0;
     private void drawRadialArcFlatBottom(Canvas canvas, float seconds, float startRadius, float endRadius, Paint paint, Paint outlinePaint) {
+        flatCounter++;
+
         if(startRadius < 0 || startRadius > 1 || endRadius < 0 || endRadius > 1) {
             Log.e(TAG, "drawRadialArcFlatBottom: arc too big! radius(" + startRadius + "," + endRadius +
                     "), seconds(" + seconds + ")");
@@ -286,11 +308,19 @@ public class ClockFace implements Observer {
             return;
         }
 
+        if(burnInProtection && ambientMode) {
+            // scale down everything to leave a 10 pixel margin
+            float ratio = (radius - 10f) / radius;
+
+            startRadius *= ratio;
+            endRadius *= ratio;
+        }
+
         // This one always starts at the top and goes clockwise to the time indicated (seconds).
         // This computation is much easier than doing it for the general case.
 
         if(missingBottomPixels == 0)
-            drawRadialArc(canvas, null, 0, seconds, startRadius, endRadius, paint, outlinePaint);
+            drawRadialArc(canvas, null, 0, seconds, startRadius, endRadius, paint, outlinePaint, false);
         else {
             Path p = new Path();
 
@@ -299,10 +329,19 @@ public class ClockFace implements Observer {
 
             if(seconds < flatBottomCornerTime) {
                 // trivial case: we don't run into the flat tire region
+
+                if(flatCounter % 100 == 1) {
+                    Log.v(TAG, "flat (case 1): seconds(" + seconds + ") < bottomCornerTime(" + flatBottomCornerTime + ")");
+                }
                 p.arcTo(startOval, (-90f), seconds * 6f, true);
                 p.arcTo(endOval, seconds * 6f - 90f, -seconds * 6f);
             } else if (seconds < 60 - flatBottomCornerTime) {
                 // next case: we're inside the flat-bottom region
+
+                if(flatCounter % 100 == 1) {
+                    Log.v(TAG, "flat (case 2): seconds(" + seconds + ") < bottomCornerTime(" + flatBottomCornerTime + ")");
+                }
+
                 p.arcTo(startOval, -90f, flatBottomCornerTime * 6f, true);
 
                 // lines left then down
@@ -316,6 +355,10 @@ public class ClockFace implements Observer {
                 // final case, we're covering the entire initial arc, all the way across the flat bottom
                 // (with a linear discontinuity, but arcTo() will bridge the gap with a lineTo())
                 // then up the other side
+
+                if(flatCounter % 100 == 1) {
+                    Log.v(TAG, "flat (case 3): seconds(" + seconds + ") < bottomCornerTime(" + flatBottomCornerTime + ")");
+                }
                 p.arcTo(startOval, -90f, flatBottomCornerTime * 6f, true);
                 p.arcTo(startOval, -90f + 6f * (60 - flatBottomCornerTime), 6f * (seconds - 60 + flatBottomCornerTime));
 
@@ -755,9 +798,10 @@ public class ClockFace implements Observer {
         // stopwatch has the inner ring. Outer ring is 0.95 to 1.0, inner ring is 0.9 to 0.95.
 
         // Note: if you see 0.94 or 0.96, that's really 0.95 but leaving buffer room for the overlapping
-        // line widths. Likewise, if you see 0.99 rather than 1.0, same deal.
+        // line widths. Likewise, if you see 0.99 rather than 1.0, same deal. All of these numbers have
+        // been tweaked to try to get pixel-perfect results.
 
-        // first, let's compute some stuff on the timer; if the timer is done but we haven't gotten
+        // First, let's compute some stuff on the timer; if the timer is done but we haven't gotten
         // any updates from the app, then we should go ahead and treat it as if it's been reset
         long timerRemaining = 0; // should go from 0 to timerDuration, where 0 means we're done
         if (!XWatchfaceReceiver.timerIsRunning) {
@@ -778,18 +822,23 @@ public class ClockFace implements Observer {
             }
 
             float seconds = stopwatchRenderTime / 1000.0f;
-            float minutes = stopwatchRenderTime / 60000.0f;
+
+            // rather than computing minutes directly (i.e., stopWatchRenderTime / 60000), we're instead going
+            // to compute the integer number of hours (using Math.floor) and subtract that, giving us a resulting
+            // number that ranges from [0-60).
+            float hours = (float) Math.floor(stopwatchRenderTime / 3600000f);
+            float minutes = (stopwatchRenderTime / 60000.0f) - hours * 60f;
 
             float stopWatchR1 = 0.90f;
-            float stopWatchR2 =  (XWatchfaceReceiver.timerIsReset || timerRemaining == 0) ? 0.99f : 0.94f;
+            float stopWatchR2 =  (XWatchfaceReceiver.timerIsReset || timerRemaining == 0) ? 0.995f : 0.945f;
 
             // Stopwatch second hand only drawn if we're not in ambient mode.
             if(!ambientMode)
-                drawRadialLine(canvas, seconds, 0.1f, 0.95f, colorStopwatchSeconds, null);
+                drawRadialLine(canvas, seconds, 0.1f, 0.945f, colorStopwatchSeconds, null);
 
             // Stopwatch minute hand. Same thin gauge as second hand, but will be attached to the arc,
             // and thus look super cool.
-            drawRadialLine(canvas, minutes, 0.1f, stopWatchR2, colorStopwatchStroke, null);
+            drawRadialLine(canvas, minutes, 0.1f, stopWatchR2-0.005f, colorStopwatchStroke, null);
             drawRadialArcFlatBottom(canvas, minutes, stopWatchR1, stopWatchR2, colorStopwatchFill, colorStopwatchStroke);
         }
 
@@ -804,11 +853,10 @@ public class ClockFace implements Observer {
             // timer hand will sweep counterclockwise from 12 o'clock back to 12 again when it's done
             float angle = (float) timerRemaining / (float) XWatchfaceReceiver.timerDuration * (float) 60;
 
-            float timerR1 = (XWatchfaceReceiver.stopwatchIsReset) ? 0.90f : 0.96f;
-            float timerR2 =  1f;
+            float timerR1 = (XWatchfaceReceiver.stopwatchIsReset) ? 0.90f : 0.952f;
+            float timerR2 =  0.995f;
 
-            // TODO replace line with minutes arc. Deal with Moto 360 flat bottom.
-            drawRadialLine(canvas, angle, 0.1f, timerR2, colorTimerStroke, null);
+            drawRadialLine(canvas, angle, 0.1f, timerR2-0.005f, colorTimerStroke, null);
             drawRadialArcFlatBottom(canvas, angle, timerR1, timerR2, colorTimerFill, colorTimerStroke);
         }
     }
@@ -827,6 +875,8 @@ public class ClockFace implements Observer {
     }
 
     public void setSize(int width, int height) {
+        Log.v(TAG, "setSize: " + width + " x " + height);
+
         cx = width / 2;
         cy = height / 2;
 
@@ -876,8 +926,11 @@ public class ClockFace implements Observer {
         //    it's a non-rectangular screen, and (to date anyway) no flat tire to worry about
 
         if (missingBottomPixels != 0) {
-            double angle = Math.asin(1.0 - missingBottomPixels / cy);
+            double angle = Math.asin(1.0 - (double) missingBottomPixels / (double) cy);
+
             flatBottomCornerTime = (float) (angle * 30.0 / Math.PI + 15);
+            Log.v(TAG, "flatBottomCornerTime(" + flatBottomCornerTime + ") <-- angle(" + angle +
+                    "), missingBottomPixels(" + missingBottomPixels + "), cy(" + cy + ")");
 
             flatBottomCornerX1_R100 = clockX(flatBottomCornerTime, 1);
             flatBottomCornerY1_R100 = clockY(flatBottomCornerTime, 1);
@@ -888,6 +941,8 @@ public class ClockFace implements Observer {
             flatBottomCornerY1_R80 = clockY(flatBottomCornerTime, 0.80f);
             flatBottomCornerX2_R80 = clockX(60 - flatBottomCornerTime, 0.80f);
             flatBottomCornerY2_R80 = clockY(60 - flatBottomCornerTime, 0.80f);
+        } else {
+            Log.v(TAG, "no flat bottom corrections");
         }
     }
 
@@ -990,7 +1045,7 @@ public class ClockFace implements Observer {
     }
 
     public void setBurnInProtection(boolean burnInProtection) {
-        this.burnInProtection = burnInProtection;
+        this.burnInProtection = burnInProtection || forceBurnInProtection;
     }
 
     public void setRound(boolean round) {

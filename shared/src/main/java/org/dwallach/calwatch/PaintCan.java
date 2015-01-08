@@ -159,6 +159,7 @@ public class PaintCan {
         // a couple things that are backwards for low-bit mode: we'll be drawing some "shadows" as
         // white outlines around black centers, "hollowing out" the hands as we're supposed to do
         palette[styleLowBit][colorSecondHandShadow].setColor(Color.WHITE);
+        palette[styleLowBit][colorSecondHandShadow].setStrokeWidth(lineWidth / 6f);
         palette[styleLowBit][colorMinuteHand].setColor(Color.BLACK);
         palette[styleLowBit][colorHourHand].setColor(Color.BLACK);
         palette[styleLowBit][colorArcShadow].setColor(Color.WHITE);
@@ -166,6 +167,8 @@ public class PaintCan {
         palette[styleLowBit][colorBigShadow].setColor(Color.WHITE);
         palette[styleLowBit][colorTimerFill].setColor(Color.BLACK);
         palette[styleLowBit][colorStopwatchFill].setColor(Color.BLACK);
+        palette[styleLowBit][colorTimerStroke].setStrokeWidth(lineWidth / 6f);
+        palette[styleLowBit][colorStopwatchStroke].setStrokeWidth(lineWidth / 6f);
     }
 
     public static Paint get(int style, int colorID) {

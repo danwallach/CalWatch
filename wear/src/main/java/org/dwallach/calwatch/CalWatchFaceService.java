@@ -168,8 +168,10 @@ public class CalWatchFaceService extends CanvasWatchFaceService {
                     .setViewProtection(WatchFaceStyle.PROTECT_HOTWORD_INDICATOR | WatchFaceStyle.PROTECT_STATUS_BAR)
                     .build());
 
+            XWatchfaceReceiver.pingExternalStopwatches(CalWatchFaceService.this);
             BatteryWrapper.init(CalWatchFaceService.this);
             Resources resources = CalWatchFaceService.this.getResources();
+
 
             if (resources == null) {
                 Log.e(TAG, "no resources? not good");
@@ -241,6 +243,7 @@ public class CalWatchFaceService extends CanvasWatchFaceService {
         }
 
         private long drawCounter = 0;
+        private int oldHeight, oldWidth;
 
         @Override
         public void onDraw(Canvas canvas, Rect bounds) {
@@ -250,10 +253,15 @@ public class CalWatchFaceService extends CanvasWatchFaceService {
             int width = bounds.width();
             int height = bounds.height();
 
+            if(width != oldWidth || height != oldHeight) {
+                oldWidth = width;
+                oldHeight = height;
+                clockFace.setSize(width, height);
+            }
+
             try {
                 // clear the screen
                 canvas.drawColor(Color.TRANSPARENT, PorterDuff.Mode.CLEAR);
-                clockFace.setSize(width, height);
 
                 TimeWrapper.update(); // fetch the time
                 clockFace.drawEverything(canvas);

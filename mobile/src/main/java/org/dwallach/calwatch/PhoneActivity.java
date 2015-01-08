@@ -121,12 +121,32 @@ public class PhoneActivity extends Activity implements Observer {
         super.onCreate(savedInstanceState);
         Log.v(TAG, "Create!");
 
+        setContentView(R.layout.activity_phone);
     }
 
-    private void activitySetup() {
-        Log.v(TAG, "And in the beginning ...");
+    protected void onPause() {
+        super.onPause();
+        Log.v(TAG, "Pause!");
 
-        setContentView(R.layout.activity_phone);
+        // perhaps incorrect assumption: if our activity is being killed, onStop will happen beforehand,
+        // so we'll deregister our clockState observer, allowing this Activity object to become
+        // garbage. A new one will be created if the activity ever comes back to life, which
+        // will call getClockState(), which will in turn resurrect observer. Setting clockState=null
+        // means that, even if this specific Activity object is resurrected from the dead, we'll
+        // just reconnect it the next time somebody internally calls getClockState(). No harm, no foul.
+
+        // http://developer.android.com/reference/android/app/Activity.html
+
+        if (clockView != null)
+            clockView.kill(this);
+
+        getClockState().deleteObserver(this);
+        clockState = null;
+    }
+
+    protected void onStart() {
+        super.onStart();
+        Log.v(TAG, "Start!");
 
         // Core UI widgets: find 'em
         liteButton = (RadioButton) findViewById(R.id.liteButton);
@@ -160,33 +180,6 @@ public class PhoneActivity extends Activity implements Observer {
 
         onResume();
         Log.v(TAG, "activity setup complete");
-    }
-
-    protected void onPause() {
-        super.onPause();
-        Log.v(TAG, "Pause!");
-
-        // perhaps incorrect assumption: if our activity is being killed, onStop will happen beforehand,
-        // so we'll deregister our clockState observer, allowing this Activity object to become
-        // garbage. A new one will be created if the activity ever comes back to life, which
-        // will call getClockState(), which will in turn resurrect observer. Setting clockState=null
-        // means that, even if this specific Activity object is resurrected from the dead, we'll
-        // just reconnect it the next time somebody internally calls getClockState(). No harm, no foul.
-
-        // http://developer.android.com/reference/android/app/Activity.html
-
-        if (clockView != null)
-            clockView.kill(this);
-
-        getClockState().deleteObserver(this);
-        clockState = null;
-    }
-
-    protected void onStart() {
-        super.onStart();
-        Log.v(TAG, "Start!");
-
-        activitySetup();
     }
 
     protected void onResume() {

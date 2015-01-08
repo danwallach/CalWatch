@@ -136,7 +136,7 @@ public class XWatchfaceReceiver extends BroadcastReceiver {
             stopwatchIsReset = extras.getBoolean(prefStopwatchReset);
             stopwatchUpdateTimestamp = extras.getLong(prefStopwatchUpdateTimestamp);
 
-            Log.v(TAG, "stopwatch update: start(" + stopwatchStart +
+            Log.v(TAG, "stopwatch update:: start(" + stopwatchStart +
                     "), base(" + stopwatchBase +
                     "), isRunning(" + stopwatchIsRunning +
                     "), isReset(" + stopwatchIsReset +
