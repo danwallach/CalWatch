@@ -754,7 +754,8 @@ public class ClockFace implements Observer {
         // If there's a timer *and* a stopwatch active, then the timer wins with the outer ring and the
         // stopwatch has the inner ring. Outer ring is 0.95 to 1.0, inner ring is 0.9 to 0.95.
 
-
+        // Note: if you see 0.94 or 0.96, that's really 0.95 but leaving buffer room for the overlapping
+        // line widths. Likewise, if you see 0.99 rather than 1.0, same deal.
 
         // first, let's compute some stuff on the timer; if the timer is done but we haven't gotten
         // any updates from the app, then we should go ahead and treat it as if it's been reset
@@ -782,7 +783,7 @@ public class ClockFace implements Observer {
             float minutes = stopwatchRenderTime / 60000.0f;
 
             float stopWatchR1 = 0.90f;
-            float stopWatchR2 =  (XWatchfaceReceiver.timerIsReset || timerRemaining == 0) ? 0.99f : 0.95f;
+            float stopWatchR2 =  (XWatchfaceReceiver.timerIsReset || timerRemaining == 0) ? 0.99f : 0.94f;
 
             // Stopwatch second hand only drawn if we're not in ambient mode.
             if(!ambientMode)
