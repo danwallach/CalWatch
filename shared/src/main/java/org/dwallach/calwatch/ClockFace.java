@@ -757,9 +757,20 @@ public class ClockFace implements Observer {
         // stopwatch has the inner ring. Outer ring is 0.95 to 1.0, inner ring is 0.9 to 0.95.
 
 
+
+        // first, let's compute some stuff on the timer; if the timer is done but we haven't gotten
+        // any updates from the app, then we should go ahead and treat it as if it's been reset
+        long timerRemaining = 0; // should go from 0 to timerDuration, where 0 means we're done
+        if (!XWatchfaceReceiver.timerIsRunning) {
+            timerRemaining = XWatchfaceReceiver.timerDuration - XWatchfaceReceiver.timerPauseElapsed;
+        } else {
+            timerRemaining = XWatchfaceReceiver.timerDuration  - currentTime + XWatchfaceReceiver.timerStart;
+        }
+        if(timerRemaining < 0) timerRemaining = 0;
+
+
         // we don't draw anything if the stopwatch is non-moving and at 00:00.00
         long stopwatchRenderTime = 0;
-
         if(!XWatchfaceReceiver.stopwatchIsReset) {
             if (!XWatchfaceReceiver.stopwatchIsRunning) {
                 stopwatchRenderTime = XWatchfaceReceiver.stopwatchBase;
@@ -773,7 +784,7 @@ public class ClockFace implements Observer {
             float minutes = stopwatchRenderTime / 60000.0f;
 
             float stopWatchR1 = 0.90f;
-            float stopWatchR2 =  (XWatchfaceReceiver.timerIsReset) ? 1f : 0.95f;
+            float stopWatchR2 =  (XWatchfaceReceiver.timerIsReset || timerRemaining == 0) ? 0.99f : 0.95f;
 
             // Stopwatch second hand only drawn if we're not in ambient mode.
             if(!ambientMode)
@@ -785,8 +796,7 @@ public class ClockFace implements Observer {
             drawRadialArcFlatBottom(canvas, minutes, stopWatchR1, stopWatchR2, colorStopwatchFill, colorStopwatchStroke);
         }
 
-        long timerRemaining = 0; // should go from 0 to timerDuration, where 0 means we're done
-        if(!XWatchfaceReceiver.timerIsReset) {
+        if(!XWatchfaceReceiver.timerIsReset && timerRemaining > 0) {
             if (!XWatchfaceReceiver.timerIsRunning) {
                 timerRemaining = XWatchfaceReceiver.timerDuration - XWatchfaceReceiver.timerPauseElapsed;
             } else {
@@ -798,7 +808,7 @@ public class ClockFace implements Observer {
             float angle = (float) timerRemaining / (float) XWatchfaceReceiver.timerDuration * (float) 60;
 
             float timerR1 = (XWatchfaceReceiver.stopwatchIsReset) ? 0.90f : 0.95f;
-            float timerR2 =  1f;
+            float timerR2 =  0.99f;
 
             // TODO replace line with minutes arc. Deal with Moto 360 flat bottom.
             drawRadialLine(canvas, angle, 0.1f, timerR2, colorTimerStroke, null);
