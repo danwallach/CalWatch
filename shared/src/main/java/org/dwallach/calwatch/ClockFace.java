@@ -330,17 +330,17 @@ public class ClockFace implements Observer {
             if(seconds < flatBottomCornerTime) {
                 // trivial case: we don't run into the flat tire region
 
-                if(flatCounter % 100 == 1) {
-                    Log.v(TAG, "flat (case 1): seconds(" + seconds + ") < bottomCornerTime(" + flatBottomCornerTime + ")");
-                }
+//                if(flatCounter % 100 == 1) {
+//                    Log.v(TAG, "flat (case 1): seconds(" + seconds + ") < bottomCornerTime(" + flatBottomCornerTime + ")");
+//                }
                 p.arcTo(startOval, (-90f), seconds * 6f, true);
                 p.arcTo(endOval, seconds * 6f - 90f, -seconds * 6f);
             } else if (seconds < 60 - flatBottomCornerTime) {
                 // next case: we're inside the flat-bottom region
 
-                if(flatCounter % 100 == 1) {
-                    Log.v(TAG, "flat (case 2): seconds(" + seconds + ") < bottomCornerTime(" + flatBottomCornerTime + ")");
-                }
+//                if(flatCounter % 100 == 1) {
+//                    Log.v(TAG, "flat (case 2): seconds(" + seconds + ") < bottomCornerTime(" + flatBottomCornerTime + ")");
+//                }
 
                 p.arcTo(startOval, -90f, flatBottomCornerTime * 6f, true);
 
@@ -356,9 +356,9 @@ public class ClockFace implements Observer {
                 // (with a linear discontinuity, but arcTo() will bridge the gap with a lineTo())
                 // then up the other side
 
-                if(flatCounter % 100 == 1) {
-                    Log.v(TAG, "flat (case 3): seconds(" + seconds + ") < bottomCornerTime(" + flatBottomCornerTime + ")");
-                }
+//                if(flatCounter % 100 == 1) {
+//                    Log.v(TAG, "flat (case 3): seconds(" + seconds + ") < bottomCornerTime(" + flatBottomCornerTime + ")");
+//                }
                 p.arcTo(startOval, -90f, flatBottomCornerTime * 6f, true);
                 p.arcTo(startOval, -90f + 6f * (60 - flatBottomCornerTime), 6f * (seconds - 60 + flatBottomCornerTime));
 
