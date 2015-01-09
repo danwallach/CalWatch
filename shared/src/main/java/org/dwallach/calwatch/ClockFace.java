@@ -23,9 +23,9 @@ public class ClockFace implements Observer {
     private static final String TAG = "ClockFace";
 
     // for testing purposes, turn these things on; disable for production
-    private final boolean forceAmbientLowBit = true;
-    private final boolean forceBurnInProtection = true;
-    private final boolean forceMotoFlatBottom = true;
+    private final boolean forceAmbientLowBit = false;
+    private final boolean forceBurnInProtection = false;
+    private final boolean forceMotoFlatBottom = false;
 
 
     // initial values to get the ball rolling (avoids a div by zero problem in computeFlatBottomCorners)
@@ -963,17 +963,31 @@ public class ClockFace implements Observer {
     }
 
     private float flatBottomX(float time, float radius) {
-        // first find the right and left side values of X
-        float x1 = interpolate(flatBottomCornerX1_R80, 0.8f, flatBottomCornerX1_R100, 1f, radius);
-        float x2 = interpolate(flatBottomCornerX2_R80, 0.8f, flatBottomCornerX2_R100, 1f, radius);
-        return interpolate(x1, flatBottomCornerTime, x2, 60 - flatBottomCornerTime, time);
+// old, incorrect approach: linear interpolation between the sides
+//        float x1 = interpolate(flatBottomCornerX1_R80, 0.8f, flatBottomCornerX1_R100, 1f, radius);
+//        float x2 = interpolate(flatBottomCornerX2_R80, 0.8f, flatBottomCornerX2_R100, 1f, radius);
+//        return interpolate(x1, flatBottomCornerTime, x2, 60 - flatBottomCornerTime, time);
+
+        // new shiny approach: project a line from the center, intersect it with a line, but
+        // make the height of that line consistent with our pre-computed flatBottomCorner values,
+        // otherwise we'd have the height of the intersection changing as the time got closer to 6 o'clock.
+
+        float finalY = flatBottomY(time, radius);
+        float r1X = clockX(time, 1f);
+        float r1Y = clockY(time, 1f);
+
+        return interpolate(r1X, r1Y, cx, cy, finalY);
     }
 
     private float flatBottomY(float time, float radius) {
-        // first find the right and left side values of Y
-        float y1 = interpolate(flatBottomCornerY1_R80, 0.8f, flatBottomCornerY1_R100, 1f, radius);
-        float y2 = interpolate(flatBottomCornerY2_R80, 0.8f, flatBottomCornerY2_R100, 1f, radius);
-        return interpolate(y1, flatBottomCornerTime, y2, 60 - flatBottomCornerTime, time);
+// old, incorrect approach: linear interplation between the sides
+//        float y1 = interpolate(flatBottomCornerY1_R80, 0.8f, flatBottomCornerY1_R100, 1f, radius);
+//        float y2 = interpolate(flatBottomCornerY2_R80, 0.8f, flatBottomCornerY2_R100, 1f, radius);
+//        return interpolate(y1, flatBottomCornerTime, y2, 60 - flatBottomCornerTime, time);
+
+        // new shiny approach: we're just returning the magic Y-value as above
+
+        return interpolate(flatBottomCornerY1_R80, 0.8f, flatBottomCornerY1_R100, 1f, radius);
     }
 
 
