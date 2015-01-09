@@ -152,6 +152,15 @@ public class XWatchfaceReceiver extends BroadcastReceiver {
             timerIsReset = extras.getBoolean(prefTimerReset);
             timerUpdateTimestamp = extras.getLong(prefTimerUpdateTimestamp);
 
+            // sanity checking: if we're coming back from whatever and a formerly running
+            // timer has gotten way past the deadline, then just reset things.
+            long currentTime = System.currentTimeMillis();
+            if(timerIsRunning && timerStart + timerDuration < currentTime) {
+                timerIsReset = true;
+                timerIsRunning = false;
+            }
+
+
             Log.v(TAG, "timer udpate:: start(" + timerStart +
                     "), elapsed(" + timerPauseElapsed +
                     "), duration(" + timerDuration +
