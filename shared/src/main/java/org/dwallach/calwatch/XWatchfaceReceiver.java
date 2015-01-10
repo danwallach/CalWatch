@@ -1,5 +1,8 @@
 /*
- * Copyright (C) 2014 Dan Wallach <dwallach@rice.edu>
+ * Copyright (C) 2015 Dan Wallach <dwallach@rice.edu>
+ *
+ * (Note: license for this specific file differs from the rest
+ *  of the CalWatch project.)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
