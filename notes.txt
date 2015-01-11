@@ -60,8 +60,4 @@ TODO reshape around peek card?
 TODO update the slides
 
 Longer-term items
-    Way, way, way too many colors in ClockFace
-    TODO have a handful of colors, named for where they're used, centralize how they're set & reset
-        - The low-bit ambient mode graphics are, at best, tolerable. Some cleanup in ClockFace
-          would make it easier to modify this in one place.
     TODO custom background images?
