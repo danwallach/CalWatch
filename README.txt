@@ -32,8 +32,5 @@ notes.txt -- ongoing work, notes, to-do items, etc.
           tweaks to compile under newer Java versions
 
         org.dwallach.calwatch/ -- CalWatch Java files
-            proto/ -- protocol buffer code for communications between
-                devices calendar.proto contains instructions on how to
-                regenerate the Java files here
 
 /wear -- code that runs only on the watch
