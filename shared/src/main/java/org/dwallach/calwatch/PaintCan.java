@@ -11,6 +11,12 @@ import android.graphics.Paint;
 import android.util.Log;
 import android.util.SparseArray;
 
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+
 /**
  * Cheesy helper for getting Paint values for calendar events and making sure we don't allocate
  * the same color twice.
@@ -49,7 +55,7 @@ public class PaintCan {
     public static final int styleLowBit = 2;
     public static final int styleMax = 2;
 
-    private static final float gamma = 2.2f;
+    private static final float gamma = 1.0f;
 
     private static Paint newPaint(int argb, int style, float textSize, float strokeWidth) {
         Paint retPaint = new Paint(Paint.SUBPIXEL_TEXT_FLAG | Paint.HINTING_ON);
@@ -75,7 +81,7 @@ public class PaintCan {
 
             case styleAmbient:
                 retPaint.setAntiAlias(true);
-                retPaint.setColor(argbToGrey(argb));
+                retPaint.setColor(argbToGreyARGB(argb));
                 break;
 
             default:
@@ -184,12 +190,10 @@ public class PaintCan {
     }
 
     public static Paint getCalendarGreyPaint(int argb) {
-        return getCalendarPaint(argbToGrey(argb));
+        return getCalendarPaint(argbToGreyARGB(argb));
     }
 
-    private static int argbToGrey(int argb) {
-        // CIE standard for luminance. Because overkill.
-        int a = (argb & 0xff000000) >> 24;
+    private static float argbToLuminance(int argb) {
         int r = (argb & 0xff0000) >> 16;
         int g = (argb & 0xff00) >> 8;
         int b = argb & 0xff;
@@ -198,12 +202,27 @@ public class PaintCan {
         float fg = g / 255.0f;
         float fb = b / 255.0f;
 
-        float fy = (float) (.2126f * Math.pow(fr, gamma) + .7152f * Math.pow(fg, gamma) + .0722f * Math.pow(fb, gamma));
+        // Many different codes (for reference):
+        // http://www.f4.fhtw-berlin.de/~barthel/ImageJ/ColorInspector/HTMLHelp/farbraumJava.htm
 
+        // This code is an approximation of the CIE spec for sRGB -> luminance. The real spec has even
+        // more complexity for the gamma conversion. In practice, this seems to yield very dark colors,
+        // so we're going with the computationally cheaper and pragmatically prettier YUV conversion.
+        // float fy = (float) (.2126f * Math.pow(fr, gamma) + .7152f * Math.pow(fg, gamma) + .0722f * Math.pow(fb, gamma));
+
+        // This line is from the YUV variant, which leaves out the gamma correction and gives less
+        // weight to green. Seems to look better in practice even if it's "wrong".
+        float fy = .299f * fr + .587f * fg + .114f * fb;
+
+        // clipping shouldn't be necessary, but paranoia is warranted
         if (fy > 1.0f) fy = 1.0f;
 
-        int y = (int) (fy * 255);
+        return fy;
 
+    }
+    private static int argbToGreyARGB(int argb) {
+        int a = (argb & 0xff000000) >> 24;
+        int y = (int)(argbToLuminance(argb) * 255f);
         return (a << 24) | (y << 16) | (y << 8) | y;
     }
 }
