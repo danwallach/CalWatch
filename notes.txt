@@ -34,6 +34,8 @@ Refactoring / reengineering
     TODO fix Gradle, presently requiring me to have the git version code in three places to work right
     (I tried putting it just in settings.gradle or the top-level build.gradle and this didn't work)
 
+TODO BUG: in "numbers" mode, the shadow text is in the wrong font size
+
 Right-to-left support
     TODO detect when we're in RTL mode
     TODO swap day/date block from 9 o'clock to 3 o'clock or leave alone?
