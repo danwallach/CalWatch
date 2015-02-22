@@ -138,9 +138,9 @@ public class PaintCan {
             palette[style][colorArcShadow] = newPaint(Color.BLACK, style, smTextSize, lineWidth / 6f);
             palette[style][colorSmallTextAndLines] = newPaint(Color.WHITE, style, smTextSize, lineWidth / 3f);
             palette[style][colorBigTextAndLines] = newPaint(Color.WHITE, style, textSize, lineWidth);
+            palette[style][colorBigShadow] = newPaint(Color.BLACK, style, textSize, lineWidth / 2f);
             palette[style][colorBlackFill] = newPaint(Color.BLACK, style, textSize, lineWidth);
             palette[style][colorSmallShadow] = newPaint(Color.BLACK, style, smTextSize, lineWidth / 4f);
-            palette[style][colorBigShadow] = newPaint(Color.BLACK, style, smTextSize, lineWidth / 2f);
 
             palette[style][colorStopwatchSeconds] = newPaint(0xFF80A3F2, style, smTextSize, lineWidth / 8f);  // light blue
             palette[style][colorStopwatchStroke] = newPaint(0xFF80A3F2, style, smTextSize, lineWidth / 3f);  // light blue
