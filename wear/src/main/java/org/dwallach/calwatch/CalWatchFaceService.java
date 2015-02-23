@@ -147,6 +147,7 @@ public class CalWatchFaceService extends CanvasWatchFaceService {
          */
         @Override
         public void update(Observable observable, Object data) {
+            updateTimer();
             invalidate();
         }
 
@@ -283,6 +284,11 @@ public class CalWatchFaceService extends CanvasWatchFaceService {
 
             if(calendarFetcher != null)
                 calendarFetcher.kill();
+
+            if(clockState != null) {
+                clockState.deleteObserver(this);
+                clockState = null;
+            }
 
             super.onDestroy();
         }

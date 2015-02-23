@@ -79,13 +79,14 @@ public class MyViewAnim extends View implements Observer {
         public void handleMessage(Message message) {
             switch (message.what) {
                 case MSG_UPDATE_TIME:
-//                        Log.v(TAG, "updating time");
+                    Log.v(TAG, "12-sec timer ping");
 
                     invalidate();
                     if (shouldTimerBeRunning()) {
                         long timeMs = System.currentTimeMillis();
                         long delayMs = INTERACTIVE_UPDATE_RATE_MS
                                 - (timeMs % INTERACTIVE_UPDATE_RATE_MS);
+                        Log.v(TAG, "setting next 12-sec timer ping, delay(" + delayMs/1000.0 + ")");
                         mUpdateTimeHandler.sendEmptyMessageDelayed(MSG_UPDATE_TIME, delayMs);
                     }
                     break;
@@ -121,6 +122,7 @@ public class MyViewAnim extends View implements Observer {
 
         mUpdateTimeHandler.removeMessages(MSG_UPDATE_TIME);
         if (shouldTimerBeRunning()) {
+            Log.v(TAG, "updateTimer: setting ping");
             mUpdateTimeHandler.sendEmptyMessage(MSG_UPDATE_TIME);
         }
     }
@@ -133,6 +135,7 @@ public class MyViewAnim extends View implements Observer {
      */
     @Override
     public void update(Observable observable, Object data) {
+        updateTimer();
         invalidate();
     }
 
@@ -198,6 +201,11 @@ public class MyViewAnim extends View implements Observer {
         if(calendarFetcher != null) {
             calendarFetcher.kill();
             calendarFetcher = null;
+        }
+
+        if(clockState != null) {
+            clockState.deleteObserver(this);
+            clockState = null;
         }
     }
 
