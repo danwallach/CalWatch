@@ -140,8 +140,10 @@ public class PhoneActivity extends Activity implements Observer {
         if (clockView != null)
             clockView.kill(this);
 
-        getClockState().deleteObserver(this);
-        clockState = null;
+        if(clockState != null) {
+            clockState.deleteObserver(this);
+            clockState = null;
+        }
     }
 
     protected void onStart() {

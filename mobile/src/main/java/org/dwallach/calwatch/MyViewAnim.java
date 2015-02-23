@@ -154,10 +154,12 @@ public class MyViewAnim extends View implements Observer {
             Log.e(TAG, "no resources? not good");
         }
 
-        clockFace = new ClockFace();
+        if(clockFace == null)
+            clockFace = new ClockFace();
         clockState = ClockState.getSingleton();
 
-        clockState.addObserver(this); // callbacks if something changes
+        clockState.deleteObserver(this); // in case we were already there
+        clockState.addObserver(this); // ensure we're there, but only once
 
         if(calendarFetcher != null)
             calendarFetcher.kill();
@@ -206,6 +208,11 @@ public class MyViewAnim extends View implements Observer {
         if(clockState != null) {
             clockState.deleteObserver(this);
             clockState = null;
+        }
+
+        if(clockFace != null) {
+            clockFace.kill();
+            clockFace = null;
         }
     }
 

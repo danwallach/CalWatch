@@ -27,11 +27,20 @@ public class ClockFace implements Observer {
     private final boolean forceBurnInProtection = false;
     private final boolean forceMotoFlatBottom = false;
 
+    // for testing: sometimes it seems we have multiple instances of ClockFace, which is bad; let's
+    // try to track them
+    private static int instanceCounter = 0;
+    private int instanceID;
+
+
+    // these ones are static so subsequent instances of this class can recover state; we start
+    // them off non-zero, but they'll be changed quickly enough
+    private static int savedCx = 140, savedCy = 140, savedRadius = 140;
 
     // initial values to get the ball rolling (avoids a div by zero problem in computeFlatBottomCorners)
-    private int cx = 140, oldCx = -1;
-    private int cy = 140, oldCy = -1;
-    private int radius;
+    private int cx = savedCx, oldCx = -1;
+    private int cy = savedCy, oldCy = -1;
+    private int radius = savedRadius;
 
     private boolean showSeconds = true, showDayDate = true;
     private boolean ambientLowBit = forceAmbientLowBit;
@@ -107,7 +116,8 @@ public class ClockFace implements Observer {
     }
 
     public ClockFace() {
-        Log.v(TAG, "ClockFace setup!");
+        instanceID = instanceCounter++;
+        Log.v(TAG, "ClockFace setup, instance(" + instanceID + ")");
 
         this.clockState = ClockState.getSingleton();
         setupObserver();
@@ -879,15 +889,15 @@ public class ClockFace implements Observer {
     public void setSize(int width, int height) {
         Log.v(TAG, "setSize: " + width + " x " + height);
 
-        cx = width / 2;
-        cy = height / 2;
+        savedCx = cx = width / 2;
+        savedCy = cy = height / 2;
 
         if(cx == oldCx && cy == oldCy) return; // nothing changed, we're done
 
         oldCx = cx;
         oldCy = cy;
 
-        radius = (cx > cy) ? cy : cx; // minimum of the two
+        savedRadius = radius = (cx > cy) ? cy : cx; // minimum of the two
 
         // This creates all the Paint objects used throughout the draw routines
         // here. Everything scales with the radius of the watchface, which is why
@@ -1035,7 +1045,7 @@ public class ClockFace implements Observer {
 
     // call this if you want this instance to head to the garbage collector; this disconnects
     // it from paying attention to changes in the ClockState
-    public void destroy() {
+    public void kill() {
         clockState.deleteObserver(this);
     }
 
@@ -1046,7 +1056,7 @@ public class ClockFace implements Observer {
     // this gets called when the clockState updates itself
     @Override
     public void update(Observable observable, Object data) {
-        Log.v(TAG, "update - start");
+        Log.v(TAG, "update - start, instance(" + instanceID + ")");
         wipeCaches();
         TimeWrapper.update();
         this.faceMode = clockState.getFaceMode();
