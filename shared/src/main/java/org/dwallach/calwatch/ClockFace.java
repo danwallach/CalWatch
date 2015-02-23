@@ -145,6 +145,7 @@ public class ClockFace implements Observer {
     public void drawEverything(Canvas canvas) {
         TimeWrapper.frameStart();
 
+
         // draw the calendar wedges first, at the bottom of the stack, then the face indices
         drawCalendar(canvas);
         drawFace(canvas);
@@ -419,6 +420,7 @@ public class ClockFace implements Observer {
 
         // check if we've already rendered the face
         if(localFaceMode != facePathCacheMode || p == null) {
+            Log.v(TAG, "drawFace: cx(" + cx + "), cy(" + cy + "), r(" + radius+ ")");
 
             p = new Path();
 
@@ -1044,12 +1046,14 @@ public class ClockFace implements Observer {
     // this gets called when the clockState updates itself
     @Override
     public void update(Observable observable, Object data) {
+        Log.v(TAG, "update - start");
         wipeCaches();
         TimeWrapper.update();
         this.faceMode = clockState.getFaceMode();
         this.showDayDate = clockState.getShowDayDate();
         this.showSeconds = clockState.getShowSeconds();
         updateEventList();
+        Log.v(TAG, "update - end");
     }
 
     private void updateEventList() {

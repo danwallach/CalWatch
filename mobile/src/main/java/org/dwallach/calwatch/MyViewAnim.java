@@ -29,7 +29,7 @@ import java.util.Observable;
 import java.util.Observer;
 import java.util.concurrent.TimeUnit;
 
-public class MyViewAnim extends SurfaceView implements Observer {
+public class MyViewAnim extends View implements Observer {
     private static final String TAG = "MyViewAnim";
 
     public MyViewAnim(Context context, AttributeSet attrs) {
@@ -164,6 +164,33 @@ public class MyViewAnim extends SurfaceView implements Observer {
 
     }
 
+    // when the user started up the config panel, then navigated away and came back, but apparently
+    // only under Android 5.0, it would tear down and restart everything, but onSizeChanged() would
+    // never actually happen the second time around. This is the workaround.
+
+    // credit where due:
+    // http://www.sherif.mobi/2013/01/how-to-get-widthheight-of-view.html
+    // http://stackoverflow.com/questions/10411975/how-to-get-the-width-and-height-of-an-image-view-in-android
+    @Override
+    public void onWindowFocusChanged(boolean hasFocus) {
+        super.onWindowFocusChanged(hasFocus);
+
+        int tmpWidth = getWidth();
+        int tmpHeight = getHeight();
+
+        if(tmpWidth == 0 || tmpHeight == 0) {
+            Log.v(TAG, "onWindowFocusChanged: got zeros for width or height");
+            return;
+        }
+
+        this.width = tmpWidth;
+        this.height = tmpHeight;
+
+        Log.v(TAG, "onWindowFocusChanged: " + width + ", " + height);
+        clockFace.setSize(width, height);
+
+    }
+
     public void kill(Context context) {
         Log.d(TAG, "kill");
         mUpdateTimeHandler.removeMessages(MSG_UPDATE_TIME);
@@ -179,7 +206,9 @@ public class MyViewAnim extends SurfaceView implements Observer {
 
     @Override
     protected void onSizeChanged (int w, int h, int oldw, int oldh) {
-        Log.v(TAG, "size change: " + w + ", " + h);
+        super.onSizeChanged(w, h, oldw, oldh);
+
+        Log.v(TAG, "onSizeChanged: " + w + ", " + h);
         this.width = w;
         this.height = h;
         clockFace.setSize(width, height);
