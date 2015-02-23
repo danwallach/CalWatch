@@ -178,9 +178,10 @@ public class CalWatchFaceService extends CanvasWatchFaceService {
                 Log.e(TAG, "no resources? not good");
             }
 
-            clockFace = new ClockFace();
-            clockState = ClockState.getSingleton();
+            if(clockFace == null)
+                clockFace = new ClockFace();
 
+            clockState = ClockState.getSingleton();
             clockState.addObserver(this); // callbacks if something changes
 
             if(calendarFetcher != null)
@@ -288,6 +289,11 @@ public class CalWatchFaceService extends CanvasWatchFaceService {
             if(clockState != null) {
                 clockState.deleteObserver(this);
                 clockState = null;
+            }
+
+            if(clockFace != null) {
+                clockFace.kill();
+                clockFace = null;
             }
 
             super.onDestroy();
