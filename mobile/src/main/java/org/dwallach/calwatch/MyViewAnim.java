@@ -154,8 +154,11 @@ public class MyViewAnim extends View implements Observer {
             Log.e(TAG, "no resources? not good");
         }
 
-        if(clockFace == null)
+        if(clockFace == null) {
             clockFace = new ClockFace();
+            clockFace.setSize(width, height);
+        }
+
         clockState = ClockState.getSingleton();
 
         clockState.deleteObserver(this); // in case we were already there
@@ -192,7 +195,8 @@ public class MyViewAnim extends View implements Observer {
         this.height = tmpHeight;
 
         Log.v(TAG, "onWindowFocusChanged: " + width + ", " + height);
-        clockFace.setSize(width, height);
+        if(clockFace != null)
+            clockFace.setSize(width, height);
 
     }
 
@@ -226,7 +230,8 @@ public class MyViewAnim extends View implements Observer {
         Log.v(TAG, "onSizeChanged: " + w + ", " + h);
         this.width = w;
         this.height = h;
-        clockFace.setSize(width, height);
+        if(clockFace != null)
+            clockFace.setSize(width, height);
     }
 
     private int width, height;
