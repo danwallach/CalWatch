@@ -29,8 +29,7 @@ public class EventLayoutUniform {
      * @return true if it worked, false if it failed
      */
     public static boolean go(List<EventWrapper> events) {
-        int i, j, k, nEvents;
-        int maxLevelAnywhere = 0;
+        int i, j, nEvents;
 
         if (events == null) return true; // degenerate case, in which we trivially succeed
         nEvents = events.size();
@@ -57,7 +56,6 @@ public class EventLayoutUniform {
 
             ClLinearExpression sumSizes = new ClLinearExpression(0.0);
 
-            j = 0;
             for (i = 0; i < nEvents; i++) {
                 startLevels[i] = new ClVariable("start" + i);
                 sizes[i] = new ClVariable("size" + i);

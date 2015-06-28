@@ -19,11 +19,7 @@ public class BatteryWrapper {
     private static final String TAG = "BatteryWrapper";
 
     private Context context;
-    private int status;
     private boolean isCharging;
-    private int chargePlug;
-    private boolean usbCharge;
-    private boolean acCharge;
     private float batteryPct = 1.0f;
 
     private static BatteryWrapper singleton;
@@ -61,13 +57,13 @@ public class BatteryWrapper {
             Intent batteryStatus = context.registerReceiver(null, ifilter);
 
             // Are we charging / charged?
-            status = batteryStatus.getIntExtra(BatteryManager.EXTRA_STATUS, -1);
+            int status = batteryStatus.getIntExtra(BatteryManager.EXTRA_STATUS, -1);
             isCharging = (status == BatteryManager.BATTERY_STATUS_CHARGING || status == BatteryManager.BATTERY_STATUS_FULL);
 
             // How are we charging?
-            chargePlug = batteryStatus.getIntExtra(BatteryManager.EXTRA_PLUGGED, -1);
-            usbCharge = chargePlug == BatteryManager.BATTERY_PLUGGED_USB;
-            acCharge = chargePlug == BatteryManager.BATTERY_PLUGGED_AC;
+            int chargePlug = batteryStatus.getIntExtra(BatteryManager.EXTRA_PLUGGED, -1);
+//            boolean usbCharge = chargePlug == BatteryManager.BATTERY_PLUGGED_USB;
+//            boolean acCharge = chargePlug == BatteryManager.BATTERY_PLUGGED_AC;
 
             int level = batteryStatus.getIntExtra(BatteryManager.EXTRA_LEVEL, -1);
             int scale = batteryStatus.getIntExtra(BatteryManager.EXTRA_SCALE, -1);

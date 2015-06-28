@@ -39,6 +39,7 @@ public class CalendarFetcher {
     public CalendarFetcher(Context context, Uri contentUri, String authority) {
         this.contentUri = contentUri;
         this.context = context;
+        this.loaderHandler = new MyHandler(context, this);
 
         // hook into watching the calendar (code borrowed from Google's calendar wear app)
         Log.v(TAG, "setting up intent receiver");
@@ -49,7 +50,7 @@ public class CalendarFetcher {
         isReceiverRegistered = true;
 
         // kick off initial loading of calendar state
-        loaderHandler.sendEmptyMessage(MSG_LOAD_CAL);
+        loaderHandler.sendEmptyMessage(MyHandler.MSG_LOAD_CAL);
     }
 
     public void kill() {
@@ -60,8 +61,8 @@ public class CalendarFetcher {
             isReceiverRegistered = false;
         }
 
-        cancelLoaderTask();
-        loaderHandler.removeMessages(MSG_LOAD_CAL);
+        loaderHandler.cancelLoaderTask();
+        loaderHandler.removeMessages(MyHandler.MSG_LOAD_CAL);
     }
 
     /**
@@ -177,8 +178,15 @@ public class CalendarFetcher {
     /**
      * Asynchronous task to load the calendar instances.
      */
-    private class CalLoaderTask extends AsyncTask<Void, Void, List<WireEvent>> {
+    public static class CalLoaderTask extends AsyncTask<Void, Void, List<WireEvent>> {
         private PowerManager.WakeLock wakeLock;
+        private Context context;
+        private CalendarFetcher fetcher;
+
+        CalLoaderTask(Context context, CalendarFetcher fetcher) {
+            this.context = context;
+            this.fetcher = fetcher;
+        }
 
         @Override
         protected List<WireEvent> doInBackground(Void... voids) {
@@ -194,7 +202,7 @@ public class CalendarFetcher {
 
             Log.v(TAG, "wake lock acquired");
 
-            return loadContent();
+            return fetcher.loadContent();
         }
 
         @Override
@@ -223,28 +231,10 @@ public class CalendarFetcher {
         }
     }
 
-    private static final int MSG_LOAD_CAL = 1;
-    private AsyncTask<Void,Void,List<WireEvent>> loaderTask;
 
     // this will fire when it's time to (re)load the calendar, launching an asynchronous
     // task to do all the dirty work and eventually update ClockState
-    final Handler loaderHandler = new Handler() {
-        @Override
-        public void handleMessage(Message message) {
-            switch (message.what) {
-                case MSG_LOAD_CAL:
-                    cancelLoaderTask();
-                    Log.v(TAG, "launching calendar loader task");
-
-                    loaderTask = new CalLoaderTask();
-                    loaderTask.execute();
-                    break;
-                default:
-                    Log.e(TAG, "unexpected message: " + message.toString());
-            }
-        }
-    };
-
+    final MyHandler loaderHandler;
     private boolean isReceiverRegistered;
 
     private BroadcastReceiver broadcastReceiver = new BroadcastReceiver() {
@@ -262,16 +252,42 @@ public class CalendarFetcher {
                 // Solution? Screw it. Whatever we get, we don't care, we'll reload the calendar.
 
                 Log.v(TAG, "receiver: time to load new calendar data");
-                cancelLoaderTask();
-                loaderHandler.sendEmptyMessage(MSG_LOAD_CAL);
+                loaderHandler.cancelLoaderTask();
+                loaderHandler.sendEmptyMessage(MyHandler.MSG_LOAD_CAL);
             }
         }
     };
 
-    private void cancelLoaderTask() {
-        if (loaderTask != null) {
-            loaderTask.cancel(true);
+    public static class MyHandler extends Handler {
+        public static final int MSG_LOAD_CAL = 1;
+        private AsyncTask<Void,Void,List<WireEvent>> loaderTask;
+        private Context context;
+        private CalendarFetcher fetcher;
+
+        public MyHandler(Context context, CalendarFetcher fetcher) {
+            this.context = context;
+            this.fetcher = fetcher;
+        }
+
+        public void cancelLoaderTask() {
+            if (loaderTask != null) {
+                loaderTask.cancel(true);
+            }
+        }
+
+        @Override
+        public void handleMessage(Message message) {
+            switch (message.what) {
+                case MSG_LOAD_CAL:
+                    cancelLoaderTask();
+                    Log.v(TAG, "launching calendar loader task");
+
+                    loaderTask = new CalLoaderTask(context, fetcher);
+                    loaderTask.execute();
+                    break;
+                default:
+                    Log.e(TAG, "unexpected message: " + message.toString());
+            }
         }
     }
-
 }

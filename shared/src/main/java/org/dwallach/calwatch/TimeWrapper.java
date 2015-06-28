@@ -93,7 +93,6 @@ public class TimeWrapper {
     private static long avgRuntimeAccumulator = 0;
     private static int skippedFrames = 0;
     private static int zombieFrames = 0;
-    private static boolean measuringFrame = false;
 
     /**
      * for performance monitoring: start the counters over again from scratch
@@ -103,7 +102,6 @@ public class TimeWrapper {
         minRuntime = 0;
         maxRuntime = 0;
         avgRuntimeAccumulator = 0;
-        measuringFrame = false;
         lastFPSTime = 0;
         skippedFrames = 0;
         zombieFrames = 0;
@@ -151,7 +149,6 @@ public class TimeWrapper {
      */
     public static void frameStart() {
         frameStartTime = SystemClock.elapsedRealtimeNanos();
-        measuringFrame = true;
     }
 
     /**
@@ -159,7 +156,6 @@ public class TimeWrapper {
      */
     public static void frameEnd() {
         long frameEndTime = SystemClock.elapsedRealtimeNanos();
-        measuringFrame = false;
 
         // first sample around, we're not remembering anything, just the time it ended; this gets on smooth footing for subsequent samples
         if(lastFPSTime == 0) {

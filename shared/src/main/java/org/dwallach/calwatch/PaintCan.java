@@ -11,12 +11,6 @@ import android.graphics.Paint;
 import android.util.Log;
 import android.util.SparseArray;
 
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-
 /**
  * Cheesy helper for getting Paint values for calendar events and making sure we don't allocate
  * the same color twice.
@@ -31,7 +25,7 @@ public class PaintCan {
         Integer argbInt = argb;
 
         if(map == null)
-            map = new SparseArray<Paint>();
+            map = new SparseArray<>();
 
         retPaint = map.get(argbInt);
         if(retPaint == null) {
@@ -54,8 +48,6 @@ public class PaintCan {
     public static final int styleAmbient = 1;
     public static final int styleLowBit = 2;
     public static final int styleMax = 2;
-
-    private static final float gamma = 1.0f;
 
     private static Paint newPaint(int argb, int style, float textSize, float strokeWidth) {
         Paint retPaint = new Paint(Paint.SUBPIXEL_TEXT_FLAG | Paint.HINTING_ON);

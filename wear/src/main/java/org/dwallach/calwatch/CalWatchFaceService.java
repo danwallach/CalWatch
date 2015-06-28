@@ -26,23 +26,12 @@
 
 package org.dwallach.calwatch;
 
-import android.content.BroadcastReceiver;
-import android.content.Context;
-import android.content.Intent;
-import android.content.IntentFilter;
 import android.content.res.Resources;
-import android.database.ContentObserver;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.PorterDuff;
 import android.graphics.Rect;
-import android.net.Uri;
-import android.os.AsyncTask;
 import android.os.Bundle;
-import android.os.Handler;
-import android.os.Message;
-import android.os.PowerManager;
-import android.provider.CalendarContract;
 import android.support.wearable.provider.WearableCalendarContract;
 import android.support.wearable.watchface.CanvasWatchFaceService;
 import android.support.wearable.watchface.WatchFaceService;
@@ -52,12 +41,8 @@ import android.view.Gravity;
 import android.view.SurfaceHolder;
 import android.view.WindowInsets;
 
-import org.dwallach.calwatch.WireEvent;
-
-import java.util.List;
 import java.util.Observable;
 import java.util.Observer;
-import java.util.concurrent.TimeUnit;
 
 /**
  * Drawn heavily from the Android Wear SweepWatchFaceService example code.
@@ -65,89 +50,36 @@ import java.util.concurrent.TimeUnit;
 public class CalWatchFaceService extends CanvasWatchFaceService {
     private static final String TAG = "CalWatchFaceService";
 
-    /**
-     * Update rate in milliseconds for NON-interactive mode. We update once every 12 seconds
-     * to advance the minute hand when we're not otherwise sweeping the second hand.
-     *
-     * The default of one update per minute is ugly so we'll do better.
-     */
-    private static final long INTERACTIVE_UPDATE_RATE_MS = TimeUnit.SECONDS.toMillis(12);
-
     @Override
     public Engine onCreateEngine() {
         return new Engine();
     }
 
     private class Engine extends CanvasWatchFaceService.Engine implements Observer {
-        static final int MSG_UPDATE_TIME = 0;
-
         private ClockFace clockFace;
         private ClockState clockState;
         private CalendarFetcher calendarFetcher;
 
-        /**
-         * Handler to tick once every 12 seconds.
-         * Used only if the second hand is turned off
-         * or in ambient mode so we get smooth minute-hand
-         * motion.
-         */
-        private final Handler mUpdateTimeHandler = new Handler() {
-            @Override
-            public void handleMessage(Message message) {
-                switch (message.what) {
-                    case MSG_UPDATE_TIME:
-//                        Log.v(TAG, "updating time");
+        private boolean subSecondRefreshNeeded() {
+            boolean result = false;
 
-                        invalidate();
-                        if (shouldTimerBeRunning()) {
-                            long timeMs = System.currentTimeMillis();
-                            long delayMs = INTERACTIVE_UPDATE_RATE_MS
-                                    - (timeMs % INTERACTIVE_UPDATE_RATE_MS);
-                            mUpdateTimeHandler.sendEmptyMessageDelayed(MSG_UPDATE_TIME, delayMs);
-                        }
-                        break;
-                }
-            }
-        };
-
-        private boolean shouldTimerBeRunning() {
-            boolean timerNeeded = false;
-
-            // run the timer if we're in ambient mode
-            if(clockFace != null) {
-                timerNeeded = clockFace.getAmbientMode();
-            }
-
-            // or run the timer if we're not showing the seconds hand
+            // if the second-hand is supposed to be rendered and we're not in ambient mode
             if(clockState != null) {
-                timerNeeded = timerNeeded || !clockState.getShowSeconds();
+                result = clockState.getShowSeconds();
             }
 
-            return timerNeeded;
+            if(clockFace != null) {
+                result = result && !clockFace.getAmbientMode();
+            }
+
+            return result;
         }
 
         /**
-         * Starts the {@link #mUpdateTimeHandler} timer if it should be running and isn't currently
-         * or stops it if it shouldn't be running but currently is.
-         */
-        private void updateTimer() {
-            Log.d(TAG, "updateTimer");
-
-            mUpdateTimeHandler.removeMessages(MSG_UPDATE_TIME);
-            if (shouldTimerBeRunning()) {
-                mUpdateTimeHandler.sendEmptyMessage(MSG_UPDATE_TIME);
-            }
-        }
-
-        /**
-         * Callback from ClockState if something changes, which means we'll need
-         * to redraw.
-         * @param observable
-         * @param data
+         * Callback from ClockState if something changes, which means we'll need to redraw.
          */
         @Override
         public void update(Observable observable, Object data) {
-            updateTimer();
             invalidate();
         }
 
@@ -165,8 +97,13 @@ public class CalWatchFaceService extends CanvasWatchFaceService {
                     .setBackgroundVisibility(WatchFaceStyle.BACKGROUND_VISIBILITY_INTERRUPTIVE)
                     .setShowSystemUiTime(false)
                     .setStatusBarGravity(Gravity.CENTER)
-                    .setHotwordIndicatorGravity(Gravity.CENTER_HORIZONTAL) // I'd really like vertical to be 30% from top but can't say that here
+                    .setHotwordIndicatorGravity(Gravity.CENTER_HORIZONTAL) // not particularly precise, but seems reasonable
                     .setViewProtection(WatchFaceStyle.PROTECT_HOTWORD_INDICATOR | WatchFaceStyle.PROTECT_STATUS_BAR)
+
+                    // the features below were added in Wear 5.1 (maybe 5.0?) and seem worth tweaking
+                    .setPeekOpacityMode(WatchFaceStyle.PEEK_OPACITY_MODE_TRANSLUCENT)
+                    .setShowUnreadCountIndicator(true)
+
                     .build());
 
             XWatchfaceReceiver.pingExternalStopwatches(CalWatchFaceService.this);
@@ -231,10 +168,6 @@ public class CalWatchFaceService extends CanvasWatchFaceService {
                 TimeWrapper.frameReset();
 
             invalidate();
-
-            // Whether the timer should be running depends on whether we're in ambient mode (as well
-            // as whether we're visible), so we may need to start or stop the timer.
-            updateTimer();
         }
 
         @Override
@@ -274,14 +207,13 @@ public class CalWatchFaceService extends CanvasWatchFaceService {
 
             // Draw every frame as long as we're visible and doing the sweeping second hand,
             // otherwise the timer will take care of it.
-            if (isVisible() && !shouldTimerBeRunning())
+            if (isVisible() && subSecondRefreshNeeded())
                 invalidate();
         }
 
         @Override
         public void onDestroy() {
             Log.v(TAG, "onDestroy");
-            mUpdateTimeHandler.removeMessages(MSG_UPDATE_TIME);
 
             if(calendarFetcher != null)
                 calendarFetcher.kill();

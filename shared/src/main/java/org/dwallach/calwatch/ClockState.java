@@ -101,7 +101,7 @@ public class ClockState extends Observable {
     }
 
     public void setWireEventList(List<WireEvent> wireEventList) {
-        List<EventWrapper> results = new ArrayList<EventWrapper>();
+        List<EventWrapper> results = new ArrayList<>();
 
         for (WireEvent wireEvent : wireEventList)
             results.add(new EventWrapper(wireEvent));
@@ -159,7 +159,7 @@ public class ClockState extends Observable {
 //                "), clipEnd: " + TimeWrapper.formatGMTTime(clipEndMillis) + " (" + clipEndMillis + ")");
 
         lastClipTime = localClipTime;
-        visibleEventList = new ArrayList<EventWrapper>();
+        visibleEventList = new ArrayList<>();
 
         if(eventList != null) {
             Log.v(TAG, "clipping " + eventList.size() + " raw events to fit the screen");
@@ -230,7 +230,7 @@ public class ClockState extends Observable {
      * @param eventBytes a marshalled protobuf of type WireUpdate
      */
     public void setProtobuf(byte[] eventBytes) {
-        WireUpdate wireUpdate = null;
+        WireUpdate wireUpdate;
 
         try {
             wireUpdate = WireUpdate.parseFrom(eventBytes);
@@ -266,9 +266,7 @@ public class ClockState extends Observable {
     public byte[] getProtobuf() {
         // note: we're now *not* sending calendar events; just the UI state
         WireUpdate wireUpdate = new WireUpdate(getFaceMode(), getShowSeconds(), getShowDayDate());
-        byte[] output = wireUpdate.toByteArray();
-
-        return output;
+        return wireUpdate.toByteArray();
     }
 
     public void pingObservers() {

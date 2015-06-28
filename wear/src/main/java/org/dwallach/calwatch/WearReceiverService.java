@@ -250,7 +250,6 @@ public class WearReceiverService extends WearableListenerService implements Goog
 
             } catch (IllegalArgumentException e) {
                 Log.e(TAG, "failed to decode base64 saved state: " + e.toString());
-                return;
             }
         }
     }

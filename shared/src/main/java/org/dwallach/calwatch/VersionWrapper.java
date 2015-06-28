@@ -21,8 +21,7 @@ public class VersionWrapper {
 
     public static void logVersion(Context activity) {
         try {
-            PackageInfo pinfo = null;
-            pinfo = activity.getPackageManager().getPackageInfo(activity.getPackageName(), 0);
+            PackageInfo pinfo = activity.getPackageManager().getPackageInfo(activity.getPackageName(), 0);
             int versionNumber = pinfo.versionCode;
             String versionName = pinfo.versionName;
 
