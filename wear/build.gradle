@@ -42,20 +42,17 @@ def getVersionName = { ->
 
 
 android {
-    compileSdkVersion 21
-    buildToolsVersion "21.1.0"
+    compileSdkVersion 22
+    buildToolsVersion "22.0.1"
 
     defaultConfig {
         applicationId "org.dwallach.calwatch"
-        minSdkVersion 21
-        targetSdkVersion 21
+        minSdkVersion 21      // Android 5.0, Lollipop, for the watches that haven't been updated to 5.1 yet
+        targetSdkVersion 22   // Android 5.1, Lollipop, which is the current Android Wear system version
         versionCode getVersionCode()
         versionName getVersionName()
     }
-    compileOptions {
-        sourceCompatibility JavaVersion.VERSION_1_7
-        targetCompatibility JavaVersion.VERSION_1_7
-    }
+
     buildTypes {
         release {
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'

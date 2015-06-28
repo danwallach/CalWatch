@@ -587,6 +587,7 @@ public class ClockFace implements Observer {
 
         facePathCache = null;
         batteryPathCache = null;
+        batteryCritical = false;
         stipplePathCache = null;
         stippleTimeCache = -1;
 
@@ -732,6 +733,7 @@ public class ClockFace implements Observer {
     }
 
     private Path batteryPathCache = null;
+    private boolean batteryCritical = false;
     private long batteryCacheTime = 0;
 
     private void drawBattery(Canvas canvas) {
@@ -742,7 +744,6 @@ public class ClockFace implements Observer {
         }
 
         long time = TimeWrapper.getGMTTime();
-        boolean batteryCritical = false;
         float batteryPct = 1f;
 
         // we don't want to poll *too* often; this translates to about once per five minute
@@ -762,17 +763,17 @@ public class ClockFace implements Observer {
             if(batteryPct > 0.5f) {
                 // batteryPathCache = null;
             } else {
-                float minRadius = 0.02f, maxRadius = 0.06f;
+                float minRadius = 0.01f, maxRadius = 0.06f;
                 float dotRadius;
                 if(batteryPct < 0.1)
                     dotRadius = maxRadius;
                 else
                     dotRadius = maxRadius - ((maxRadius - minRadius) * (batteryPct - 0.1f) / 0.4f);
 
-                Log.v(TAG, "--> dot radius: " + dotRadius);
                 batteryPathCache.addCircle(cx, cy, radius * dotRadius, Path.Direction.CCW); // direction shouldn't matter
 
                 batteryCritical = batteryPct <= 0.1f;
+                Log.v(TAG, "--> dot radius: " + dotRadius + ", critical: " + batteryCritical);
             }
         }
 
