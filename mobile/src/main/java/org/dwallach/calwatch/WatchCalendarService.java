@@ -6,6 +6,7 @@
  */
 package org.dwallach.calwatch;
 
+import android.app.ApplicationErrorReport;
 import android.app.Service;
 import android.content.Context;
 import android.content.Intent;
@@ -14,6 +15,9 @@ import android.util.Log;
 
 import java.util.Observable;
 import java.util.Observer;
+
+import fr.nicolaspomepuy.androidwearcrashreport.mobile.CrashInfo;
+import fr.nicolaspomepuy.androidwearcrashreport.mobile.CrashReport;
 
 public class WatchCalendarService extends Service implements Observer {
     private static final String TAG = "WatchCalendarService";
@@ -68,6 +72,17 @@ public class WatchCalendarService extends Service implements Observer {
         wearSender = new WearSender(this);
 
         PreferencesHelper.loadPreferences(this);
+
+        // Nicholas Pomepuy's crash reporting library will collect exceptions on the watch,
+        // pass them along via the Data API, and they'll end up here, where we will then
+        // pass them along to the Google Play Store. I'll be amazed if this works.
+        CrashReport.getInstance(this).setOnCrashListener(new CrashReport.IOnCrashListener() {
+            @Override
+            public void onCrashReceived(CrashInfo crashInfo) {
+                // Manage the crash
+                CrashReport.getInstance(WatchCalendarService.this).reportToPlayStore(WatchCalendarService.this);
+            }
+        });
     }
 
     @Override

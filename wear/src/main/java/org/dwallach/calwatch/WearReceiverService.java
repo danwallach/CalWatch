@@ -33,6 +33,8 @@ import com.google.android.gms.wearable.WearableListenerService;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 
+import fr.nicolaspomepuy.androidwearcrashreport.wear.CrashReporter;
+
 /**
  * This class pairs up with WearSender
  * Created by dwallach on 8/25/14.
@@ -73,6 +75,10 @@ public class WearReceiverService extends WearableListenerService implements Goog
         // why is this necessary?
         initGoogle();
 
+        // Nicholas Pomepuy's crash reporting library claims to be able to pass things
+        // going kaboom all the way out to the Play Store for us. Let's see if it works.
+        CrashReporter.getInstance(this).start();
+
         // this also seems a reasonable place to set up the battery monitor
 
         BatteryWrapper.init(this);
@@ -90,6 +96,8 @@ public class WearReceiverService extends WearableListenerService implements Goog
             }
         }
 
+
+
         // We want this service to continue running until it is explicitly
         // stopped, so return sticky.
         return START_STICKY;
@@ -105,12 +113,11 @@ public class WearReceiverService extends WearableListenerService implements Goog
 
                 Log.d(TAG, "--> item found: " + item.toString());
                 if (item.getUri().getPath().compareTo(Constants.SettingsPath) == 0) {
+                    Log.d(TAG, "----> it's an event for us!");
                     DataMap dataMap = DataMapItem.fromDataItem(item).getDataMap();
                     byte[] eventbuf = dataMap.getByteArray(Constants.DataKey);
                     newEventBytes(eventbuf);
                     savePreferences(eventbuf); // save this for subsequent restarts
-                } else {
-                    Log.e(TAG, "unexpected data path: " + item.getUri().getPath());
                 }
             }
         }

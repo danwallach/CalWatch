@@ -93,6 +93,7 @@
     <orderEntry type="library" exported="" name="support-annotations-21.0.0" level="project" />
     <orderEntry type="library" exported="" name="support-v4-21.0.0" level="project" />
     <orderEntry type="library" exported="" name="play-services-wearable-6.1.71" level="project" />
+    <orderEntry type="library" exported="" name="crashreport-wear-0.4" level="project" />
     <orderEntry type="module" module-name="shared" exported="" />
   </component>
 </module>
