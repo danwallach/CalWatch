@@ -75,7 +75,7 @@ public class WearSender implements GoogleApiClient.ConnectionCallbacks, GoogleAp
              */
             if (googleApiClient.isConnected()) {
                 PutDataMapRequest putDataMapReq = PutDataMapRequest.create(Constants.SettingsPath);
-                putDataMapReq.getDataMap().putByteArray(Constants.SettingsPath, wireBytesToSend);
+                putDataMapReq.getDataMap().putByteArray(Constants.DataKey, wireBytesToSend);
                 PutDataRequest putDataReq = putDataMapReq.asPutDataRequest();
                 PendingResult<DataApi.DataItemResult> pendingResult =
                         Wearable.DataApi.putDataItem(googleApiClient, putDataReq);

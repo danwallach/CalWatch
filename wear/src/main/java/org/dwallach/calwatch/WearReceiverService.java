@@ -113,9 +113,9 @@ public class WearReceiverService extends WearableListenerService implements Goog
 
                 Log.d(TAG, "--> item found: " + item.toString());
                 if (item.getUri().getPath().compareTo(Constants.SettingsPath) == 0) {
-                    Log.d(TAG, "----> it's an event for us!");
                     DataMap dataMap = DataMapItem.fromDataItem(item).getDataMap();
                     byte[] eventbuf = dataMap.getByteArray(Constants.DataKey);
+                    Log.d(TAG, "----> it's an event for us, nbytes: " + eventbuf.length);
 
                     // the first time through, this seems to be null; weird, but at
                     // least it's easy to ignore the nullness
