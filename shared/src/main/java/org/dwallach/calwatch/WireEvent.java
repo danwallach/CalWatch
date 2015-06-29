@@ -10,11 +10,6 @@ package org.dwallach.calwatch;
  * Created by dwallach on 12/18/14.
  */
 public final class WireEvent {
-
-    public static final Long DEFAULT_STARTTIME = 0L;
-    public static final Long DEFAULT_ENDTIME = 0L;
-    public static final Integer DEFAULT_DISPLAYCOLOR = 0;
-
     public final Long startTime;
     public final Long endTime;
     public final Integer displayColor;

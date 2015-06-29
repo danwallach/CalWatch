@@ -13,16 +13,21 @@ import android.util.Log;
 
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.api.GoogleApiClient;
+import com.google.android.gms.common.api.PendingResult;
+import com.google.android.gms.common.api.ResultCallback;
+import com.google.android.gms.wearable.DataApi;
 import com.google.android.gms.wearable.MessageApi;
 import com.google.android.gms.wearable.MessageEvent;
 import com.google.android.gms.wearable.Node;
 import com.google.android.gms.wearable.NodeApi;
+import com.google.android.gms.wearable.PutDataMapRequest;
+import com.google.android.gms.wearable.PutDataRequest;
 import com.google.android.gms.wearable.Wearable;
 
 /**
  * Created by dwallach on 8/25/14.
  */
-public class WearSender implements GoogleApiClient.ConnectionCallbacks, GoogleApiClient.OnConnectionFailedListener, MessageApi.MessageListener {
+public class WearSender implements GoogleApiClient.ConnectionCallbacks, GoogleApiClient.OnConnectionFailedListener {
     private static final String TAG = "WearSender";
     byte[] wireBytesToSend = null;
 
@@ -59,7 +64,7 @@ public class WearSender implements GoogleApiClient.ConnectionCallbacks, GoogleAp
              * Major source: https://developer.android.com/google/auth/api-client.html
              */
 
-            if(!isActiveConnection()) return;
+//            if(!isActiveConnection()) return;
             if(wireBytesToSend == null) return;
             if(wireBytesToSend.length == 0) return;
 
@@ -69,28 +74,25 @@ public class WearSender implements GoogleApiClient.ConnectionCallbacks, GoogleAp
              * essential code borrowed from WearOngoingNotificationSample
              */
             if (googleApiClient.isConnected()) {
-                new AsyncTask<Void, Void, Void>() {
-                    @Override
-                    protected Void doInBackground(Void... params) {
-                        NodeApi.GetConnectedNodesResult nodes =
-                                Wearable.NodeApi.getConnectedNodes(googleApiClient).await();
-                        int failures = 0;
-                        for (Node node : nodes.getNodes()) {
-                            Log.v(TAG, "Sending to node: " + node.getDisplayName());
-                            MessageApi.SendMessageResult result = Wearable.MessageApi.sendMessage(
-                                    googleApiClient, node.getId(), Constants.WearDataSendPath, wireBytesToSend).await();
-                            if (!result.getStatus().isSuccess()) {
-                                Log.e(TAG, "ERROR: failed to send Message: " + result.getStatus());
-                                failures++;
-                            }
-                            if(failures == 0) {
-                                wireBytesToSend = null; // we're done with sending this message
-                            }
-                        }
+                PutDataMapRequest putDataMapReq = PutDataMapRequest.create(Constants.SettingsPath);
+                putDataMapReq.getDataMap().putByteArray(Constants.SettingsPath, wireBytesToSend);
+                PutDataRequest putDataReq = putDataMapReq.asPutDataRequest();
+                PendingResult<DataApi.DataItemResult> pendingResult =
+                        Wearable.DataApi.putDataItem(googleApiClient, putDataReq);
 
-                        return null;
+                // this callback isn't strictly necessary for correctness, but it will be
+                // exceptionally useful for log debugging
+                pendingResult.setResultCallback(new ResultCallback<DataApi.DataItemResult>() {
+                    @Override
+                    public void onResult(final DataApi.DataItemResult result) {
+                        if(result.getStatus().isSuccess()) {
+                            Log.d(TAG, "Data item set: " + result.getDataItem().getUri());
+                        } else {
+                            Log.e(TAG, "Data item failed? " + result.getStatus().toString());
+                        }
                     }
-                }.execute();
+                });
+
             }
 
         } catch (Throwable throwable) {
@@ -142,15 +144,6 @@ public class WearSender implements GoogleApiClient.ConnectionCallbacks, GoogleAp
             return;
         }
 
-        try {
-            Wearable.MessageApi.addListener(googleApiClient, this);
-        } catch (NullPointerException e) {
-            Log.e(TAG, "unexpected failure in onConnected (googleApiClient = " + googleApiClient + ")", e);
-            closeGoogle();
-            initGoogle();
-            return;
-        }
-
         sendAllToWatch();
     }
 
@@ -179,7 +172,6 @@ public class WearSender implements GoogleApiClient.ConnectionCallbacks, GoogleAp
             Log.v(TAG, "cleaning up Google API");
             readyToSend = false;
             if (googleApiClient != null) {
-                Wearable.MessageApi.removeListener(googleApiClient, this);
                 if (googleApiClient.isConnected())
                     googleApiClient.disconnect();
             }
@@ -187,30 +179,4 @@ public class WearSender implements GoogleApiClient.ConnectionCallbacks, GoogleAp
             googleApiClient = null;
         }
     }
-
-    //
-    // Official documentation: https://developer.android.com/training/wearables/data-layer/events.html
-    // Very, very helpful: http://www.doubleencore.com/2014/07/create-custom-ongoing-notification-android-wear/
-    //
-
-    public void onMessageReceived(MessageEvent messageEvent) {
-        Log.v(TAG, "message received!");
-
-        if (messageEvent.getPath().equals(Constants.WearDataReturnPath)) {
-            // the watch says "hi"; make sure we send it stuff
-
-            try {
-                byte[] versionStringBytes = messageEvent.getData();
-                String versionString = new String(versionStringBytes);
-                Log.v(TAG, "watch ping string: " + versionString);
-            } catch (Throwable t) {
-                Log.e(TAG, "failed to decode version string from watch");
-            }
-
-            sendAllToWatch(); // send the calendar and whatever else we have
-        } else {
-            Log.v(TAG, "received message on unexpected path: " + messageEvent.getPath());
-        }
-    }
-
 }

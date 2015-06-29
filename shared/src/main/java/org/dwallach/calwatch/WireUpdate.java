@@ -11,7 +11,13 @@ import android.util.Log;
 import java.io.IOException;
 
 /**
- * Created by dwallach on 12/18/14.
+ * This data structure deals with serializing and deserializing all the state that we want to
+ * get from the phone to the watch. Originally, when we had to send the entire serialized calendar,
+ * we used protobufs, which was total overkill with later versions of Wear, where Google dealt
+ * with moving the calendars around. We simplified down to this business. We could probably
+ * go a step further and replace this with distinct entries in the DataMap, but we might want
+ * to add more things later on, so it's easiest to just keep this around. It's expansion room
+ * for later on.
  */
 public class WireUpdate {
     private static final String TAG = "WireUpdate";

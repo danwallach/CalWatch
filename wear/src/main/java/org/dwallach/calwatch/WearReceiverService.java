@@ -9,6 +9,7 @@ package org.dwallach.calwatch;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.util.Base64;
@@ -16,12 +17,21 @@ import android.util.Log;
 
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.api.GoogleApiClient;
+import com.google.android.gms.common.data.FreezableUtils;
+import com.google.android.gms.wearable.DataEvent;
+import com.google.android.gms.wearable.DataEventBuffer;
+import com.google.android.gms.wearable.DataItem;
+import com.google.android.gms.wearable.DataMap;
+import com.google.android.gms.wearable.DataMapItem;
 import com.google.android.gms.wearable.MessageApi;
 import com.google.android.gms.wearable.MessageEvent;
 import com.google.android.gms.wearable.Node;
 import com.google.android.gms.wearable.NodeApi;
 import com.google.android.gms.wearable.Wearable;
 import com.google.android.gms.wearable.WearableListenerService;
+
+import java.util.List;
+import java.util.concurrent.TimeUnit;
 
 /**
  * This class pairs up with WearSender
@@ -85,27 +95,24 @@ public class WearReceiverService extends WearableListenerService implements Goog
         return START_STICKY;
     }
 
-    //
-    // Official documentation: https://developer.android.com/training/wearables/data-layer/events.html
-    // Very, very helpful: http://www.doubleencore.com/2014/07/create-custom-ongoing-notification-android-wear/
-    //
-
     @Override
-    public void onMessageReceived(MessageEvent messageEvent) {
-        Log.v(TAG, "message received!");
-        initGoogle();
-        if (messageEvent.getPath().equals(Constants.WearDataSendPath)) {
-            byte[] messageData = messageEvent.getData();
-            if(messageData.length == 0) {
-                Log.e(TAG, "zero-length message received from phone; asking for a retry");
-                pingPhone(); // something went awfully wrong here
-            } else {
-                Log.v(TAG, "message length: " + messageData.length + " bytes");
-                newEventBytes(messageData);
-                savePreferences(messageData); // save this for subsequent restarts
+    public void onDataChanged(DataEventBuffer dataEvents) {
+        Log.d(TAG, "data changed");
+        for (DataEvent event : dataEvents) {
+            if (event.getType() == DataEvent.TYPE_CHANGED) {
+                // DataItem changed
+                DataItem item = event.getDataItem();
+
+                Log.d(TAG, "--> item found: " + item.toString());
+                if (item.getUri().getPath().compareTo(Constants.SettingsPath) == 0) {
+                    DataMap dataMap = DataMapItem.fromDataItem(item).getDataMap();
+                    byte[] eventbuf = dataMap.getByteArray(Constants.DataKey);
+                    newEventBytes(eventbuf);
+                    savePreferences(eventbuf); // save this for subsequent restarts
+                } else {
+                    Log.e(TAG, "unexpected data path: " + item.getUri().getPath());
+                }
             }
-        } else {
-            Log.v(TAG, "received message on unexpected path: " + messageEvent.getPath());
         }
     }
 
@@ -131,9 +138,8 @@ public class WearReceiverService extends WearableListenerService implements Goog
 
     @Override
     public void onConnected(Bundle connectionHint) {
+        // Apparently unrelated to connections with the phone.
         Log.v(TAG, "Connected to Google Api Service");
-
-        pingPhone();
     }
 
 
@@ -142,6 +148,8 @@ public class WearReceiverService extends WearableListenerService implements Goog
         // The connection has been interrupted.
         // Disable any UI components that depend on Google APIs
         // until onConnected() is called.
+
+        // Apparently unrelated to connections with the phone.
         Log.v(TAG, "suspended connection!");
         if(googleApiClient != null && googleApiClient.isConnected())
             googleApiClient.disconnect();
@@ -152,8 +160,8 @@ public class WearReceiverService extends WearableListenerService implements Goog
     public void onConnectionFailed(ConnectionResult result) {
         // This callback is important for handling errors that
         // may occur while attempting to connect with Google.
-        //
-        // More about this in the next section.
+
+        // Apparently unrelated to connections with the phone.
 
         Log.v(TAG, "lost connection!");
         if(googleApiClient != null && googleApiClient.isConnected())
@@ -163,52 +171,10 @@ public class WearReceiverService extends WearableListenerService implements Goog
 
     public void onPeerConnected(Node peer) {
         Log.v(TAG, "phone is connected!, "+peer.getDisplayName());
-
-        pingPhone();
     }
 
     public void onPeerDisconnected(Node peer) {
         Log.v(TAG, "phone is disconnected!, " + peer.getDisplayName());
-    }
-
-    public void pingPhone() {
-        Log.v(TAG, "pinging phone for data");
-
-        if (googleApiClient != null && googleApiClient.isConnected()) {
-            new AsyncTask<Void, Void, Void>() {
-                @Override
-                protected Void doInBackground(Void... params) {
-                    try {
-                        NodeApi.GetConnectedNodesResult nodes =
-                                Wearable.NodeApi.getConnectedNodes(googleApiClient).await();
-                        int failures = 0;
-
-                        byte[] versionStringBytes = VersionWrapper.getVersionString().getBytes();
-
-                        // TODO: test weird cases when we have one watch associated with >1 phone
-                        // (is that possible?) or one phone associated with more than one phone
-                        for (Node node : nodes.getNodes()) {
-                            Log.v(TAG, "Sending to node: " + node.getDisplayName());
-                            MessageApi.SendMessageResult result = Wearable.MessageApi.sendMessage(
-                                    googleApiClient, node.getId(), Constants.WearDataReturnPath, versionStringBytes).await();
-                            if (!result.getStatus().isSuccess()) {
-                                Log.e(TAG, "ERROR: failed to send Message: " + result.getStatus());
-                                failures++;
-                            }
-                            if (failures == 0) {
-                                Log.v(TAG, "ping delivered!");
-                            }
-                        }
-                    } catch (Throwable t) {
-                        Log.e(TAG, "unexpected failure in pingPhone()", t);
-                    } finally {
-                        return null;
-                    }
-                }
-            }.execute();
-        } else {
-            Log.e(TAG, "pingPhone: No GoogleAPI?!");
-        }
     }
 
     /**
