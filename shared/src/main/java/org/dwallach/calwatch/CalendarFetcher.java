@@ -22,6 +22,7 @@ import android.provider.CalendarContract;
 import android.text.format.DateUtils;
 import android.util.Log;
 
+import java.lang.ref.WeakReference;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
@@ -32,8 +33,10 @@ public class CalendarFetcher {
 
     private Uri contentUri;
 
-    // yes, saving a Context is evil, but we need to keep it around for the loadContent
-    // task, which runs asynchronously
+    // note, this particular context will only live as long as the instance of CalendarFetcher
+    // lives, and it is, in turn, kept alive only as long as the activity, so we don't have
+    // to worry about any leakage. The contexts that might live ever-so-slightly longer, in
+    // the handler / task, are held by weak-references, so we're safe.
     private Context context;
 
     public CalendarFetcher(Context context, Uri contentUri, String authority) {
@@ -180,16 +183,21 @@ public class CalendarFetcher {
      */
     public static class CalLoaderTask extends AsyncTask<Void, Void, List<WireEvent>> {
         private PowerManager.WakeLock wakeLock;
-        private Context context;
+
+        // using a weak-reference to the context rather than holding the context itself,
+        // per http://www.androiddesignpatterns.com/2013/01/inner-class-handler-memory-leak.html
+        private WeakReference<Context> contextRef;
         private CalendarFetcher fetcher;
 
         CalLoaderTask(Context context, CalendarFetcher fetcher) {
-            this.context = context;
+            this.contextRef = new WeakReference<>(context);
             this.fetcher = fetcher;
         }
 
         @Override
         protected List<WireEvent> doInBackground(Void... voids) {
+            Context context = contextRef.get();
+
             if(context == null) {
                 Log.e(TAG, "no saved context: can't do background loader");
                 return null;
@@ -261,11 +269,14 @@ public class CalendarFetcher {
     public static class MyHandler extends Handler {
         public static final int MSG_LOAD_CAL = 1;
         private AsyncTask<Void,Void,List<WireEvent>> loaderTask;
-        private Context context;
+
+        // using a weak-reference to the context rather than holding the context itself,
+        // per http://www.androiddesignpatterns.com/2013/01/inner-class-handler-memory-leak.html
+        private WeakReference<Context> contextRef;
         private CalendarFetcher fetcher;
 
         public MyHandler(Context context, CalendarFetcher fetcher) {
-            this.context = context;
+            this.contextRef = new WeakReference<>(context);
             this.fetcher = fetcher;
         }
 
@@ -277,6 +288,12 @@ public class CalendarFetcher {
 
         @Override
         public void handleMessage(Message message) {
+            Context context = contextRef.get();
+            if(context == null) {
+                Log.e(TAG, "handleMessage: no available context, nothing to do");
+                return;
+            }
+
             switch (message.what) {
                 case MSG_LOAD_CAL:
                     cancelLoaderTask();

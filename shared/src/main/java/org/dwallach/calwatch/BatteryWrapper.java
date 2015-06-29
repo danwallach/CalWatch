@@ -18,6 +18,12 @@ import android.util.Log;
 public class BatteryWrapper {
     private static final String TAG = "BatteryWrapper";
 
+    // yes, we're holding a context live, and that's generally considered a bad thing, but the
+    // BatteryWrapper is only held alive by the activity. If it goes away, so does the context,
+    // so no leakage issues here to worry about. The logic in init() that tries to deal with
+    // this might be unnecessarily redundant, but it's paranoia / defensive engineering based on
+    // ancient history, where it seemed like init() got called more than once.
+
     private Context context;
     private boolean isCharging;
     private float batteryPct = 1.0f;

@@ -39,16 +39,6 @@ public class MyViewAnim extends View implements Observer {
         init(context);
     }
 
-    /**
-     * Update rate in milliseconds for NON-interactive mode. We update once every 12 seconds
-     * to advance the minute hand when we're not otherwise sweeping the second hand.
-     *
-     * The default of one update per minute is ugly so we'll do better.
-     */
-    private static final long INTERACTIVE_UPDATE_RATE_MS = TimeUnit.SECONDS.toMillis(12);
-
-    private static final int MSG_UPDATE_TIME = 0;
-
     private ClockFace clockFace;
     private ClockState clockState;
 
@@ -63,36 +53,9 @@ public class MyViewAnim extends View implements Observer {
             TimeWrapper.frameReport();
         else {
             TimeWrapper.frameReset();
-            updateTimer();
             invalidate();
         }
     }
-
-    /**
-     * Handler to tick once every 12 seconds.
-     * Used only if the second hand is turned off
-     * or in ambient mode so we get smooth minute-hand
-     * motion.
-     */
-    private final Handler mUpdateTimeHandler = new Handler() {
-        @Override
-        public void handleMessage(Message message) {
-            switch (message.what) {
-                case MSG_UPDATE_TIME:
-                    Log.v(TAG, "12-sec timer ping");
-
-                    invalidate();
-                    if (shouldTimerBeRunning()) {
-                        long timeMs = System.currentTimeMillis();
-                        long delayMs = INTERACTIVE_UPDATE_RATE_MS
-                                - (timeMs % INTERACTIVE_UPDATE_RATE_MS);
-                        Log.v(TAG, "setting next 12-sec timer ping, delay(" + delayMs/1000.0 + ")");
-                        mUpdateTimeHandler.sendEmptyMessageDelayed(MSG_UPDATE_TIME, delayMs);
-                    }
-                    break;
-            }
-        }
-    };
 
     private boolean shouldTimerBeRunning() {
         boolean timerNeeded = false;
@@ -114,20 +77,6 @@ public class MyViewAnim extends View implements Observer {
     }
 
     /**
-     * Starts the {@link #mUpdateTimeHandler} timer if it should be running and isn't currently
-     * or stops it if it shouldn't be running but currently is.
-     */
-    private void updateTimer() {
-        Log.d(TAG, "updateTimer");
-
-        mUpdateTimeHandler.removeMessages(MSG_UPDATE_TIME);
-        if (shouldTimerBeRunning()) {
-            Log.v(TAG, "updateTimer: setting ping");
-            mUpdateTimeHandler.sendEmptyMessage(MSG_UPDATE_TIME);
-        }
-    }
-
-    /**
      * Callback from ClockState if something changes, which means we'll need
      * to redraw.
      * @param observable
@@ -135,7 +84,6 @@ public class MyViewAnim extends View implements Observer {
      */
     @Override
     public void update(Observable observable, Object data) {
-        updateTimer();
         invalidate();
     }
 
@@ -202,7 +150,6 @@ public class MyViewAnim extends View implements Observer {
 
     public void kill(Context context) {
         Log.d(TAG, "kill");
-        mUpdateTimeHandler.removeMessages(MSG_UPDATE_TIME);
 
         if(calendarFetcher != null) {
             calendarFetcher.kill();

@@ -26,6 +26,11 @@ public class WearSender implements GoogleApiClient.ConnectionCallbacks, GoogleAp
     private static final String TAG = "WearSender";
     byte[] wireBytesToSend = null;
 
+    // yes, we're hanging onto a context here, as part the phone side of sending state to the watch,
+    // and yes, hanging onto contexts is frowned upon. However, this context is only held alive
+    // by virtue of the instance of WearSender, which is in turn only held alive by virtue of the
+    // WatchCalendarService. And that thing can and will be summarily killed by the system at any
+    // time, so this context won't leak.
     private Context context;
     private GoogleApiClient googleApiClient;
 
