@@ -80,6 +80,7 @@ public class WatchCalendarService extends Service implements Observer {
             @Override
             public void onCrashReceived(CrashInfo crashInfo) {
                 // Manage the crash
+                Log.e(TAG, "wear-side crash detected!", crashInfo.getThrowable());
                 CrashReport.getInstance(WatchCalendarService.this).reportToPlayStore(WatchCalendarService.this);
             }
         });
