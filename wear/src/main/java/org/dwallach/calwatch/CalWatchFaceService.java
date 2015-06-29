@@ -98,7 +98,7 @@ public class CalWatchFaceService extends CanvasWatchFaceService {
                     .setShowSystemUiTime(false)
                     .setStatusBarGravity(Gravity.CENTER)
                     .setHotwordIndicatorGravity(Gravity.CENTER_HORIZONTAL) // not particularly precise, but seems reasonable
-                    .setViewProtection(WatchFaceStyle.PROTECT_HOTWORD_INDICATOR | WatchFaceStyle.PROTECT_STATUS_BAR)
+                    .setViewProtectionMode(WatchFaceStyle.PROTECT_HOTWORD_INDICATOR | WatchFaceStyle.PROTECT_STATUS_BAR)
 
                     // the features below were added in Wear 5.1 (maybe 5.0?) and seem worth tweaking
                     .setPeekOpacityMode(WatchFaceStyle.PEEK_OPACITY_MODE_TRANSLUCENT)
