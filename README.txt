@@ -15,7 +15,7 @@ notes.txt -- ongoing work, notes, to-do items, etc.
      the correct resolutions; these downstream dependencies are all
      checked in, so unless you're changing the the icon, you don't
      need to rerun this csh script. Also note that you'll need the
-     netpbm package installed to run it.)
+     Imagemagick package installed to run it.)
 
 /logdumps -- logcat plus notes from the various times that CalWatch has blown up
 
