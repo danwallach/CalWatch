@@ -65,7 +65,7 @@ android {
 dependencies {
     compile fileTree(dir: 'libs', include: ['*.jar'])
     compile project(':shared')
-    compile 'com.google.android.support:wearable:1.1.+'
+    compile 'com.google.android.support:wearable:1.2.+'
     compile 'com.google.android.gms:play-services-wearable:7.5.0'
     compile 'fr.nicolaspomepuy.androidwearcrashreport:crashreport-wear:0.4@aar'
 }
