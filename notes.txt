@@ -27,6 +27,26 @@ Daydream?
     http://developer.android.com/reference/android/service/dreams/DreamService.html
     -- looks almost exactly the same as implementing an activity, or the watchface API
 
+Marshmallow permissions / updates
+    http://android-developers.blogspot.com/2015/11/api-23-sdk-now-available-for-android.html
+    http://developer.android.com/training/articles/wear-permissions.html
+
+    TODO tag phone->wear updates as "urgent" so they don't take forever to happen
+    TODO kill off the long-running service, doesn't need to start at boot time (on either platform)
+    TODO request permissions (phone)
+    TODO request permissions (wear)
+        TODO fake "Activity" on wear to launch the permission request
+    TODO UX to deal with "no calendar permission"
+        TODO "no calendar available icon"
+            http://www.flaticon.com/packs/calendar-icons
+        TODO capture presses on screen (interactive on wear!)
+    TODO watchface rendering with and without calendar data
+
+    Other stuff, while we're overhauling things:
+    TODO Heisenbug investigation: when starting on a freshly wiped phone, weird rendering artifacts (negative numbers?) but it goes away
+    TODO Change phone config panel to show three simultaneous watchfaces with picker rather than three text names
+    TODO Tweak hour indices to be a bit longer (maybe 2.5 - 3x the size of the minute indices)
+
 Refactoring / reengineering
     TODO significant code overlap between mobile/MyViewAnim and wear/CalWatchFaceService
     - but differences are significant enough that it's not going to be very easy to move to /shared
@@ -58,6 +78,10 @@ TODO reshape around peek card?
       - Option 2: move watch center up partly
 
 TODO update the slides
+    Now a standard lecture in Comp215, so some updates in there already, but should it change
+    from an "evolution of CalWatch" into a "how to code for Android" talk? Or not?
 
 Longer-term items
     TODO custom background images?
+    TODO Non-linear sweep seconds hand
+
