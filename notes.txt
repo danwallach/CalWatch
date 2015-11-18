@@ -47,6 +47,13 @@ Marshmallow permissions / updates
     TODO Change phone config panel to show three simultaneous watchfaces with picker rather than three text names
     TODO Tweak hour indices to be a bit longer (maybe 2.5 - 3x the size of the minute indices)
 
+    TODO Convert everything to Kotlin, because why not? Might as well use something newer and cleaner
+    https://kotlinlang.org/docs/tutorials/kotlin-android.html
+
+    TODO Adopt Wear Compatibility Library
+    https://github.com/googlesamples/android-WearCompanionLibrary
+    https://github.com/googlesamples/android-WclDemoSample
+
 Refactoring / reengineering
     TODO significant code overlap between mobile/MyViewAnim and wear/CalWatchFaceService
     - but differences are significant enough that it's not going to be very easy to move to /shared
