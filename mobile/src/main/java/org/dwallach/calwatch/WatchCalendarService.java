@@ -38,6 +38,7 @@ public class WatchCalendarService extends Service implements Observer {
 
     public WatchCalendarService() {
         super();
+        singletonService = this;
     }
 
 
@@ -125,6 +126,5 @@ public class WatchCalendarService extends Service implements Observer {
             Intent serviceIntent = new Intent(ctx, WatchCalendarService.class);
             ctx.startService(serviceIntent);
         }
-
     }
 }

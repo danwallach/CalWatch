@@ -29,7 +29,7 @@ public class PreferencesHelper {
         editor.putBoolean("showDayDate", clockState.getShowDayDate());
 
         if(!editor.commit())
-            Log.v(TAG, "savePreferences commit failed ?!");
+            Log.e(TAG, "savePreferences commit failed ?!");
     }
 
     public static void loadPreferences(Context context) {

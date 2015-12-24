@@ -177,7 +177,6 @@ public class PhoneActivity extends Activity implements Observer {
         dayDateSwitch.setOnClickListener(myListener);
 
         WatchCalendarService.kickStart(this);  // bring it up, if it's not already up
-
         PreferencesHelper.loadPreferences(this);
 
         onResume();
