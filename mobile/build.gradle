@@ -42,13 +42,13 @@ def getVersionName = { ->
 
 
 android {
-    compileSdkVersion 22
-    buildToolsVersion "22.0.1"
+    compileSdkVersion 23
+    buildToolsVersion "23.0.2"
 
     defaultConfig {
         applicationId "org.dwallach.calwatch"
         minSdkVersion 18      // Android 4.3, Jelly Bean, which is the minimum for the Android Wear app
-        targetSdkVersion 22   // Android 5.1, Lollipop, which is the current Android Wear system version
+        targetSdkVersion 23   // Android 6.0, Marshmallow, with the shiny new permission model
         versionCode getVersionCode()
         versionName getVersionName()
     }

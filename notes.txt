@@ -36,9 +36,10 @@ Marshmallow permissions / updates
     TODO request permissions (phone)
     TODO request permissions (wear)
         TODO fake "Activity" on wear to launch the permission request
+        https://github.com/googlesamples/android-RuntimePermissionsWear/blob/master/wear/src/main/java/com/example/android/wearable/runtimepermissions/RequestPermissionOnPhoneActivity.java
+        http://developer.android.com/samples/AgendaData/Application/src/com.example.android.wearable.agendadata/MainActivity.html
     TODO UX to deal with "no calendar permission"
         TODO "no calendar available icon"
-            http://www.flaticon.com/packs/calendar-icons
         TODO capture presses on screen (interactive on wear!)
     TODO watchface rendering with and without calendar data
 
