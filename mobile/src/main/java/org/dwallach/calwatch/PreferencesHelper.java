@@ -24,6 +24,7 @@ public class PreferencesHelper {
             return;
         }
 
+        editor.putInt("permissionRequests", CalendarPermission.getNumRequests());
         editor.putInt("faceMode", clockState.getFaceMode());
         editor.putBoolean("showSeconds", clockState.getShowSeconds());
         editor.putBoolean("showDayDate", clockState.getShowDayDate());
@@ -46,12 +47,14 @@ public class PreferencesHelper {
         int faceMode = prefs.getInt("faceMode", Constants.DefaultWatchFace); // ClockState.FACE_TOOL
         boolean showSeconds = prefs.getBoolean("showSeconds", Constants.DefaultShowSeconds);
         boolean showDayDate = prefs.getBoolean("showDayDate", Constants.DefaultShowDayDate);
+        int permissionRequests = prefs.getInt("permissionRequests", 0);
 
-        Log.v(TAG, "faceMode: " + faceMode + ", showSeconds: " + showSeconds + ", showDayDate: " + showDayDate);
+        Log.v(TAG, "faceMode: " + faceMode + ", showSeconds: " + showSeconds + ", showDayDate: " + showDayDate + ", permissionRequests: " + permissionRequests);
 
         clockState.setFaceMode(faceMode);
         clockState.setShowSeconds(showSeconds);
         clockState.setShowDayDate(showDayDate);
+        CalendarPermission.setNumRequests(permissionRequests);
 
         clockState.pingObservers(); // we only need to do this once, versus multiple times when done internally
     }

@@ -32,17 +32,12 @@ public class CalendarFetcher {
     private static final String TAG = "CalendarFetcher";
 
     private Uri contentUri;
-
-    // note, this particular context will only live as long as the instance of CalendarFetcher
-    // lives, and it is, in turn, kept alive only as long as the activity, so we don't have
-    // to worry about any leakage. The contexts that might live ever-so-slightly longer, in
-    // the handler / task, are held by weak-references, so we're safe.
-    private Context context;
+    private WeakReference<Context> contextRef;
 
     public CalendarFetcher(Context context, Uri contentUri, String authority) {
         this.contentUri = contentUri;
-        this.context = context;
-        this.loaderHandler = new MyHandler(context, this);
+        this.contextRef = new WeakReference<>(context);
+        this.loaderHandlerRef = new WeakReference<>(new MyHandler(context, this));
 
         // hook into watching the calendar (code borrowed from Google's calendar wear app)
         Log.v(TAG, "setting up intent receiver");
@@ -53,11 +48,26 @@ public class CalendarFetcher {
         isReceiverRegistered = true;
 
         // kick off initial loading of calendar state
-        loaderHandler.sendEmptyMessage(MyHandler.MSG_LOAD_CAL);
+        loaderHandlerRef.get().sendEmptyMessage(MyHandler.MSG_LOAD_CAL);
+    }
+
+    private Context getContext() {
+        Context context = contextRef.get();
+        if(context == null) {
+            Log.e(TAG, "no context available");
+        }
+
+        return context;
     }
 
     public void kill() {
         Log.v(TAG, "kill");
+
+        Context context = getContext();
+        if (context == null) return;
+
+        MyHandler loaderHandler = getMyHandler();
+        if(loaderHandler == null) return;
 
         if (isReceiverRegistered) {
             context.unregisterReceiver(broadcastReceiver);
@@ -66,6 +76,8 @@ public class CalendarFetcher {
 
         loaderHandler.cancelLoaderTask();
         loaderHandler.removeMessages(MyHandler.MSG_LOAD_CAL);
+
+        loaderHandlerRef.clear();
     }
 
     /**
@@ -73,14 +85,13 @@ public class CalendarFetcher {
      */
     public List<WireEvent> loadContent() {
         // local state which we'll eventually return
-        List<WireEvent> cr = new ArrayList<WireEvent>();
+        List<WireEvent> cr = new ArrayList<>();
+
+        Context context = getContext();
+        if (context == null) return null;
 
         // first, get the list of calendars
         Log.v(TAG, "starting to load content");
-        if (context == null) {
-            Log.e(TAG, "No query context!");
-            return null;
-        }
 
         TimeWrapper.update();
         long time = TimeWrapper.getGMTTime();
@@ -107,65 +118,74 @@ public class CalendarFetcher {
         };
 
         // now, get the list of events
-        long begin = System.currentTimeMillis();
+        try {
+            Uri.Builder builder = contentUri.buildUpon();
+            ContentUris.appendId(builder, queryStartMillis);
+            ContentUris.appendId(builder, queryEndMillis);
+            final Cursor iCursor = context.getContentResolver().query(builder.build(),
+                    instancesProjection, null, null, null);
 
-        Uri.Builder builder = contentUri.buildUpon();
-        ContentUris.appendId(builder, queryStartMillis);
-        ContentUris.appendId(builder, queryEndMillis);
-        final Cursor iCursor = context.getContentResolver().query(builder.build(),
-                instancesProjection, null, null, null);
 
+            // if it's null, which shouldn't ever happen, then we at least won't gratuitously fail here
+            if (iCursor != null) {
+                if (iCursor.moveToFirst()) {
+                    do {
+                        int i = 0;
 
-        // if it's null, which shouldn't ever happen, then we at least won't gratuitously fail here
-        if (iCursor != null) {
-            if (iCursor.moveToFirst()) {
-                do {
-                    int i = 0;
+                        long startTime = iCursor.getLong(i++);
+                        long endTime = iCursor.getLong(i++);
+                        i++; // long eventID = iCursor.getLong(i++);
+                        int displayColor = iCursor.getInt(i++);
+                        boolean allDay = (iCursor.getInt(i++) != 0);
+                        boolean visible = (iCursor.getInt(i) != 0);
 
-                    long startTime = iCursor.getLong(i++);
-                    long endTime = iCursor.getLong(i++);
-                    long eventID = iCursor.getLong(i++);
-                    int displayColor = iCursor.getInt(i++);
-                    boolean allDay = (iCursor.getInt(i++) != 0);
-                    boolean visible = (iCursor.getInt(i++) != 0);
+                        if (visible && !allDay)
+                            cr.add(new WireEvent(startTime, endTime, displayColor));
 
-                    if (visible && !allDay)
-                        cr.add(new WireEvent(startTime, endTime, displayColor));
+                    } while (iCursor.moveToNext());
+                    Log.v(TAG, "visible instances found: " + cr.size());
+                }
 
-                } while (iCursor.moveToNext());
-                Log.v(TAG, "visible instances found: " + cr.size());
+                // lifecycle cleanliness: important to close down when we're done
+                iCursor.close();
             }
 
-            // lifecycle cleanliness: important to close down when we're done
-            iCursor.close();
-        }
+
+            if (cr.size() > 1) {
+                // Primary sort: color, so events from the same calendar will become consecutive wedges
+
+                // Secondary sort: endTime, with objects ending earlier appearing first in the sort.
+                //   (goal: first fill in the outer ring of the display with smaller wedges; the big
+                //    ones will end late in the day, and will thus end up on the inside of the watchface)
+
+                // Third-priority sort: startTime, with objects starting later (smaller) appearing first in the sort.
 
 
-        if (cr.size() > 1) {
-            // Primary sort: color, so events from the same calendar will become consecutive wedges
+                Collections.sort(cr, new Comparator<WireEvent>() {
+                                         @Override
+                                         public int compare(WireEvent lhs, WireEvent rhs) {
+                        if (!lhs.displayColor.equals(rhs.displayColor))
+                            return lcompare(lhs.displayColor, rhs.displayColor);
 
-            // Secondary sort: endTime, with objects ending earlier appearing first in the sort.
-            //   (goal: first fill in the outer ring of the display with smaller wedges; the big
-            //    ones will end late in the day, and will thus end up on the inside of the watchface)
+                        if (!lhs.endTime.equals(rhs.endTime))
+                            return lcompare(lhs.endTime, rhs.endTime);
 
-            // Third-priority sort: startTime, with objects starting later (smaller) appearing first in the sort.
-
-
-            Collections.sort(cr, new Comparator<WireEvent>() {
-                @Override
-                public int compare(WireEvent lhs, WireEvent rhs) {
-                    if (lhs.displayColor != rhs.displayColor)
-                        return lcompare(lhs.displayColor, rhs.displayColor);
-
-                    if (lhs.endTime != rhs.endTime)
-                        return lcompare(lhs.endTime, rhs.endTime);
-
-                    return lcompare(rhs.startTime, lhs.startTime);
+                        return lcompare(rhs.startTime, lhs.startTime);
                 }
-            });
-        }
+                });
+            }
 
-        return cr;
+            return cr;
+        } catch (SecurityException e) {
+            // apparently we don't have permission for the calendar!
+            Log.e(TAG, "security exception while reading calendar!", e);
+            kill();
+            ClockState clockState = ClockState.getSingleton();
+            if(clockState != null)
+                clockState.setCalendarPermission(false);
+
+            return null;
+        }
     }
 
     // Arrgghh: java.util.Long.compare() isn't defined until API level 19 and we're trying
@@ -242,8 +262,16 @@ public class CalendarFetcher {
 
     // this will fire when it's time to (re)load the calendar, launching an asynchronous
     // task to do all the dirty work and eventually update ClockState
-    final MyHandler loaderHandler;
+    private final WeakReference<MyHandler> loaderHandlerRef;
     private boolean isReceiverRegistered;
+
+    private MyHandler getMyHandler() {
+        MyHandler handler = loaderHandlerRef.get();
+        if(handler == null) {
+            Log.e(TAG, "no handler available");
+        }
+        return handler;
+    }
 
     private BroadcastReceiver broadcastReceiver = new BroadcastReceiver() {
         @Override
@@ -260,6 +288,9 @@ public class CalendarFetcher {
                 // Solution? Screw it. Whatever we get, we don't care, we'll reload the calendar.
 
                 Log.v(TAG, "receiver: time to load new calendar data");
+                MyHandler loaderHandler = getMyHandler();
+                if(loaderHandler == null) return;
+
                 loaderHandler.cancelLoaderTask();
                 loaderHandler.sendEmptyMessage(MyHandler.MSG_LOAD_CAL);
             }

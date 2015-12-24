@@ -11,6 +11,8 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.res.Resources;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.PorterDuff;
@@ -105,6 +107,8 @@ public class MyViewAnim extends View implements Observer {
         if(clockFace == null) {
             clockFace = new ClockFace();
             clockFace.setSize(width, height);
+            Bitmap emptyCalendar = BitmapFactory.decodeResource(context.getResources(), R.drawable.empty_calendar);
+            clockFace.setMissingCalendarBitmap(emptyCalendar);
         }
 
         clockState = ClockState.getSingleton();

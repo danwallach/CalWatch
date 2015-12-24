@@ -27,6 +27,8 @@
 package org.dwallach.calwatch;
 
 import android.content.res.Resources;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.PorterDuff;
@@ -41,6 +43,7 @@ import android.view.Gravity;
 import android.view.SurfaceHolder;
 import android.view.WindowInsets;
 
+import java.lang.ref.WeakReference;
 import java.util.Observable;
 import java.util.Observer;
 
@@ -50,12 +53,19 @@ import java.util.Observer;
 public class CalWatchFaceService extends CanvasWatchFaceService {
     private static final String TAG = "CalWatchFaceService";
 
-    @Override
-    public Engine onCreateEngine() {
-        return new Engine();
+    private static WeakReference<Engine> engineRef;
+
+    public static Engine getEngine() {
+        return engineRef.get();
     }
 
-    private class Engine extends CanvasWatchFaceService.Engine implements Observer {
+    @Override
+    public Engine onCreateEngine() {
+        engineRef = new WeakReference<>(new Engine());
+        return engineRef.get();
+    }
+
+    public class Engine extends CanvasWatchFaceService.Engine implements Observer {
         private ClockFace clockFace;
         private ClockState clockState;
         private CalendarFetcher calendarFetcher;
@@ -73,6 +83,28 @@ public class CalWatchFaceService extends CanvasWatchFaceService {
             }
 
             return result;
+        }
+
+        public void calendarPermissionUpdate() {
+            initCalendarFetcher();
+        }
+
+        private void initCalendarFetcher() {
+            Log.v(TAG, "initCalendarFetcher");
+            if(calendarFetcher != null) {
+                calendarFetcher.kill();
+                calendarFetcher = null;
+            }
+
+            boolean permissionGiven = CalendarPermission.check(CalWatchFaceService.this);
+            if(!clockState.getCalendarPermission() && permissionGiven) {
+                Log.e(TAG, "we've got permission, but clockState is messed up");
+                clockState.setCalendarPermission(true);
+            }
+
+            // TODO finish this
+
+            calendarFetcher = new CalendarFetcher(CalWatchFaceService.this, WearableCalendarContract.Instances.CONTENT_URI, WearableCalendarContract.AUTHORITY);
         }
 
         /**
@@ -104,6 +136,9 @@ public class CalWatchFaceService extends CanvasWatchFaceService {
                     .setPeekOpacityMode(WatchFaceStyle.PEEK_OPACITY_MODE_TRANSLUCENT)
                     .setShowUnreadCountIndicator(true)
 
+                    // we need tap events for permission requests
+                    .setAcceptsTapEvents(true)
+
                     .build());
 
             XWatchfaceReceiver.pingExternalStopwatches(CalWatchFaceService.this);
@@ -115,18 +150,17 @@ public class CalWatchFaceService extends CanvasWatchFaceService {
                 Log.e(TAG, "no resources? not good");
             }
 
-            if(clockFace == null)
+            if(clockFace == null) {
                 clockFace = new ClockFace();
+                Bitmap emptyCalendar = BitmapFactory.decodeResource(CalWatchFaceService.this.getResources(), R.drawable.empty_calendar);
+                clockFace.setMissingCalendarBitmap(emptyCalendar);
+            }
 
             clockState = ClockState.getSingleton();
             clockState.addObserver(this); // callbacks if something changes
 
-            if(calendarFetcher != null)
-                calendarFetcher.kill();
+            initCalendarFetcher();
 
-            calendarFetcher = new CalendarFetcher(CalWatchFaceService.this, WearableCalendarContract.Instances.CONTENT_URI, WearableCalendarContract.AUTHORITY);
-
-            // start the background service, if it's not already running
             WearReceiverService.kickStart(CalWatchFaceService.this);
         }
 
@@ -210,6 +244,23 @@ public class CalWatchFaceService extends CanvasWatchFaceService {
             if (isVisible() && subSecondRefreshNeeded())
                 invalidate();
         }
+
+        @Override
+        public void onTapCommand(int tapType, int x, int y, long eventTime) {
+            switch(tapType) {
+                case TAP_TYPE_TOUCH:
+                    if(clockState != null && !clockState.getCalendarPermission())
+                        PermissionActivity.kickStart(CalWatchFaceService.this);
+                    break;
+                case TAP_TYPE_TOUCH_CANCEL:
+                    // user lifted their finger, "cancelling" the tap?
+                    break;
+                case TAP_TYPE_TAP:
+                    // user lifted their finger, I guess?
+                    break;
+            }
+        }
+
 
         @Override
         public void onDestroy() {

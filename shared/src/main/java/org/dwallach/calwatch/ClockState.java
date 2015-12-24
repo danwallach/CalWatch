@@ -8,9 +8,6 @@ package org.dwallach.calwatch;
 
 import android.util.Log;
 
-import org.dwallach.calwatch.WireEvent;
-import org.dwallach.calwatch.WireUpdate;
-
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
@@ -26,6 +23,7 @@ public class ClockState extends Observable {
     private int faceMode = Constants.DefaultWatchFace;
     private boolean showSeconds = Constants.DefaultShowSeconds;
     private boolean showDayDate = Constants.DefaultShowDayDate;
+
     private List<EventWrapper> eventList = null;
     private List<EventWrapper> visibleEventList = null;
     private int maxLevel = 0;
@@ -33,6 +31,7 @@ public class ClockState extends Observable {
     private static ClockState singleton = null;
 
     private boolean wireInitialized = false;
+    private boolean calendarPermission = false;
 
     /**
      * Query whether or not a wire update has arrived yet. If the result is false,
@@ -45,6 +44,13 @@ public class ClockState extends Observable {
         return wireInitialized;
     }
 
+    public void setCalendarPermission(boolean state) {
+        calendarPermission = state;
+    }
+
+    public boolean getCalendarPermission() {
+        return calendarPermission;
+    }
 
     // we don't want others constructing this
     private ClockState() { }
@@ -92,37 +98,17 @@ public class ClockState extends Observable {
     /**
      * Load the eventlist. This is meant to consume the output of the calendarFetcher,
      * which is in GMT time, *not* local time.
-     * @param eventList list of events (GMT time)
      */
-    public void setEventWrapperList(List<EventWrapper> eventList) {
-        this.eventList = eventList;
-        this.visibleEventList = null;
-        pingObservers();
-    }
-
     public void setWireEventList(List<WireEvent> wireEventList) {
         List<EventWrapper> results = new ArrayList<>();
 
         for (WireEvent wireEvent : wireEventList)
             results.add(new EventWrapper(wireEvent));
 
-        setEventWrapperList(results);
+        this.eventList = results;
+        this.visibleEventList = null;
+        pingObservers();
         Log.v(TAG, "new calendar event list, " + results.size() + " entries");
-    }
-
-    /**
-     * This fetches *every* event present in the ClockState (typically 24 hours worth),
-     * and does it *without* clipping to the visible watchface. These will be in GMT time.
-     */
-    public List<WireEvent> getWireEventList() {
-        List<WireEvent> output = new ArrayList<WireEvent>();
-
-        if(eventList == null) return null;
-
-        for(EventWrapper event: eventList)
-            output.add(event.getWireEvent());
-
-        return output;
     }
 
     private long lastClipTime = 0;
@@ -159,9 +145,10 @@ public class ClockState extends Observable {
 //                "), clipEnd: " + TimeWrapper.formatGMTTime(clipEndMillis) + " (" + clipEndMillis + ")");
 
         lastClipTime = localClipTime;
-        visibleEventList = new ArrayList<>();
 
         if(eventList != null) {
+            visibleEventList = new ArrayList<>();
+
             Log.v(TAG, "clipping " + eventList.size() + " raw events to fit the screen");
             for (EventWrapper eventWrapper : eventList) {
                 WireEvent e = eventWrapper.getWireEvent();
@@ -192,10 +179,13 @@ public class ClockState extends Observable {
 
                 visibleEventList.add((new EventWrapper(new WireEvent(startTime + gmtOffset, endTime + gmtOffset, e.displayColor))));
             }
+
+            if(visibleEventList.size() == 0)
+                visibleEventList = null; // sigh, no actual events
         }
 
         // now, we run off and do screen layout
-        if(eventList != null) {
+        if(visibleEventList != null) {
             // first, try the fancy constraint solver
             if(EventLayoutUniform.go(visibleEventList)) {
                 // yeah, we succeeded
@@ -205,12 +195,14 @@ public class ClockState extends Observable {
                 Log.v(TAG, "falling back to older greedy method");
                 this.maxLevel = EventLayout.go(visibleEventList);
             }
-        } else
-            this.maxLevel = 0;
 
-        EventLayout.sanityTest(visibleEventList, this.maxLevel, "After new event layout");
-        Log.v(TAG, "maxLevel for new events: " + this.maxLevel);
-        Log.v(TAG, "number of new events: " + visibleEventList.size());
+            EventLayout.sanityTest(visibleEventList, this.maxLevel, "After new event layout");
+            Log.v(TAG, "maxLevel for new events: " + this.maxLevel);
+            Log.v(TAG, "number of new events: " + visibleEventList.size());
+        } else {
+            Log.v(TAG, "no events visible!");
+            this.maxLevel = 0;
+        }
 
 //        debugDump();
     }

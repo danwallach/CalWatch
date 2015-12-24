@@ -124,6 +124,7 @@ public class PhoneActivity extends Activity implements Observer {
         setContentView(R.layout.activity_phone);
     }
 
+    @Override
     protected void onPause() {
         super.onPause();
         Log.v(TAG, "Pause!");
@@ -146,6 +147,7 @@ public class PhoneActivity extends Activity implements Observer {
         }
     }
 
+    @Override
     protected void onStart() {
         super.onStart();
         Log.v(TAG, "Start!");
@@ -183,6 +185,7 @@ public class PhoneActivity extends Activity implements Observer {
         Log.v(TAG, "activity setup complete");
     }
 
+    @Override
     protected void onResume() {
         super.onResume();
         Log.v(TAG, "Resume!");
