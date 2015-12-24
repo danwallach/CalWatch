@@ -9,14 +9,10 @@
 
 # Add any project specific keep options here:
 
--keep public class org.dwallach.calwatch.CalWatchFaceService
--keep public class org.dwallach.calwatch.CalWatchFaceService.Engine
--keep public class org.dwallach.calwatch.WearReceiverService
--keep public class org.dwallach.calwatch.XWatchfaceReceiver
--keep public class org.dwallach.calwatch.proto.**
+-keep public class org.dwallach.calwatch.**
 
--keep class com.squareup.wire.** { *; }
+# -keep class com.squareup.wire.** { *; }
 
--dontwarn okio.**
+# -dontwarn okio.**
 
 -dontobfuscate
