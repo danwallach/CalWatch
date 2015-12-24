@@ -1,6 +1,6 @@
 foreach dst (mobile wear)
     echo Destination: $dst
-    foreach src (icon.png empty-calendar.png)
+    foreach src (icon.png empty_calendar.png)
         echo -n $src
         convert $src -resize 400x400 ../$dst/src/main/res/drawable/$src:r_400.png
         echo -n .
