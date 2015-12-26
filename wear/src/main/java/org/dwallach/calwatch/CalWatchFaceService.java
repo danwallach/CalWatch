@@ -98,11 +98,24 @@ public class CalWatchFaceService extends CanvasWatchFaceService {
 
             boolean permissionGiven = CalendarPermission.check(CalWatchFaceService.this);
             if(!clockState.getCalendarPermission() && permissionGiven) {
-                Log.e(TAG, "we've got permission, but clockState is messed up");
+                // Hypothetically this isn't necessary, because it's handled in CalendarPermission.handleResult.
+                // Nonetheless, paranoia.
+                Log.e(TAG, "we've got permission, need to update the clockState");
                 clockState.setCalendarPermission(true);
             }
 
-            // TODO finish this
+            if(!permissionGiven) {
+                // If this succeeds, then it will call calendarPermissionUpdate, which will *recursively*
+                // call back to initCalendarFetcher(). That's why we're returning right after this.
+
+                // The "firstTimeOnly" bit here is what keeps this from going into infinite recursion.
+                // We'll only launch the activity in this instance if we've never asked the user before.
+
+                // The onTap handler will ask, no matter what, if we don't have permission.
+
+                PermissionActivity.kickStart(CalWatchFaceService.this, true);
+                return;
+            }
 
             calendarFetcher = new CalendarFetcher(CalWatchFaceService.this, WearableCalendarContract.Instances.CONTENT_URI, WearableCalendarContract.AUTHORITY);
         }
@@ -250,7 +263,7 @@ public class CalWatchFaceService extends CanvasWatchFaceService {
             switch(tapType) {
                 case TAP_TYPE_TOUCH:
                     if(clockState != null && !clockState.getCalendarPermission())
-                        PermissionActivity.kickStart(CalWatchFaceService.this);
+                        PermissionActivity.kickStart(CalWatchFaceService.this, false);
                     break;
                 case TAP_TYPE_TOUCH_CANCEL:
                     // user lifted their finger, "cancelling" the tap?
