@@ -31,17 +31,17 @@ Marshmallow permissions / updates
     http://android-developers.blogspot.com/2015/11/api-23-sdk-now-available-for-android.html
     http://developer.android.com/training/articles/wear-permissions.html
 
-    TODO tag phone->wear updates as "urgent" so they don't take forever to happen
+    TODO tag phone->wear updates as "urgent" so they don't take forever to happen (WRITTEN; VERIFICATION NEEDED)
     TODO kill off the long-running service, doesn't need to start at boot time (on either platform)
-    TODO request permissions (phone)
-    TODO request permissions (wear)
-        TODO fake "Activity" on wear to launch the permission request
+    TODO request permissions (phone) (WRITTEN; VERIFICATION NEEDED)
+    TODO request permissions (wear) (WRITTEN; VERIFICATION NEEDED)
+        TODO fake "Activity" on wear to launch the permission request (WRITTEN; VERIFICATION NEEDED)
         https://github.com/googlesamples/android-RuntimePermissionsWear/blob/master/wear/src/main/java/com/example/android/wearable/runtimepermissions/RequestPermissionOnPhoneActivity.java
         http://developer.android.com/samples/AgendaData/Application/src/com.example.android.wearable.agendadata/MainActivity.html
-    TODO UX to deal with "no calendar permission"
-        TODO "no calendar available icon"
-        TODO capture presses on screen (interactive on wear!)
-    TODO watchface rendering with and without calendar data
+    TODO UX to deal with "no calendar permission" (WRITTEN; VERIFICATION NEEDED)
+        TODO "no calendar available icon" (WRITTEN; VERIFICATION NEEDED)
+        TODO capture presses on screen (interactive on wear!) (WRITTEN; VERIFICATION NEEDED)
+    TODO watchface rendering with and without calendar data (WRITTEN; VERIFICATION NEEDED)
 
     Other stuff, while we're overhauling things:
     TODO Heisenbug investigation: when starting on a freshly wiped phone, weird rendering artifacts (negative numbers?) but it goes away
