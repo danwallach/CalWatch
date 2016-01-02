@@ -95,13 +95,13 @@ public class ClVariable extends ClAbstractVariable
   public Object getAttachedObject()
     { return _attachedObject; }
 
-  public static void setVarMap(Hashtable map)
+  public static void setVarMap(Map<String,ClVariable> map)
   { _ourVarMap = map; }
 
-  public static Hashtable getVarMap()
+  public static Map<String,ClVariable> getVarMap()
   { return _ourVarMap; }
 
-  private static Hashtable _ourVarMap;
+  private static Map<String,ClVariable> _ourVarMap;
 
   private double _value;
 

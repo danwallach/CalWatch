@@ -470,7 +470,7 @@ public class ClTests extends CL {
       String s;
       FileReader in = new FileReader("randoms.txt");
       BufferedReader reader = new BufferedReader(in);
-      vRandom = new Vector(20001);
+      vRandom = new Vector<>(20001);
       // skip over comment
       reader.readLine();
       // skip over number of randoms
@@ -808,6 +808,6 @@ public class ClTests extends CL {
 
   static private int iRandom = 0;
   static private int cRandom = 0;
-  static private Vector vRandom;
+  static private Vector<Double> vRandom;
   static private Random RND;
 }
