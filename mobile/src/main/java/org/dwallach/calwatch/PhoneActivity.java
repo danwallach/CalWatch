@@ -6,14 +6,8 @@
  */
 package org.dwallach.calwatch;
 import android.app.Activity;
-import android.app.AlarmManager;
-import android.app.PendingIntent;
-import android.content.BroadcastReceiver;
-import android.content.Context;
-import android.content.Intent;
-import android.content.IntentFilter;
-import android.content.SharedPreferences;
 import android.os.Bundle;
+import android.support.annotation.NonNull;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -21,6 +15,7 @@ import android.view.View;
 import android.widget.RadioButton;
 import android.widget.Switch;
 
+import java.lang.ref.WeakReference;
 import java.util.Observable;
 import java.util.Observer;
 
@@ -35,6 +30,8 @@ public class PhoneActivity extends Activity implements Observer {
     private ClockState clockState;
     private boolean disableUICallbacks = false;
 
+    private static WeakReference<Activity> activityRef;
+
     private ClockState getClockState() {
         if(clockState == null) {
             Log.v(TAG, "reconnecting clock state");
@@ -46,6 +43,7 @@ public class PhoneActivity extends Activity implements Observer {
 
     public PhoneActivity() {
         super();
+        activityRef = new WeakReference<Activity>(this);
     }
 
     //
@@ -181,6 +179,8 @@ public class PhoneActivity extends Activity implements Observer {
         WatchCalendarService.kickStart(this);  // bring it up, if it's not already up
         PreferencesHelper.loadPreferences(this);
 
+        CalendarPermission.requestFirstTimeOnly(this); // ask for calendar permissions, but only if we haven't asked yet
+
         onResume();
         Log.v(TAG, "activity setup complete");
     }
@@ -219,5 +219,34 @@ public class PhoneActivity extends Activity implements Observer {
         Log.v(TAG, "Noticed a change in the clock state; saving preferences");
         setFaceModeUI(getClockState().getFaceMode(), getClockState().getShowSeconds(), getClockState().getShowDayDate());
         PreferencesHelper.savePreferences(this);
+    }
+
+    @Override
+    public void onRequestPermissionsResult(int requestCode, @NonNull String permissions[], @NonNull int[] grantResults) {
+        Log.v(TAG, "onRequestPermissionsResult");
+        CalendarPermission.handleResult(requestCode, permissions, grantResults);
+//        CalWatchFaceService.Engine engine = CalWatchFaceService.getEngine();
+//        if(engine != null) {
+//            engine.calendarPermissionUpdate();
+//        }
+        Log.v(TAG, "finishing PermissionActivity");
+    }
+
+    /**
+     * This will be called when the user clicks on the watchface, presumably because they want
+     * us to request calendar permissions.
+     */
+    static void watchfaceClick() {
+        if(activityRef == null)
+            return; // can't do anything without an activity
+
+        Activity activity = activityRef.get();
+        if(activity == null)
+            return; // can't do anything with an activity
+
+        ClockState clockState = ClockState.getSingleton();
+        if(clockState != null && !clockState.getCalendarPermission()) {
+            CalendarPermission.request(activity);
+        }
     }
 }

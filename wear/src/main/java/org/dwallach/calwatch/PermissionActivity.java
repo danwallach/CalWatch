@@ -3,7 +3,6 @@ package org.dwallach.calwatch;
 import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
-import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.util.Log;
 
@@ -12,7 +11,6 @@ import android.util.Log;
  */
 public class PermissionActivity extends Activity {
     private static final String TAG = "PermissionActivity";
-    private boolean firstTimeOnly = true;
 
     @Override
     public void onRequestPermissionsResult(int requestCode, @NonNull String permissions[], @NonNull int[] grantResults) {
@@ -30,7 +28,7 @@ public class PermissionActivity extends Activity {
     public void onStart() {
         super.onStart();
 
-        firstTimeOnly = getIntent().getExtras().getBoolean("firstTimeOnly");
+        boolean firstTimeOnly = getIntent().getExtras().getBoolean("firstTimeOnly");
 
         Log.v(TAG, "starting PermissionActivity, firstTimeOnly(" + firstTimeOnly + ")");
 

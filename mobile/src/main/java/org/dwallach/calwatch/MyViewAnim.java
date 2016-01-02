@@ -23,6 +23,7 @@ import android.os.PowerManager;
 import android.provider.CalendarContract;
 import android.util.AttributeSet;
 import android.util.Log;
+import android.view.MotionEvent;
 import android.view.SurfaceView;
 import android.view.View;
 
@@ -175,7 +176,7 @@ public class MyViewAnim extends View implements Observer {
     private long drawCounter = 0;
 
     @Override
-    protected void onSizeChanged (int w, int h, int oldw, int oldh) {
+    protected void onSizeChanged(int w, int h, int oldw, int oldh) {
         super.onSizeChanged(w, h, oldw, oldh);
 
         Log.v(TAG, "onSizeChanged: " + w + ", " + h);
@@ -215,6 +216,20 @@ public class MyViewAnim extends View implements Observer {
             invalidate();
     }
 
-}
+    @Override
+    public boolean onTouchEvent(MotionEvent event) {
+        if(event.getAction() == MotionEvent.ACTION_UP)
+            performClick();
 
+        return true;
+    }
+
+    @Override
+    public boolean performClick() {
+        super.performClick();
+        PhoneActivity.watchfaceClick();
+
+        return true;
+    }
+}
 
