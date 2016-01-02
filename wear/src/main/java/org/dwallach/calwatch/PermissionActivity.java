@@ -16,11 +16,14 @@ public class PermissionActivity extends Activity {
 
     @Override
     public void onRequestPermissionsResult(int requestCode, @NonNull String permissions[], @NonNull int[] grantResults) {
+        Log.v(TAG, "onRequestPermissionsResult");
         CalendarPermission.handleResult(requestCode, permissions, grantResults);
         CalWatchFaceService.Engine engine = CalWatchFaceService.getEngine();
         if(engine != null) {
             engine.calendarPermissionUpdate();
         }
+        Log.v(TAG, "finishing PermissionActivity");
+        this.finish(); // we're done, so this shuts everything down
     }
 
     @Override
@@ -29,15 +32,13 @@ public class PermissionActivity extends Activity {
 
         firstTimeOnly = getIntent().getExtras().getBoolean("firstTimeOnly");
 
-        Log.v(TAG, "starting PermissionActivity");
+        Log.v(TAG, "starting PermissionActivity, firstTimeOnly(" + firstTimeOnly + ")");
 
         if(firstTimeOnly) {
             CalendarPermission.requestFirstTimeOnly(this);
         } else {
             CalendarPermission.request(this);
         }
-        Log.v(TAG, "finishing PermissionActivity");
-        this.finish(); // we're done, so this shuts everything down
     }
 
     /**

@@ -105,7 +105,7 @@ public class CalWatchFaceService extends CanvasWatchFaceService {
             }
 
             if(!permissionGiven) {
-                // If this succeeds, then it will call calendarPermissionUpdate, which will *recursively*
+                // If this succeeds, then it will call calendarPermissionUpdate, which will asynchronously
                 // call back to initCalendarFetcher(). That's why we're returning right after this.
 
                 // The "firstTimeOnly" bit here is what keeps this from going into infinite recursion.
@@ -262,6 +262,10 @@ public class CalWatchFaceService extends CanvasWatchFaceService {
         public void onTapCommand(int tapType, int x, int y, long eventTime) {
             switch(tapType) {
                 case TAP_TYPE_TOUCH:
+                    // if we don't have calendar permission, then that means we're interpreting
+                    // watchface taps as permission requests.
+
+                    // TODO be more specific about the x,y coordinates, like check if they're on the right side of the screen
                     if(clockState != null && !clockState.getCalendarPermission())
                         PermissionActivity.kickStart(CalWatchFaceService.this, false);
                     break;

@@ -64,18 +64,18 @@ public class CalendarFetcher {
         Log.v(TAG, "kill");
 
         Context context = getContext();
-        if (context == null) return;
 
-        MyHandler loaderHandler = getMyHandler();
-        if(loaderHandler == null) return;
-
-        if (isReceiverRegistered) {
+        if (isReceiverRegistered && context != null) {
             context.unregisterReceiver(broadcastReceiver);
             isReceiverRegistered = false;
         }
 
-        loaderHandler.cancelLoaderTask();
-        loaderHandler.removeMessages(MyHandler.MSG_LOAD_CAL);
+        MyHandler loaderHandler = getMyHandler();
+
+        if(loaderHandler != null) {
+            loaderHandler.cancelLoaderTask();
+            loaderHandler.removeMessages(MyHandler.MSG_LOAD_CAL);
+        }
 
         loaderHandlerRef.clear();
     }
