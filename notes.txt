@@ -48,12 +48,10 @@ Marshmallow permissions / updates
     TODO Change phone config panel to show three simultaneous watchfaces with picker rather than three text names
     TODO Tweak hour indices to be a bit longer (maybe 2.5 - 3x the size of the minute indices)
 
-    TODO Convert everything to Kotlin, because why not? Might as well use something newer and cleaner
-    https://kotlinlang.org/docs/tutorials/kotlin-android.html
-
     TODO Adopt Wear Compatibility Library
     https://github.com/googlesamples/android-WearCompanionLibrary
     https://github.com/googlesamples/android-WclDemoSample
+    - Unclear if there's any real benefit for CalWatch in these libraries
 
 Refactoring / reengineering
     TODO significant code overlap between mobile/MyViewAnim and wear/CalWatchFaceService
@@ -61,6 +59,11 @@ Refactoring / reengineering
 
     TODO fix Gradle, presently requiring me to have the git version code in three places to work right
     (I tried putting it just in settings.gradle or the top-level build.gradle and this didn't work)
+
+    TODO Convert everything to Kotlin, because why not? Might as well use something newer and cleaner
+    https://kotlinlang.org/docs/tutorials/kotlin-android.html
+
+    TODO Rip out Observer/Listener logic (getting untenable) and redo with functional-reactive style
 
 Right-to-left support
     TODO detect when we're in RTL mode
@@ -92,4 +95,4 @@ TODO update the slides
 Longer-term items
     TODO custom background images?
     TODO Non-linear sweep seconds hand
-
+    - Go with a lookup table, linearly interpolate between positions?

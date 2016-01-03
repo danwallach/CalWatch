@@ -29,7 +29,9 @@ notes.txt -- ongoing work, notes, to-do items, etc.
 
         - The code here is essentially unchanged from the original
           (http://sourceforge.net/projects/cassowary/), but with
-          tweaks to compile under newer Java versions
+          tweaks to compile under newer Java versions, including
+          updates to use the newer parametric HashMap versus the
+          older non-parametric Hashtable.
 
         org.dwallach.calwatch/ -- CalWatch Java files
 
