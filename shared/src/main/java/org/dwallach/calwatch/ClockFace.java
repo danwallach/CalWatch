@@ -562,6 +562,25 @@ public class ClockFace implements Observer {
         }
     }
 
+    private static int NON_LINEAR_TABLE_SIZE = 200;
+    private static double[] NON_LINEAR_TABLE = new double[NON_LINEAR_TABLE_SIZE];
+
+    static {
+        // TODO: initialize NON_LINEAR_TABLE in a non-linear fashion!
+        for(int i=0; i<NON_LINEAR_TABLE_SIZE; i++)
+            NON_LINEAR_TABLE[i] = (double) i / (double) NON_LINEAR_TABLE_SIZE;
+    }
+
+    /**
+     * This takes a value, in seconds, and makes the motion of the seconds-hand be *non-linear*
+     * according to the pre-computed lookup table. The goal is to have the seconds-hand have a nice
+     * snap to it, not unlike what you see in European train station clocks.
+     */
+    private static double nonLinearSeconds(double linearSeconds) {
+        // TODO: the table lookup/interpolation thing
+        return linearSeconds;
+    }
+
     private void drawHands(Canvas canvas) {
         long time = TimeWrapper.getLocalTime();
 
