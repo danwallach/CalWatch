@@ -164,7 +164,7 @@ public class ClockFace implements Observer {
         // draw the calendar wedges first, at the bottom of the stack, then the face indices
         if(clockState.getCalendarPermission()) {
             drawCalendar(canvas);
-        } else if(missingCalendarBitmap != null && missingCalendarRect != null) {
+        } else if(missingCalendarBitmap != null && missingCalendarRect != null && !ambientMode) {
             canvas.drawBitmap(missingCalendarBitmap, null, missingCalendarRect, null);
         }
 
