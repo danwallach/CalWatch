@@ -46,6 +46,7 @@ public class PermissionActivity extends Activity {
         Log.v(TAG, "kickStart");
 
         Intent activityIntent = new Intent(context, PermissionActivity.class);
+        activityIntent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
         activityIntent.putExtra("firstTimeOnly", firstTimeOnly);
         context.startActivity(activityIntent);
     }

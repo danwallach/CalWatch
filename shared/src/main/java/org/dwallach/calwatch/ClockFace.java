@@ -7,9 +7,7 @@
 package org.dwallach.calwatch;
 
 import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
-import android.graphics.Color;
 import android.graphics.Paint;
 import android.graphics.Path;
 import android.graphics.Rect;
@@ -61,7 +59,7 @@ public class ClockFace implements Observer {
 
     private ClockState clockState;
     private Rect peekCardRect;
-    private Rect missingCalendarRect;
+    private RectF missingCalendarRectF;
     private Bitmap missingCalendarBitmap;
 
     // dealing with the "flat tire" a.k.a. "chin" of Moto 360 and any other watches that pull the same trick
@@ -129,29 +127,37 @@ public class ClockFace implements Observer {
      */
     public void setMissingCalendarBitmap(Bitmap bitmap) {
         final float minRadius = 0.3f;
-        final float maxRadius = 0.8f;
+        final float maxRadius = 0.9f;
 
         missingCalendarBitmap = bitmap;
+
 
         int height = bitmap.getHeight();
         int width = bitmap.getWidth();
         float aspect = (float) height / (float) width;
+
         float minX = clockX(15,minRadius);
         float maxX = clockX(15,maxRadius);
-        float dY = ((maxX - minX) * aspect) / 2.0f;
-        float topY = clockY(0, dY);
-        float bottomY = clockY(30, dY);
+        float dY = 0.5f * (maxRadius - minRadius) * aspect;
 
-        missingCalendarRect = new Rect(
-                (int) bottomY, // bottom
-                (int) minX, // left
-                (int) maxX, // right
-                (int) topY // top
+        Log.v(TAG, String.format("missing calendar bitmap size: %d,%d, aspect: %.1f, dY: %.1f, (cy: %d, radius: %d)", width, height, aspect, dY, cy, radius));
+
+        float topY = clockY(0, dY)+10f;
+        float bottomY = clockY(30, dY)+10f;
+
+        missingCalendarRectF = new RectF(
+                minX, // left
+                topY, // top
+                maxX, // right
+                bottomY // bottom
         );
-//                clockX(45,radius), // left
-//                clockY(0,radius),  // top
-//                clockX(15,radius), // right
-//                clockY(30,radius));// bottom
+
+        Log.v(TAG, String.format("missing calendar rect: left,top,right,bottom: (%.1f,%.1f,%.1f,%.1f)",
+                minX, // left
+                topY, // top
+                maxX, // right
+                bottomY // bottom
+        ));
     }
 
     /*
@@ -161,12 +167,10 @@ public class ClockFace implements Observer {
     public void drawEverything(Canvas canvas) {
         TimeWrapper.frameStart();
 
-        // draw the calendar wedges first, at the bottom of the stack, then the face indices
-        if(clockState.getCalendarPermission()) {
-            drawCalendar(canvas);
-        } else if(missingCalendarBitmap != null && missingCalendarRect != null && !ambientMode) {
-            canvas.drawBitmap(missingCalendarBitmap, null, missingCalendarRect, null);
-        }
+        // the calendar goes on the very bottom and everything else stacks above
+
+        drawCalendar(canvas);
+
 
         drawFace(canvas);
 
@@ -573,11 +577,13 @@ public class ClockFace implements Observer {
         // get closer to the next second.
         for(int i=0; i<NON_LINEAR_TABLE_SIZE; i++) {
             // TODO: test the next two lines to make sure everything works
-//            double thetaMinusPi2 = i * Math.PI / (double) NON_LINEAR_TABLE_SIZE - Math.PI/2.0;
-//            NON_LINEAR_TABLE[i] = Math.pow((1.0 + Math.sin(thetaMinusPi2))/2.0, 7.0);
+            double thetaMinusPi2 = i * Math.PI / (double) NON_LINEAR_TABLE_SIZE - Math.PI/2.0;
 
-            // TODO: test the next lines to make sure that we get expected linear behavior
-            NON_LINEAR_TABLE[i] = (double) i / (double) NON_LINEAR_TABLE_SIZE;
+            // two components here: the non-linear part (the first line) and then a linear
+            // part (the line below). This make sure we still have some motion. The second
+            // hand never entirely stops.
+            NON_LINEAR_TABLE[i] = 0.5 * Math.pow((1.0 + Math.sin(thetaMinusPi2))/2.0, 8.0)
+                    + 0.5 * ((double) i / (double) NON_LINEAR_TABLE_SIZE);
         }
     }
 
@@ -651,6 +657,16 @@ public class ClockFace implements Observer {
 
     private void drawCalendar(Canvas canvas) {
         calendarTicker++;
+
+        // if we don't have permission to see the calendar, then we'll let the user know
+        if(!clockState.getCalendarPermission() && missingCalendarBitmap != null && missingCalendarRectF != null && !ambientMode) {
+            // first make sure we can draw a yellow rectangle where we want the icon to go
+//            canvas.drawRect(missingCalendarRectF, PaintCan.get(PaintCan.styleNormal, PaintCan.colorBatteryLow));
+
+            canvas.drawBitmap(missingCalendarBitmap, null, missingCalendarRectF, null);
+            return;
+        }
+
 
         // this line represents a big change; we're still an observer of the clock state, but now
         // we're also polling it; it promises to support this polling efficiently, and in return,

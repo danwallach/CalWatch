@@ -9,29 +9,20 @@ package org.dwallach.calwatch;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
-import android.net.Uri;
-import android.os.AsyncTask;
 import android.os.Bundle;
 import android.util.Base64;
 import android.util.Log;
 
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.api.GoogleApiClient;
-import com.google.android.gms.common.data.FreezableUtils;
 import com.google.android.gms.wearable.DataEvent;
 import com.google.android.gms.wearable.DataEventBuffer;
 import com.google.android.gms.wearable.DataItem;
 import com.google.android.gms.wearable.DataMap;
 import com.google.android.gms.wearable.DataMapItem;
-import com.google.android.gms.wearable.MessageApi;
-import com.google.android.gms.wearable.MessageEvent;
 import com.google.android.gms.wearable.Node;
-import com.google.android.gms.wearable.NodeApi;
 import com.google.android.gms.wearable.Wearable;
 import com.google.android.gms.wearable.WearableListenerService;
-
-import java.util.List;
-import java.util.concurrent.TimeUnit;
 
 import fr.nicolaspomepuy.androidwearcrashreport.wear.CrashReporter;
 

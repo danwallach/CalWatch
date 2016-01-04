@@ -10,6 +10,7 @@
 # Add any project specific keep options here:
 
 -keep public class org.dwallach.calwatch.**
+-keep public class fr.nicholaspomepuy.**
 
 # -keep class com.squareup.wire.** { *; }
 

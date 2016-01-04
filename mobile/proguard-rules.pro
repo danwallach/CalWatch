@@ -9,17 +9,16 @@
 
 # Add any project specific keep options here:
 
--keep public class org.dwallach.calwatch.PhoneActivity
--keep public class org.dwallach.calwatch.WakeupReceiver
--keep public class org.dwallach.calwatch.WatchCalendarService
--keep public class org.dwallach.calwatch.XWatchfaceReceiver
--keep public class org.dwallach.calwatch.proto.*
+-keep public class org.dwallach.calwatch.**
+-keep public class fr.nicholaspomepuy.**
 
 # -keep class com.squareup.wire.** { *; }
 
--keep public class android.support.**
--keep public class android.app.**
--keep public class android.R**
+# -keep public class android.support.**
+# -keep public class android.app.**
+# -keep public class android.R**
+
+# -keepattributes Signature
 
 # -dontwarn okio.**
 

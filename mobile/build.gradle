@@ -56,13 +56,13 @@ android {
         sourceCompatibility JavaVersion.VERSION_1_7
         targetCompatibility JavaVersion.VERSION_1_7
     }
-    buildTypes {
-        release {
-            proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
-            minifyEnabled true
-            shrinkResources true
-        }
-    }
+//    buildTypes {
+//        release {
+//            proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
+//            minifyEnabled true
+//            shrinkResources true
+//        }
+//    }
 }
 
 // http://stackoverflow.com/questions/18689365/how-to-add-xlintunchecked-to-my-android-gradle-based-project
@@ -80,6 +80,7 @@ dependencies {
     wearApp project(':wear')     // says that this project has both the mobile and wear components
 
     compile 'com.google.android.gms:play-services-wearable:8.4.0'
-    compile 'com.android.support:support-v4:23.1.1'
-    compile 'fr.nicolaspomepuy.androidwearcrashreport:crashreport-mobile:0.4@aar'
+//    compile 'com.android.support:support-v4:23.1.1'
+    compile 'com.android.support:support-v13:23.1.1'
+    compile 'fr.nicolaspomepuy.androidwearcrashreport:crashreport-mobile:0.6@aar'
 }
