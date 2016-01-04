@@ -463,8 +463,8 @@ public class ClockFace implements Observer {
             for (int i = 0; i < 60; i += 5) {
                 if (i == 0) { // top of watch: special
                     if (localFaceMode != ClockState.FACE_NUMBERS) {
-                        drawRadialLine(p, strokeWidth, -0.4f, .8f, 1.0f, true, false);
-                        drawRadialLine(p, strokeWidth, 0.4f, .8f, 1.0f, true, false);
+                        drawRadialLine(p, strokeWidth, -0.4f, .75f, 1.0f, true, false);
+                        drawRadialLine(p, strokeWidth, 0.4f, .75f, 1.0f, true, false);
                     }
                 } else if (i == 45 && !ambientMode && showDayDate) { // 9 o'clock, don't extend into the inside
                     drawRadialLine(p, strokeWidth, i, 0.9f, 1.0f, false, false);
@@ -477,7 +477,7 @@ public class ClockFace implements Observer {
                         if (i == 30 && bottomHack)
                             drawRadialLine(p, strokeWidth, i, .9f, 1.0f, false, bottomHack);
                         else
-                            drawRadialLine(p, strokeWidth, i, .8f, 1.0f, false, bottomHack);
+                            drawRadialLine(p, strokeWidth, i, .75f, 1.0f, false, bottomHack);
                     }
                 }
             }
@@ -562,23 +562,36 @@ public class ClockFace implements Observer {
         }
     }
 
-    private static int NON_LINEAR_TABLE_SIZE = 200;
+    private static int NON_LINEAR_TABLE_SIZE = 1000;
     private static double[] NON_LINEAR_TABLE = new double[NON_LINEAR_TABLE_SIZE];
 
     static {
-        // TODO: initialize NON_LINEAR_TABLE in a non-linear fashion!
-        for(int i=0; i<NON_LINEAR_TABLE_SIZE; i++)
+        // This is where we initialize our non-linear second hand table.
+        // We're implementing y=[(1+sin(theta - pi/2))/2] ^ pow over x in [0,pi]
+        // Adjusting the power makes the second hand hang out closer to its
+        // starting position and then launch faster to hit the target when we
+        // get closer to the next second.
+        for(int i=0; i<NON_LINEAR_TABLE_SIZE; i++) {
+            // TODO: test the next two lines to make sure everything works
+//            double thetaMinusPi2 = i * Math.PI / (double) NON_LINEAR_TABLE_SIZE - Math.PI/2.0;
+//            NON_LINEAR_TABLE[i] = Math.pow((1.0 + Math.sin(thetaMinusPi2))/2.0, 7.0);
+
+            // TODO: test the next lines to make sure that we get expected linear behavior
             NON_LINEAR_TABLE[i] = (double) i / (double) NON_LINEAR_TABLE_SIZE;
+        }
     }
 
     /**
      * This takes a value, in seconds, and makes the motion of the seconds-hand be *non-linear*
      * according to the pre-computed lookup table. The goal is to have the seconds-hand have a nice
-     * snap to it, not unlike what you see in European train station clocks.
+     * snap to it, not unlike what you see in European train station clocks. Note that we're doing
+     * a performance vs. memory tradeoff here. Rather than interpolating on the table, we're just
+     * making the table bigger and clipping to the nearest table entry.
      */
     private static double nonLinearSeconds(double linearSeconds) {
-        // TODO: the table lookup/interpolation thing
-        return linearSeconds;
+        double secFloor = Math.floor(linearSeconds);
+        double secFrac = linearSeconds - secFloor;
+        return secFloor + NON_LINEAR_TABLE[(int) (secFrac * NON_LINEAR_TABLE_SIZE)];
     }
 
     private void drawHands(Canvas canvas) {
@@ -603,7 +616,7 @@ public class ClockFace implements Observer {
             // ugly details: we might run 10% or more away from our targets at 4Hz, making the second
             // hand miss the indices. Ugly. Thus, some hackery.
             if(clipSeconds) seconds = Math.floor(seconds * freqUpdate) / freqUpdate;
-            drawRadialLine(canvas, seconds, 0.1f, 0.95f, secondsColor, shadowColor);
+            drawRadialLine(canvas, nonLinearSeconds(seconds), 0.1f, 0.95f, secondsColor, shadowColor);
         }
     }
 

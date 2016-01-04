@@ -46,7 +46,7 @@ Marshmallow permissions / updates
     Other stuff, while we're overhauling things:
     TODO Heisenbug investigation: when starting on a freshly wiped phone, weird rendering artifacts (negative numbers?) but it goes away
     TODO Change phone config panel to show three simultaneous watchfaces with picker rather than three text names
-    TODO Tweak hour indices to be a bit longer (maybe 2.5 - 3x the size of the minute indices)
+    TODO Tweak hour indices to be a bit longer (maybe 2.5 - 3x the size of the minute indices) (TWEAKED; VERIFICATION NEEDED)
 
     TODO Adopt Wear Compatibility Library
     https://github.com/googlesamples/android-WearCompanionLibrary
@@ -94,5 +94,4 @@ TODO update the slides
 
 Longer-term items
     TODO custom background images?
-    TODO Non-linear sweep seconds hand
-    - Go with a lookup table, linearly interpolate between positions?
+    TODO Non-linear sweep seconds hand (WRITTEN; VERIFICATION NEEDED)
