@@ -126,14 +126,19 @@ public class ClockFace implements Observer {
      * Call this at initialization time to set up the icon for the missing calendar.
      */
     public void setMissingCalendarBitmap(Bitmap bitmap) {
-        final float minRadius = 0.3f;
-        final float maxRadius = 0.9f;
-
         missingCalendarBitmap = bitmap;
 
+        updateMissingCalendarRect();
+    }
 
-        int height = bitmap.getHeight();
-        int width = bitmap.getWidth();
+
+    private void updateMissingCalendarRect() {
+        final float minRadius = 0.2f;
+        final float maxRadius = 0.7f;
+
+        int height = missingCalendarBitmap.getHeight();
+        int width = missingCalendarBitmap.getWidth();
+
         float aspect = (float) height / (float) width;
 
         float minX = clockX(15,minRadius);
@@ -142,8 +147,8 @@ public class ClockFace implements Observer {
 
         Log.v(TAG, String.format("missing calendar bitmap size: %d,%d, aspect: %.1f, dY: %.1f, (cy: %d, radius: %d)", width, height, aspect, dY, cy, radius));
 
-        float topY = clockY(0, dY)+10f;
-        float bottomY = clockY(30, dY)+10f;
+        float topY = clockY(0, dY);
+        float bottomY = clockY(30, dY);
 
         missingCalendarRectF = new RectF(
                 minX, // left
@@ -963,6 +968,8 @@ public class ClockFace implements Observer {
         PaintCan.initPaintBucket(radius);
 
         computeFlatBottomCorners();
+
+        updateMissingCalendarRect();
 
         wipeCaches();
     }
