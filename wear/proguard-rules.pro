@@ -41,3 +41,8 @@
 
 -dontobfuscate
 -dontwarn android.support.**
+-dontnote **ILicensingService
+-keep class org.apache.http.** { *; }
+-dontwarn org.apache.http.**
+-keep class android.net.http.** { *; }
+-dontwarn android.net.http.**
