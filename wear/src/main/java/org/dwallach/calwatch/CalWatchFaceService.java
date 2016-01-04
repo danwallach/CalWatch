@@ -113,6 +113,7 @@ public class CalWatchFaceService extends CanvasWatchFaceService {
 
                 // The onTap handler will ask, no matter what, if we don't have permission.
 
+                Log.v(TAG, "no calendar permission given, launching first-time activity to ask");
                 PermissionActivity.kickStart(CalWatchFaceService.this, true);
                 return;
             }

@@ -28,15 +28,9 @@ public class PermissionActivity extends Activity {
     public void onStart() {
         super.onStart();
 
-        boolean firstTimeOnly = getIntent().getExtras().getBoolean("firstTimeOnly");
+        Log.v(TAG, "starting PermissionActivity");
 
-        Log.v(TAG, "starting PermissionActivity, firstTimeOnly(" + firstTimeOnly + ")");
-
-        if(firstTimeOnly) {
-            CalendarPermission.requestFirstTimeOnly(this);
-        } else {
-            CalendarPermission.request(this);
-        }
+        CalendarPermission.request(this);
     }
 
     /**
@@ -45,9 +39,10 @@ public class PermissionActivity extends Activity {
     public static void kickStart(Context context, boolean firstTimeOnly) {
         Log.v(TAG, "kickStart");
 
+        if(firstTimeOnly && CalendarPermission.getNumRequests() > 0) return; // don't bug the user!
+
         Intent activityIntent = new Intent(context, PermissionActivity.class);
         activityIntent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-        activityIntent.putExtra("firstTimeOnly", firstTimeOnly);
         context.startActivity(activityIntent);
     }
 }

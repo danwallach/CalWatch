@@ -39,7 +39,10 @@ public class CalendarPermission {
      * Check whether we have permission to access the calendar.
      */
     public static boolean check(Context context) {
-        return ContextCompat.checkSelfPermission(context, Manifest.permission.READ_CALENDAR) == PackageManager.PERMISSION_GRANTED;
+        int result = ContextCompat.checkSelfPermission(context, Manifest.permission.READ_CALENDAR);
+        Log.v(TAG, "calendar permissions check: " + result + " (granted = " + PackageManager.PERMISSION_GRANTED + ")");
+
+        return result == PackageManager.PERMISSION_GRANTED;
     }
 
     /**
