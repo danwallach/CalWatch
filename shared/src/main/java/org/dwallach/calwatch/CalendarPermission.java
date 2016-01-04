@@ -11,7 +11,6 @@ import android.support.v4.content.ContextCompat;
 import android.util.Log;
 
 import java.util.Arrays;
-import java.util.Observable;
 
 /**
  * Deal with all the Marshmallow permission machinery.
@@ -28,18 +27,10 @@ public class CalendarPermission {
     }
 
     /**
-     * Read by PreferencesHelper
+     * Returns the number of permission requests ever made by CalWatch.
      */
     public static int getNumRequests() {
         return numRequests;
-    }
-
-    /**
-     * Set by PreferencesHelper
-     */
-    public static void setNumRequests(int n) {
-        Log.v(TAG, "restoring memory of numRequests: " + n);
-        numRequests = n;
     }
 
     /**
@@ -56,7 +47,9 @@ public class CalendarPermission {
      * Check whether we've already asked, so we're walking on thin ice.
      */
     public static boolean checkAlreadyAsked(Activity activity) {
-        return ActivityCompat.shouldShowRequestPermissionRationale(activity, Manifest.permission.READ_CALENDAR);
+        boolean result = ActivityCompat.shouldShowRequestPermissionRationale(activity, Manifest.permission.READ_CALENDAR);
+        Log.v(TAG, "previous checks performed#" + numRequests + ", shouldShowRationale=" + result);
+        return result;
     }
 
     /**
@@ -73,6 +66,7 @@ public class CalendarPermission {
     public static void request(Activity activity) {
         if(!check(activity)) {
             numRequests++;
+            Log.v(TAG, "this will be check #" + numRequests);
             ActivityCompat.requestPermissions(activity,
                     new String[]{Manifest.permission.READ_CALENDAR},
                     INTERNAL_PERM_REQUEST_CODE);

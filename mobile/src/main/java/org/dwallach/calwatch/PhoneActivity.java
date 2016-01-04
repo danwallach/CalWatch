@@ -238,6 +238,7 @@ public class PhoneActivity extends Activity implements Observer {
      * us to request calendar permissions.
      */
     static void watchfaceClick() {
+        Log.v(TAG, "Watchface clicked!");
         if(activityRef == null)
             return; // can't do anything without an activity
 
@@ -246,8 +247,13 @@ public class PhoneActivity extends Activity implements Observer {
             return; // can't do anything with an activity
 
         ClockState clockState = ClockState.getSingleton();
-        if(clockState != null && !clockState.getCalendarPermission()) {
+        if(clockState == null)
+            Log.v(TAG, "Activity found and clockState is null.");
+        else if(!clockState.getCalendarPermission()) {
+            Log.v(TAG, "Requesting permissions");
             CalendarPermission.request(activity);
+        } else {
+            Log.v(TAG, "Permissions already granted.");
         }
     }
 }
