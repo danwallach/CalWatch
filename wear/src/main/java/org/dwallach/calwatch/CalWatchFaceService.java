@@ -173,9 +173,11 @@ public class CalWatchFaceService extends CanvasWatchFaceService {
             clockState = ClockState.getSingleton();
             clockState.addObserver(this); // callbacks if something changes
 
+            WearReceiverService.kickStart(CalWatchFaceService.this);
+            CalendarPermission.init(CalWatchFaceService.this);
+
             initCalendarFetcher();
 
-            WearReceiverService.kickStart(CalWatchFaceService.this);
         }
 
         @Override

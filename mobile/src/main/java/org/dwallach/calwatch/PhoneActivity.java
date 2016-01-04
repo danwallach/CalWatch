@@ -178,6 +178,7 @@ public class PhoneActivity extends Activity implements Observer {
 
         WatchCalendarService.kickStart(this);  // bring it up, if it's not already up
         PreferencesHelper.loadPreferences(this);
+        CalendarPermission.init(this);
 
         CalendarPermission.requestFirstTimeOnly(this); // ask for calendar permissions, but only if we haven't asked yet
 

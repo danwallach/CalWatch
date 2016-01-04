@@ -15,7 +15,7 @@ public class PreferencesHelper {
 
     public static void savePreferences(Context context) {
         Log.v(TAG, "savePreferences");
-        SharedPreferences prefs = context.getSharedPreferences("org.dwallach.calwatch.prefs", Context.MODE_PRIVATE);
+        SharedPreferences prefs = context.getSharedPreferences(Constants.PrefsKey, Context.MODE_PRIVATE);
         SharedPreferences.Editor editor = prefs.edit();
 
         ClockState clockState = ClockState.getSingleton();
@@ -24,7 +24,6 @@ public class PreferencesHelper {
             return;
         }
 
-        editor.putInt("permissionRequests", CalendarPermission.getNumRequests());
         editor.putInt("faceMode", clockState.getFaceMode());
         editor.putBoolean("showSeconds", clockState.getShowSeconds());
         editor.putBoolean("showDayDate", clockState.getShowDayDate());
@@ -43,18 +42,16 @@ public class PreferencesHelper {
         }
 
 
-        SharedPreferences prefs = context.getSharedPreferences("org.dwallach.calwatch.prefs", Context.MODE_PRIVATE);
+        SharedPreferences prefs = context.getSharedPreferences(Constants.PrefsKey, Context.MODE_PRIVATE);
         int faceMode = prefs.getInt("faceMode", Constants.DefaultWatchFace); // ClockState.FACE_TOOL
         boolean showSeconds = prefs.getBoolean("showSeconds", Constants.DefaultShowSeconds);
         boolean showDayDate = prefs.getBoolean("showDayDate", Constants.DefaultShowDayDate);
-        int permissionRequests = prefs.getInt("permissionRequests", 0);
 
-        Log.v(TAG, "faceMode: " + faceMode + ", showSeconds: " + showSeconds + ", showDayDate: " + showDayDate + ", permissionRequests: " + permissionRequests);
+        Log.v(TAG, "faceMode: " + faceMode + ", showSeconds: " + showSeconds + ", showDayDate: " + showDayDate);
 
         clockState.setFaceMode(faceMode);
         clockState.setShowSeconds(showSeconds);
         clockState.setShowDayDate(showDayDate);
-        CalendarPermission.setNumRequests(permissionRequests);
 
         clockState.pingObservers(); // we only need to do this once, versus multiple times when done internally
     }

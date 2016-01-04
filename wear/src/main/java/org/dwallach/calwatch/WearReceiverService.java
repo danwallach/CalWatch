@@ -188,7 +188,7 @@ public class WearReceiverService extends WearableListenerService implements Goog
             return;
 
         Log.v(TAG, "savePreferences: " + eventBytes.length + " bytes");
-        SharedPreferences prefs = getSharedPreferences("org.dwallach.calwatch.prefs", MODE_PRIVATE);
+        SharedPreferences prefs = getSharedPreferences(Constants.PrefsKey, MODE_PRIVATE);
         SharedPreferences.Editor editor = prefs.edit();
 
         // TODO there's no reason to save state like this any more; maybe we could merge with mobile/PreferencesHelper
@@ -198,7 +198,6 @@ public class WearReceiverService extends WearableListenerService implements Goog
         // protobuf-encoded, WireUpdate structure, which itself has a handful of ints and a
         // variable-length array of WireEvents, which are themselves just a bunch of long's.
         editor.putString("savedState", Base64.encodeToString(eventBytes, Base64.DEFAULT));
-        editor.putInt("permissionRequests", CalendarPermission.getNumRequests());
 
         if(!editor.commit())
             Log.v(TAG, "savePreferences commit failed ?!");
@@ -210,11 +209,8 @@ public class WearReceiverService extends WearableListenerService implements Goog
     public void loadPreferences() {
         Log.v(TAG, "loadPreferences");
 
-        SharedPreferences prefs = getSharedPreferences("org.dwallach.calwatch.prefs", MODE_PRIVATE);
+        SharedPreferences prefs = getSharedPreferences(Constants.PrefsKey, MODE_PRIVATE);
         String savedState = prefs.getString("savedState", "");
-        int permissionRequests = prefs.getInt("permissionRequests", 0);
-
-        CalendarPermission.setNumRequests(permissionRequests);
 
         if(savedState.length() > 0) {
             try {
