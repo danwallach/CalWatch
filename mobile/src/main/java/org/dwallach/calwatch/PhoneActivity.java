@@ -180,7 +180,7 @@ public class PhoneActivity extends Activity implements Observer {
         PreferencesHelper.loadPreferences(this);
         CalendarPermission.init(this);
 
-        CalendarPermission.requestFirstTimeOnly(this); // ask for calendar permissions, but only if we haven't asked yet
+        clockView.initCalendarFetcher(this);
 
         onResume();
         Log.v(TAG, "activity setup complete");
@@ -237,7 +237,7 @@ public class PhoneActivity extends Activity implements Observer {
      * This will be called when the user clicks on the watchface, presumably because they want
      * us to request calendar permissions.
      */
-    static void watchfaceClick() {
+    static void watchfaceClick(MyViewAnim view) {
         Log.v(TAG, "Watchface clicked!");
         if(activityRef == null)
             return; // can't do anything without an activity
@@ -252,6 +252,7 @@ public class PhoneActivity extends Activity implements Observer {
         else if(!clockState.getCalendarPermission()) {
             Log.v(TAG, "Requesting permissions");
             CalendarPermission.request(activity);
+            view.initCalendarFetcher(activity);
         } else {
             Log.v(TAG, "Permissions already granted.");
         }

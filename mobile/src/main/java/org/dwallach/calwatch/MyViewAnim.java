@@ -27,11 +27,11 @@ import java.util.Observer;
 public class MyViewAnim extends View implements Observer {
     private static final String TAG = "MyViewAnim";
 
-    public MyViewAnim(Activity activity, AttributeSet attrs) {
-        super(activity, attrs);
+    public MyViewAnim(Context context, AttributeSet attrs) {
+        super(context, attrs);
 
         setWillNotDraw(false);
-        init(activity);
+        init(context);
     }
 
     private ClockFace clockFace;
@@ -82,14 +82,14 @@ public class MyViewAnim extends View implements Observer {
 
     private CalendarFetcher calendarFetcher;
 
-    public void init(Activity activity) {
+    public void init(Context context) {
         Log.d(TAG, "init");
 
         // announce our version number to the logs
-        VersionWrapper.logVersion(activity);
+        VersionWrapper.logVersion(context);
 
-        BatteryWrapper.init(activity);
-        Resources resources = activity.getResources();
+        BatteryWrapper.init(context);
+        Resources resources = context.getResources();
 
         if (resources == null) {
             Log.e(TAG, "no resources? not good");
@@ -97,7 +97,7 @@ public class MyViewAnim extends View implements Observer {
 
         if(clockFace == null) {
             clockFace = new ClockFace();
-            Bitmap emptyCalendar = BitmapFactory.decodeResource(activity.getResources(), R.drawable.empty_calendar);
+            Bitmap emptyCalendar = BitmapFactory.decodeResource(context.getResources(), R.drawable.empty_calendar);
             clockFace.setMissingCalendarBitmap(emptyCalendar);
 
             clockFace.setSize(width, height);
@@ -108,19 +108,12 @@ public class MyViewAnim extends View implements Observer {
         clockState.deleteObserver(this); // in case we were already there
         clockState.addObserver(this); // ensure we're there, but only once
 
-        initCalendarFetcher(activity);
-
-        if(calendarFetcher != null)
-            calendarFetcher.kill();
-
-        calendarFetcher = new CalendarFetcher(activity, CalendarContract.Instances.CONTENT_URI, CalendarContract.AUTHORITY);
-
-
+//        initCalendarFetcher(context);
     }
 
     // this is redundant with CalWatchFaceService.Engine.initCalendarFetcher, but just different enough that it's
     // not really worth trying to have a grand unified thing.
-    private void initCalendarFetcher(Activity activity) {
+    public void initCalendarFetcher(Activity activity) {
         Log.v(TAG, "initCalendarFetcher");
         if(calendarFetcher != null) {
             calendarFetcher.kill();
@@ -247,7 +240,7 @@ public class MyViewAnim extends View implements Observer {
     @Override
     public boolean performClick() {
         super.performClick();
-        PhoneActivity.watchfaceClick();
+        PhoneActivity.watchfaceClick(this);
 
         return true;
     }
