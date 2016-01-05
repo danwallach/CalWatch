@@ -227,10 +227,13 @@ public class PhoneActivity extends Activity implements Observer {
     public void onRequestPermissionsResult(int requestCode, @NonNull String permissions[], @NonNull int[] grantResults) {
         Log.v(TAG, "onRequestPermissionsResult");
         CalendarPermission.handleResult(requestCode, permissions, grantResults);
-//        CalWatchFaceService.Engine engine = CalWatchFaceService.getEngine();
-//        if(engine != null) {
-//            engine.calendarPermissionUpdate();
-//        }
+
+        if(clockView == null) {
+            Log.e(TAG, "no clockview available?!");
+        } else {
+            clockView.initCalendarFetcher(this);
+        }
+
         Log.v(TAG, "finishing PermissionActivity");
     }
 
