@@ -19,15 +19,11 @@ import java.io.IOException
  * to add more things later on, so it's easiest to just keep this around. It's expansion room
  * for later on.
  */
-class WireUpdate(val faceMode: Int, val showSecondHand: Boolean, val showDayDate: Boolean) {
+data class WireUpdate(val faceMode: Int, val showSecondHand: Boolean, val showDayDate: Boolean) {
 
     fun toByteArray(): ByteArray {
         val output = "$HEADER;$faceMode;$showSecondHand;$showDayDate;$TRAILER"
         return output.toByteArray()
-    }
-
-    override fun toString(): String {
-        return "facemode($faceMode), showSecondHand($showSecondHand), showDayDate($showDayDate)"
     }
 
     companion object {

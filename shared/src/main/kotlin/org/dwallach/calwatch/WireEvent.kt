@@ -6,4 +6,4 @@
  */
 package org.dwallach.calwatch
 
-class WireEvent(val startTime: Long, val endTime: Long, val displayColor: Int)
+data class WireEvent(val startTime: Long, val endTime: Long, val displayColor: Int)
