@@ -22,9 +22,7 @@ import java.util.Observable
 import java.util.Observer
 
 class MyViewAnim(context: Context, attrs: AttributeSet) : View(context, attrs), Observer {
-
     init {
-
         setWillNotDraw(false)
         init(context)
     }
@@ -146,8 +144,8 @@ class MyViewAnim(context: Context, attrs: AttributeSet) : View(context, attrs), 
     override fun onWindowFocusChanged(hasFocus: Boolean) {
         super.onWindowFocusChanged(hasFocus)
 
-        val tmpWidth = getWidth()
-        val tmpHeight = getHeight()
+        val tmpWidth = width // properties of the View, reflected into a Kotlin variable
+        val tmpHeight = height
 
         if (tmpWidth == 0 || tmpHeight == 0) {
             Log.v(TAG, "onWindowFocusChanged: got zeros for width or height")
@@ -160,7 +158,6 @@ class MyViewAnim(context: Context, attrs: AttributeSet) : View(context, attrs), 
         Log.v(TAG, "onWindowFocusChanged: $_width, $_height")
         if (clockFace != null)
             clockFace!!.setSize(_width, _height)
-
     }
 
     fun kill(context: Context) {
@@ -195,6 +192,8 @@ class MyViewAnim(context: Context, attrs: AttributeSet) : View(context, attrs), 
             clockFace!!.setSize(_width, _height)
     }
 
+    // We're using underscores here to make these distinct from "width" and "height" which are
+    // properties on the View, which would turn into function calls if we just used them.
     private var _width: Int = 0
     private var _height: Int = 0
 
