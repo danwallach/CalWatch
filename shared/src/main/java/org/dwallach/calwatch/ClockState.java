@@ -146,9 +146,8 @@ public class ClockState extends Observable {
 
         lastClipTime = localClipTime;
 
+        List<EventWrapper> tmpVisibleEventList = new ArrayList<>();
         if(eventList != null) {
-            visibleEventList = new ArrayList<>();
-
             Log.v(TAG, "clipping " + eventList.size() + " raw events to fit the screen");
             for (EventWrapper eventWrapper : eventList) {
                 WireEvent e = eventWrapper.getWireEvent();
@@ -177,33 +176,37 @@ public class ClockState extends Observable {
                 // bringing these back, as well as doing something more useful with all-day events,
                 // which are similarly also ignored.
 
-                visibleEventList.add((new EventWrapper(new WireEvent(startTime + gmtOffset, endTime + gmtOffset, e.displayColor))));
+                tmpVisibleEventList.add((new EventWrapper(new WireEvent(startTime + gmtOffset, endTime + gmtOffset, e.displayColor))));
             }
 
-            if(visibleEventList.size() == 0)
-                visibleEventList = null; // sigh, no actual events
+            if(tmpVisibleEventList.size() == 0)
+                tmpVisibleEventList = null; // sigh, no actual events
         }
 
         // now, we run off and do screen layout
-        if(visibleEventList != null) {
+        int tmpMaxLevel = 0;
+
+        if(tmpVisibleEventList != null) {
             // first, try the fancy constraint solver
-            if(EventLayoutUniform.go(visibleEventList)) {
+            if(EventLayoutUniform.go(tmpVisibleEventList)) {
                 // yeah, we succeeded
-                this.maxLevel = EventLayoutUniform.MAXLEVEL;
+                tmpMaxLevel = EventLayoutUniform.MAXLEVEL;
             } else {
                 // something blew up with the Simplex solver, fall back to the cheesy, greedy algorithm
                 Log.v(TAG, "falling back to older greedy method");
-                this.maxLevel = EventLayout.go(visibleEventList);
+                tmpMaxLevel = EventLayout.go(tmpVisibleEventList);
             }
 
-            EventLayout.sanityTest(visibleEventList, this.maxLevel, "After new event layout");
-            Log.v(TAG, "maxLevel for new events: " + this.maxLevel);
-            Log.v(TAG, "number of new events: " + visibleEventList.size());
+            EventLayout.sanityTest(tmpVisibleEventList, tmpMaxLevel, "After new event layout");
+            Log.v(TAG, "maxLevel for new events: " + tmpMaxLevel);
+            Log.v(TAG, "number of new events: " + tmpVisibleEventList.size());
         } else {
             Log.v(TAG, "no events visible!");
-            this.maxLevel = 0;
+            tmpMaxLevel = 0;
         }
 
+        this.visibleEventList = tmpVisibleEventList;
+        this.maxLevel = tmpMaxLevel;
 //        debugDump();
     }
 
