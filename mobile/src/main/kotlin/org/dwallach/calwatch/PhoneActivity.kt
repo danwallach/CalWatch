@@ -12,23 +12,14 @@ import android.util.Log
 import android.view.Menu
 import android.view.MenuItem
 import android.view.View
-import android.widget.RadioButton
-import android.widget.Switch
 
 import java.lang.ref.WeakReference
 import java.util.Observable
 import java.util.Observer
 
+import kotlinx.android.synthetic.main.activity_phone.*
 
 class PhoneActivity : Activity(), Observer {
-
-    private var toolButton: RadioButton? = null
-    private var numbersButton: RadioButton? = null
-    private var liteButton: RadioButton? = null
-    private var clockView: MyViewAnim? = null
-    private var secondsSwitch: Switch? = null
-    private var dayDateSwitch: Switch? = null
-
     private var clockState: ClockState? = null
     private var disableUICallbacks = false
 
@@ -49,9 +40,9 @@ class PhoneActivity : Activity(), Observer {
     // this will be called, eventually, from whatever feature is responsible for
     // restoring saved user preferences
     //
-    private fun setFaceModeUI(mode: Int, showSeconds: Boolean, showDayDate: Boolean) {
+    private fun setFaceModeUI(mode: Int, showSecondsP: Boolean, showDayDateP: Boolean) {
         Log.v(TAG, "setFaceModeUI")
-        if (toolButton == null || numbersButton == null || liteButton == null || secondsSwitch == null || dayDateSwitch == null) {
+        if (toolButton == null || numbersButton == null || liteButton == null || showSeconds == null || showDayDate == null) {
             Log.v(TAG, "trying to set UI mode without buttons active yet")
             return
         }
@@ -60,14 +51,14 @@ class PhoneActivity : Activity(), Observer {
 
         try {
             when (mode) {
-                ClockState.FACE_TOOL -> toolButton!!.performClick()
-                ClockState.FACE_NUMBERS -> numbersButton!!.performClick()
-                ClockState.FACE_LITE -> liteButton!!.performClick()
+                ClockState.FACE_TOOL -> toolButton.performClick()
+                ClockState.FACE_NUMBERS -> numbersButton.performClick()
+                ClockState.FACE_LITE -> liteButton.performClick()
                 else -> Log.v(TAG, "bogus face mode: " + mode)
             }
 
-            secondsSwitch!!.isChecked = showSeconds
-            dayDateSwitch!!.isChecked = showDayDate
+            this.showSeconds.isChecked = showSecondsP
+            this.showDayDate.isChecked = showDayDateP
         } catch (throwable: Throwable) {
             // probably a called-from-wrong-thread-exception, we'll just ignore it
             Log.v(TAG, "ignoring exception while updating button state")
@@ -80,22 +71,22 @@ class PhoneActivity : Activity(), Observer {
         Log.v(TAG, "getFaceModeFromUI")
         var mode = -1
 
-        if (toolButton == null || numbersButton == null || liteButton == null || secondsSwitch == null || dayDateSwitch == null) {
+        if (toolButton == null || numbersButton == null || liteButton == null || showSeconds == null || showDayDate == null) {
             Log.v(TAG, "trying to get UI mode without buttons active yet")
             return
         }
 
-        if (toolButton!!.isChecked)
+        if (toolButton.isChecked)
             mode = ClockState.FACE_TOOL
-        else if (numbersButton!!.isChecked)
+        else if (numbersButton.isChecked)
             mode = ClockState.FACE_NUMBERS
-        else if (liteButton!!.isChecked)
+        else if (liteButton.isChecked)
             mode = ClockState.FACE_LITE
         else
             Log.v(TAG, "no buttons are selected? weird.")
 
-        val showSeconds = secondsSwitch!!.isChecked
-        val showDayDate = dayDateSwitch!!.isChecked
+        val showSeconds = showSeconds.isChecked
+        val showDayDate = showDayDate.isChecked
 
         if (mode != -1) {
             getClockState().faceMode = mode
@@ -126,8 +117,8 @@ class PhoneActivity : Activity(), Observer {
 
         // http://developer.android.com/reference/android/app/Activity.html
 
-        if (clockView != null)
-            clockView!!.kill(this)
+        if (surfaceView != null)
+            surfaceView.kill(this)
 
         if (clockState != null) {
             clockState!!.deleteObserver(this)
@@ -139,36 +130,24 @@ class PhoneActivity : Activity(), Observer {
         super.onStart()
         Log.v(TAG, "Start!")
 
-        // Core UI widgets: find 'em
-        liteButton = findViewById(R.id.liteButton) as RadioButton
-        toolButton = findViewById(R.id.toolButton) as RadioButton
-        numbersButton = findViewById(R.id.numbersButton) as RadioButton
-        clockView = findViewById(R.id.surfaceView) as MyViewAnim
-        secondsSwitch = findViewById(R.id.showSeconds) as Switch
-        dayDateSwitch = findViewById(R.id.showDayDate) as Switch
-        //        clockView.setSleepInEventLoop(true);
-
-        Log.v(TAG, "registering callback")
-
         val myListener = View.OnClickListener {
             if (!disableUICallbacks)
                 getFaceModeFromUI()
-            if (clockView != null)
-                clockView!!.invalidate()
+            surfaceView.invalidate();
         }
 
-        liteButton!!.setOnClickListener(myListener)
-        toolButton!!.setOnClickListener(myListener)
-        numbersButton!!.setOnClickListener(myListener)
-        secondsSwitch!!.setOnClickListener(myListener)
-        dayDateSwitch!!.setOnClickListener(myListener)
+        liteButton.setOnClickListener(myListener)
+        toolButton.setOnClickListener(myListener)
+        numbersButton.setOnClickListener(myListener)
+        showSeconds.setOnClickListener(myListener)
+        showDayDate.setOnClickListener(myListener)
 
         WatchCalendarService.kickStart(this)  // bring it up, if it's not already up
         PreferencesHelper.loadPreferences(this)
         CalendarPermission.init(this)
 
-        clockView!!.init(this)
-        clockView!!.initCalendarFetcher(this)
+        surfaceView.init(this)
+        surfaceView.initCalendarFetcher(this)
 
         onResume()
         Log.v(TAG, "activity setup complete")
@@ -180,9 +159,9 @@ class PhoneActivity : Activity(), Observer {
 
         getClockState() // side-effects: re-initializes observer
 
-        if (clockView != null) {
-            clockView!!.init(this)
-            clockView!!.invalidate()
+        if (surfaceView != null) {
+            surfaceView.init(this)
+            surfaceView.invalidate()
         }
     }
 
@@ -210,10 +189,10 @@ class PhoneActivity : Activity(), Observer {
         Log.v(TAG, "onRequestPermissionsResult")
         CalendarPermission.handleResult(requestCode, permissions, grantResults)
 
-        if (clockView == null) {
+        if (surfaceView != null) {
             Log.e(TAG, "no clockview available?!")
         } else {
-            clockView!!.initCalendarFetcher(this)
+            surfaceView.initCalendarFetcher(this)
         }
 
         Log.v(TAG, "finishing PermissionActivity")
