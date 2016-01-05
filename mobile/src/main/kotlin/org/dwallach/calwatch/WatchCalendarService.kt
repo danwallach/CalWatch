@@ -95,7 +95,7 @@ class WatchCalendarService : Service(), Observer {
         throw UnsupportedOperationException("Not yet implemented")
     }
 
-    override fun update(observable: Observable?, data: Any) {
+    override fun update(observable: Observable?, data: Any?) {
         // somebody updated something in the clock state (new events, new display options, etc.)
         Log.v(TAG, "internal clock state changed: time to send all to the watch")
         sendAllToWatch()

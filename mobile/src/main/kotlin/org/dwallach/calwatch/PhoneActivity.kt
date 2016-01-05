@@ -178,7 +178,7 @@ class PhoneActivity : Activity(), Observer {
         return super.onOptionsItemSelected(item)
     }
 
-    override fun update(observable: Observable?, data: Any) {
+    override fun update(observable: Observable?, data: Any?) {
         // somebody changed *something* in the ClockState, causing us to get called
         Log.v(TAG, "Noticed a change in the clock state; saving preferences")
         setFaceModeUI(getClockState().faceMode, getClockState().showSeconds, getClockState().showDayDate)
