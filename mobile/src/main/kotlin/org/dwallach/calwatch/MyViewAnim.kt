@@ -67,7 +67,7 @@ class MyViewAnim(context: Context, attrs: AttributeSet) : View(context, attrs), 
      * Callback from ClockState if something changes, which means we'll need
      * to redraw.
      */
-    override fun update(observable: Observable, data: Any) {
+    override fun update(observable: Observable?, data: Any) {
         invalidate()
     }
 
