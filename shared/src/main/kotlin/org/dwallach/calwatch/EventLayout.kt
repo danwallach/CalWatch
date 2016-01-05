@@ -20,6 +20,8 @@ object EventLayout {
      * @return maximum level of any calendar event
      */
     fun go(events: List<EventWrapper>?): Int {
+        Log.i(TAG, "Running event layout with %d events".format(events?.size ?: 0))
+
         // We're going to execute a greedy O(n^2) algorithm that runs like this:
 
         // Levels go from 0 to MAXINT. Every event will have a minLevel and maxLevelAnywhere. In the

@@ -51,7 +51,7 @@ object TimeWrapper {
     private fun updateMonthDayCache() {
         // assumption: the day and month and such only change when we hit a new hour, otherwise we can reuse an old result
         val newCacheTime = localFloorHour
-        if (newCacheTime != monthDayCacheTime || localMonthDayCache !== "") {
+        if (newCacheTime != monthDayCacheTime || localMonthDayCache == "") {
             localMonthDayCache = DateUtils.formatDateTime(null, gmtTime, DateUtils.FORMAT_ABBREV_MONTH or DateUtils.FORMAT_SHOW_DATE)
             localDayOfWeekCache = DateUtils.formatDateTime(null, gmtTime, DateUtils.FORMAT_SHOW_WEEKDAY)
             monthDayCacheTime = newCacheTime

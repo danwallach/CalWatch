@@ -28,6 +28,8 @@ object EventLayoutUniform {
      * @return true if it worked, false if it failed
      */
     fun go(events: List<EventWrapper>?): Boolean {
+        Log.i(TAG, "Running uniform event layout with %d events".format(events?.size ?: 0))
+
         var i: Int
         var j: Int
         val nEvents: Int

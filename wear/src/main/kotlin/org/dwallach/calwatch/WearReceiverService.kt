@@ -46,7 +46,7 @@ class WearReceiverService : WearableListenerService(), GoogleApiClient.Connectio
         clockState.protobuf = eventBytes
     }
 
-    override fun onStartCommand(intent: Intent, flags: Int, startId: Int): Int {
+    override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
         Log.v(TAG, "service starting!")
 
         // why is this necessary?
