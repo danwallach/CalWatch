@@ -18,7 +18,7 @@ public class PreferencesHelper {
         SharedPreferences prefs = context.getSharedPreferences(Constants.PrefsKey, Context.MODE_PRIVATE);
         SharedPreferences.Editor editor = prefs.edit();
 
-        ClockState clockState = ClockState.getSingleton();
+        ClockState clockState = ClockState.Companion.getSingleton();
         if(clockState == null) {
             Log.e(TAG, "no clock state yet, can't save preferences");
             return;
@@ -35,7 +35,7 @@ public class PreferencesHelper {
     public static void loadPreferences(Context context) {
         Log.v(TAG, "loadPreferences");
 
-        ClockState clockState = ClockState.getSingleton();
+        ClockState clockState = ClockState.Companion.getSingleton();
         if(clockState == null) {
             Log.e(TAG, "no clock state yet, can't load preferences");
             return;

@@ -1,4 +1,5 @@
 apply plugin: 'com.android.application'
+apply plugin: 'kotlin-android'
 
 // idea borrowed from here: http://stackoverflow.com/questions/17097263/automatically-versioning-android-project-from-git-describe-with-android-studio-g
 
@@ -40,6 +41,16 @@ def getVersionName = { ->
     return versionName
 }
 
+buildscript {
+    ext.kotlin_version = '1.0.0-beta-4584'
+    repositories {
+        mavenCentral()
+    }
+    dependencies {
+        classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlin_version"
+        classpath "org.jetbrains.kotlin:kotlin-android-extensions:$kotlin_version"
+    }
+}
 
 android {
     compileSdkVersion 23
@@ -51,6 +62,9 @@ android {
         targetSdkVersion 23   // Android 6.0, Marshmallow, with the shiny new permission system
         versionCode getVersionCode()
         versionName getVersionName()
+    }
+    sourceSets {
+        main.java.srcDirs += 'src/main/kotlin'
     }
 
 //    buildTypes {
@@ -79,4 +93,8 @@ dependencies {
 //    compile 'com.android.support:support-v13:23.1.1'
     compile 'com.google.android.support:wearable:1.3.0'
     compile 'fr.nicolaspomepuy.androidwearcrashreport:crashreport-wear:0.6@aar'
+    compile "org.jetbrains.kotlin:kotlin-stdlib:$kotlin_version"
+}
+repositories {
+    mavenCentral()
 }

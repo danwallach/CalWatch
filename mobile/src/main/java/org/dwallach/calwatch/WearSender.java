@@ -54,7 +54,7 @@ public class WearSender implements GoogleApiClient.ConnectionCallbacks, GoogleAp
 
     public void sendAllToWatch() {
         try {
-            ClockState clockState = ClockState.getSingleton();
+            ClockState clockState = ClockState.Companion.getSingleton();
             wireBytesToSend = clockState.getProtobuf();
 
             Log.v(TAG, "preparing event list for transmission, length(" + wireBytesToSend.length + " bytes)");

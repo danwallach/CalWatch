@@ -88,7 +88,7 @@ public class MyViewAnim extends View implements Observer {
         // announce our version number to the logs
         VersionWrapper.logVersion(context);
 
-        BatteryWrapper.init(context);
+        BatteryWrapper.Companion.init(context);
         Resources resources = context.getResources();
 
         if (resources == null) {
@@ -103,7 +103,7 @@ public class MyViewAnim extends View implements Observer {
             clockFace.setSize(width, height);
         }
 
-        clockState = ClockState.getSingleton();
+        clockState = ClockState.Companion.getSingleton();
 
         clockState.deleteObserver(this); // in case we were already there
         clockState.addObserver(this); // ensure we're there, but only once
@@ -124,7 +124,7 @@ public class MyViewAnim extends View implements Observer {
 
         if(clockState == null) {
             Log.e(TAG, "null clockState?! Trying again.");
-            clockState = ClockState.getSingleton();
+            clockState = ClockState.Companion.getSingleton();
             if(clockState == null) {
                 Log.e(TAG, "total fail on clockState!");
                 return;

@@ -35,7 +35,7 @@ public class PhoneActivity extends Activity implements Observer {
     private ClockState getClockState() {
         if(clockState == null) {
             Log.v(TAG, "reconnecting clock state");
-            clockState = ClockState.getSingleton();
+            clockState = ClockState.Companion.getSingleton();
             clockState.addObserver(this);
         }
         return clockState;
@@ -176,7 +176,7 @@ public class PhoneActivity extends Activity implements Observer {
         secondsSwitch.setOnClickListener(myListener);
         dayDateSwitch.setOnClickListener(myListener);
 
-        WatchCalendarService.kickStart(this);  // bring it up, if it's not already up
+        WatchCalendarService.Companion.kickStart(this);  // bring it up, if it's not already up
         PreferencesHelper.loadPreferences(this);
         CalendarPermission.init(this);
 
@@ -250,7 +250,7 @@ public class PhoneActivity extends Activity implements Observer {
         if(activity == null)
             return; // can't do anything with an activity
 
-        ClockState clockState = ClockState.getSingleton();
+        ClockState clockState = ClockState.Companion.getSingleton();
         if(clockState == null)
             Log.v(TAG, "Activity found and clockState is null.");
         else if(!clockState.getCalendarPermission()) {
