@@ -19,7 +19,7 @@ class EventWrapper(val wireEvent: WireEvent) {
 
     init {
         this.pathCache = PathCache()
-        this.paint = PaintCan.getCalendarPaint(wireEvent.displayColor!!)
+        this.paint = PaintCan.getCalendarPaint(wireEvent.displayColor)
         this.greyPaint = PaintCan.getCalendarGreyPaint(wireEvent.displayColor)
         this.lowBitPaint = PaintCan.get(true, true, PaintCan.colorBlackFill)
         this.minLevel = 0

@@ -146,7 +146,7 @@ class CalWatchFaceService : CanvasWatchFaceService() {
                 clockFace!!.setMissingCalendarBitmap(emptyCalendar)
             }
 
-            clockState = ClockState.getSingleton()
+            clockState = ClockState.getState()
             clockState!!.addObserver(this) // callbacks if something changes
 
             WearReceiverService.kickStart(this@CalWatchFaceService)

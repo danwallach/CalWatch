@@ -41,11 +41,7 @@ class WearReceiverService : WearableListenerService(), GoogleApiClient.Connectio
 
     private fun newEventBytes(eventBytes: ByteArray) {
         Log.v(TAG, "newEventBytes: " + eventBytes.size)
-        val clockState = ClockState.getSingleton()
-        if (clockState == null) {
-            Log.e(TAG, "whoa, no ClockState yet?!")
-            return
-        }
+        val clockState = ClockState.getState()
 
         clockState.protobuf = eventBytes
     }
@@ -66,15 +62,11 @@ class WearReceiverService : WearableListenerService(), GoogleApiClient.Connectio
 
         // and to load any saved data while we're waiting on the phone to give us fresh data
 
-        val clockState = ClockState.getSingleton()
-        if (clockState == null) {
-            Log.e(TAG, "whoa, no ClockState yet?!")
+        val clockState = ClockState.getState()
+        if (clockState.wireInitialized) {
+            Log.v(TAG, "clock state already initialized, no need to go to saved prefs")
         } else {
-            if (clockState.wireInitialized) {
-                Log.v(TAG, "clock state already initialized, no need to go to saved prefs")
-            } else {
-                loadPreferences()
-            }
+            loadPreferences()
         }
 
         // We want this service to continue running until it is explicitly

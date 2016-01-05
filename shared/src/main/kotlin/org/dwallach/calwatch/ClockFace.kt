@@ -606,8 +606,8 @@ class ClockFace : Observer {
             val evMinLevel = eventWrapper.minLevel
             val evMaxLevel = eventWrapper.maxLevel
 
-            val startTime = e.startTime!!
-            val endTime = e.endTime!!
+            val startTime = e.startTime
+            val endTime = e.endTime
 
             arcStart = startTime / 720000.0
             arcEnd = endTime / 720000.0

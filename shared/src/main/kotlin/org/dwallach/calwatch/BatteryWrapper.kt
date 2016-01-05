@@ -45,9 +45,9 @@ class BatteryWrapper private constructor(
             isCharging = status == BatteryManager.BATTERY_STATUS_CHARGING || status == BatteryManager.BATTERY_STATUS_FULL
 
             // How are we charging?
-            val chargePlug = batteryStatus.getIntExtra(BatteryManager.EXTRA_PLUGGED, -1)
-            //            boolean usbCharge = chargePlug == BatteryManager.BATTERY_PLUGGED_USB;
-            //            boolean acCharge = chargePlug == BatteryManager.BATTERY_PLUGGED_AC;
+            //            val chargePlug = batteryStatus.getIntExtra(BatteryManager.EXTRA_PLUGGED, -1)
+            //            val usbCharge = chargePlug == BatteryManager.BATTERY_PLUGGED_USB;
+            //            val acCharge = chargePlug == BatteryManager.BATTERY_PLUGGED_AC;
 
             val level = batteryStatus.getIntExtra(BatteryManager.EXTRA_LEVEL, -1)
             val scale = batteryStatus.getIntExtra(BatteryManager.EXTRA_SCALE, -1)
