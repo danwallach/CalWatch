@@ -11,7 +11,6 @@ import android.util.Log
 import java.io.IOException
 import java.util.ArrayList
 import java.util.Observable
-import kotlin.MutableList
 
 class ClockState private constructor() : Observable() {
     var faceMode: Int = Constants.DefaultWatchFace
@@ -87,7 +86,7 @@ class ClockState private constructor() : Observable() {
 
         lastClipTime = localClipTime
 
-        var tmpVisibleEventList = MutableList<EventWrapper>()
+        var tmpVisibleEventList = ArrayList<EventWrapper>()
         val oldEventList = eventList
 
         if(oldEventList != null) {

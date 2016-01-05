@@ -91,7 +91,7 @@ public class CalendarPermission {
      */
     public static void handleResult(int requestCode, @NonNull String permissions[], @NonNull int[] grantResults) {
         if (requestCode == INTERNAL_PERM_REQUEST_CODE) {
-            ClockState state = ClockState.Companion.getSingleton();
+            ClockState state = ClockState.Companion.getState();
             // If request is cancelled, the result arrays are empty.
             if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
                 Log.v(TAG, "calendar permission granted!");
