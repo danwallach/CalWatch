@@ -121,6 +121,15 @@ public class MyViewAnim extends View implements Observer {
         }
 
         boolean permissionGiven = CalendarPermission.check(activity);
+
+        if(clockState == null) {
+            Log.e(TAG, "null clockState?! Trying again.");
+            clockState = ClockState.getSingleton();
+            if(clockState == null) {
+                Log.e(TAG, "total fail on clockState!");
+                return;
+            }
+        }
         if(!clockState.getCalendarPermission() && permissionGiven) {
             // Hypothetically this isn't necessary, because it's handled in CalendarPermission.handleResult.
             // Nonetheless, paranoia.

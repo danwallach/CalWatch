@@ -180,6 +180,7 @@ public class PhoneActivity extends Activity implements Observer {
         PreferencesHelper.loadPreferences(this);
         CalendarPermission.init(this);
 
+        clockView.init(this);
         clockView.initCalendarFetcher(this);
 
         onResume();
