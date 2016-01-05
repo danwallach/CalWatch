@@ -24,10 +24,13 @@ class WatchCalendarService : Service(), Observer {
     private fun getClockState(): ClockState {
         // more on the design of this particular contraption in the comments in PhoneActivity
         if (clockState == null) {
-            clockState = ClockState.getSingleton()
-            clockState?.addObserver(this)
+            val tmp = ClockState.getState()
+            tmp.addObserver(this)
+            clockState = tmp
+            return tmp
+        } else {
+            return clockState!!
         }
-        return clockState
     }
 
 
@@ -101,7 +104,7 @@ class WatchCalendarService : Service(), Observer {
     companion object {
         private val TAG = "WatchCalendarService"
 
-        var singletonService: WatchCalendarService?
+        var singletonService: WatchCalendarService? = null
 
         fun kickStart(ctx: Context) {
             // start the calendar service, if it's not already running

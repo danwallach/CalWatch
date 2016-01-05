@@ -19,7 +19,7 @@ public class EventLayoutUniformTest extends TestCase {
                 .add(new WireEvent(31L, 40L, 4))
                 .get();
 
-        boolean success = EventLayoutUniform.go(data);
+        boolean success = EventLayoutUniform.INSTANCE.go(data);
         assertEquals(success, true);
         levelCheck(data, EventLayoutUniform.MAXLEVEL);
 
@@ -29,7 +29,7 @@ public class EventLayoutUniformTest extends TestCase {
                 .add(new WireEvent(31L, 40L, 4))
                 .get();
 
-        success = EventLayoutUniform.go(data);
+        success = EventLayoutUniform.INSTANCE.go(data);
         assertEquals(success, true);
         levelCheck(data, EventLayoutUniform.MAXLEVEL);
 
@@ -47,7 +47,7 @@ public class EventLayoutUniformTest extends TestCase {
                 .add(new WireEvent(31L, 35L, 9))
                 .get();
 
-        success = EventLayoutUniform.go(data);
+        success = EventLayoutUniform.INSTANCE.go(data);
         assertEquals(success, true);
         levelCheck(data, EventLayoutUniform.MAXLEVEL);
     }

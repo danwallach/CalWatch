@@ -118,8 +118,8 @@ class CalendarFetcher private constructor(private val contextRef: WeakReference<
         Log.v(TAG, "starting to load content")
 
         TimeWrapper.update()
-        val time = TimeWrapper.getGMTTime()
-        val queryStartMillis = TimeWrapper.getLocalFloorHour() - TimeWrapper.getGmtOffset()
+        val time = TimeWrapper.gmtTime
+        val queryStartMillis = TimeWrapper.localFloorHour - TimeWrapper.gmtOffset
         val queryEndMillis = queryStartMillis + 86400000 // 24 hours later
 
         try {
@@ -180,12 +180,12 @@ class CalendarFetcher private constructor(private val contextRef: WeakReference<
 
                 Collections.sort(cr, Comparator<org.dwallach.calwatch.WireEvent> { lhs, rhs ->
                     if (lhs.displayColor != rhs.displayColor)
-                        return@Comparator lcompare(lhs.displayColor!!.toLong(), rhs.displayColor!!.toLong())
+                        return@Comparator lcompare(lhs.displayColor.toLong(), rhs.displayColor.toLong())
 
                     if (lhs.endTime != rhs.endTime)
-                        return@Comparator lcompare(lhs.endTime!!, rhs.endTime!!)
+                        return@Comparator lcompare(lhs.endTime, rhs.endTime)
 
-                    lcompare(rhs.startTime!!, lhs.startTime!!)
+                    lcompare(rhs.startTime, lhs.startTime)
                 })
             }
 

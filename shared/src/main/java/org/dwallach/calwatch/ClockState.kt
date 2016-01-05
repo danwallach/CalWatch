@@ -66,19 +66,20 @@ class ClockState private constructor() : Observable() {
 
         //        Log.v(TAG, "starting event pool: " + eventList.size());
 
-        val gmtOffset = TimeWrapper.getGmtOffset()
+        val gmtOffset = TimeWrapper.gmtOffset
 
-        val localClipTime = TimeWrapper.getLocalFloorHour()
+        val localClipTime = TimeWrapper.localFloorHour
         val clipStartMillis = localClipTime - gmtOffset // convert from localtime back to GMT time for looking at events
         val clipEndMillis = clipStartMillis + 43200000  // 12 hours later
 
-        if (visibleEventList != null)
-            EventLayout.sanityTest(visibleEventList, this.maxLevel, "Before clipping")
+        val oldVisibleEventList = visibleEventList
+        if (oldVisibleEventList != null)
+            EventLayout.sanityTest(oldVisibleEventList, this.maxLevel, "Before clipping")
 
         // this used to compare to the GMT version (clipStartMillis), but this caused incorrect behavior
         // when the watch suddenly updated itself for a new timezone. Comparing to the *local* time
         // is the right answer.
-        if (lastClipTime == localClipTime && visibleEventList != null)
+        if (lastClipTime == localClipTime && oldVisibleEventList != null)
             return  // we've already done it, and we've got a cache of the results
 
         //        Log.v(TAG, "clipStart: " + TimeWrapper.formatGMTTime(clipStartMillis) + " (" + clipStartMillis +
@@ -126,7 +127,7 @@ class ClockState private constructor() : Observable() {
         }
 
         // now, we run off and do screen layout
-        var tmpMaxLevel = 0
+        var tmpMaxLevel: Int
 
         if (tmpVisibleEventList.size > 0) {
             // first, try the fancy constraint solver
@@ -212,22 +213,22 @@ class ClockState private constructor() : Observable() {
         Log.v(TAG, "All events in the DB:")
         if(eventList != null)
             for (e in eventList!!) {
-                Log.v(TAG, "--> displayColor(" + Integer.toHexString(e.wireEvent.displayColor!!) + "), minLevel(" + e.minLevel + "), maxLevel(" + e.maxLevel + "), startTime(" + e.wireEvent.startTime + "), endTime(" + e.wireEvent.endTime + ")")
+                Log.v(TAG, "--> displayColor(" + Integer.toHexString(e.wireEvent.displayColor) + "), minLevel(" + e.minLevel + "), maxLevel(" + e.maxLevel + "), startTime(" + e.wireEvent.startTime + "), endTime(" + e.wireEvent.endTime + ")")
             }
 
         Log.v(TAG, "Visible:")
         if(visibleEventList != null)
             for (e in visibleEventList!!) {
-                Log.v(TAG, "--> displayColor(" + Integer.toHexString(e.wireEvent.displayColor!!) + "), minLevel(" + e.minLevel + "), maxLevel(" + e.maxLevel + "), startTime(" + e.wireEvent.startTime + "), endTime(" + e.wireEvent.endTime + ")")
+                Log.v(TAG, "--> displayColor(" + Integer.toHexString(e.wireEvent.displayColor) + "), minLevel(" + e.minLevel + "), maxLevel(" + e.maxLevel + "), startTime(" + e.wireEvent.startTime + "), endTime(" + e.wireEvent.endTime + ")")
             }
     }
 
     companion object {
         private val TAG = "ClockState"
 
-        val FACE_TOOL = 0
-        val FACE_NUMBERS = 1
-        val FACE_LITE = 2
+        const val FACE_TOOL = 0
+        const val FACE_NUMBERS = 1
+        const val FACE_LITE = 2
 
         private var singleton: ClockState? = null
 

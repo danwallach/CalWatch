@@ -12,7 +12,6 @@ import android.graphics.Paint
 import android.graphics.Path
 import android.graphics.Rect
 import android.graphics.RectF
-import android.os.Build
 import android.util.Log
 import java.util.Observable
 import java.util.Observer
@@ -357,8 +356,8 @@ class ClockFace : Observer {
         x1 = clockX(45.0, .85f)
         y1 = clockY(45.0, .85f)
 
-        val paint = PaintCan.get(ambientLowBit, ambientMode, PaintCan.colorSmallTextAndLines)
-        val shadow = PaintCan.get(ambientLowBit, ambientMode, PaintCan.colorSmallShadow)
+        val paint = PaintCan[ambientLowBit, ambientMode, PaintCan.colorSmallTextAndLines]
+        val shadow = PaintCan[ambientLowBit, ambientMode, PaintCan.colorSmallShadow]
 
         // AA note: we only draw the month box when in normal mode, not ambient, so no AA gymnastics here
 
@@ -386,10 +385,10 @@ class ClockFace : Observer {
 
         val localFaceMode = faceMode
 
-        val colorTickShadow = PaintCan.get(ambientLowBit, ambientMode, PaintCan.colorSecondHandShadow)
-        val colorSmall = PaintCan.get(ambientLowBit, ambientMode, PaintCan.colorSmallTextAndLines)
-        val colorBig = PaintCan.get(ambientLowBit, ambientMode, PaintCan.colorBigTextAndLines)
-        val colorTextShadow = PaintCan.get(ambientLowBit, ambientMode, PaintCan.colorBigShadow)
+        val colorTickShadow = PaintCan[ambientLowBit, ambientMode, PaintCan.colorSecondHandShadow]
+        val colorSmall = PaintCan[ambientLowBit, ambientMode, PaintCan.colorSmallTextAndLines]
+        val colorBig = PaintCan[ambientLowBit, ambientMode, PaintCan.colorBigTextAndLines]
+        val colorTextShadow = PaintCan[ambientLowBit, ambientMode, PaintCan.colorBigShadow]
 
         // check if we've already rendered the face
         if (localFaceMode != facePathCacheMode || p == null) {
@@ -521,7 +520,7 @@ class ClockFace : Observer {
     }
 
     private fun drawHands(canvas: Canvas) {
-        val time = TimeWrapper.getLocalTime()
+        val time = TimeWrapper.localTime
 
         var seconds = time / 1000.0
         val minutes = seconds / 60.0
@@ -532,16 +531,16 @@ class ClockFace : Observer {
         val secondsColor: Paint
         val shadowColor: Paint
 
-        shadowColor = PaintCan.get(ambientLowBit, ambientMode, PaintCan.colorSecondHandShadow)
-        hourColor = PaintCan.get(ambientLowBit, ambientMode, PaintCan.colorHourHand)
-        minuteColor = PaintCan.get(ambientLowBit, ambientMode, PaintCan.colorMinuteHand)
-        //        secondsColor = PaintCan.get(ambientLowBit, ambientMode, PaintCan.colorSecondHand);
+        shadowColor = PaintCan[ambientLowBit, ambientMode, PaintCan.colorSecondHandShadow]
+        hourColor = PaintCan[ambientLowBit, ambientMode, PaintCan.colorHourHand]
+        minuteColor = PaintCan[ambientLowBit, ambientMode, PaintCan.colorMinuteHand]
+//        secondsColor = PaintCan[ambientLowBit, ambientMode, PaintCan.colorSecondHand];
 
         drawRadialLine(canvas, hours, 0.1f, 0.6f, hourColor, shadowColor)
         drawRadialLine(canvas, minutes, 0.1f, 0.9f, minuteColor, shadowColor)
 
         if (!ambientMode && showSeconds) {
-            secondsColor = PaintCan.get(PaintCan.styleNormal, PaintCan.colorSecondHand)
+            secondsColor = PaintCan[PaintCan.styleNormal, PaintCan.colorSecondHand]
             // ugly details: we might run 10% or more away from our targets at 4Hz, making the second
             // hand miss the indices. Ugly. Thus, some hackery.
             if (clipSeconds) seconds = Math.floor(seconds * freqUpdate) / freqUpdate
@@ -565,7 +564,7 @@ class ClockFace : Observer {
         if (eventList != null)
             for (eventWrapper in eventList!!) {
                 val pc = eventWrapper.pathCache
-                pc?.set(null)
+                pc.set(null)
             }
     }
 
@@ -598,7 +597,7 @@ class ClockFace : Observer {
             }
         }
 
-        val time = TimeWrapper.getLocalTime()
+        val time = TimeWrapper.localTime
 
         for (eventWrapper in eventList!!) {
             val arcStart: Double
@@ -616,7 +615,7 @@ class ClockFace : Observer {
             // path caching happens inside drawRadialArc
 
             val arcColor = eventWrapper.getPaint(ambientLowBit, ambientMode)
-            val arcShadow = PaintCan.get(ambientLowBit, ambientMode, PaintCan.colorArcShadow)
+            val arcShadow = PaintCan[ambientLowBit, ambientMode, PaintCan.colorArcShadow]
 
             drawRadialArc(canvas, eventWrapper.pathCache, arcStart, arcEnd,
                     calendarRingMaxRadius - evMinLevel * calendarRingWidth / (maxLevel + 1),
@@ -720,7 +719,7 @@ class ClockFace : Observer {
                 //                            ")");
             }
         }
-        canvas.drawPath(stipplePathCache, PaintCan.get(ambientLowBit, ambientMode, PaintCan.colorBlackFill))
+        canvas.drawPath(stipplePathCache, PaintCan[ambientLowBit, ambientMode, PaintCan.colorBlackFill])
     }
 
     private var batteryPathCache: Path? = null
@@ -730,7 +729,7 @@ class ClockFace : Observer {
     private fun drawBattery(canvas: Canvas) {
         val batteryWrapper = BatteryWrapper.getWrapper() ?: return // we're not ready yet, for whatever reason
 
-        val time = TimeWrapper.getGMTTime()
+        val time = TimeWrapper.gmtTime
 
         // we don't want to poll *too* often; this translates to about once per five minute
         if (batteryPathCache == null || time - batteryCacheTime > 300000) {
@@ -770,9 +769,9 @@ class ClockFace : Observer {
             val paint: Paint
 
             if (batteryCritical)
-                paint = PaintCan.get(PaintCan.styleNormal, PaintCan.colorBatteryCritical)
+                paint = PaintCan[PaintCan.styleNormal, PaintCan.colorBatteryCritical]
             else
-                paint = PaintCan.get(PaintCan.styleNormal, PaintCan.colorBatteryLow)
+                paint = PaintCan[PaintCan.styleNormal, PaintCan.colorBatteryLow]
 
             if (!ambientMode)
                 canvas.drawPath(batteryPathCache, paint)
@@ -780,13 +779,13 @@ class ClockFace : Observer {
     }
 
     fun drawTimers(canvas: Canvas) {
-        val currentTime = TimeWrapper.getGMTTime() // note that we're *not* using local time here
+        val currentTime = TimeWrapper.gmtTime // note that we're *not* using local time here
 
-        val colorStopwatchSeconds = PaintCan.get(ambientLowBit, ambientMode, PaintCan.colorStopwatchSeconds)
-        val colorStopwatchStroke = PaintCan.get(ambientLowBit, ambientMode, PaintCan.colorStopwatchStroke)
-        val colorStopwatchFill = PaintCan.get(ambientLowBit, ambientMode, PaintCan.colorStopwatchFill)
-        val colorTimerStroke = PaintCan.get(ambientLowBit, ambientMode, PaintCan.colorTimerStroke)
-        val colorTimerFill = PaintCan.get(ambientLowBit, ambientMode, PaintCan.colorTimerFill)
+        val colorStopwatchSeconds = PaintCan[ambientLowBit, ambientMode, PaintCan.colorStopwatchSeconds]
+        val colorStopwatchStroke = PaintCan[ambientLowBit, ambientMode, PaintCan.colorStopwatchStroke]
+        val colorStopwatchFill = PaintCan[ambientLowBit, ambientMode, PaintCan.colorStopwatchFill]
+        val colorTimerStroke = PaintCan[ambientLowBit, ambientMode, PaintCan.colorTimerStroke]
+        val colorTimerFill = PaintCan[ambientLowBit, ambientMode, PaintCan.colorTimerFill]
 
         // Radius 0.9 is the start of the tick marks and the end of the normal minute hand. The normal
         // second hand goes to 0.95. If there's a stopwatch but no timer, then the stopwatch second and minute
@@ -813,7 +812,7 @@ class ClockFace : Observer {
 
 
         // we don't draw anything if the stopwatch is non-moving and at 00:00.00
-        var stopwatchRenderTime: Long = 0
+        var stopwatchRenderTime: Long
         if (!XWatchfaceReceiver.stopwatchIsReset) {
             if (!XWatchfaceReceiver.stopwatchIsRunning) {
                 stopwatchRenderTime = XWatchfaceReceiver.stopwatchBase
@@ -1105,23 +1104,19 @@ class ClockFace : Observer {
         private var debugMetricsPrinted = false
 
         private val NON_LINEAR_TABLE_SIZE = 1000
-        private val NON_LINEAR_TABLE = DoubleArray(NON_LINEAR_TABLE_SIZE)
-
-        init {
+        private val NON_LINEAR_TABLE = DoubleArray(NON_LINEAR_TABLE_SIZE) { i ->
             // This is where we initialize our non-linear second hand table.
             // We're implementing y=[(1+sin(theta - pi/2))/2] ^ pow over x in [0,pi]
             // Adjusting the power makes the second hand hang out closer to its
             // starting position and then launch faster to hit the target when we
             // get closer to the next second.
-            for (i in 0..NON_LINEAR_TABLE_SIZE - 1) {
-                // TODO: test the next two lines to make sure everything works
-                val thetaMinusPi2 = i * Math.PI / NON_LINEAR_TABLE_SIZE.toDouble() - Math.PI / 2.0
+            val thetaMinusPi2 = i * Math.PI / NON_LINEAR_TABLE_SIZE.toDouble() - Math.PI / 2.0
 
-                // two components here: the non-linear part (the first line) and then a linear
-                // part (the line below). This make sure we still have some motion. The second
-                // hand never entirely stops.
-                NON_LINEAR_TABLE[i] = 0.6 * Math.pow((1.0 + Math.sin(thetaMinusPi2)) / 2.0, 8.0) + 0.4 * (i.toDouble() / NON_LINEAR_TABLE_SIZE.toDouble())
-            }
+            // two components here: the non-linear part (the first line) and then a linear
+            // part (the line below). This make sure we still have some motion. The second
+            // hand never entirely stops.
+            0.6 * Math.pow((1.0 + Math.sin(thetaMinusPi2)) / 2.0, 8.0)
+            + 0.4 * (i.toDouble() / NON_LINEAR_TABLE_SIZE.toDouble())
         }
 
         /**

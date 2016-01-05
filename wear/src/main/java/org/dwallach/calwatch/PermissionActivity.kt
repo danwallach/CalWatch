@@ -36,7 +36,7 @@ class PermissionActivity : Activity() {
         fun kickStart(context: Context, firstTimeOnly: Boolean) {
             Log.v(TAG, "kickStart")
 
-            if (firstTimeOnly && CalendarPermission.getNumRequests() > 0) return  // don't bug the user!
+            if (firstTimeOnly && CalendarPermission.numRequests > 0) return  // don't bug the user!
 
             val activityIntent = Intent(context, PermissionActivity::class.java)
             activityIntent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK)

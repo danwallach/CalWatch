@@ -4,25 +4,22 @@
  * Home page: http://www.cs.rice.edu/~dwallach/calwatch/
  * Licensing: http://www.cs.rice.edu/~dwallach/calwatch/licensing.html
  */
-package org.dwallach.calwatch;
+package org.dwallach.calwatch
 
-import android.content.Context;
-import android.text.format.DateUtils;
-import android.util.Log;
+import android.util.Log
 
-import java.util.ArrayList;
-import java.util.List;
 
-public class EventLayout {
-    private final static String TAG = "EventLayout";
+object EventLayout {
+    private val TAG = "EventLayout"
 
     /**
      * Takes a list of calendar events and mutates their minLevel and maxLevel for calendar side-by-side
      * non-overlapping layout.
      * @param events list of events
+     * *
      * @return maximum level of any calendar event
      */
-    public static int go(List<EventWrapper> events) {
+    fun go(events: List<EventWrapper>?): Int {
         // We're going to execute a greedy O(n^2) algorithm that runs like this:
 
         // Levels go from 0 to MAXINT. Every event will have a minLevel and maxLevelAnywhere. In the
@@ -43,50 +40,60 @@ public class EventLayout {
 
         // (In degenerate cases, this could actually get to O(n^3). Highly unlikely.)
 
-        int i, j, k, nEvents;
-        int maxLevelAnywhere = 0;
+        var i: Int
+        var j: Int
+        var k: Int
+        val nEvents: Int
+        var maxLevelAnywhere = 0
 
-        if(events == null) return 0;  // degenerate case, shouldn't happen
-        nEvents = events.size();
-        if(nEvents == 0) return 0;    // another degnerate case
+        if (events == null) return 0  // degenerate case, shouldn't happen
+        nEvents = events.size
+        if (nEvents == 0) return 0    // another degnerate case
 
-        EventWrapper e = events.get(0); // first event
-        boolean levelsFull[] = new boolean[nEvents+1];
-        char printLevelsFull[] = new char[nEvents+1];
-        e.setMinLevel(0);
-        e.setMaxLevel(0);
+        var e = events[0] // first event
+        val levelsFull = BooleanArray(nEvents + 1)
+        val printLevelsFull = CharArray(nEvents + 1)
+        e.minLevel = 0
+        e.maxLevel = 0
 
-        for(i=1; i<nEvents; i++) {
-            e = events.get(i);
+        i = 1
+        while (i < nEvents) {
+            e = events[i]
 
             // not sure this is necessary but it can't hurt
-            e.setMinLevel(0);
-            e.setMaxLevel(0);
-            e.getPathCache().set(null);
+            e.minLevel = 0
+            e.maxLevel = 0
+            e.pathCache.set(null)
 
             // clear the levels used mask
-            for(j=0; j<= nEvents; j++) {
-                levelsFull[j] = false;
-                printLevelsFull[j] = '.';
+            j = 0
+            while (j <= nEvents) {
+                levelsFull[j] = false
+                printLevelsFull[j] = '.'
+                j++
             }
 
             // now fill out the levels based on events from [0, N-1]
-            for(j=0; j<i; j++) {
-                EventWrapper pe = events.get(j);
+            j = 0
+            while (j < i) {
+                val pe = events[j]
 
                 // note: all of these loops for bit manipulation seem gratuitously inefficient and
                 // if we really cared, we could probably just limit the world to 64 levels and do everything
                 // with masked 64-bit bitvectors or something. As they say, premature optimization is
                 // the root of all evil. So maybe later. Probably never.
-                if(e.overlaps(pe)) {
-                    int peMaxLevel = pe.getMaxLevel();
-                    for (k = pe.getMinLevel(); k <= peMaxLevel; k++) {
-                        levelsFull[k] = true;
-                        printLevelsFull[k] = '@';
+                if (e.overlaps(pe)) {
+                    val peMaxLevel = pe.maxLevel
+                    k = pe.minLevel
+                    while (k <= peMaxLevel) {
+                        levelsFull[k] = true
+                        printLevelsFull[k] = '@'
+                        k++
                     }
                 }
+                j++
             }
-            levelsFull[maxLevelAnywhere+1] = true; // one extra one on the end to make the state machine below run cleanly
+            levelsFull[maxLevelAnywhere + 1] = true // one extra one on the end to make the state machine below run cleanly
 
             // Log.v(TAG, "inserting event "+i+" (" + e.title +
             //        "), fullLevels(" + String.valueOf(printLevelsFull) +
@@ -96,70 +103,74 @@ public class EventLayout {
             // now, discover the first open hole, from the lowest level, then expand to fill
             // available space
 
-            boolean searching = true;
-            int holeStart = -1, holeEnd = -1;
+            var searching = true
+            var holeStart = -1
+            var holeEnd = -1
 
             // note the <= here; we need to run one level beyond, to have the state machine
             // hit a slot that's full no matter what, so it always sorts out the best hole
-            for(k=0; k<= maxLevelAnywhere; k++) {
-                if(searching) {
+            k = 0
+            while (k <= maxLevelAnywhere) {
+                if (searching) {
                     if (!levelsFull[k]) {
                         // Log.v(TAG, "--> found start level: " + k);
-                        searching = false;
-                        holeStart = k;
-                        holeEnd = k;
+                        searching = false
+                        holeStart = k
+                        holeEnd = k
                     } // else {
                     // haven't found anything yet; keep searching
                     // }
                 } else {
                     // onward we go!
                     if (!levelsFull[k]) {
-                        holeEnd = k;
+                        holeEnd = k
                         // Log.v(TAG, "--> expanded end level: "+ k);
-                    }
-                    // sad, this search is over
-                    else {
+                    } else {
                         // Log.v(TAG, "--> no further holes");
-                        break;
-                    }
+                        break
+                    }// sad, this search is over
                 }
+                k++
             }
-            if(holeStart != -1) {
+            if (holeStart != -1) {
                 // okay, we found a hole for the new event
-                e.setMinLevel(holeStart);
-                e.setMaxLevel(holeEnd);
+                e.minLevel = holeStart
+                e.maxLevel = holeEnd
 
                 // Log.v(TAG, "--> hole found: (" + e.minLevel + "," + e.maxLevel + ")");
             } else {
                 // Log.v(TAG, "--> adding a level");
-                e.setMinLevel(maxLevelAnywhere + 1);
-                e.setMaxLevel(maxLevelAnywhere + 1);
+                e.minLevel = maxLevelAnywhere + 1
+                e.maxLevel = maxLevelAnywhere + 1
 
                 // Sigh. Now we need to loop through all the previous events to see if
                 // anybody else can expand out to occupy the new level
-                for(j=0; j<i; j++) {
-                    EventWrapper pe = events.get(j);
-                    int peMaxLevel = pe.getMaxLevel();
+                j = 0
+                while (j < i) {
+                    val pe = events[j]
+                    val peMaxLevel = pe.maxLevel
 
-                    if(!e.overlaps(pe) && peMaxLevel == maxLevelAnywhere) {
+                    if (!e.overlaps(pe) && peMaxLevel == maxLevelAnywhere) {
                         // Log.v(TAG, "=== expanding event " + j);
-                        pe.setMaxLevel(peMaxLevel+1);
+                        pe.maxLevel = peMaxLevel + 1
                     }
+                    j++
                 }
 
-                maxLevelAnywhere++;
+                maxLevelAnywhere++
             }
+            i++
         }
-        return maxLevelAnywhere;
+        return maxLevelAnywhere
     }
 
-    public static void sanityTest(List<EventWrapper> events, int maxLevel, String blurb) {
-        int  nEvents = events.size();
+    fun sanityTest(events: List<EventWrapper>, maxLevel: Int, blurb: String) {
+        val nEvents = events.size
 
-        for(int i=0; i<nEvents; i++) {
-            EventWrapper e = events.get(i);
-            if (e.getMinLevel() < 0 || e.getMaxLevel() > maxLevel) {
-                Log.e(TAG, "malformed eventwrapper (" + blurb + "): " + e.toString());
+        for (i in 0..nEvents - 1) {
+            val e = events[i]
+            if (e.minLevel < 0 || e.maxLevel > maxLevel) {
+                Log.e(TAG, "malformed eventwrapper (" + blurb + "): " + e.toString())
             }
         }
     }

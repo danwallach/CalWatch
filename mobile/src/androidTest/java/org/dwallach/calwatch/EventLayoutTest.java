@@ -16,7 +16,7 @@ public class EventLayoutTest extends TestCase {
                 .add(new WireEvent(31L, 40L, 4))
                 .get();
 
-        int maxLevel = EventLayout.go(data);
+        int maxLevel = EventLayout.INSTANCE.go(data);
         assertEquals(maxLevel, 0);
         levelCheck(data, maxLevel);
 
@@ -26,7 +26,7 @@ public class EventLayoutTest extends TestCase {
                 .add(new WireEvent(31L, 40L, 4))
                 .get();
 
-        maxLevel = EventLayout.go(data);
+        maxLevel = EventLayout.INSTANCE.go(data);
         assertEquals(maxLevel, 1);
         levelCheck(data, maxLevel);
     }
