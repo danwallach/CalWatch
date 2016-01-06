@@ -1110,13 +1110,13 @@ class ClockFace : Observer {
             // Adjusting the power makes the second hand hang out closer to its
             // starting position and then launch faster to hit the target when we
             // get closer to the next second.
-            val thetaMinusPi2 = i * Math.PI / NON_LINEAR_TABLE_SIZE.toDouble() - Math.PI / 2.0
+            val iFrac: Double = i.toDouble() / NON_LINEAR_TABLE_SIZE.toDouble()
+            val thetaMinusPi2: Double = (iFrac - 0.5) * Math.PI
 
             // two components here: the non-linear part (the first line) and then a linear
             // part (the line below). This make sure we still have some motion. The second
             // hand never entirely stops.
-            0.6 * Math.pow((1.0 + Math.sin(thetaMinusPi2)) / 2.0, 8.0)
-            + 0.4 * (i.toDouble() / NON_LINEAR_TABLE_SIZE.toDouble())
+            0.6 * Math.pow((1.0 + Math.sin(thetaMinusPi2)) / 2.0, 8.0) + 0.4 * iFrac
         }
 
         /**
