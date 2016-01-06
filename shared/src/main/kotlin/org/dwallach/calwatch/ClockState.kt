@@ -73,8 +73,8 @@ class ClockState private constructor() : Observable() {
         val clipEndMillis = clipStartMillis + 43200000  // 12 hours later
 
         val oldVisibleEventList = visibleEventList
-        if (oldVisibleEventList != null)
-            EventLayout.sanityTest(oldVisibleEventList, this.maxLevel, "Before clipping")
+//        if (oldVisibleEventList != null)
+//            EventLayout.sanityTest(oldVisibleEventList, this.maxLevel, "Before clipping")
 
         // this used to compare to the GMT version (clipStartMillis), but this caused incorrect behavior
         // when the watch suddenly updated itself for a new timezone. Comparing to the *local* time

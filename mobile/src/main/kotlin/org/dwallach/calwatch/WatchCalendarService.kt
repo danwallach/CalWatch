@@ -4,6 +4,7 @@
  * Home page: http://www.cs.rice.edu/~dwallach/calwatch/
  * Licensing: http://www.cs.rice.edu/~dwallach/calwatch/licensing.html
  */
+@file:JvmName("org.dwallach.calwatch.WatchCalendarService")
 package org.dwallach.calwatch
 
 import android.app.Service

@@ -1,3 +1,4 @@
+@file:JvmName("org.dwallach.calwatch.PermissionActivity")
 package org.dwallach.calwatch
 
 import android.app.Activity
