@@ -146,7 +146,7 @@ class ClockState private constructor() : Observable() {
             this.visibleEventList = tmpVisibleEventList
             this.maxLevel = tmpMaxLevel
         } else {
-            this.visibleEventList = null
+            this.visibleEventList = tmpVisibleEventList
             this.maxLevel = 0;
             Log.v(TAG, "no events visible!")
         }
