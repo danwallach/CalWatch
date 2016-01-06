@@ -20,20 +20,6 @@ import fr.nicolaspomepuy.androidwearcrashreport.mobile.CrashReport
 
 class WatchCalendarService : Service(), Observer {
     private var wearSender: WearSender? = null
-    private var clockState: ClockState? = null
-
-    private fun getClockState(): ClockState {
-        // more on the design of this particular contraption in the comments in PhoneActivity
-        if (clockState == null) {
-            val tmp = ClockState.getState()
-            tmp.addObserver(this)
-            clockState = tmp
-            return tmp
-        } else {
-            return clockState!!
-        }
-    }
-
 
     init {
         singletonService = this
@@ -41,13 +27,7 @@ class WatchCalendarService : Service(), Observer {
 
     // this is called when there's something new from the calendar DB
     fun sendAllToWatch() {
-        if (wearSender == null) {
-            Log.e(TAG, "no wear sender?!")
-            return
-        }
-
-        // and now, send on to the wear device
-        wearSender!!.sendAllToWatch()
+        wearSender?.sendAllToWatch() ?: Log.e(TAG, "no wear sender?!")
     }
 
     override fun onStartCommand(intent: Intent, flags: Int, startId: Int): Int {
@@ -61,7 +41,7 @@ class WatchCalendarService : Service(), Observer {
 
     private fun initInternal() {
         BatteryWrapper.init(this)
-        getClockState()
+        ClockState.getState().addObserver(this)
         wearSender = WearSender(this)
 
         PreferencesHelper.loadPreferences(this)
@@ -87,8 +67,7 @@ class WatchCalendarService : Service(), Observer {
         super.onDestroy()
         Log.v(TAG, "service destroyed!")
 
-        clockState!!.deleteObserver(this)
-        clockState = null
+        ClockState.getState().deleteObserver(this)
     }
 
     override fun onBind(intent: Intent): IBinder? {
@@ -106,6 +85,7 @@ class WatchCalendarService : Service(), Observer {
         private val TAG = "WatchCalendarService"
 
         var singletonService: WatchCalendarService? = null
+        private set
 
         fun kickStart(ctx: Context) {
             // start the calendar service, if it's not already running

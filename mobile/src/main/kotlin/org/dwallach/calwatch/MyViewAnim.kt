@@ -29,9 +29,6 @@ class MyViewAnim(context: Context, attrs: AttributeSet) : View(context, attrs), 
     }
 
     private var clockFace: ClockFace? = null
-    private var clockState: ClockState? = null
-
-
     private var visible = false
 
     override fun onVisibilityChanged(changedView: View, visibility: Int) {
@@ -47,6 +44,7 @@ class MyViewAnim(context: Context, attrs: AttributeSet) : View(context, attrs), 
 
     private fun shouldTimerBeRunning(): Boolean {
         var timerNeeded = false
+        val clockState = ClockState.getState()
 
         if (!visible)
             return false
@@ -57,9 +55,7 @@ class MyViewAnim(context: Context, attrs: AttributeSet) : View(context, attrs), 
         }
 
         // or run the timer if we're not showing the seconds hand
-        if (clockState != null) {
-            timerNeeded = timerNeeded || !clockState!!.showSeconds
-        }
+        timerNeeded = timerNeeded || clockState.showSeconds
 
         return timerNeeded
     }
@@ -82,31 +78,31 @@ class MyViewAnim(context: Context, attrs: AttributeSet) : View(context, attrs), 
 
         BatteryWrapper.init(context)
         val resources = context.resources
+        val clockState = ClockState.getState()
 
         if (resources == null) {
             Log.e(TAG, "no resources? not good")
         }
 
         if (clockFace == null) {
-            clockFace = ClockFace()
+            val tmpClockFace = ClockFace()
             val emptyCalendar = BitmapFactory.decodeResource(context.resources, R.drawable.empty_calendar)
-            clockFace!!.setMissingCalendarBitmap(emptyCalendar)
+            tmpClockFace.setMissingCalendarBitmap(emptyCalendar)
+            tmpClockFace.setSize(_width, _height)
 
-            clockFace!!.setSize(_width, _height)
+            clockFace = tmpClockFace
         }
 
-        clockState = ClockState.getState()
-
-        clockState!!.deleteObserver(this) // in case we were already there
-        clockState!!.addObserver(this) // ensure we're there, but only once
-
-        //        initCalendarFetcher(context);
+        clockState.addObserver(this)
     }
 
     // this is redundant with CalWatchFaceService.Engine.initCalendarFetcher, but just different enough that it's
     // not really worth trying to have a grand unified thing.
     fun initCalendarFetcher(activity: Activity) {
         Log.v(TAG, "initCalendarFetcher")
+
+        val clockState = ClockState.getState()
+
         if (calendarFetcher != null) {
             calendarFetcher!!.kill()
             calendarFetcher = null
@@ -114,15 +110,11 @@ class MyViewAnim(context: Context, attrs: AttributeSet) : View(context, attrs), 
 
         val permissionGiven = CalendarPermission.check(activity)
 
-        if (clockState == null) {
-            Log.e(TAG, "null clockState?! Trying again.")
-            clockState = ClockState.getState()
-        }
-        if (!clockState!!.calendarPermission && permissionGiven) {
+        if (!clockState.calendarPermission && permissionGiven) {
             // Hypothetically this isn't necessary, because it's handled in CalendarPermission.handleResult.
             // Nonetheless, paranoia.
             Log.e(TAG, "we've got permission, need to update the clockState")
-            clockState!!.calendarPermission = true
+            clockState.calendarPermission = true
         }
 
         if (!permissionGiven) {
@@ -163,16 +155,14 @@ class MyViewAnim(context: Context, attrs: AttributeSet) : View(context, attrs), 
 
     fun kill(context: Context) {
         Log.d(TAG, "kill")
+        val clockState = ClockState.getState()
 
         if (calendarFetcher != null) {
             calendarFetcher!!.kill()
             calendarFetcher = null
         }
 
-        if (clockState != null) {
-            clockState!!.deleteObserver(this)
-            clockState = null
-        }
+        clockState.deleteObserver(this)
 
         if (clockFace != null) {
             clockFace!!.kill()

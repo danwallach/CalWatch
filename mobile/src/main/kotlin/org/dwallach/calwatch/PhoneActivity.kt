@@ -21,17 +21,7 @@ import java.util.Observer
 import kotlinx.android.synthetic.main.activity_phone.*
 
 class PhoneActivity : Activity(), Observer {
-    private var clockState: ClockState? = null
     private var disableUICallbacks = false
-
-    private fun getClockState(): ClockState {
-        if (clockState == null) {
-            Log.v(TAG, "reconnecting clock state")
-            clockState = ClockState.getState()
-            clockState!!.addObserver(this)
-        }
-        return clockState!!
-    }
 
     init {
         activityRef = WeakReference<Activity>(this)
@@ -43,7 +33,7 @@ class PhoneActivity : Activity(), Observer {
     //
     private fun setFaceModeUI(mode: Int, showSecondsP: Boolean, showDayDateP: Boolean) {
         Log.v(TAG, "setFaceModeUI")
-        if (toolButton == null || numbersButton == null || liteButton == null || showSeconds == null || showDayDate == null) {
+        if (!uiButtonsReady()) {
             Log.v(TAG, "trying to set UI mode without buttons active yet")
             return
         }
@@ -68,11 +58,14 @@ class PhoneActivity : Activity(), Observer {
         disableUICallbacks = false
     }
 
+    private fun uiButtonsReady() :Boolean =
+            toolButton != null && numbersButton != null && liteButton != null && showSeconds != null && showDayDate != null;
+
     private fun getFaceModeFromUI() {
         Log.v(TAG, "getFaceModeFromUI")
         var mode = -1
 
-        if (toolButton == null || numbersButton == null || liteButton == null || showSeconds == null || showDayDate == null) {
+        if (!uiButtonsReady()) {
             Log.v(TAG, "trying to get UI mode without buttons active yet")
             return
         }
@@ -88,14 +81,15 @@ class PhoneActivity : Activity(), Observer {
 
         val showSeconds = showSeconds.isChecked
         val showDayDate = showDayDate.isChecked
+        val clockState = ClockState.getState()
 
         if (mode != -1) {
-            getClockState().faceMode = mode
+            clockState.faceMode = mode
         }
-        getClockState().showSeconds = showSeconds
-        getClockState().showDayDate = showDayDate
+        clockState.showSeconds = showSeconds
+        clockState.showDayDate = showDayDate
 
-        getClockState().pingObservers() // we only need to do this once, versus a whole bunch of times when it was happening internally
+        clockState.pingObservers() // we only need to do this once, versus a whole bunch of times when it was happening internally
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -121,10 +115,7 @@ class PhoneActivity : Activity(), Observer {
         if (surfaceView != null)
             surfaceView.kill(this)
 
-        if (clockState != null) {
-            clockState!!.deleteObserver(this)
-            clockState = null
-        }
+        ClockState.getState().deleteObserver(this)
     }
 
     override fun onStart() {
@@ -158,7 +149,7 @@ class PhoneActivity : Activity(), Observer {
         super.onResume()
         Log.v(TAG, "Resume!")
 
-        getClockState() // side-effects: re-initializes observer
+        ClockState.getState().addObserver(this)
 
         if (surfaceView != null) {
             surfaceView.init(this)
@@ -182,7 +173,9 @@ class PhoneActivity : Activity(), Observer {
     override fun update(observable: Observable?, data: Any?) {
         // somebody changed *something* in the ClockState, causing us to get called
         Log.v(TAG, "Noticed a change in the clock state; saving preferences")
-        setFaceModeUI(getClockState().faceMode, getClockState().showSeconds, getClockState().showDayDate)
+
+        val clockState = ClockState.getState()
+        setFaceModeUI(clockState.faceMode, clockState.showSeconds, clockState.showDayDate)
         PreferencesHelper.savePreferences(this)
     }
 
@@ -216,8 +209,7 @@ class PhoneActivity : Activity(), Observer {
             val activity = activityRef?.get() ?: return
             // can't do anything with an activity
 
-            val clockState = ClockState.getState()
-            if (!clockState.calendarPermission) {
+            if (!ClockState.getState().calendarPermission) {
                 Log.v(TAG, "Requesting permissions")
                 CalendarPermission.request(activity)
                 view.initCalendarFetcher(activity)
