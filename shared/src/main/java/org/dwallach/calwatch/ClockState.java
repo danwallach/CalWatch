@@ -179,14 +179,14 @@ public class ClockState extends Observable {
                 tmpVisibleEventList.add((new EventWrapper(new WireEvent(startTime + gmtOffset, endTime + gmtOffset, e.displayColor))));
             }
 
-            if(tmpVisibleEventList.size() == 0)
-                tmpVisibleEventList = null; // sigh, no actual events
+//            if(tmpVisibleEventList.size() == 0)
+//                tmpVisibleEventList = null; // sigh, no actual events
         }
 
         // now, we run off and do screen layout
         int tmpMaxLevel = 0;
 
-        if(tmpVisibleEventList != null) {
+        if(tmpVisibleEventList.size() > 0) {
             // first, try the fancy constraint solver
             if(EventLayoutUniform.go(tmpVisibleEventList)) {
                 // yeah, we succeeded
