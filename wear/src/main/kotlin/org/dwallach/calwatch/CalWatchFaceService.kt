@@ -51,8 +51,9 @@ import java.util.Observer
  */
 class CalWatchFaceService : CanvasWatchFaceService() {
     override fun onCreateEngine(): Engine {
-        engineRef = WeakReference(Engine())
-        return engineRef!!.get()
+        val tmpEngineRef = WeakReference(Engine())
+        engineRef = tmpEngineRef
+        return tmpEngineRef.get()
     }
 
     inner class Engine : CanvasWatchFaceService.Engine(), Observer {
@@ -80,10 +81,8 @@ class CalWatchFaceService : CanvasWatchFaceService() {
             Log.v(TAG, "initCalendarFetcher")
             val clockState = ClockState.getState()
 
-            if (calendarFetcher != null) {
-                calendarFetcher!!.kill()
-                calendarFetcher = null
-            }
+            calendarFetcher?.kill()
+            calendarFetcher = null
 
             val permissionGiven = CalendarPermission.check(this@CalWatchFaceService)
             if (!clockState.calendarPermission && permissionGiven) {
@@ -141,9 +140,10 @@ class CalWatchFaceService : CanvasWatchFaceService() {
             }
 
             if (clockFace == null) {
-                clockFace = ClockFace()
+                val tmpClockFace = ClockFace()
                 val emptyCalendar = BitmapFactory.decodeResource(this@CalWatchFaceService.resources, R.drawable.empty_calendar)
-                clockFace!!.setMissingCalendarBitmap(emptyCalendar)
+                tmpClockFace.setMissingCalendarBitmap(emptyCalendar)
+                clockFace = tmpClockFace
             }
 
             clockState.addObserver(this) // callbacks if something changes
@@ -158,10 +158,20 @@ class CalWatchFaceService : CanvasWatchFaceService() {
         override fun onPropertiesChanged(properties: Bundle?) {
             super.onPropertiesChanged(properties)
 
-            val lowBitAmbientMode = properties!!.getBoolean(WatchFaceService.PROPERTY_LOW_BIT_AMBIENT, false)
+            if(properties == null) {
+                Log.d(TAG, "onPropertiesChanged: empty properties?!")
+                return;
+            }
+
+            if(clockFace == null) {
+                Log.d(TAG, "onPropertiesChanged: null clockFace?")
+                return
+            }
+
+            val lowBitAmbientMode = properties.getBoolean(WatchFaceService.PROPERTY_LOW_BIT_AMBIENT, false)
             val burnInProtection = properties.getBoolean(WatchFaceService.PROPERTY_BURN_IN_PROTECTION, false)
-            clockFace!!.setAmbientLowBit(lowBitAmbientMode)
-            clockFace!!.setBurnInProtection(burnInProtection)
+            clockFace?.setAmbientLowBit(lowBitAmbientMode)
+            clockFace?.setBurnInProtection(burnInProtection)
             Log.d(TAG, "onPropertiesChanged: low-bit ambient = $lowBitAmbientMode, burn-in protection = $burnInProtection")
         }
 
@@ -178,8 +188,14 @@ class CalWatchFaceService : CanvasWatchFaceService() {
         override fun onAmbientModeChanged(inAmbientMode: Boolean) {
             super.onAmbientModeChanged(inAmbientMode)
 
+            if(clockFace == null) {
+                Log.d(TAG, "onAmbientModeChanged: null clockFace?")
+                return
+            }
+
+
             Log.d(TAG, "onAmbientModeChanged: " + inAmbientMode)
-            clockFace!!.ambientMode = inAmbientMode
+            clockFace?.ambientMode = inAmbientMode
 
             // If we just switched *to* ambient mode, then we've got some FPS data to report
             // to the logs. Otherwise, we're coming *back* from ambient mode, so it's a good
@@ -194,7 +210,7 @@ class CalWatchFaceService : CanvasWatchFaceService() {
 
         override fun onInterruptionFilterChanged(interruptionFilter: Int) {
             super.onInterruptionFilterChanged(interruptionFilter)
-            clockFace!!.setMuteMode(interruptionFilter == WatchFaceService.INTERRUPTION_FILTER_NONE)
+            clockFace?.setMuteMode(interruptionFilter == WatchFaceService.INTERRUPTION_FILTER_NONE)
             invalidate()
         }
 
@@ -206,7 +222,12 @@ class CalWatchFaceService : CanvasWatchFaceService() {
             //                Log.v(TAG, "onDraw");
             drawCounter++
 
-            val width = bounds!!.width()
+            if(bounds == null || canvas == null) {
+                Log.d(TAG, "onDraw: null bounds and/or canvas")
+                return
+            }
+
+            val width = bounds.width()
             val height = bounds.height()
 
             if (width != oldWidth || height != oldHeight) {
@@ -217,7 +238,7 @@ class CalWatchFaceService : CanvasWatchFaceService() {
 
             try {
                 // clear the screen
-                canvas!!.drawColor(Color.TRANSPARENT, PorterDuff.Mode.CLEAR)
+                canvas.drawColor(Color.TRANSPARENT, PorterDuff.Mode.CLEAR)
 
                 TimeWrapper.update() // fetch the time
                 clockFace!!.drawEverything(canvas)
@@ -255,19 +276,22 @@ class CalWatchFaceService : CanvasWatchFaceService() {
 
             ClockState.getState().deleteObserver(this)
 
-            if (clockFace != null) {
-                clockFace!!.kill()
-                clockFace = null
-            }
+            clockFace?.kill()
+            clockFace = null
 
             super.onDestroy()
         }
 
         override fun onPeekCardPositionUpdate(bounds: Rect?) {
             super.onPeekCardPositionUpdate(bounds)
-            Log.d(TAG, "onPeekCardPositionUpdate: " + bounds + " (" + bounds!!.width() + ", " + bounds.height() + ")")
+            if(bounds == null) {
+                Log.d(TAG, "onPeekcardPositionUpdate: null bounds?!")
+                return
+            }
 
-            clockFace!!.setPeekCardRect(bounds)
+            Log.d(TAG, "onPeekCardPositionUpdate: " + bounds + " (" + bounds.width() + ", " + bounds.height() + ")")
+
+            clockFace?.setPeekCardRect(bounds)
 
             invalidate()
         }
@@ -280,8 +304,8 @@ class CalWatchFaceService : CanvasWatchFaceService() {
 
             Log.v(TAG, "onApplyWindowInsets (round: $isRound), (chinSize: $chinSize)")
 
-            clockFace!!.setRound(isRound)
-            clockFace!!.setMissingBottomPixels(chinSize)
+            clockFace?.setRound(isRound)
+            clockFace?.setMissingBottomPixels(chinSize)
         }
 
         override fun onVisibilityChanged(visible: Boolean) {
@@ -309,6 +333,6 @@ class CalWatchFaceService : CanvasWatchFaceService() {
         private var engineRef: WeakReference<Engine>? = null
 
         val engine: Engine
-            get() = engineRef!!.get()
+            get() = engineRef?.get() ?: throw RuntimeException("no engine available?!")
     }
 }

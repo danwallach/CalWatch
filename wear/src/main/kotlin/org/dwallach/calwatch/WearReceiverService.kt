@@ -82,31 +82,36 @@ class WearReceiverService : WearableListenerService(), GoogleApiClient.Connectio
         }
 
         Log.d(TAG, "onDataChanged")
-        for (event in dataEvents) {
-            if (event.type == DataEvent.TYPE_CHANGED) {
-                // DataItem changed
-                val item = event.dataItem
+        dataEvents
+                .filter { it.type == DataEvent.TYPE_CHANGED }
+                .map { it.dataItem }
+                .forEach { item ->
+                    Log.d(TAG, "--> item found: " + item.toString())
+                    if (item.uri.path.compareTo(Constants.SettingsPath) == 0) {
+                        val dataMap = DataMapItem.fromDataItem(item).dataMap
+                        val eventbuf = dataMap.getByteArray(Constants.DataKey)
+                        Log.d(TAG, "----> it's an event for us, nbytes: " + eventbuf.size)
 
-                Log.d(TAG, "--> item found: " + item.toString())
-                if (item.uri.path.compareTo(Constants.SettingsPath) == 0) {
-                    val dataMap = DataMapItem.fromDataItem(item).dataMap
-                    val eventbuf = dataMap.getByteArray(Constants.DataKey)
-                    Log.d(TAG, "----> it's an event for us, nbytes: " + eventbuf!!.size)
-
-                    // the first time through, this seems to be null; weird, but at
-                    // least it's easy to ignore the nullness
-                    newEventBytes(eventbuf)
-                    savePreferences(eventbuf) // save this for subsequent restarts
+                        // the first time through, this seems to be null; weird, but at
+                        // least it's easy to ignore the nullness
+                        newEventBytes(eventbuf)
+                        savePreferences(eventbuf) // save this for subsequent restarts
+                    }
                 }
-            }
-        }
     }
 
     private fun initGoogle() {
         if (googleApiClient == null) {
             Log.v(TAG, "Trying to connect to GoogleApi")
-            googleApiClient = GoogleApiClient.Builder(this).addApi(Wearable.API).addConnectionCallbacks(this).addOnConnectionFailedListener(this).build()
-            googleApiClient!!.connect()
+            val tmpClient =  GoogleApiClient
+                    .Builder(this)
+                    .addApi(Wearable.API)
+                    .addConnectionCallbacks(this)
+                    .addOnConnectionFailedListener(this)
+                    .build()
+            tmpClient.connect()
+
+            googleApiClient = tmpClient
         }
     }
 
@@ -122,6 +127,12 @@ class WearReceiverService : WearableListenerService(), GoogleApiClient.Connectio
         Log.v(TAG, "Connected to Google Api Service")
     }
 
+    private fun killGoogleClient() {
+        val tmpClient = googleApiClient
+        if (tmpClient != null && tmpClient.isConnected)
+            tmpClient.disconnect()
+        googleApiClient = null
+    }
 
     override fun onConnectionSuspended(cause: Int) {
         // The connection has been interrupted.
@@ -130,9 +141,7 @@ class WearReceiverService : WearableListenerService(), GoogleApiClient.Connectio
 
         // Apparently unrelated to connections with the phone.
         Log.v(TAG, "suspended connection!")
-        if (googleApiClient != null && googleApiClient!!.isConnected)
-            googleApiClient!!.disconnect()
-        googleApiClient = null
+        killGoogleClient()
     }
 
     override fun onConnectionFailed(result: ConnectionResult) {
@@ -142,17 +151,15 @@ class WearReceiverService : WearableListenerService(), GoogleApiClient.Connectio
         // Apparently unrelated to connections with the phone.
 
         Log.v(TAG, "lost connection!")
-        if (googleApiClient != null && googleApiClient!!.isConnected)
-            googleApiClient!!.disconnect()
-        googleApiClient = null
+        killGoogleClient()
     }
 
     override fun onPeerConnected(peer: Node?) {
-        Log.v(TAG, "phone is connected!, " + peer!!.displayName)
+        Log.v(TAG, "phone is connected!, " + (peer?.displayName ?: "null peer"))
     }
 
     override fun onPeerDisconnected(peer: Node?) {
-        Log.v(TAG, "phone is disconnected!, " + peer!!.displayName)
+        Log.v(TAG, "phone is disconnected!, " + (peer?.displayName ?: "null peer"))
     }
 
     /**
