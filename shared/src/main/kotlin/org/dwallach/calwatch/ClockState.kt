@@ -45,6 +45,7 @@ class ClockState private constructor() : Observable() {
     fun setWireEventList(eventList: List<WireEvent>) {
         Log.v(TAG, "fresh calendar event list, " + eventList.size + " entries")
         val (visibleEventList, maxLevel) = clipToVisible(eventList)
+        Log.v(TAG, "--> " + visibleEventList + " visible events")
         this.eventList = eventList
         this.visibleEventList = visibleEventList
         this.maxLevel = maxLevel
@@ -118,8 +119,8 @@ class ClockState private constructor() : Observable() {
             }
 
             EventLayout.sanityTest(clippedEvents, tmpMaxLevel, "After new event layout")
-            Log.v(TAG, "maxLevel for new events: " + tmpMaxLevel)
-            Log.v(TAG, "number of new events: " + clippedEvents.size)
+            Log.v(TAG, "maxLevel for visible events: " + tmpMaxLevel)
+            Log.v(TAG, "number of visible events: " + clippedEvents.size)
 
             return Pair(clippedEvents, tmpMaxLevel)
         } else {

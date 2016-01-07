@@ -561,11 +561,7 @@ class ClockFace : Observer {
         stipplePathCache = null
         stippleTimeCache = -1
 
-        if (eventList != null)
-            for (eventWrapper in eventList!!) {
-                val pc = eventWrapper.pathCache
-                pc.set(null)
-            }
+        eventList?.forEach { it.pathCache.set(null) }
     }
 
     private var stippleTimeCache: Long = -1
@@ -599,12 +595,12 @@ class ClockFace : Observer {
 
         val time = TimeWrapper.localTime
 
-        for (eventWrapper in eventList!!) {
+        eventList?.forEach {
             val arcStart: Double
             val arcEnd: Double
-            val e = eventWrapper.wireEvent
-            val evMinLevel = eventWrapper.minLevel
-            val evMaxLevel = eventWrapper.maxLevel
+            val e = it.wireEvent
+            val evMinLevel = it.minLevel
+            val evMaxLevel = it.maxLevel
 
             val startTime = e.startTime
             val endTime = e.endTime
@@ -614,10 +610,10 @@ class ClockFace : Observer {
 
             // path caching happens inside drawRadialArc
 
-            val arcColor = eventWrapper.getPaint(ambientLowBit, ambientMode)
+            val arcColor = it.getPaint(ambientLowBit, ambientMode)
             val arcShadow = PaintCan[ambientLowBit, ambientMode, PaintCan.colorArcShadow]
 
-            drawRadialArc(canvas, eventWrapper.pathCache, arcStart, arcEnd,
+            drawRadialArc(canvas, it.pathCache, arcStart, arcEnd,
                     calendarRingMaxRadius - evMinLevel * calendarRingWidth / (maxLevel + 1),
                     calendarRingMaxRadius - (evMaxLevel + 1) * calendarRingWidth / (maxLevel + 1),
                     arcColor, arcShadow)
