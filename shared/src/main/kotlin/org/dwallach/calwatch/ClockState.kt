@@ -9,7 +9,6 @@ package org.dwallach.calwatch
 import android.util.Log
 
 import java.io.IOException
-import java.util.ArrayList
 import java.util.Observable
 
 class ClockState private constructor() : Observable() {
@@ -37,7 +36,11 @@ class ClockState private constructor() : Observable() {
 
     /**
      * Load the eventlist. This is meant to consume the output of the calendarFetcher,
-     * which is in GMT time, *not* local time.
+     * which is in GMT time, *not* local time. Note that this method will *not* notify
+     * any observers of the ClockState that the state has changed. This is because we
+     * expect setWireEventList() to be called from other threads. Instead, pingObservers()
+     * should be called externally, and only from the main UI thread. This is exactly what
+     * CalendarFetcher does.
      */
     fun setWireEventList(eventList: List<WireEvent>) {
         Log.v(TAG, "fresh calendar event list, " + eventList.size + " entries")
@@ -45,7 +48,6 @@ class ClockState private constructor() : Observable() {
         this.eventList = eventList
         this.visibleEventList = visibleEventList
         this.maxLevel = maxLevel
-//        pingObservers()
     }
 
     private var lastClipTime: Long = 0

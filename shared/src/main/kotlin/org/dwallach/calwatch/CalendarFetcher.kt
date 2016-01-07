@@ -101,6 +101,10 @@ class CalendarFetcher private constructor(private val contextRef: WeakReference<
         loaderHandlerRef.clear()
     }
 
+    /**
+     * This will start asynchronously loading the calendar. The results will eventually arrive
+     * in ClockState.
+     */
     fun rescan() {
         Log.v(TAG, "rescan")
         val loaderHandler = myHandler ?: return
