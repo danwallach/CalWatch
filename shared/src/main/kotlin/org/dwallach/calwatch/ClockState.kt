@@ -51,9 +51,15 @@ class ClockState private constructor() : Observable() {
     private var lastClipTime: Long = 0
 
     private fun recomputeVisibleEvents() {
+        if(!calendarPermission) return; // nothing we can do!
+
         // This is going to be called on every screen refresh, so it needs to be fast in the common case.
-        // The current solution is to measure the time and try to figure out whether we've ticked onto
+        // We're going to measure the time and try to figure out whether we've ticked onto
         // a new hour, which would mean that it's time to redo the visibility calculation.
+
+        // Note that we're looking at "local" time here, so this means that any event that causes
+        // us to change timezones will cause a difference in the hour and will also trigger the
+        // recomputation.
 
         val localClipTime = TimeWrapper.localFloorHour
 
@@ -64,6 +70,7 @@ class ClockState private constructor() : Observable() {
         // the old data alone while we fire off a request to reload the calendar. This might take
         // a whole second or two, but at least it's not happening on the main UI thread.
         // TODO verify if this is a good strategy
+
 
         lastClipTime = localClipTime
         CalendarFetcher.requestRescan()
