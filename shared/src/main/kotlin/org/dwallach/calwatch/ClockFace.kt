@@ -1109,9 +1109,8 @@ class ClockFace : Observer {
             val iFrac: Double = i.toDouble() / NON_LINEAR_TABLE_SIZE.toDouble()
             val thetaMinusPi2: Double = (iFrac - 0.5) * Math.PI
 
-            // two components here: the non-linear part (the first line) and then a linear
-            // part (the line below). This make sure we still have some motion. The second
-            // hand never entirely stops.
+            // two components here: the non-linear part (with Math.pow and Math.sin) and then a linear
+            // part (with iFrac). This make sure we still have some motion. The second hand never entirely stops.
             0.5 * Math.pow((1.0 + Math.sin(thetaMinusPi2)) / 2.0, 8.0) + 0.5 * iFrac
         }
 
