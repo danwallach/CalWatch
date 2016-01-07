@@ -22,9 +22,7 @@ import android.text.format.DateUtils
 import android.util.Log
 
 import java.lang.ref.WeakReference
-import java.util.ArrayList
-import java.util.Collections
-import java.util.Comparator
+import java.util.*
 
 class CalendarFetcher private constructor(private val contextRef: WeakReference<Context>, private val contentUri: Uri, private val authority: String) {
 
@@ -108,11 +106,11 @@ class CalendarFetcher private constructor(private val contextRef: WeakReference<
     /**
      * queries the calendar database with proper Android APIs (ugly stuff)
      */
-    fun loadContent(): List<WireEvent>? {
+    private fun loadContent(): List<WireEvent> {
         // local state which we'll eventually return
-        val cr = ArrayList<WireEvent>()
+        val cr = LinkedList<WireEvent>()
 
-        val context = context ?: return null
+        val context = context ?: return emptyList()
 
         // first, get the list of calendars
         Log.v(TAG, "starting to load content")
@@ -168,7 +166,7 @@ class CalendarFetcher private constructor(private val contextRef: WeakReference<
             }
 
 
-            if (cr.size > 1) {
+            if (cr.size > 0) {
                 // Primary sort: color, so events from the same calendar will become consecutive wedges
 
                 // Secondary sort: endTime, with objects ending earlier appearing first in the sort.
@@ -177,19 +175,13 @@ class CalendarFetcher private constructor(private val contextRef: WeakReference<
 
                 // Third-priority sort: startTime, with objects starting later (smaller) appearing first in the sort.
 
-
-                Collections.sort(cr, Comparator<org.dwallach.calwatch.WireEvent> { lhs, rhs ->
-                    if (lhs.displayColor != rhs.displayColor)
-                        return@Comparator lcompare(lhs.displayColor.toLong(), rhs.displayColor.toLong())
-
-                    if (lhs.endTime != rhs.endTime)
-                        return@Comparator lcompare(lhs.endTime, rhs.endTime)
-
-                    lcompare(rhs.startTime, lhs.startTime)
-                })
+                return cr.sortedWith(
+                        compareBy<WireEvent> { it.displayColor }
+                                .thenBy { it.endTime }
+                                .thenByDescending { it.startTime });
             }
 
-            return cr
+            return emptyList()
         } catch (e: SecurityException) {
             // apparently we don't have permission for the calendar!
             Log.e(TAG, "security exception while reading calendar!", e)
@@ -197,9 +189,8 @@ class CalendarFetcher private constructor(private val contextRef: WeakReference<
             val clockState = ClockState.getState()
             clockState.calendarPermission = false
 
-            return null
+            return emptyList()
         }
-
     }
 
     /**
@@ -225,9 +216,10 @@ class CalendarFetcher private constructor(private val contextRef: WeakReference<
             }
 
             val powerManager = context.getSystemService(Context.POWER_SERVICE) as PowerManager
-            wakeLock = powerManager.newWakeLock(
+            val tmpWakeLock = powerManager.newWakeLock(
                     PowerManager.PARTIAL_WAKE_LOCK, "CalWatchWakeLock")
-            wakeLock!!.acquire()
+            tmpWakeLock.acquire()
+            wakeLock = tmpWakeLock
 
             Log.v(TAG, "wake lock acquired")
 
@@ -252,10 +244,8 @@ class CalendarFetcher private constructor(private val contextRef: WeakReference<
         }
 
         private fun releaseWakeLock() {
-            if (wakeLock != null) {
-                wakeLock!!.release()
-                wakeLock = null
-            }
+            wakeLock?.release()
+            wakeLock = null
         }
     }
 
@@ -281,9 +271,7 @@ class CalendarFetcher private constructor(private val contextRef: WeakReference<
         }
 
         fun cancelLoaderTask() {
-            if (loaderTask != null) {
-                loaderTask!!.cancel(true)
-            }
+            loaderTask?.cancel(true)
         }
 
         override fun handleMessage(message: Message) {
@@ -299,7 +287,7 @@ class CalendarFetcher private constructor(private val contextRef: WeakReference<
                     Log.v(TAG, "launching calendar loader task")
 
                     loaderTask = CalLoaderTask(context, fetcher)
-                    loaderTask!!.execute()
+                    loaderTask?.execute()
                 }
                 else -> Log.e(TAG, "unexpected message: " + message.toString())
             }
@@ -312,15 +300,5 @@ class CalendarFetcher private constructor(private val contextRef: WeakReference<
 
     companion object {
         private val TAG = "CalendarFetcher"
-
-        // Arrgghh: java.util.Long.compare() isn't defined until API level 19 and we're trying
-        // to hit API level 17, thus we need this.
-        private fun lcompare(a: Long, b: Long): Int {
-            if (a < b)
-                return -1
-            if (a > b)
-                return 1
-            return 0
-        }
     }
 }

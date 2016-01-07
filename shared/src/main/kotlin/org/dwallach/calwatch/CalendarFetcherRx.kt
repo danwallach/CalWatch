@@ -13,27 +13,18 @@ import android.content.Context
 import android.content.Intent
 import android.content.IntentFilter
 import android.net.Uri
+import android.os.AsyncTask
+import android.os.Handler
 import android.os.Message
 import android.os.PowerManager
 import android.provider.CalendarContract
 import android.text.format.DateUtils
 import android.util.Log
-import rx.Observable
-import rx.Subscriber
-import rx.android.app.AppObservable
-import rx.android.schedulers.AndroidSchedulers
-import rx.schedulers.Schedulers
 
 import java.lang.ref.WeakReference
-import java.util.ArrayList
-import java.util.Collections
-import java.util.Comparator
+import java.util.*
 
-/**
- * A new implementation of the CalendarFetcher. The original one used AsyncTask and Handler. The
- * shiny new one uses Reactive-Functional Programming. Huzzah.
- */
-class RxCalendarFetcher private constructor(private val contextRef: WeakReference<Context>, private val contentUri: Uri, private val authority: String) {
+class CalenderFetcherRx private constructor(private val contextRef: WeakReference<Context>, private val contentUri: Uri, private val authority: String) {
 
     // public constructor takes a Context, but we don't want to keep that live; all we want to keep around is a weak reference to it,
     // thus the private constructor above and the delegation to it from the public constructor, below
@@ -43,8 +34,6 @@ class RxCalendarFetcher private constructor(private val contextRef: WeakReferenc
     // task to do all the dirty work and eventually update ClockState
     private val loaderHandlerRef: WeakReference<MyHandler>
     private var isReceiverRegistered: Boolean = false
-
-    private val wireEventStream: Observable<List<WireEvent>>
 
     private val broadcastReceiver = object : BroadcastReceiver() {
         override fun onReceive(context: Context, intent: Intent) {
@@ -80,44 +69,8 @@ class RxCalendarFetcher private constructor(private val contextRef: WeakReferenc
         context.registerReceiver(broadcastReceiver, filter)
         isReceiverRegistered = true
 
-        // Useful advice about Kotlin and Functional-Reactive programming:
-        // https://medium.com/@ahmedrizwan/rxandroid-and-kotlin-part-1-f0382dc26ed8
-
-        // Useful advice about Android-specific bindings
-        // http://blog.danlew.net/2014/10/08/grokking-rxjava-part-4/
-
-
-        wireEventStream = Observable.create(object : Observable.OnSubscribe<List<WireEvent>> {
-            override fun call(subscriber: Subscriber<in List<WireEvent>>) {
-                val context = contextRef.get()
-                if(context == null) {
-                    Log.e(TAG, "empty context, can't fetch calendar content")
-                    subscriber.onCompleted() // what else are we supposed to do?
-                }
-                val powerManager = context.getSystemService(Context.POWER_SERVICE) as PowerManager
-                val wakeLock = powerManager.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, "CalWatchWakeLock")
-
-                wakeLock.acquire()
-                subscriber.onNext(loadContent(context))
-                wakeLock.release()
-            }
-        })
-
-        AppObservable.bindActivity(broadcastReceiver, null)
-
-        wireEventStream
-            .subscribeOn(Schedulers.io())
-            .observeOn(AndroidSchedulers.mainThread())
-            .subscribe(object : Subscriber<List<WireEvent>>() {
-                override fun onCompleted() { }
-
-                override fun onError(e: Throwable?) { }
-
-                override fun onNext(t: List<WireEvent>?) {
-                    if(t != null)
-                        ClockState.getState().setWireEventList(t)
-                }
-            });
+        // kick off initial loading of calendar state
+        loaderHandlerRef.get().sendEmptyMessage(MyHandler.MSG_LOAD_CAL)
     }
 
     private val context: Context?
@@ -153,9 +106,11 @@ class RxCalendarFetcher private constructor(private val contextRef: WeakReferenc
     /**
      * queries the calendar database with proper Android APIs (ugly stuff)
      */
-    fun loadContent(context: Context): List<WireEvent> {
+    private fun loadContent(): List<WireEvent> {
         // local state which we'll eventually return
-        val cr = ArrayList<WireEvent>()
+        val cr = LinkedList<WireEvent>()
+
+        val context = context ?: return emptyList()
 
         // first, get the list of calendars
         Log.v(TAG, "starting to load content")
@@ -211,7 +166,7 @@ class RxCalendarFetcher private constructor(private val contextRef: WeakReferenc
             }
 
 
-            if (cr.size > 1) {
+            if (cr.size > 0) {
                 // Primary sort: color, so events from the same calendar will become consecutive wedges
 
                 // Secondary sort: endTime, with objects ending earlier appearing first in the sort.
@@ -220,19 +175,13 @@ class RxCalendarFetcher private constructor(private val contextRef: WeakReferenc
 
                 // Third-priority sort: startTime, with objects starting later (smaller) appearing first in the sort.
 
-
-                Collections.sort(cr, Comparator<org.dwallach.calwatch.WireEvent> { lhs, rhs ->
-                    if (lhs.displayColor != rhs.displayColor)
-                        return@Comparator lcompare(lhs.displayColor.toLong(), rhs.displayColor.toLong())
-
-                    if (lhs.endTime != rhs.endTime)
-                        return@Comparator lcompare(lhs.endTime, rhs.endTime)
-
-                    lcompare(rhs.startTime, lhs.startTime)
-                })
+                return cr.sortedWith(
+                        compareBy<WireEvent> { it.displayColor }
+                                .thenBy { it.endTime }
+                                .thenByDescending { it.startTime });
             }
 
-            return cr
+            return emptyList()
         } catch (e: SecurityException) {
             // apparently we don't have permission for the calendar!
             Log.e(TAG, "security exception while reading calendar!", e)
@@ -247,7 +196,7 @@ class RxCalendarFetcher private constructor(private val contextRef: WeakReferenc
     /**
      * Asynchronous task to load the calendar instances.
      */
-    class CalLoaderTask internal constructor(context: Context, private val fetcher: RxCalendarFetcher) : AsyncTask<Void, Void, List<WireEvent>>() {
+    class CalLoaderTask internal constructor(context: Context, private val fetcher: CalenderFetcherRx) : AsyncTask<Void, Void, List<WireEvent>>() {
         private var wakeLock: PowerManager.WakeLock? = null
 
         // using a weak-reference to the context rather than holding the context itself,
@@ -267,8 +216,10 @@ class RxCalendarFetcher private constructor(private val contextRef: WeakReferenc
             }
 
             val powerManager = context.getSystemService(Context.POWER_SERVICE) as PowerManager
-            wakeLock = powerManager.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, "CalWatchWakeLock")
-            wakeLock!!.acquire()
+            val tmpWakeLock = powerManager.newWakeLock(
+                    PowerManager.PARTIAL_WAKE_LOCK, "CalWatchWakeLock")
+            tmpWakeLock.acquire()
+            wakeLock = tmpWakeLock
 
             Log.v(TAG, "wake lock acquired")
 
@@ -293,10 +244,8 @@ class RxCalendarFetcher private constructor(private val contextRef: WeakReferenc
         }
 
         private fun releaseWakeLock() {
-            if (wakeLock != null) {
-                wakeLock!!.release()
-                wakeLock = null
-            }
+            wakeLock?.release()
+            wakeLock = null
         }
     }
 
@@ -310,7 +259,7 @@ class RxCalendarFetcher private constructor(private val contextRef: WeakReferenc
             return handler
         }
 
-    class MyHandler(context: Context, private val fetcher: RxCalendarFetcher) : Handler() {
+    class MyHandler(context: Context, private val fetcher: CalenderFetcherRx) : Handler() {
         private var loaderTask: AsyncTask<Void, Void, List<WireEvent>>? = null
 
         // using a weak-reference to the context rather than holding the context itself,
@@ -322,9 +271,7 @@ class RxCalendarFetcher private constructor(private val contextRef: WeakReferenc
         }
 
         fun cancelLoaderTask() {
-            if (loaderTask != null) {
-                loaderTask!!.cancel(true)
-            }
+            loaderTask?.cancel(true)
         }
 
         override fun handleMessage(message: Message) {
@@ -340,7 +287,7 @@ class RxCalendarFetcher private constructor(private val contextRef: WeakReferenc
                     Log.v(TAG, "launching calendar loader task")
 
                     loaderTask = CalLoaderTask(context, fetcher)
-                    loaderTask!!.execute()
+                    loaderTask?.execute()
                 }
                 else -> Log.e(TAG, "unexpected message: " + message.toString())
             }
@@ -352,16 +299,6 @@ class RxCalendarFetcher private constructor(private val contextRef: WeakReferenc
     }
 
     companion object {
-        private val TAG = "RxCalendarFetcher"
-
-        // Arrgghh: java.util.Long.compare() isn't defined until API level 19 and we're trying
-        // to hit API level 17, thus we need this.
-        private fun lcompare(a: Long, b: Long): Int {
-            if (a < b)
-                return -1
-            if (a > b)
-                return 1
-            return 0
-        }
+        private val TAG = "CalenderFetcherRx"
     }
 }
