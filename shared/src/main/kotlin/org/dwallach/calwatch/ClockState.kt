@@ -35,6 +35,13 @@ class ClockState private constructor() : Observable() {
 
 
     /**
+     * Helper function to determine if we need subsecond refresh intervals.
+     */
+    fun subSecondRefreshNeeded(face: ClockFace?) =
+        // if the second-hand is supposed to be rendered and we're not in ambient mode
+        showSeconds && !(face?.ambientMode ?: false)
+
+    /**
      * Load the eventlist. This is meant to consume the output of the calendarFetcher,
      * which is in GMT time, *not* local time. Note that this method will *not* notify
      * any observers of the ClockState that the state has changed. This is because we

@@ -60,19 +60,6 @@ class CalWatchFaceService : CanvasWatchFaceService() {
         private var clockFace: ClockFace? = null
         private var calendarFetcher: CalendarFetcher? = null
 
-        private fun subSecondRefreshNeeded(): Boolean {
-            val clockState = ClockState.getState()
-
-            // if the second-hand is supposed to be rendered and we're not in ambient mode
-            var result = clockState.showSeconds
-
-            if (clockFace != null) {
-                result = result && !clockFace!!.ambientMode
-            }
-
-            return result
-        }
-
         fun calendarPermissionUpdate() {
             initCalendarFetcher()
         }
@@ -257,7 +244,7 @@ class CalWatchFaceService : CanvasWatchFaceService() {
 
             // Draw every frame as long as we're visible and doing the sweeping second hand,
             // otherwise the timer will take care of it.
-            if (isVisible && subSecondRefreshNeeded())
+            if (isVisible && ClockState.getState().subSecondRefreshNeeded(clockFace))
                 invalidate()
         }
 

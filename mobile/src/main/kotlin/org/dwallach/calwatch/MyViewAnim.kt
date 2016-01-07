@@ -42,24 +42,6 @@ class MyViewAnim(context: Context, attrs: AttributeSet) : View(context, attrs), 
         }
     }
 
-    private fun subsecondRefreshNeeded(): Boolean {
-        var needed = false
-        val clockState = ClockState.getState()
-
-        if (!visible)
-            return false
-
-        // refreshes needed even if we're in ambient mode
-        if (clockFace != null) {
-            needed = clockFace!!.ambientMode
-        }
-
-        // and especially if we're got the seconds hand showing
-        needed = needed || clockState.showSeconds
-
-        return needed
-    }
-
     /**
      * Callback from ClockState if something changes, which means we'll need
      * to redraw.
@@ -209,9 +191,7 @@ class MyViewAnim(context: Context, attrs: AttributeSet) : View(context, attrs), 
                 Log.e(TAG, "Something blew up while drawing", t)
         }
 
-        // Draw every frame as long as we're visible and doing the sweeping second hand,
-        // otherwise the timer will take care of it.
-        if (subsecondRefreshNeeded())
+        if (ClockState.getState().subSecondRefreshNeeded(clockFace))
             invalidate()
     }
 
