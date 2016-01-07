@@ -32,7 +32,7 @@ class CalendarFetcher private constructor(private val contextRef: WeakReference<
 
     // this will fire when it's time to (re)load the calendar, launching an asynchronous
     // task to do all the dirty work and eventually update ClockState
-    private val loaderHandlerRef: WeakReference<MyHandler>
+    private val loaderHandler: MyHandler
     private var isReceiverRegistered: Boolean = false
 
     private val broadcastReceiver = object : BroadcastReceiver() {
@@ -56,7 +56,7 @@ class CalendarFetcher private constructor(private val contextRef: WeakReference<
 
     init {
         val context = contextRef.get()
-        this.loaderHandlerRef = WeakReference(MyHandler(context, this))
+        this.loaderHandler = MyHandler(context, this)
         singletonFetcherRef = WeakReference(this)
 
         // hook into watching the calendar (code borrowed from Google's calendar wear app)
@@ -91,23 +91,26 @@ class CalendarFetcher private constructor(private val contextRef: WeakReference<
             isReceiverRegistered = false
         }
 
-        val loaderHandler = myHandler
+        loaderHandler.cancelLoaderTask()
+        loaderHandler.removeMessages(MyHandler.MSG_LOAD_CAL)
 
-        if (loaderHandler != null) {
-            loaderHandler.cancelLoaderTask()
-            loaderHandler.removeMessages(MyHandler.MSG_LOAD_CAL)
-        }
-
-        loaderHandlerRef.clear()
+        scanInProgress = false
     }
 
+    private var scanInProgress: Boolean = false
     /**
      * This will start asynchronously loading the calendar. The results will eventually arrive
      * in ClockState.
      */
     fun rescan() {
-        Log.v(TAG, "rescan")
-        val loaderHandler = myHandler ?: return
+        if(scanInProgress) {
+            Log.v(TAG, "rescan already in progress, redundant rescan request ignored")
+            return
+        } else {
+            Log.v(TAG, "rescan")
+        }
+
+        scanInProgress = true
 
         loaderHandler.cancelLoaderTask()
         loaderHandler.sendEmptyMessage(MyHandler.MSG_LOAD_CAL)
@@ -244,6 +247,7 @@ class CalendarFetcher private constructor(private val contextRef: WeakReference<
 
         override fun onPostExecute(results: Throwable?) {
             releaseWakeLock()
+            fetcher.scanInProgress = false // we're done!
             ClockState.getState().pingObservers() // now that we're back on the main thread we can notify people of the changes
 
             Log.v(TAG, "wake lock released")
@@ -260,16 +264,6 @@ class CalendarFetcher private constructor(private val contextRef: WeakReference<
         }
     }
 
-
-    private val myHandler: MyHandler?
-        get() {
-            val handler = loaderHandlerRef.get()
-            if (handler == null) {
-                Log.e(TAG, "no handler available")
-            }
-            return handler
-        }
-
     class MyHandler(context: Context, private val fetcher: CalendarFetcher) : Handler() {
         private var loaderTask: AsyncTask<Void, Void, Throwable?>? = null
 
@@ -283,6 +277,7 @@ class CalendarFetcher private constructor(private val contextRef: WeakReference<
 
         fun cancelLoaderTask() {
             loaderTask?.cancel(true)
+            loaderTask = null
         }
 
         override fun handleMessage(message: Message) {
