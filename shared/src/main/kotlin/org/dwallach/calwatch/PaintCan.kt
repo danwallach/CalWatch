@@ -134,12 +134,12 @@ object PaintCan {
             lpalette[style][colorBlackFill] = newPaint(Color.BLACK, style, textSize, lineWidth)
             lpalette[style][colorSmallShadow] = newPaint(Color.BLACK, style, smTextSize, lineWidth / 4f)
 
-            // TODO: fix: the Java -> Kotlin converter turned these nice hex numbers into base-10
-            lpalette[style][colorStopwatchSeconds] = newPaint(-8346638, style, smTextSize, lineWidth / 8f)  // light blue
-            lpalette[style][colorStopwatchStroke] = newPaint(-8346638, style, smTextSize, lineWidth / 3f)  // light blue
-            lpalette[style][colorStopwatchFill] = newPaint(-1870617614, style, smTextSize, lineWidth / 3f)  // light blue + transparency
-            lpalette[style][colorTimerStroke] = newPaint(-864384, style, smTextSize, lineWidth / 3f) // orange-ish
-            lpalette[style][colorTimerFill] = newPaint(-1863135360, style, smTextSize, lineWidth / 3f) // orange-ish + transparency
+            // toInt because of a Kotlin bug: https://youtrack.jetbrains.com/issue/KT-4749
+            lpalette[style][colorStopwatchSeconds] = newPaint(0xFF80A3F2.toInt(), style, smTextSize, lineWidth / 8f)  // light blue
+            lpalette[style][colorStopwatchStroke] = newPaint(0xFF80A3F2.toInt(), style, smTextSize, lineWidth / 3f)  // light blue
+            lpalette[style][colorStopwatchFill] = newPaint(0x9080A3F2.toInt(), style, smTextSize, lineWidth / 3f)  // light blue + transparency
+            lpalette[style][colorTimerStroke] = newPaint(0xFFF2CF80.toInt(), style, smTextSize, lineWidth / 3f) // orange-ish
+            lpalette[style][colorTimerFill] = newPaint(0x90F2CF80.toInt(), style, smTextSize, lineWidth / 3f) // orange-ish + transparency
 
             // shadows are stroke, not fill, so we fix that here
             lpalette[style][colorSecondHandShadow]?.style = Paint.Style.STROKE
@@ -189,9 +189,8 @@ object PaintCan {
     }
 
     private fun argbToLuminance(argb: Int): Float {
-        // TODO: fix: the Java -> Kotlin converter turned these nice hex numbers into base-10
-        val r = argb and 16711680 shr 16
-        val g = argb and 65280 shr 8
+        val r = (argb and 0xff0000) shr 16
+        val g = (argb and 0xff00) shr 8
         val b = argb and 255
 
         val fr = r / 255.0f
@@ -200,14 +199,6 @@ object PaintCan {
 
         // Many different codes (for reference):
         // http://www.f4.fhtw-berlin.de/~barthel/ImageJ/ColorInspector/HTMLHelp/farbraumJava.htm
-
-        // This code is an approximation of the CIE spec for sRGB -> luminance. The real spec has even
-        // more complexity for the gamma conversion. In practice, this seems to yield very dark colors,
-        // so we're going with the computationally cheaper and pragmatically prettier YUV conversion.
-        // float fy = (float) (.2126f * Math.pow(fr, gamma) + .7152f * Math.pow(fg, gamma) + .0722f * Math.pow(fb, gamma));
-
-        // This line is from the YUV variant, which leaves out the gamma correction and gives less
-        // weight to green. Seems to look better in practice even if it's "wrong".
         var fy = .299f * fr + .587f * fg + .114f * fb
 
         // clipping shouldn't be necessary, but paranoia is warranted
@@ -218,7 +209,7 @@ object PaintCan {
     }
 
     private fun argbToGreyARGB(argb: Int): Int {
-        val a = argb and -16777216 shr 24
+        val a = (argb and 0xff000000.toInt()) shr 24 // toInt because of a Kotlin bug: https://youtrack.jetbrains.com/issue/KT-4749
         val y = (argbToLuminance(argb) * 255f).toInt()
         return a shl 24 or (y shl 16) or (y shl 8) or y
     }
