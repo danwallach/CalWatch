@@ -188,16 +188,14 @@ class ClockState private constructor() : Observable() {
 
     private fun debugDump() {
         Log.v(TAG, "All events in the DB:")
-        if(eventList != null)
-            for (e in eventList!!) {
-                Log.v(TAG, "--> displayColor(" + Integer.toHexString(e.displayColor) + "), startTime(" + e.startTime + "), endTime(" + e.endTime + ")")
-            }
+        eventList?.forEach {
+            Log.v(TAG, "--> displayColor(" + Integer.toHexString(it.displayColor) + "), startTime(" + it.startTime + "), endTime(" + it.endTime + ")")
+        }
 
         Log.v(TAG, "Visible:")
-        if(visibleEventList != null)
-            for (e in visibleEventList!!) {
-                Log.v(TAG, "--> displayColor(" + Integer.toHexString(e.wireEvent.displayColor) + "), minLevel(" + e.minLevel + "), maxLevel(" + e.maxLevel + "), startTime(" + e.wireEvent.startTime + "), endTime(" + e.wireEvent.endTime + ")")
-            }
+        visibleEventList?.forEach {
+            Log.v(TAG, "--> displayColor(" + Integer.toHexString(it.wireEvent.displayColor) + "), minLevel(" + it.minLevel + "), maxLevel(" + it.maxLevel + "), startTime(" + it.wireEvent.startTime + "), endTime(" + it.wireEvent.endTime + ")")
+        }
     }
 
     companion object {

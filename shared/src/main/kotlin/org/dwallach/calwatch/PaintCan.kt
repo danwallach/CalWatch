@@ -27,7 +27,7 @@ object PaintCan {
         if (map == null)
             map = SparseArray<Paint>()
 
-        retPaint = map!!.get(argbInt)
+        retPaint = map?.get(argbInt) ?: null
         if (retPaint == null) {
             retPaint = Paint(Paint.ANTI_ALIAS_FLAG)
             retPaint.strokeJoin = Paint.Join.BEVEL
@@ -118,55 +118,58 @@ object PaintCan {
 
         // TODO: redo this in a functional or at least immediate way
 
-        palette = Array(styleMax + 1) { arrayOfNulls<Paint>(colorMax + 1) }
+        val lpalette = Array(styleMax + 1) { arrayOfNulls<Paint>(colorMax + 1) }
 
         for (style in 0..styleMax) {
-            palette!![style][colorBatteryLow] = newPaint(Color.YELLOW, style, smTextSize, lineWidth / 3f)
-            palette!![style][colorBatteryCritical] = newPaint(Color.RED, style, smTextSize, lineWidth / 3f)
-            palette!![style][colorSecondHand] = newPaint(Color.RED, style, smTextSize, lineWidth / 3f)
-            palette!![style][colorSecondHandShadow] = newPaint(Color.BLACK, style, smTextSize, lineWidth / 8f)
-            palette!![style][colorMinuteHand] = newPaint(Color.WHITE, style, textSize, lineWidth)
-            palette!![style][colorHourHand] = newPaint(Color.WHITE, style, textSize, lineWidth * 1.5f)
-            palette!![style][colorArcShadow] = newPaint(Color.BLACK, style, smTextSize, lineWidth / 6f)
-            palette!![style][colorSmallTextAndLines] = newPaint(Color.WHITE, style, smTextSize, lineWidth / 3f)
-            palette!![style][colorBigTextAndLines] = newPaint(Color.WHITE, style, textSize, lineWidth)
-            palette!![style][colorBigShadow] = newPaint(Color.BLACK, style, textSize, lineWidth / 2f)
-            palette!![style][colorBlackFill] = newPaint(Color.BLACK, style, textSize, lineWidth)
-            palette!![style][colorSmallShadow] = newPaint(Color.BLACK, style, smTextSize, lineWidth / 4f)
+            lpalette[style][colorBatteryLow] = newPaint(Color.YELLOW, style, smTextSize, lineWidth / 3f)
+            lpalette[style][colorBatteryCritical] = newPaint(Color.RED, style, smTextSize, lineWidth / 3f)
+            lpalette[style][colorSecondHand] = newPaint(Color.RED, style, smTextSize, lineWidth / 3f)
+            lpalette[style][colorSecondHandShadow] = newPaint(Color.BLACK, style, smTextSize, lineWidth / 8f)
+            lpalette[style][colorMinuteHand] = newPaint(Color.WHITE, style, textSize, lineWidth)
+            lpalette[style][colorHourHand] = newPaint(Color.WHITE, style, textSize, lineWidth * 1.5f)
+            lpalette[style][colorArcShadow] = newPaint(Color.BLACK, style, smTextSize, lineWidth / 6f)
+            lpalette[style][colorSmallTextAndLines] = newPaint(Color.WHITE, style, smTextSize, lineWidth / 3f)
+            lpalette[style][colorBigTextAndLines] = newPaint(Color.WHITE, style, textSize, lineWidth)
+            lpalette[style][colorBigShadow] = newPaint(Color.BLACK, style, textSize, lineWidth / 2f)
+            lpalette[style][colorBlackFill] = newPaint(Color.BLACK, style, textSize, lineWidth)
+            lpalette[style][colorSmallShadow] = newPaint(Color.BLACK, style, smTextSize, lineWidth / 4f)
 
-            palette!![style][colorStopwatchSeconds] = newPaint(-8346638, style, smTextSize, lineWidth / 8f)  // light blue
-            palette!![style][colorStopwatchStroke] = newPaint(-8346638, style, smTextSize, lineWidth / 3f)  // light blue
-            palette!![style][colorStopwatchFill] = newPaint(-1870617614, style, smTextSize, lineWidth / 3f)  // light blue + transparency
-            palette!![style][colorTimerStroke] = newPaint(-864384, style, smTextSize, lineWidth / 3f) // orange-ish
-            palette!![style][colorTimerFill] = newPaint(-1863135360, style, smTextSize, lineWidth / 3f) // orange-ish + transparency
+            // TODO: fix: the Java -> Kotlin converter turned these nice hex numbers into base-10
+            lpalette[style][colorStopwatchSeconds] = newPaint(-8346638, style, smTextSize, lineWidth / 8f)  // light blue
+            lpalette[style][colorStopwatchStroke] = newPaint(-8346638, style, smTextSize, lineWidth / 3f)  // light blue
+            lpalette[style][colorStopwatchFill] = newPaint(-1870617614, style, smTextSize, lineWidth / 3f)  // light blue + transparency
+            lpalette[style][colorTimerStroke] = newPaint(-864384, style, smTextSize, lineWidth / 3f) // orange-ish
+            lpalette[style][colorTimerFill] = newPaint(-1863135360, style, smTextSize, lineWidth / 3f) // orange-ish + transparency
 
             // shadows are stroke, not fill, so we fix that here
-            palette!![style][colorSecondHandShadow]?.style = Paint.Style.STROKE
-            palette!![style][colorArcShadow]?.style = Paint.Style.STROKE
-            palette!![style][colorSmallShadow]?.style = Paint.Style.STROKE
-            palette!![style][colorBigShadow]?.style = Paint.Style.STROKE
-            palette!![style][colorStopwatchStroke]?.style = Paint.Style.STROKE
-            palette!![style][colorTimerStroke]?.style = Paint.Style.STROKE
+            lpalette[style][colorSecondHandShadow]?.style = Paint.Style.STROKE
+            lpalette[style][colorArcShadow]?.style = Paint.Style.STROKE
+            lpalette[style][colorSmallShadow]?.style = Paint.Style.STROKE
+            lpalette[style][colorBigShadow]?.style = Paint.Style.STROKE
+            lpalette[style][colorStopwatchStroke]?.style = Paint.Style.STROKE
+            lpalette[style][colorTimerStroke]?.style = Paint.Style.STROKE
 
             // by default, text is centered, but some styles want it on the left
             // (these are the places where we'll eventually have to do more work for RTL languages)
-            palette!![style][colorSmallTextAndLines]?.textAlign = Paint.Align.LEFT
-            palette!![style][colorSmallShadow]?.textAlign = Paint.Align.LEFT
+            lpalette[style][colorSmallTextAndLines]?.textAlign = Paint.Align.LEFT
+            lpalette[style][colorSmallShadow]?.textAlign = Paint.Align.LEFT
         }
 
         // a couple things that are backwards for low-bit mode: we'll be drawing some "shadows" as
         // white outlines around black centers, "hollowing out" the hands as we're supposed to do
-        palette!![styleLowBit][colorSecondHandShadow]?.color = Color.WHITE
-        palette!![styleLowBit][colorSecondHandShadow]?.strokeWidth = lineWidth / 6f
-        palette!![styleLowBit][colorMinuteHand]?.color = Color.BLACK
-        palette!![styleLowBit][colorHourHand]?.color = Color.BLACK
-        palette!![styleLowBit][colorArcShadow]?.color = Color.WHITE
-        palette!![styleLowBit][colorSmallShadow]?.color = Color.WHITE
-        palette!![styleLowBit][colorBigShadow]?.color = Color.WHITE
-        palette!![styleLowBit][colorTimerFill]?.color = Color.BLACK
-        palette!![styleLowBit][colorStopwatchFill]?.color = Color.BLACK
-        palette!![styleLowBit][colorTimerStroke]?.strokeWidth = lineWidth / 6f
-        palette!![styleLowBit][colorStopwatchStroke]?.strokeWidth = lineWidth / 6f
+        lpalette[styleLowBit][colorSecondHandShadow]?.color = Color.WHITE
+        lpalette[styleLowBit][colorSecondHandShadow]?.strokeWidth = lineWidth / 6f
+        lpalette[styleLowBit][colorMinuteHand]?.color = Color.BLACK
+        lpalette[styleLowBit][colorHourHand]?.color = Color.BLACK
+        lpalette[styleLowBit][colorArcShadow]?.color = Color.WHITE
+        lpalette[styleLowBit][colorSmallShadow]?.color = Color.WHITE
+        lpalette[styleLowBit][colorBigShadow]?.color = Color.WHITE
+        lpalette[styleLowBit][colorTimerFill]?.color = Color.BLACK
+        lpalette[styleLowBit][colorStopwatchFill]?.color = Color.BLACK
+        lpalette[styleLowBit][colorTimerStroke]?.strokeWidth = lineWidth / 6f
+        lpalette[styleLowBit][colorStopwatchStroke]?.strokeWidth = lineWidth / 6f
+
+        palette = lpalette
     }
 
     operator fun get(style: Int, colorID: Int): Paint {
@@ -186,6 +189,7 @@ object PaintCan {
     }
 
     private fun argbToLuminance(argb: Int): Float {
+        // TODO: fix: the Java -> Kotlin converter turned these nice hex numbers into base-10
         val r = argb and 16711680 shr 16
         val g = argb and 65280 shr 8
         val b = argb and 255
