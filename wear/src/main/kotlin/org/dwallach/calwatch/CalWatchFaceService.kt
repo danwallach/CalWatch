@@ -125,10 +125,18 @@ class CalWatchFaceService : CanvasWatchFaceService() {
             // announce our version number to the logs
             VersionWrapper.logVersion(this@CalWatchFaceService)
 
-            setWatchFaceStyle(WatchFaceStyle.Builder(this@CalWatchFaceService).setCardPeekMode(WatchFaceStyle.PEEK_MODE_SHORT).setBackgroundVisibility(WatchFaceStyle.BACKGROUND_VISIBILITY_INTERRUPTIVE).setShowSystemUiTime(false).setStatusBarGravity(Gravity.CENTER).setHotwordIndicatorGravity(Gravity.CENTER_HORIZONTAL) // not particularly precise, but seems reasonable
-                    .setViewProtectionMode(WatchFaceStyle.PROTECT_HOTWORD_INDICATOR or WatchFaceStyle.PROTECT_STATUS_BAR).setPeekOpacityMode// the features below were added in Wear 5.1 (maybe 5.0?) and seem worth tweaking
-            (WatchFaceStyle.PEEK_OPACITY_MODE_TRANSLUCENT).setShowUnreadCountIndicator(true).setAcceptsTapEvents// we need tap events for permission requests
-            (true).build())
+            setWatchFaceStyle(
+                    WatchFaceStyle.Builder(this@CalWatchFaceService)
+                    .setCardPeekMode(WatchFaceStyle.PEEK_MODE_SHORT)
+                    .setBackgroundVisibility(WatchFaceStyle.BACKGROUND_VISIBILITY_INTERRUPTIVE)
+                    .setShowSystemUiTime(false)
+                    .setStatusBarGravity(Gravity.CENTER)
+                    .setHotwordIndicatorGravity(Gravity.CENTER_HORIZONTAL) // not particularly precise, but seems reasonable
+                    .setViewProtectionMode(WatchFaceStyle.PROTECT_HOTWORD_INDICATOR or WatchFaceStyle.PROTECT_STATUS_BAR)
+                    .setPeekOpacityMode(WatchFaceStyle.PEEK_OPACITY_MODE_TRANSLUCENT) // the features below were added in Wear 5.1 (maybe 5.0?) and seem worth tweaking
+                    .setShowUnreadCountIndicator(true)
+                    .setAcceptsTapEvents(true)// we need tap events for permission requests
+                    .build())
 
             XWatchfaceReceiver.pingExternalStopwatches(this@CalWatchFaceService)
             BatteryWrapper.init(this@CalWatchFaceService)

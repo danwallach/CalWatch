@@ -49,10 +49,7 @@ class CalendarFetcher private constructor(private val contextRef: WeakReference<
                 // Solution? Screw it. Whatever we get, we don't care, we'll reload the calendar.
 
                 Log.v(TAG, "receiver: time to load new calendar data")
-                val loaderHandler = myHandler ?: return
-
-                loaderHandler.cancelLoaderTask()
-                loaderHandler.sendEmptyMessage(MyHandler.MSG_LOAD_CAL)
+                rescan()
             }
         }
     }
@@ -60,6 +57,7 @@ class CalendarFetcher private constructor(private val contextRef: WeakReference<
     init {
         val context = contextRef.get()
         this.loaderHandlerRef = WeakReference(MyHandler(context, this))
+        singletonFetcherRef = WeakReference(this)
 
         // hook into watching the calendar (code borrowed from Google's calendar wear app)
         Log.v(TAG, "setting up intent receiver")
@@ -70,7 +68,7 @@ class CalendarFetcher private constructor(private val contextRef: WeakReference<
         isReceiverRegistered = true
 
         // kick off initial loading of calendar state
-        loaderHandlerRef.get().sendEmptyMessage(MyHandler.MSG_LOAD_CAL)
+        rescan()
     }
 
     private val context: Context?
@@ -101,6 +99,14 @@ class CalendarFetcher private constructor(private val contextRef: WeakReference<
         }
 
         loaderHandlerRef.clear()
+    }
+
+    fun rescan() {
+        Log.v(TAG, "rescan")
+        val loaderHandler = myHandler ?: return
+
+        loaderHandler.cancelLoaderTask()
+        loaderHandler.sendEmptyMessage(MyHandler.MSG_LOAD_CAL)
     }
 
     /**
@@ -196,7 +202,7 @@ class CalendarFetcher private constructor(private val contextRef: WeakReference<
     /**
      * Asynchronous task to load the calendar instances.
      */
-    class CalLoaderTask internal constructor(context: Context, private val fetcher: CalendarFetcher) : AsyncTask<Void, Void, List<WireEvent>>() {
+    class CalLoaderTask internal constructor(context: Context, private val fetcher: CalendarFetcher) : AsyncTask<Void, Void, Throwable?>() {
         private var wakeLock: PowerManager.WakeLock? = null
 
         // using a weak-reference to the context rather than holding the context itself,
@@ -207,7 +213,7 @@ class CalendarFetcher private constructor(private val contextRef: WeakReference<
             this.contextRef = WeakReference(context)
         }
 
-        override fun doInBackground(vararg voids: Void): List<WireEvent>? {
+        override fun doInBackground(vararg voids: Void): Throwable? {
             val context = contextRef.get()
 
             if (context == null) {
@@ -223,19 +229,20 @@ class CalendarFetcher private constructor(private val contextRef: WeakReference<
 
             Log.v(TAG, "wake lock acquired")
 
-            return fetcher.loadContent()
+            try {
+                ClockState.getState().setWireEventList(fetcher.loadContent())
+                return null;
+            } catch (t: Throwable) {
+                Log.e(TAG, "unexpected failure setting wire event list from calendar", t)
+                return t;
+            }
         }
 
-        override fun onPostExecute(results: List<WireEvent>) {
+        override fun onPostExecute(results: Throwable?) {
             releaseWakeLock()
+            ClockState.getState().pingObservers() // now that we're back on the main thread we can notify people of the changes
 
             Log.v(TAG, "wake lock released")
-
-            try {
-                ClockState.getState().setWireEventList(results)
-            } catch (t: Throwable) {
-                Log.e(TAG, "unexpected failure setting wire event list from calendar")
-            }
 
         }
 
@@ -260,7 +267,7 @@ class CalendarFetcher private constructor(private val contextRef: WeakReference<
         }
 
     class MyHandler(context: Context, private val fetcher: CalendarFetcher) : Handler() {
-        private var loaderTask: AsyncTask<Void, Void, List<WireEvent>>? = null
+        private var loaderTask: AsyncTask<Void, Void, Throwable?>? = null
 
         // using a weak-reference to the context rather than holding the context itself,
         // per http://www.androiddesignpatterns.com/2013/01/inner-class-handler-memory-leak.html
@@ -294,11 +301,17 @@ class CalendarFetcher private constructor(private val contextRef: WeakReference<
         }
 
         companion object {
-            val MSG_LOAD_CAL = 1
+            const val MSG_LOAD_CAL = 1
         }
     }
 
     companion object {
-        private val TAG = "CalendarFetcher"
+        private const val TAG = "CalendarFetcher"
+        private var singletonFetcherRef: WeakReference<CalendarFetcher>? = null
+
+        fun requestRescan() {
+            Log.i(TAG, "requestRescan")
+            singletonFetcherRef?.get()?.rescan()
+        }
     }
 }

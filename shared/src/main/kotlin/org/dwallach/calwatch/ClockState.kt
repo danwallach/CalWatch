@@ -17,10 +17,10 @@ class ClockState private constructor() : Observable() {
     var showSeconds: Boolean = Constants.DefaultShowSeconds
     var showDayDate: Boolean = Constants.DefaultShowDayDate
 
-    private var eventList: List<EventWrapper>? = null
+    private var eventList: List<WireEvent>? = null
     private var visibleEventList: List<EventWrapper>? = null
 
-    var maxLevel = 0
+    var maxLevel: Int = 0
         private set
 
     /**
@@ -39,134 +39,101 @@ class ClockState private constructor() : Observable() {
      * Load the eventlist. This is meant to consume the output of the calendarFetcher,
      * which is in GMT time, *not* local time.
      */
-    fun setWireEventList(wireEventList: List<WireEvent>) {
-        val results = ArrayList<EventWrapper>()
-
-        for (wireEvent in wireEventList)
-            results.add(EventWrapper(wireEvent))
-
-        this.eventList = results
-        this.visibleEventList = null
-        pingObservers()
-        Log.v(TAG, "new calendar event list, " + results.size + " entries")
+    fun setWireEventList(eventList: List<WireEvent>) {
+        Log.v(TAG, "fresh calendar event list, " + eventList.size + " entries")
+        val (visibleEventList, maxLevel) = clipToVisible(eventList)
+        this.eventList = eventList
+        this.visibleEventList = visibleEventList
+        this.maxLevel = maxLevel
+//        pingObservers()
     }
 
     private var lastClipTime: Long = 0
 
-    private fun computeVisibleEvents() {
-        //        if(eventList == null) {
-        //            Log.v(TAG, "no events to compute visibility over, going with empty list for now");
-        //        }
-
+    private fun recomputeVisibleEvents() {
         // This is going to be called on every screen refresh, so it needs to be fast in the common case.
         // The current solution is to measure the time and try to figure out whether we've ticked onto
-        // a new hour, which would mean that it's time to redo the visibility calculation. If new events
-        // showed up for whatever other reason, then that would have nuked visibleEventList, so we'll
-        // recompute that here as well.
+        // a new hour, which would mean that it's time to redo the visibility calculation.
 
-        //        Log.v(TAG, "starting event pool: " + eventList.size());
+        val localClipTime = TimeWrapper.localFloorHour
 
+        if (lastClipTime == localClipTime)
+            return
+
+        // If we get here, that means we hit the top of a new hour. We're experimentally leaving
+        // the old data alone while we fire off a request to reload the calendar. This might take
+        // a whole second or two, but at least it's not happening on the main UI thread.
+        // TODO verify if this is a good strategy
+
+        lastClipTime = localClipTime
+        CalendarFetcher.requestRescan()
+    }
+
+    /**
+     * Given a list of events, return another list that corresponds to the set of
+     * events visible in the next twelve hours, with events that would be off-screen
+     * clipped to the 12-hour dial.
+     */
+    private fun clipToVisible(events: List<WireEvent>): Pair<List<EventWrapper>, Int> {
         val gmtOffset = TimeWrapper.gmtOffset
 
         val localClipTime = TimeWrapper.localFloorHour
         val clipStartMillis = localClipTime - gmtOffset // convert from localtime back to GMT time for looking at events
         val clipEndMillis = clipStartMillis + 43200000  // 12 hours later
 
-        val oldVisibleEventList = visibleEventList
-//        if (oldVisibleEventList != null)
-//            EventLayout.sanityTest(oldVisibleEventList, this.maxLevel, "Before clipping")
-
-        // this used to compare to the GMT version (clipStartMillis), but this caused incorrect behavior
-        // when the watch suddenly updated itself for a new timezone. Comparing to the *local* time
-        // is the right answer.
-        if (lastClipTime == localClipTime && oldVisibleEventList != null)
-            return  // we've already done it, and we've got a cache of the results
-
-        //        Log.v(TAG, "clipStart: " + TimeWrapper.formatGMTTime(clipStartMillis) + " (" + clipStartMillis +
-        //                "), clipEnd: " + TimeWrapper.formatGMTTime(clipEndMillis) + " (" + clipEndMillis + ")");
-
-        lastClipTime = localClipTime
-
-        var tmpVisibleEventList = ArrayList<EventWrapper>()
-        val oldEventList = eventList
-
-        if(oldEventList != null) {
-            Log.v(TAG, "clipping " + oldEventList.size + " raw events to fit the screen")
-
-            // TODO: redo all of this using standard functional programming rather than mutable lists
-
-            for (eventWrapper in oldEventList) {
-                val e = eventWrapper.wireEvent
-                var startTime = e.startTime
-                var endTime = e.endTime
-
-                //                Log.v(TAG, "New event: startTime: " + TimeWrapper.formatGMTTime(startTime) +
-                //                        ", endTime: " + TimeWrapper.formatGMTTime(endTime));
-
-                // clip the event to the screen
-                if (startTime < clipStartMillis) startTime = clipStartMillis
-                if (endTime > clipEndMillis) endTime = clipEndMillis
-
-
-                //                Log.v(TAG, "-- Clipped: startTime: " + TimeWrapper.formatGMTTime(startTime) +
-                //                        ", endTime: " + TimeWrapper.formatGMTTime(endTime));
-
-
-                if (endTime < clipStartMillis || startTime > clipEndMillis)
-                    continue // this one is off-screen
-
-                if (startTime == clipStartMillis && endTime == clipEndMillis)
-                    continue // this one covers the full 12-hour face of the watch; ignore for now
-
-                // TODO if we ever do time-duration weighting of event thickness, then we can consider
-                // bringing these back, as well as doing something more useful with all-day events,
-                // which are similarly also ignored.
-
-                tmpVisibleEventList.add(EventWrapper(WireEvent(startTime + gmtOffset, endTime + gmtOffset, e.displayColor)))
-            }
+        val clippedEvents = events.map {
+            it.copy(startTime = if(it.startTime < clipStartMillis) clipStartMillis else it.startTime,
+                    endTime = if(it.endTime > clipEndMillis) clipEndMillis else it.endTime)
+        }.filter {
+            // keep only events that are onscreen
+            it.endTime >= clipStartMillis && it.startTime <= clipEndMillis &&
+            // get rid of events that go the full twelve-hour range
+                    !(it.endTime == clipEndMillis && it.startTime == clipStartMillis)
+        }.map {
+            // apply GMT offset, and then wrap with EventWrapper, where the layout will happen
+            EventWrapper(it.copy(startTime = it.startTime + gmtOffset, endTime = it.endTime + gmtOffset))
         }
 
         // now, we run off and do screen layout
         var tmpMaxLevel: Int
 
-        if (tmpVisibleEventList.size > 0) {
+        if (clippedEvents.isNotEmpty()) {
             // first, try the fancy constraint solver
-            if (EventLayoutUniform.go(tmpVisibleEventList)) {
+            if (EventLayoutUniform.go(clippedEvents)) {
                 // yeah, we succeeded
                 tmpMaxLevel = EventLayoutUniform.MAXLEVEL
             } else {
                 // something blew up with the Simplex solver, fall back to the cheesy, greedy algorithm
                 Log.v(TAG, "falling back to older greedy method")
-                tmpMaxLevel = EventLayout.go(tmpVisibleEventList)
+                tmpMaxLevel = EventLayout.go(clippedEvents)
             }
 
-            EventLayout.sanityTest(tmpVisibleEventList, tmpMaxLevel, "After new event layout")
+            EventLayout.sanityTest(clippedEvents, tmpMaxLevel, "After new event layout")
             Log.v(TAG, "maxLevel for new events: " + tmpMaxLevel)
-            Log.v(TAG, "number of new events: " + tmpVisibleEventList.size)
-            this.visibleEventList = tmpVisibleEventList
-            this.maxLevel = tmpMaxLevel
+            Log.v(TAG, "number of new events: " + clippedEvents.size)
+
+            return Pair(clippedEvents, tmpMaxLevel)
         } else {
-            this.visibleEventList = tmpVisibleEventList
-            this.maxLevel = 0;
             Log.v(TAG, "no events visible!")
+            return Pair(emptyList(), 0)
         }
     }
 
     /**
      * This returns a list of *visible* events on the watchface, cropped to size, and adjusted to
-     * the *local* timezone. If you want GMT events, which will not have been clipped, then use
-     * getWireEventList().
+     * the *local* timezone.
      */
     fun getVisibleEventList(): List<EventWrapper>? {
         // should be fast, since mostly it will detect that nothing has changed
-        computeVisibleEvents()
+        recomputeVisibleEvents()
         return visibleEventList
     }
 
     var protobuf: ByteArray
         /**
-         * marshalls into a protobuf for transmission elsewhere
-         * @return the protobuf
+         * Marshalls into a protobuf for transmission elsewhere. (Well, it used to be
+         * a protobuf, in ancient days, when we had to ship the entire calendar from
+         * phone to watch, but now it's just a simple string.)
          */
         get() {
             val wireUpdate = WireUpdate(faceMode, showSeconds, showDayDate)
@@ -213,7 +180,7 @@ class ClockState private constructor() : Observable() {
         Log.v(TAG, "All events in the DB:")
         if(eventList != null)
             for (e in eventList!!) {
-                Log.v(TAG, "--> displayColor(" + Integer.toHexString(e.wireEvent.displayColor) + "), minLevel(" + e.minLevel + "), maxLevel(" + e.maxLevel + "), startTime(" + e.wireEvent.startTime + "), endTime(" + e.wireEvent.endTime + ")")
+                Log.v(TAG, "--> displayColor(" + Integer.toHexString(e.displayColor) + "), startTime(" + e.startTime + "), endTime(" + e.endTime + ")")
             }
 
         Log.v(TAG, "Visible:")
@@ -247,3 +214,5 @@ class ClockState private constructor() : Observable() {
         }
     }
 }
+
+

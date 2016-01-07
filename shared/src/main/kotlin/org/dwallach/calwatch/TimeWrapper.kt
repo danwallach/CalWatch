@@ -18,7 +18,7 @@ import java.util.TimeZone
  * to fix the problem.
  */
 object TimeWrapper {
-    private val TAG = "TimeWrapper"
+    private const val TAG = "TimeWrapper"
     var tz: TimeZone? = null
         private set
     var gmtOffset: Int = 0
