@@ -31,7 +31,7 @@ class MyViewAnim(context: Context, attrs: AttributeSet) : View(context, attrs), 
     private var clockFace: ClockFace? = null
     private var visible = false
 
-    override fun onVisibilityChanged(changedView: View, visibility: Int) {
+    override fun onVisibilityChanged(changedView: View?, visibility: Int) {
         visible = visibility == View.VISIBLE
 
         if (!visible)

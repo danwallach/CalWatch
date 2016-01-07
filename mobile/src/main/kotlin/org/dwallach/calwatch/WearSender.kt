@@ -130,7 +130,7 @@ class WearSender(private val context: Context) : GoogleApiClient.ConnectionCallb
         closeGoogle()
     }
 
-    override fun onConnectionFailed(result: ConnectionResult) {
+    override fun onConnectionFailed(result: ConnectionResult?) {
         // This callback is important for handling errors that
         // may occur while attempting to connect with Google.
         //

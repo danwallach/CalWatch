@@ -30,7 +30,7 @@ class WatchCalendarService : Service(), Observer {
         wearSender?.sendAllToWatch() ?: Log.e(TAG, "no wear sender?!")
     }
 
-    override fun onStartCommand(intent: Intent, flags: Int, startId: Int): Int {
+    override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
         super.onStartCommand(intent, flags, startId)
         Log.v(TAG, "service starting!")
 
@@ -70,7 +70,7 @@ class WatchCalendarService : Service(), Observer {
         ClockState.getState().deleteObserver(this)
     }
 
-    override fun onBind(intent: Intent): IBinder? {
+    override fun onBind(intent: Intent?): IBinder? {
         Log.e(TAG, "onBind: we should support this")
         throw UnsupportedOperationException("Not yet implemented")
     }
