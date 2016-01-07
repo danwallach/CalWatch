@@ -42,22 +42,22 @@ class MyViewAnim(context: Context, attrs: AttributeSet) : View(context, attrs), 
         }
     }
 
-    private fun shouldTimerBeRunning(): Boolean {
-        var timerNeeded = false
+    private fun subsecondRefreshNeeded(): Boolean {
+        var needed = false
         val clockState = ClockState.getState()
 
         if (!visible)
             return false
 
-        // run the timer if we're in ambient mode
+        // refreshes needed even if we're in ambient mode
         if (clockFace != null) {
-            timerNeeded = clockFace!!.ambientMode
+            needed = clockFace!!.ambientMode
         }
 
-        // or run the timer if we're not showing the seconds hand
-        timerNeeded = timerNeeded || clockState.showSeconds
+        // and especially if we're got the seconds hand showing
+        needed = needed || clockState.showSeconds
 
-        return timerNeeded
+        return needed
     }
 
     /**
@@ -211,7 +211,7 @@ class MyViewAnim(context: Context, attrs: AttributeSet) : View(context, attrs), 
 
         // Draw every frame as long as we're visible and doing the sweeping second hand,
         // otherwise the timer will take care of it.
-        if (!shouldTimerBeRunning())
+        if (subsecondRefreshNeeded())
             invalidate()
     }
 

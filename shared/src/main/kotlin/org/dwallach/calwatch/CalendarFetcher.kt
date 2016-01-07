@@ -13,10 +13,7 @@ import android.content.Context
 import android.content.Intent
 import android.content.IntentFilter
 import android.net.Uri
-import android.os.AsyncTask
-import android.os.Handler
-import android.os.Message
-import android.os.PowerManager
+import android.os.*
 import android.provider.CalendarContract
 import android.text.format.DateUtils
 import android.util.Log
@@ -237,7 +234,10 @@ class CalendarFetcher private constructor(private val contextRef: WeakReference<
             Log.v(TAG, "wake lock acquired")
 
             try {
+                val startTime = SystemClock.elapsedRealtimeNanos()
                 ClockState.getState().setWireEventList(fetcher.loadContent())
+                val endTime = SystemClock.elapsedRealtimeNanos()
+                Log.i(TAG, "total calendar computation time: %.3f ms".format((endTime - startTime) / 1000000.0))
                 return null;
             } catch (t: Throwable) {
                 Log.e(TAG, "unexpected failure setting wire event list from calendar", t)

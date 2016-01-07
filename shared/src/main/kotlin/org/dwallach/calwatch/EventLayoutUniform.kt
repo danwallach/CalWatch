@@ -140,7 +140,7 @@ object EventLayoutUniform {
             return false
         } finally {
             val nanoStop = SystemClock.elapsedRealtimeNanos()
-            Log.v(TAG, "Event layout time: " + java.lang.Double.toString((nanoStop - nanoStart) / 1000000.0) + " ms")
+            Log.v(TAG, "Event layout time: %.3f ms".format((nanoStop - nanoStart) / 1000000.0))
         }
 
         return true
