@@ -103,9 +103,11 @@ class ClockState private constructor() : Observable() {
                     endTime = if(it.endTime > clipEndMillis) clipEndMillis else it.endTime)
         }.filter {
             // keep only events that are onscreen
-            it.endTime >= clipStartMillis && it.startTime <= clipEndMillis &&
+            it.endTime > clipStartMillis && it.startTime < clipEndMillis
             // get rid of events that go the full twelve-hour range
-                    !(it.endTime == clipEndMillis && it.startTime == clipStartMillis)
+                    && !(it.endTime == clipEndMillis && it.startTime == clipStartMillis)
+            // and get rid of events that start and end at precisely the same time
+                    && it.endTime > it.startTime
         }.map {
             // apply GMT offset, and then wrap with EventWrapper, where the layout will happen
             EventWrapper(it.copy(startTime = it.startTime + gmtOffset, endTime = it.endTime + gmtOffset))
