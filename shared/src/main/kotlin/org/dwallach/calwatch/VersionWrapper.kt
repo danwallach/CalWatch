@@ -11,7 +11,7 @@ import android.content.pm.PackageManager
 import android.util.Log
 
 object VersionWrapper {
-    private val TAG = "VersionWrapper"
+    private const val TAG = "VersionWrapper"
 
     var versionString: String? = null
         private set

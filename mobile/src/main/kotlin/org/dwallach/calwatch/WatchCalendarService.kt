@@ -81,7 +81,7 @@ class WatchCalendarService : Service(), Observer {
     }
 
     companion object {
-        private val TAG = "WatchCalendarService"
+        private const val TAG = "WatchCalendarService"
 
         var singletonService: WatchCalendarService? = null
         private set

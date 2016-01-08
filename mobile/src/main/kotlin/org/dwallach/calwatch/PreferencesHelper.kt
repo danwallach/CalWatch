@@ -11,7 +11,7 @@ import android.content.SharedPreferences
 import android.util.Log
 
 object PreferencesHelper {
-    private val TAG = "PreferencesHelper"
+    private const val TAG = "PreferencesHelper"
 
     fun savePreferences(context: Context) {
         Log.v(TAG, "savePreferences")

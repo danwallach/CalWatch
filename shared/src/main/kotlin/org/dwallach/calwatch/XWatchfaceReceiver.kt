@@ -73,7 +73,7 @@ class XWatchfaceReceiver : BroadcastReceiver() {
     }
 
     companion object {
-        private val TAG = "XWatchfaceReceiver"
+        private const val TAG = "XWatchfaceReceiver"
 
         const val prefStopwatchRunning = "running"
         const val prefStopwatchReset = "reset"

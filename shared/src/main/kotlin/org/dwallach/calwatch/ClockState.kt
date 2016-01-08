@@ -206,7 +206,7 @@ class ClockState private constructor() : Observable() {
     }
 
     companion object {
-        private val TAG = "ClockState"
+        private const val TAG = "ClockState"
 
         const val FACE_TOOL = 0
         const val FACE_NUMBERS = 1

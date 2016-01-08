@@ -192,7 +192,7 @@ class PhoneActivity : Activity(), Observer {
     }
 
     companion object {
-        private val TAG = "PhoneActivity"
+        private const val TAG = "PhoneActivity"
 
         private var activityRef: WeakReference<Activity?>? = null
 

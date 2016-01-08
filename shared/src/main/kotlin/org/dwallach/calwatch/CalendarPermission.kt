@@ -1,3 +1,10 @@
+/*
+ * CalWatch
+ * Copyright (C) 2014 by Dan Wallach
+ * Home page: http://www.cs.rice.edu/~dwallach/calwatch/
+ * Licensing: http://www.cs.rice.edu/~dwallach/calwatch/licensing.html
+ */
+
 package org.dwallach.calwatch
 
 import android.Manifest
@@ -12,8 +19,8 @@ import android.util.Log
  * Deal with all the Marshmallow permission machinery.
  */
 object CalendarPermission {
-    private val TAG = "CalendarPermission"
-    private val INTERNAL_PERM_REQUEST_CODE = 31337
+    private const val TAG = "CalendarPermission"
+    private const val INTERNAL_PERM_REQUEST_CODE = 31337
 
     /**
      * Returns the number of permission requests ever made by CalWatch.

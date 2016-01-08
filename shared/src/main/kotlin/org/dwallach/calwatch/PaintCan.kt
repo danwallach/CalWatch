@@ -17,7 +17,7 @@ import android.util.SparseArray
  * Created by dwallach on 8/15/14.
  */
 object PaintCan {
-    private val TAG = "PaintCan"
+    private const val TAG = "PaintCan"
     private var map: SparseArray<Paint>? = null
 
     fun getCalendarPaint(argb: Int): Paint {

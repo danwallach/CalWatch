@@ -208,7 +208,7 @@ class WearReceiverService : WearableListenerService(), GoogleApiClient.Connectio
     }
 
     companion object {
-        private val TAG = "WearReceiverService"
+        private const val TAG = "WearReceiverService"
         private var running = false;
 //        var singleton: WearReceiverService
 

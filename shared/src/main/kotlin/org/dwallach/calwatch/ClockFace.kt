@@ -1072,12 +1072,12 @@ class ClockFace : Observer {
     }
 
     companion object {
-        private val TAG = "ClockFace"
+        private const val TAG = "ClockFace"
 
         // for testing purposes, turn these things on; disable for production
-        private val forceAmbientLowBit = false
-        private val forceBurnInProtection = false
-        private val forceMotoFlatBottom = false
+        private const val forceAmbientLowBit = false
+        private const val forceBurnInProtection = false
+        private const val forceMotoFlatBottom = false
 
         // for testing: sometimes it seems we have multiple instances of ClockFace, which is bad; let's
         // try to track them
@@ -1090,17 +1090,17 @@ class ClockFace : Observer {
         private var savedCy = 140
         private var savedRadius = 140
 
-        private val freqUpdate = 5f  // 5 Hz, or 0.20sec for second hand
+        private const val freqUpdate = 5f  // 5 Hz, or 0.20sec for second hand
 
-        private val calendarRingMinRadius = 0.2f
-        private val calendarRingMaxRadius = 0.9f
-        private val calendarRingWidth = calendarRingMaxRadius - calendarRingMinRadius
+        private const val calendarRingMinRadius = 0.2f
+        private const val calendarRingMaxRadius = 0.9f
+        private const val calendarRingWidth = calendarRingMaxRadius - calendarRingMinRadius
 
-        private val clipSeconds = false // force second hand to align with FPS boundaries (good for low-FPS drawing)
+        private const val clipSeconds = false // force second hand to align with FPS boundaries (good for low-FPS drawing)
 
         private var debugMetricsPrinted = false
 
-        private val NON_LINEAR_TABLE_SIZE = 1000
+        private const val NON_LINEAR_TABLE_SIZE = 1000
         private val NON_LINEAR_TABLE = DoubleArray(NON_LINEAR_TABLE_SIZE) { i ->
             // This is where we initialize our non-linear second hand table.
             // We're implementing y=[(1+sin(theta - pi/2))/2] ^ pow over x in [0,pi]

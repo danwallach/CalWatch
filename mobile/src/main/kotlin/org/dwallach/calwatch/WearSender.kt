@@ -23,7 +23,7 @@ class WearSender(private val context: Context) : GoogleApiClient.ConnectionCallb
     // WatchCalendarService. And that thing can and will be summarily killed by the system at any
     // time, so this context won't leak.
 
-    internal var wireBytesToSend: ByteArray? = null
+    private var wireBytesToSend: ByteArray? = null
     private var googleApiClient: GoogleApiClient? = null
 
     private fun initGoogle() {
@@ -154,7 +154,7 @@ class WearSender(private val context: Context) : GoogleApiClient.ConnectionCallb
     }
 
     companion object {
-        private val TAG = "WearSender"
+        private const val TAG = "WearSender"
 
         //    private String nodeId;
 

@@ -10,7 +10,7 @@ import android.util.Log
 
 
 object EventLayout {
-    private val TAG = "EventLayout"
+    private const val TAG = "EventLayout"
 
     /**
      * Takes a list of calendar events and mutates their minLevel and maxLevel for calendar side-by-side

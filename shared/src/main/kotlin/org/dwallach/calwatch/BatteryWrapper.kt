@@ -60,7 +60,7 @@ class BatteryWrapper private constructor(
     }
 
     companion object {
-        private val TAG = "BatteryWrapper"
+        private const val TAG = "BatteryWrapper"
 
         private var singleton: BatteryWrapper? = null
 

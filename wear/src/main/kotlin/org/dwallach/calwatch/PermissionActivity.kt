@@ -35,7 +35,7 @@ class PermissionActivity : Activity() {
     }
 
     companion object {
-        private val TAG = "PermissionActivity"
+        private const val TAG = "PermissionActivity"
 
         /**
          * Call this to launch the wear permission dialog.

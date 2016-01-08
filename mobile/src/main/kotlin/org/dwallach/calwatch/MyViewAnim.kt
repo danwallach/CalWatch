@@ -209,7 +209,7 @@ class MyViewAnim(context: Context, attrs: AttributeSet) : View(context, attrs), 
     }
 
     companion object {
-        private val TAG = "MyViewAnim"
+        private const val TAG = "MyViewAnim"
     }
 }
 

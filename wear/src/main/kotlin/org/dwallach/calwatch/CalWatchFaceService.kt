@@ -323,7 +323,7 @@ class CalWatchFaceService : CanvasWatchFaceService() {
     }
 
     companion object {
-        private val TAG = "CalWatchFaceService"
+        private const val TAG = "CalWatchFaceService"
 
         private var engineRef: WeakReference<Engine>? = null
 

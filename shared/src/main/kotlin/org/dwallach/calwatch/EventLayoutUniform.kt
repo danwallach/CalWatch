@@ -16,8 +16,8 @@ import EDU.Washington.grad.gjb.cassowary.*
  * as pretty as possible
  */
 object EventLayoutUniform {
-    private val TAG = "EventLayoutUniform"
-    val MAXLEVEL = 10000 // we'll go from 0 to MAXLEVEL, inclusive
+    private const val TAG = "EventLayoutUniform"
+    const val MAXLEVEL = 10000 // we'll go from 0 to MAXLEVEL, inclusive
 
     /**
      * Takes a list of calendar events and mutates their minLevel and maxLevel for calendar side-by-side

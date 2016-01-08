@@ -27,11 +27,11 @@ data class WireUpdate(val faceMode: Int, val showSecondHand: Boolean, val showDa
     }
 
     companion object {
-        private val TAG = "WireUpdate"
+        private const val TAG = "WireUpdate"
 
 
-        private val HEADER = "CWDATA2"
-        private val TRAILER = "$"
+        private const val HEADER = "CWDATA2"
+        private const val TRAILER = "$"
 
         @Throws(IOException::class)
         fun parseFrom(input: ByteArray): WireUpdate {
