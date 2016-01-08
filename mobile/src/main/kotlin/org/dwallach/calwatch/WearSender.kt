@@ -30,7 +30,11 @@ class WearSender(private val context: Context) : GoogleApiClient.ConnectionCallb
         if (googleApiClient == null) {
             Log.v(TAG, "initializing GoogleApiClient")
             //            readyToSend = false;
-            googleApiClient = GoogleApiClient.Builder(context).addApi(Wearable.API).addConnectionCallbacks(this).addOnConnectionFailedListener(this).build()
+            googleApiClient = GoogleApiClient
+                    .Builder(context)
+                    .addApi(Wearable.API)
+                    .addConnectionCallbacks(this)
+                    .addOnConnectionFailedListener(this).build()
             googleApiClient!!.connect()
         }
     }

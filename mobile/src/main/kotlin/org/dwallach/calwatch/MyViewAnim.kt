@@ -84,10 +84,8 @@ class MyViewAnim(context: Context, attrs: AttributeSet) : View(context, attrs), 
 
         val clockState = ClockState.getState()
 
-        if (calendarFetcher != null) {
-            calendarFetcher!!.kill()
-            calendarFetcher = null
-        }
+        calendarFetcher?.kill()
+        calendarFetcher = null
 
         val permissionGiven = CalendarPermission.check(activity)
 
@@ -130,25 +128,20 @@ class MyViewAnim(context: Context, attrs: AttributeSet) : View(context, attrs), 
         this._height = tmpHeight
 
         Log.v(TAG, "onWindowFocusChanged: $_width, $_height")
-        if (clockFace != null)
-            clockFace!!.setSize(_width, _height)
+        clockFace?.setSize(_width, _height)
     }
 
     fun kill(context: Context) {
         Log.d(TAG, "kill")
         val clockState = ClockState.getState()
 
-        if (calendarFetcher != null) {
-            calendarFetcher!!.kill()
-            calendarFetcher = null
-        }
+        calendarFetcher?.kill()
+        calendarFetcher = null
 
         clockState.deleteObserver(this)
 
-        if (clockFace != null) {
-            clockFace!!.kill()
-            clockFace = null
-        }
+        clockFace?.kill()
+        clockFace = null
     }
 
 
@@ -160,8 +153,7 @@ class MyViewAnim(context: Context, attrs: AttributeSet) : View(context, attrs), 
         Log.v(TAG, "onSizeChanged: $w, $h")
         this._width = w
         this._height = h
-        if (clockFace != null)
-            clockFace!!.setSize(_width, _height)
+        clockFace?.setSize(_width, _height)
     }
 
     // We're using underscores here to make these distinct from "width" and "height" which are
@@ -180,18 +172,24 @@ class MyViewAnim(context: Context, attrs: AttributeSet) : View(context, attrs), 
         }
 
         try {
+            val lClockFace = clockFace
             // clear the screen
+
+            if(lClockFace == null) {
+                Log.e(TAG, "can't draw when we have no clockface")
+                return
+            }
             canvas.drawColor(Color.TRANSPARENT, PorterDuff.Mode.CLEAR)
 
             TimeWrapper.update() // fetch the time
-            clockFace!!.drawEverything(canvas)
+            lClockFace.drawEverything(canvas)
+
+            if (ClockState.getState().subSecondRefreshNeeded(lClockFace))
+                invalidate()
         } catch (t: Throwable) {
             if (drawCounter % 1000 == 0L)
                 Log.e(TAG, "Something blew up while drawing", t)
         }
-
-        if (ClockState.getState().subSecondRefreshNeeded(clockFace!!))
-            invalidate()
     }
 
     override fun onTouchEvent(event: MotionEvent): Boolean {

@@ -96,8 +96,15 @@ class ClockFace : Observer {
 
 
     private fun updateMissingCalendarRect() {
-        val height = missingCalendarBitmap!!.height
-        val width = missingCalendarBitmap!!.width
+        val lMissingCalendarBitmap = missingCalendarBitmap
+
+        if(lMissingCalendarBitmap == null) {
+            Log.e(TAG, "no missing calendar bitmap?!")
+            return
+        }
+
+        val height = lMissingCalendarBitmap.height
+        val width = lMissingCalendarBitmap.width
 
         missingCalendarX = clockX(15.0, 0.2f)
         missingCalendarY = clockY(0.0, 0f) - height / 2
@@ -731,7 +738,7 @@ class ClockFace : Observer {
             batteryWrapper.fetchStatus()
             val batteryPct = batteryWrapper.batteryPct
             batteryCacheTime = time
-            batteryPathCache = Path()
+            val lBatteryPathCache = Path()
 
             //
             // New idea: draw nothing unless the battery is low. At 50%, we start a small yellow
@@ -750,11 +757,13 @@ class ClockFace : Observer {
                 else
                     dotRadius = maxRadius - (maxRadius - minRadius) * (batteryPct - 0.1f) / 0.4f
 
-                batteryPathCache!!.addCircle(cx.toFloat(), cy.toFloat(), radius * dotRadius, Path.Direction.CCW) // direction shouldn't matter
+                lBatteryPathCache.addCircle(cx.toFloat(), cy.toFloat(), radius * dotRadius, Path.Direction.CCW) // direction shouldn't matter
 
                 batteryCritical = batteryPct <= 0.1f
                 Log.v(TAG, "--> dot radius: $dotRadius, critical: $batteryCritical")
             }
+
+            batteryPathCache = lBatteryPathCache
         }
 
         // note that we'll flip the color from white to red once the battery gets below 10%

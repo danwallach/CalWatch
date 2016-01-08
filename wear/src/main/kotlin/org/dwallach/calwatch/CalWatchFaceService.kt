@@ -217,6 +217,12 @@ class CalWatchFaceService : CanvasWatchFaceService() {
             //                Log.v(TAG, "onDraw");
             drawCounter++
 
+            val lClockFace = clockFace
+            if(lClockFace == null) {
+                Log.e(TAG, "onDraw: can't draw without a clockface")
+                return
+            }
+
             if(bounds == null || canvas == null) {
                 Log.d(TAG, "onDraw: null bounds and/or canvas")
                 return
@@ -228,7 +234,7 @@ class CalWatchFaceService : CanvasWatchFaceService() {
             if (width != oldWidth || height != oldHeight) {
                 oldWidth = width
                 oldHeight = height
-                clockFace!!.setSize(width, height)
+                lClockFace.setSize(width, height)
             }
 
             try {
@@ -236,16 +242,16 @@ class CalWatchFaceService : CanvasWatchFaceService() {
                 canvas.drawColor(Color.TRANSPARENT, PorterDuff.Mode.CLEAR)
 
                 TimeWrapper.update() // fetch the time
-                clockFace!!.drawEverything(canvas)
+                lClockFace.drawEverything(canvas)
+
+                // Draw every frame as long as we're visible and doing the sweeping second hand,
+                // otherwise the timer will take care of it.
+                if (isVisible && ClockState.getState().subSecondRefreshNeeded(lClockFace))
+                    invalidate()
             } catch (t: Throwable) {
                 if (drawCounter % 1000 == 0L)
                     Log.e(TAG, "Something blew up while drawing", t)
             }
-
-            // Draw every frame as long as we're visible and doing the sweeping second hand,
-            // otherwise the timer will take care of it.
-            if (isVisible && ClockState.getState().subSecondRefreshNeeded(clockFace!!))
-                invalidate()
         }
 
         override fun onTapCommand(tapType: Int, x: Int, y: Int, eventTime: Long) {
@@ -266,8 +272,8 @@ class CalWatchFaceService : CanvasWatchFaceService() {
         override fun onDestroy() {
             Log.v(TAG, "onDestroy")
 
-            if (calendarFetcher != null)
-                calendarFetcher!!.kill()
+            calendarFetcher?.kill()
+            calendarFetcher = null
 
             ClockState.getState().deleteObserver(this)
 
