@@ -154,11 +154,11 @@ class WearReceiverService : WearableListenerService(), GoogleApiClient.Connectio
     }
 
     override fun onPeerConnected(peer: Node?) {
-        Log.v(TAG, "phone is connected!, " + (peer?.displayName ?: "null peer"))
+        Log.v(TAG, "phone is connected: " + (peer?.displayName ?: "null peer"))
     }
 
     override fun onPeerDisconnected(peer: Node?) {
-        Log.v(TAG, "phone is disconnected!, " + (peer?.displayName ?: "null peer"))
+        Log.v(TAG, "phone is disconnected: " + (peer?.displayName ?: "null peer"))
     }
 
     /**
