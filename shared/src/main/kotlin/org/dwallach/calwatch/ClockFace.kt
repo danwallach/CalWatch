@@ -582,20 +582,16 @@ class ClockFace : Observer {
         // we know we've always got an up to date set of calendar wedges
         updateEventList()
 
-        if (eventList == null) {
+        val lEventList = eventList
+
+        if (lEventList == null) {
             if (calendarTicker % 1000 == 0) Log.v(TAG, "drawCalendar starting, eventList is null")
-
-            update(null, null) // probably won't accomplish any more than the updateEventList above...
-
-            if (eventList == null) {
-                Log.v(TAG, "eventList still null after update; giving up")
-                return  // again, must not be ready yet
-            }
+            return  // not be ready yet
         }
 
         val time = TimeWrapper.localTime
 
-        eventList?.forEach {
+        lEventList.forEach {
             val arcStart: Double
             val arcEnd: Double
             val e = it.wireEvent
@@ -632,7 +628,7 @@ class ClockFace : Observer {
         // but it's less of a problem here than with the watchFace, because the external UI isn't
         // inducing the state here to change
         if (stippleTime != stippleTimeCache || stipplePathCache == null) {
-            stipplePathCache = Path()
+            val lStipplePathCache = Path()
             stippleTimeCache = stippleTime
 
             //            if(calendarTicker % 1000 == 0)
@@ -696,11 +692,11 @@ class ClockFace : Observer {
                 yhigh = ymid - dyhigh
 
                 // Path p = new Path();
-                stipplePathCache!!.moveTo(x1, y1)
-                stipplePathCache!!.lineTo(xlow, ylow)
-                stipplePathCache!!.lineTo(x2, y2)
-                stipplePathCache!!.lineTo(xhigh, yhigh)
-                stipplePathCache!!.close()
+                lStipplePathCache.moveTo(x1, y1)
+                lStipplePathCache.lineTo(xlow, ylow)
+                lStipplePathCache.lineTo(x2, y2)
+                lStipplePathCache.lineTo(xhigh, yhigh)
+                lStipplePathCache.close()
                 i++
                 r1 = r2
                 x1 = x2
@@ -714,6 +710,8 @@ class ClockFace : Observer {
                 //                            "), xhigh(" + Float.toString(xhigh) + "), yhigh(" + Float.toString(yhigh) +
                 //                            ")");
             }
+
+            stipplePathCache = lStipplePathCache
         }
         canvas.drawPath(stipplePathCache, PaintCan[ambientLowBit, ambientMode, PaintCan.colorBlackFill])
     }
@@ -1019,15 +1017,18 @@ class ClockFace : Observer {
 
     private var faceMode: Int = 0
     // nothing changed
-    var ambientMode = false
-        set(ambientMode) {
-            Log.i(TAG, "Ambient mode: " + ambientMode)
+    private var ambientMode = false
 
-            if (ambientMode == this.ambientMode) return
+    // using explicit getters and setters rather than Kotlin implicit ones on a hunch that
+    // the implicit ones might be causing problems
 
-            this.ambientMode = ambientMode
-            wipeCaches()
-        }
+    fun getAmbientMode() = ambientMode
+    fun setAmbientMode(ambientMode: Boolean): Unit {
+        Log.i(TAG, "Ambient mode: " + this.ambientMode + " -> " + ambientMode)
+        if (ambientMode == this.ambientMode) return // nothing changed, so we're good
+        this.ambientMode = ambientMode
+        wipeCaches()
+    }
     private var eventList: List<EventWrapper>? = null
     private var maxLevel: Int = 0
 

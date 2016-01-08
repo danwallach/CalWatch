@@ -183,14 +183,15 @@ class CalWatchFaceService : CanvasWatchFaceService() {
         override fun onAmbientModeChanged(inAmbientMode: Boolean) {
             super.onAmbientModeChanged(inAmbientMode)
 
-            if(clockFace == null) {
+            val lClockFace = clockFace
+            if(lClockFace == null) {
                 Log.d(TAG, "onAmbientModeChanged: null clockFace?")
                 return
             }
 
 
             Log.d(TAG, "onAmbientModeChanged: " + inAmbientMode)
-            clockFace?.ambientMode = inAmbientMode
+            lClockFace.setAmbientMode(inAmbientMode)
 
             // If we just switched *to* ambient mode, then we've got some FPS data to report
             // to the logs. Otherwise, we're coming *back* from ambient mode, so it's a good
@@ -244,7 +245,7 @@ class CalWatchFaceService : CanvasWatchFaceService() {
 
             // Draw every frame as long as we're visible and doing the sweeping second hand,
             // otherwise the timer will take care of it.
-            if (isVisible && ClockState.getState().subSecondRefreshNeeded(clockFace))
+            if (isVisible && ClockState.getState().subSecondRefreshNeeded(clockFace!!))
                 invalidate()
         }
 

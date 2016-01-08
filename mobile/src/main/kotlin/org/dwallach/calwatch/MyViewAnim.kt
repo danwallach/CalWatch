@@ -191,7 +191,7 @@ class MyViewAnim(context: Context, attrs: AttributeSet) : View(context, attrs), 
                 Log.e(TAG, "Something blew up while drawing", t)
         }
 
-        if (ClockState.getState().subSecondRefreshNeeded(clockFace))
+        if (ClockState.getState().subSecondRefreshNeeded(clockFace!!))
             invalidate()
     }
 

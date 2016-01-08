@@ -38,7 +38,7 @@ class WearSender(private val context: Context) : GoogleApiClient.ConnectionCallb
     fun sendAllToWatch() {
         try {
             val clockState = ClockState.getState()
-            wireBytesToSend = clockState.protobuf
+            wireBytesToSend = clockState.getProtobuf()
 
             Log.v(TAG, "preparing event list for transmission, length(" + wireBytesToSend!!.size + " bytes)")
 

@@ -44,7 +44,7 @@ class WearReceiverService : WearableListenerService(), GoogleApiClient.Connectio
         Log.v(TAG, "newEventBytes: " + eventBytes.size)
         val clockState = ClockState.getState()
 
-        clockState.protobuf = eventBytes
+        clockState.setProtobuf(eventBytes)
     }
 
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {

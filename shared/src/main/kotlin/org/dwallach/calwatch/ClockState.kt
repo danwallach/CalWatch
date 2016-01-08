@@ -37,9 +37,9 @@ class ClockState private constructor() : Observable() {
     /**
      * Helper function to determine if we need subsecond refresh intervals.
      */
-    fun subSecondRefreshNeeded(face: ClockFace?) =
+    fun subSecondRefreshNeeded(face: ClockFace) =
         // if the second-hand is supposed to be rendered and we're not in ambient mode
-        showSeconds && !(face?.ambientMode ?: false)
+        showSeconds && !face.getAmbientMode()
 
     /**
      * Load the eventlist. This is meant to consume the output of the calendarFetcher,
@@ -79,8 +79,6 @@ class ClockState private constructor() : Observable() {
         // If we get here, that means we hit the top of a new hour. We're experimentally leaving
         // the old data alone while we fire off a request to reload the calendar. This might take
         // a whole second or two, but at least it's not happening on the main UI thread.
-        // TODO verify if this is a good strategy
-
 
         lastClipTime = localClipTime
         CalendarFetcher.requestRescan()
@@ -148,45 +146,45 @@ class ClockState private constructor() : Observable() {
         return visibleEventList
     }
 
-    var protobuf: ByteArray
-        /**
-         * Marshalls into a protobuf for transmission elsewhere. (Well, it used to be
-         * a protobuf, in ancient days, when we had to ship the entire calendar from
-         * phone to watch, but now it's just a simple string.)
-         */
-        get() {
-            val wireUpdate = WireUpdate(faceMode, showSeconds, showDayDate)
-            return wireUpdate.toByteArray()
+    /**
+     * Marshalls into a protobuf for transmission elsewhere. (Well, it used to be
+     * a protobuf, in ancient days, when we had to ship the entire calendar from
+     * phone to watch, but now it's just a simple string.)
+     */
+    fun getProtobuf(): ByteArray {
+        val wireUpdate = WireUpdate(faceMode, showSeconds, showDayDate)
+        return wireUpdate.toByteArray()
+    }
+    /**
+     * Load the ClockState with a protobuf containing a complete update
+     * @param eventBytes a marshalled protobuf of type WireUpdate
+     */
+    fun setProtobuf(eventBytes: ByteArray): Unit {
+        Log.i(TAG, "setting protobuf: %d bytes".format(eventBytes.size))
+        val wireUpdate: WireUpdate
+
+        try {
+            wireUpdate = WireUpdate.parseFrom(eventBytes)
+            wireInitialized = true
+        } catch (ioe: IOException) {
+            Log.e(TAG, "parse failure on protobuf", ioe)
+            return
+        } catch (e: Exception) {
+            if (eventBytes.size == 0)
+                Log.e(TAG, "zero-length message received!")
+            else
+                Log.e(TAG, "some other weird failure on protobuf: nbytes(" + eventBytes.size + ")", e)
+            return
         }
-        /**
-         * Load the ClockState with a protobuf containing a complete update
-         * @param eventBytes a marshalled protobuf of type WireUpdate
-         */
-        set(eventBytes) {
-            val wireUpdate: WireUpdate
 
-            try {
-                wireUpdate = WireUpdate.parseFrom(eventBytes)
-                wireInitialized = true
-            } catch (ioe: IOException) {
-                Log.e(TAG, "parse failure on protobuf: nbytes(" + eventBytes.size + ")", ioe)
-                return
-            } catch (e: Exception) {
-                if (eventBytes.size == 0)
-                    Log.e(TAG, "zero-length message received!")
-                else
-                    Log.e(TAG, "some other weird failure on protobuf: nbytes(" + eventBytes.size + ")", e)
-                return
-            }
+        faceMode = wireUpdate.faceMode
+        showSeconds = wireUpdate.showSecondHand
+        showDayDate = wireUpdate.showDayDate
 
-            faceMode = wireUpdate.faceMode
-            showSeconds = wireUpdate.showSecondHand
-            showDayDate = wireUpdate.showDayDate
+        pingObservers()
 
-            pingObservers()
-
-            Log.v(TAG, "event update complete")
-        }
+        Log.v(TAG, "event update complete")
+    }
 
     fun pingObservers() {
         // this incantation will make observers elsewhere aware that there's new content
