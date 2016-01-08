@@ -24,7 +24,7 @@ class PhoneActivity : Activity(), Observer {
     private var disableUICallbacks = false
 
     init {
-        activityRef = WeakReference<Activity>(this)
+        activityRef = WeakReference<Activity?>(this)
     }
 
     //
@@ -195,7 +195,7 @@ class PhoneActivity : Activity(), Observer {
     companion object {
         private val TAG = "PhoneActivity"
 
-        private var activityRef: WeakReference<Activity>? = null
+        private var activityRef: WeakReference<Activity?>? = null
 
         /**
          * This will be called when the user clicks on the watchface, presumably because they want
@@ -203,10 +203,9 @@ class PhoneActivity : Activity(), Observer {
          */
         internal fun watchfaceClick(view: MyViewAnim) {
             Log.v(TAG, "Watchface clicked!")
-            if (activityRef == null)
-                return  // can't do anything without an activity
 
-            val activity = activityRef?.get() ?: return
+            val activity: Activity? = activityRef?.get() ?: return
+            if(activity == null) return
             // can't do anything with an activity
 
             if (!ClockState.getState().calendarPermission) {

@@ -281,7 +281,7 @@ class CalendarFetcher private constructor(private val contextRef: WeakReference<
         }
 
         override fun handleMessage(message: Message) {
-            val context = contextRef.get()
+            val context: Context? = contextRef.get()
             if (context == null) {
                 Log.e(TAG, "handleMessage: no available context, nothing to do")
                 return

@@ -328,6 +328,10 @@ class CalWatchFaceService : CanvasWatchFaceService() {
         private var engineRef: WeakReference<Engine>? = null
 
         val engine: Engine
-            get() = engineRef?.get() ?: throw RuntimeException("no engine available?!")
+            get() {
+                val result: Engine? = engineRef?.get() ?: null
+                if(result == null) throw RuntimeException("no engine available?!")
+                return result
+            }
     }
 }
