@@ -112,24 +112,24 @@ class ClockState private constructor() : Observable() {
         }
 
         // now, we run off and do screen layout
-        var tmpMaxLevel: Int
+        var lMaxLevel: Int
 
         if (clippedEvents.isNotEmpty()) {
             // first, try the fancy constraint solver
             if (EventLayoutUniform.go(clippedEvents)) {
                 // yeah, we succeeded
-                tmpMaxLevel = EventLayoutUniform.MAXLEVEL
+                lMaxLevel = EventLayoutUniform.MAXLEVEL
             } else {
                 // something blew up with the Simplex solver, fall back to the cheesy, greedy algorithm
                 Log.v(TAG, "falling back to older greedy method")
-                tmpMaxLevel = EventLayout.go(clippedEvents)
+                lMaxLevel = EventLayout.go(clippedEvents)
             }
 
-            EventLayout.sanityTest(clippedEvents, tmpMaxLevel, "After new event layout")
-            Log.v(TAG, "maxLevel for visible events: " + tmpMaxLevel)
+            EventLayout.sanityTest(clippedEvents, lMaxLevel, "After new event layout")
+            Log.v(TAG, "maxLevel for visible events: " + lMaxLevel)
             Log.v(TAG, "number of visible events: " + clippedEvents.size)
 
-            return Pair(clippedEvents, tmpMaxLevel)
+            return Pair(clippedEvents, lMaxLevel)
         } else {
             Log.v(TAG, "no events visible!")
             return Pair(emptyList(), 0)

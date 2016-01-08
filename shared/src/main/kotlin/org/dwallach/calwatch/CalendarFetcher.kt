@@ -226,10 +226,10 @@ class CalendarFetcher private constructor(private val contextRef: WeakReference<
             }
 
             val powerManager = context.getSystemService(Context.POWER_SERVICE) as PowerManager
-            val tmpWakeLock = powerManager.newWakeLock(
+            val lWakeLock = powerManager.newWakeLock(
                     PowerManager.PARTIAL_WAKE_LOCK, "CalWatchWakeLock")
-            tmpWakeLock.acquire()
-            wakeLock = tmpWakeLock
+            lWakeLock.acquire()
+            wakeLock = lWakeLock
 
             Log.v(TAG, "wake lock acquired")
 

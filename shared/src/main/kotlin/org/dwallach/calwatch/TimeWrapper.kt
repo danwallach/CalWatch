@@ -19,8 +19,6 @@ import java.util.TimeZone
  */
 object TimeWrapper {
     private const val TAG = "TimeWrapper"
-    var tz: TimeZone? = null
-        private set
     var gmtOffset: Int = 0
         private set
     var gmtTime: Long = 0
@@ -32,8 +30,8 @@ object TimeWrapper {
 
     fun update() {
         gmtTime = System.currentTimeMillis() + magicOffset
-        tz = TimeZone.getDefault()
-        gmtOffset = tz!!.getOffset(gmtTime) // includes DST correction
+        val tz = TimeZone.getDefault()
+        gmtOffset = tz.getOffset(gmtTime) // includes DST correction
     }
 
     val localTime: Long

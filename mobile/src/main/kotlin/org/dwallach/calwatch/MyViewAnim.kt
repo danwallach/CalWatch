@@ -66,12 +66,12 @@ class MyViewAnim(context: Context, attrs: AttributeSet) : View(context, attrs), 
         }
 
         if (clockFace == null) {
-            val tmpClockFace = ClockFace()
+            val lClockFace = ClockFace()
             val emptyCalendar = BitmapFactory.decodeResource(context.resources, R.drawable.empty_calendar)
-            tmpClockFace.setMissingCalendarBitmap(emptyCalendar)
-            tmpClockFace.setSize(_width, _height)
+            lClockFace.setMissingCalendarBitmap(emptyCalendar)
+            lClockFace.setSize(_width, _height)
 
-            clockFace = tmpClockFace
+            clockFace = lClockFace
         }
 
         clockState.addObserver(this)
@@ -116,16 +116,16 @@ class MyViewAnim(context: Context, attrs: AttributeSet) : View(context, attrs), 
     override fun onWindowFocusChanged(hasFocus: Boolean) {
         super.onWindowFocusChanged(hasFocus)
 
-        val tmpWidth = width // properties of the View, reflected into a Kotlin variable
-        val tmpHeight = height
+        val lWidth = width // properties of the View, reflected into a Kotlin variable
+        val lHeight = height
 
-        if (tmpWidth == 0 || tmpHeight == 0) {
+        if (lWidth == 0 || lHeight == 0) {
             Log.v(TAG, "onWindowFocusChanged: got zeros for width or height")
             return
         }
 
-        this._width = tmpWidth
-        this._height = tmpHeight
+        this._width = lWidth
+        this._height = lHeight
 
         Log.v(TAG, "onWindowFocusChanged: $_width, $_height")
         clockFace?.setSize(_width, _height)

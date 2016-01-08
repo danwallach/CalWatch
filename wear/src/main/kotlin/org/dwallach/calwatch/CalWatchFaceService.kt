@@ -50,9 +50,9 @@ import java.util.Observer
  */
 class CalWatchFaceService : CanvasWatchFaceService() {
     override fun onCreateEngine(): Engine {
-        val tmpEngineRef = WeakReference(Engine())
-        engineRef = tmpEngineRef
-        return tmpEngineRef.get()
+        val lEngineRef = WeakReference(Engine())
+        engineRef = lEngineRef
+        return lEngineRef.get()
     }
 
     inner class Engine : CanvasWatchFaceService.Engine(), Observer {
@@ -134,10 +134,10 @@ class CalWatchFaceService : CanvasWatchFaceService() {
             }
 
             if (clockFace == null) {
-                val tmpClockFace = ClockFace()
+                val lClockFace = ClockFace()
                 val emptyCalendar = BitmapFactory.decodeResource(this@CalWatchFaceService.resources, R.drawable.empty_calendar)
-                tmpClockFace.setMissingCalendarBitmap(emptyCalendar)
-                clockFace = tmpClockFace
+                lClockFace.setMissingCalendarBitmap(emptyCalendar)
+                clockFace = lClockFace
             }
 
             clockState.addObserver(this) // callbacks if something changes

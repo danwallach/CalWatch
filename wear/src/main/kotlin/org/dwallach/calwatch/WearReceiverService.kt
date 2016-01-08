@@ -102,15 +102,15 @@ class WearReceiverService : WearableListenerService(), GoogleApiClient.Connectio
     private fun initGoogle() {
         if (googleApiClient == null) {
             Log.v(TAG, "Trying to connect to GoogleApi")
-            val tmpClient =  GoogleApiClient
+            val lClient =  GoogleApiClient
                     .Builder(this)
                     .addApi(Wearable.API)
                     .addConnectionCallbacks(this)
                     .addOnConnectionFailedListener(this)
                     .build()
-            tmpClient.connect()
+            lClient.connect()
 
-            googleApiClient = tmpClient
+            googleApiClient = lClient
         }
     }
 
@@ -127,9 +127,9 @@ class WearReceiverService : WearableListenerService(), GoogleApiClient.Connectio
     }
 
     private fun killGoogleClient() {
-        val tmpClient = googleApiClient
-        if (tmpClient != null && tmpClient.isConnected)
-            tmpClient.disconnect()
+        val lClient = googleApiClient
+        if (lClient != null && lClient.isConnected)
+            lClient.disconnect()
         googleApiClient = null
     }
 

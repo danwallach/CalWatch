@@ -23,49 +23,50 @@ class WearSender(private val context: Context) : GoogleApiClient.ConnectionCallb
     // WatchCalendarService. And that thing can and will be summarily killed by the system at any
     // time, so this context won't leak.
 
-    private var wireBytesToSend: ByteArray? = null
     private var googleApiClient: GoogleApiClient? = null
 
     private fun initGoogle() {
         if (googleApiClient == null) {
             Log.v(TAG, "initializing GoogleApiClient")
             //            readyToSend = false;
-            googleApiClient = GoogleApiClient
+            val lClient = GoogleApiClient
                     .Builder(context)
                     .addApi(Wearable.API)
                     .addConnectionCallbacks(this)
                     .addOnConnectionFailedListener(this).build()
-            googleApiClient!!.connect()
+            lClient.connect()
+            googleApiClient = lClient
         }
     }
 
     fun sendAllToWatch() {
         try {
             val clockState = ClockState.getState()
-            wireBytesToSend = clockState.getProtobuf()
+            val wireBytesToSend = clockState.getProtobuf()
+            if (wireBytesToSend.size == 0) return
 
-            Log.v(TAG, "preparing event list for transmission, length(" + wireBytesToSend!!.size + " bytes)")
+            Log.v(TAG, "preparing event list for transmission, length(" + wireBytesToSend.size + " bytes)")
 
             /*
              * Useful source: http://toastdroid.com/2014/08/18/messageapi-simple-conversations-with-android-wear/
              * Major source: https://developer.android.com/google/auth/api-client.html
              */
 
-            //            if(!isActiveConnection()) return;
-            if (wireBytesToSend == null) return
-            if (wireBytesToSend!!.size == 0) return
+
+
 
             Log.v(TAG, "ready to send request")
 
+            val lClient = googleApiClient
             /*
              * essential code borrowed from WearOngoingNotificationSample
              */
-            if (googleApiClient!!.isConnected) {
+            if (lClient != null &&  lClient.isConnected) {
                 val putDataMapReq = PutDataMapRequest.create(Constants.SettingsPath)
                 putDataMapReq.dataMap.putByteArray(Constants.DataKey, wireBytesToSend)
                 val putDataReq = putDataMapReq.asPutDataRequest()
                 putDataReq.setUrgent() // because we want this stuff to propagate quickly -- new feature along with Android M
-                val pendingResult = Wearable.DataApi.putDataItem(googleApiClient, putDataReq)
+                val pendingResult = Wearable.DataApi.putDataItem(lClient, putDataReq)
 
                 // this callback isn't strictly necessary for correctness, but it will be
                 // exceptionally useful for log debugging
@@ -148,9 +149,9 @@ class WearSender(private val context: Context) : GoogleApiClient.ConnectionCallb
         try {
             Log.v(TAG, "cleaning up Google API")
             //            readyToSend = false;
-            if (googleApiClient != null) {
-                if (googleApiClient!!.isConnected)
-                    googleApiClient!!.disconnect()
+            val lClient = googleApiClient
+            if (lClient != null && lClient.isConnected) {
+                lClient.disconnect()
             }
         } finally {
             googleApiClient = null
