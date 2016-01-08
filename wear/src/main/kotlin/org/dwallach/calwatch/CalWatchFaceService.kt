@@ -24,7 +24,6 @@
  * limitations under the License.
  */
 
-@file:JvmName("org.dwallach.calwatch.CalWatchFaceService")
 package org.dwallach.calwatch
 
 import android.graphics.BitmapFactory

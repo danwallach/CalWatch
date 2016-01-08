@@ -4,7 +4,6 @@
  * Home page: http://www.cs.rice.edu/~dwallach/calwatch/
  * Licensing: http://www.cs.rice.edu/~dwallach/calwatch/licensing.html
  */
-@file:JvmName("org.dwallach.calwatch.PhoneActivity")
 package org.dwallach.calwatch
 
 import android.app.Activity

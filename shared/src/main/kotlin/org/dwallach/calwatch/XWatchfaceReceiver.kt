@@ -17,7 +17,6 @@
  * limitations under the License.
  */
 
-@file:JvmName("org.dwallach.calwatch.XWatchfaceReceiver")
 package org.dwallach.calwatch
 
 import android.content.BroadcastReceiver
