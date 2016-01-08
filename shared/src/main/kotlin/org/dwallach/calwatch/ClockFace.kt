@@ -34,7 +34,6 @@ class ClockFace : Observer {
     private var missingBottomPixels = 0 // Moto 360 hack; set to non-zero number to pull up the indicia
     private var flatBottomCornerTime = 30f // Moto 360 hack: set to < 30.0 seconds for where the flat bottom starts
 
-    private val clockState: ClockState
     private var peekCardRect: Rect? = null
     private var missingCalendarX: Float = 0.toFloat()
     private var missingCalendarY: Float = 0.toFloat()
@@ -72,7 +71,6 @@ class ClockFace : Observer {
         instanceID = instanceCounter++
         Log.v(TAG, "ClockFace setup, instance($instanceID)")
 
-        this.clockState = ClockState.getState()
         setupObserver()
         update(null, null) // initialize variables from initial constants, or whatever else is hanging out in ClockState
 
@@ -578,7 +576,7 @@ class ClockFace : Observer {
         calendarTicker++
 
         // if we don't have permission to see the calendar, then we'll let the user know
-        if (!clockState.calendarPermission && missingCalendarBitmap != null && !ambientMode) {
+        if (!ClockState.calendarPermission && missingCalendarBitmap != null && !ambientMode) {
             canvas.drawBitmap(missingCalendarBitmap, missingCalendarX, missingCalendarY, null)
             return
         }
@@ -728,15 +726,13 @@ class ClockFace : Observer {
     private var batteryCacheTime: Long = 0
 
     private fun drawBattery(canvas: Canvas) {
-        val batteryWrapper = BatteryWrapper.getWrapper() ?: return // we're not ready yet, for whatever reason
-
         val time = TimeWrapper.gmtTime
 
         // we don't want to poll *too* often; this translates to about once per five minute
         if (batteryPathCache == null || time - batteryCacheTime > 300000) {
             Log.v(TAG, "fetching new battery status")
-            batteryWrapper.fetchStatus()
-            val batteryPct = batteryWrapper.batteryPct
+            BatteryWrapper.fetchStatus()
+            val batteryPct = BatteryWrapper.batteryPct
             batteryCacheTime = time
             val lBatteryPathCache = Path()
 
@@ -1045,29 +1041,29 @@ class ClockFace : Observer {
     // call this if you want this instance to head to the garbage collector; this disconnects
     // it from paying attention to changes in the ClockState
     fun kill() {
-        clockState.deleteObserver(this)
+        ClockState.deleteObserver(this)
     }
 
     private fun setupObserver() {
-        clockState.addObserver(this)
+        ClockState.addObserver(this)
     }
 
-    // this gets called when the clockState updates itself
+    // this gets called when the ClockState updates itself
     override fun update(observable: Observable?, data: Any?) {
         Log.v(TAG, "update - start, instance($instanceID)")
         wipeCaches()
         TimeWrapper.update()
-        this.faceMode = clockState.faceMode
-        this.showDayDate = clockState.showDayDate
-        this.showSeconds = clockState.showSeconds
+        this.faceMode = ClockState.faceMode
+        this.showDayDate = ClockState.showDayDate
+        this.showSeconds = ClockState.showSeconds
         updateEventList()
         Log.v(TAG, "update - end")
     }
 
     private fun updateEventList() {
         // this is cheap enough that we can afford to do it at 60Hz
-        this.maxLevel = clockState.maxLevel
-        this.eventList = clockState.getVisibleEventList()
+        this.maxLevel = ClockState.maxLevel
+        this.eventList = ClockState.getVisibleEventList()
     }
 
     fun setBurnInProtection(burnInProtection: Boolean) {

@@ -80,15 +80,14 @@ class PhoneActivity : Activity(), Observer {
 
         val showSeconds = showSeconds.isChecked
         val showDayDate = showDayDate.isChecked
-        val clockState = ClockState.getState()
 
         if (mode != -1) {
-            clockState.faceMode = mode
+            ClockState.faceMode = mode
         }
-        clockState.showSeconds = showSeconds
-        clockState.showDayDate = showDayDate
+        ClockState.showSeconds = showSeconds
+        ClockState.showDayDate = showDayDate
 
-        clockState.pingObservers() // we only need to do this once, versus a whole bunch of times when it was happening internally
+        ClockState.pingObservers() // we only need to do this once, versus a whole bunch of times when it was happening internally
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -102,19 +101,10 @@ class PhoneActivity : Activity(), Observer {
         super.onPause()
         Log.v(TAG, "Pause!")
 
-        // perhaps incorrect assumption: if our activity is being killed, onStop will happen beforehand,
-        // so we'll deregister our clockState observer, allowing this Activity object to become
-        // garbage. A new one will be created if the activity ever comes back to life, which
-        // will call getClockState(), which will in turn resurrect observer. Setting clockState=null
-        // means that, even if this specific Activity object is resurrected from the dead, we'll
-        // just reconnect it the next time somebody internally calls getClockState(). No harm, no foul.
-
-        // http://developer.android.com/reference/android/app/Activity.html
-
         if (surfaceView != null)
             surfaceView.kill(this)
 
-        ClockState.getState().deleteObserver(this)
+        ClockState.deleteObserver(this)
     }
 
     override fun onStart() {
@@ -148,7 +138,7 @@ class PhoneActivity : Activity(), Observer {
         super.onResume()
         Log.v(TAG, "Resume!")
 
-        ClockState.getState().addObserver(this)
+        ClockState.addObserver(this)
 
         if (surfaceView != null) {
             surfaceView.init(this)
@@ -173,8 +163,7 @@ class PhoneActivity : Activity(), Observer {
         // somebody changed *something* in the ClockState, causing us to get called
         Log.v(TAG, "Noticed a change in the clock state; saving preferences")
 
-        val clockState = ClockState.getState()
-        setFaceModeUI(clockState.faceMode, clockState.showSeconds, clockState.showDayDate)
+        setFaceModeUI(ClockState.faceMode, ClockState.showSeconds, ClockState.showDayDate)
         PreferencesHelper.savePreferences(this)
     }
 
@@ -207,7 +196,7 @@ class PhoneActivity : Activity(), Observer {
             if(activity == null) return
             // can't do anything with an activity
 
-            if (!ClockState.getState().calendarPermission) {
+            if (!ClockState.calendarPermission) {
                 Log.v(TAG, "Requesting permissions")
                 CalendarPermission.request(activity)
                 view.initCalendarFetcher(activity)

@@ -26,7 +26,7 @@ class PermissionActivity : Activity() {
         this.finish() // we're done, so this shuts everything down
     }
 
-    public override fun onStart() {
+    override fun onStart() {
         super.onStart()
 
         Log.v(TAG, "starting PermissionActivity")

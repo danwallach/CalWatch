@@ -18,11 +18,9 @@ object PreferencesHelper {
         val prefs = context.getSharedPreferences(Constants.PrefsKey, Context.MODE_PRIVATE)
         val editor = prefs.edit()
 
-        val clockState = ClockState.getState()
-
-        editor.putInt("faceMode", clockState.faceMode)
-        editor.putBoolean("showSeconds", clockState.showSeconds)
-        editor.putBoolean("showDayDate", clockState.showDayDate)
+        editor.putInt("faceMode", ClockState.faceMode)
+        editor.putBoolean("showSeconds", ClockState.showSeconds)
+        editor.putBoolean("showDayDate", ClockState.showDayDate)
 
         if (!editor.commit())
             Log.e(TAG, "savePreferences commit failed ?!")
@@ -31,8 +29,6 @@ object PreferencesHelper {
     fun loadPreferences(context: Context) {
         Log.v(TAG, "loadPreferences")
 
-        val clockState = ClockState.getState()
-
         val prefs = context.getSharedPreferences(Constants.PrefsKey, Context.MODE_PRIVATE)
         val faceMode = prefs.getInt("faceMode", Constants.DefaultWatchFace) // ClockState.FACE_TOOL
         val showSeconds = prefs.getBoolean("showSeconds", Constants.DefaultShowSeconds)
@@ -40,10 +36,10 @@ object PreferencesHelper {
 
         Log.v(TAG, "faceMode: $faceMode, showSeconds: $showSeconds, showDayDate: $showDayDate")
 
-        clockState.faceMode = faceMode
-        clockState.showSeconds = showSeconds
-        clockState.showDayDate = showDayDate
+        ClockState.faceMode = faceMode
+        ClockState.showSeconds = showSeconds
+        ClockState.showDayDate = showDayDate
 
-        clockState.pingObservers() // we only need to do this once, versus multiple times when done internally
+        ClockState.pingObservers() // we only need to do this once, versus multiple times when done internally
     }
 }

@@ -40,7 +40,7 @@ class WatchCalendarService : Service(), Observer {
 
     private fun initInternal() {
         BatteryWrapper.init(this)
-        ClockState.getState().addObserver(this)
+        ClockState.addObserver(this)
         wearSender = WearSender(this)
 
         PreferencesHelper.loadPreferences(this)
@@ -66,7 +66,7 @@ class WatchCalendarService : Service(), Observer {
         super.onDestroy()
         Log.v(TAG, "service destroyed!")
 
-        ClockState.getState().deleteObserver(this)
+        ClockState.deleteObserver(this)
     }
 
     override fun onBind(intent: Intent?): IBinder? {

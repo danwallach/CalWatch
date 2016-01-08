@@ -41,8 +41,7 @@ class WearSender(private val context: Context) : GoogleApiClient.ConnectionCallb
 
     fun sendAllToWatch() {
         try {
-            val clockState = ClockState.getState()
-            val wireBytesToSend = clockState.getProtobuf()
+            val wireBytesToSend = ClockState.getProtobuf()
             if (wireBytesToSend.size == 0) return
 
             Log.v(TAG, "preparing event list for transmission, length(" + wireBytesToSend.size + " bytes)")
@@ -51,16 +50,8 @@ class WearSender(private val context: Context) : GoogleApiClient.ConnectionCallb
              * Useful source: http://toastdroid.com/2014/08/18/messageapi-simple-conversations-with-android-wear/
              * Major source: https://developer.android.com/google/auth/api-client.html
              */
-
-
-
-
-            Log.v(TAG, "ready to send request")
-
             val lClient = googleApiClient
-            /*
-             * essential code borrowed from WearOngoingNotificationSample
-             */
+
             if (lClient != null &&  lClient.isConnected) {
                 val putDataMapReq = PutDataMapRequest.create(Constants.SettingsPath)
                 putDataMapReq.dataMap.putByteArray(Constants.DataKey, wireBytesToSend)
@@ -91,17 +82,6 @@ class WearSender(private val context: Context) : GoogleApiClient.ConnectionCallb
             singleton = this
         onCreate()
     }
-
-    //    public static WearSender getSingleton() {
-    //        return singleton;
-    //    }
-
-    //    private boolean isActiveConnection() {
-    //        if(readyToSend) return true;
-    //        Log.v(TAG, "connection inactive, retrying");
-    //        initGoogle();
-    //        return false;
-    //    }
 
     protected fun onCreate() {
         Log.v(TAG, "onCreate!")

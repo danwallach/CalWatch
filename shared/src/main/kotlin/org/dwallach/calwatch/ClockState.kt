@@ -11,7 +11,13 @@ import android.util.Log
 import java.io.IOException
 import java.util.Observable
 
-class ClockState private constructor() : Observable() {
+object ClockState : Observable() {
+    private const val TAG = "ClockState"
+
+    const val FACE_TOOL = 0
+    const val FACE_NUMBERS = 1
+    const val FACE_LITE = 2
+
     var faceMode: Int = Constants.DefaultWatchFace
     var showSeconds: Boolean = Constants.DefaultShowSeconds
     var showDayDate: Boolean = Constants.DefaultShowDayDate
@@ -202,30 +208,6 @@ class ClockState private constructor() : Observable() {
         Log.v(TAG, "Visible:")
         visibleEventList?.forEach {
             Log.v(TAG, "--> displayColor(" + Integer.toHexString(it.wireEvent.displayColor) + "), minLevel(" + it.minLevel + "), maxLevel(" + it.maxLevel + "), startTime(" + it.wireEvent.startTime + "), endTime(" + it.wireEvent.endTime + ")")
-        }
-    }
-
-    companion object {
-        private const val TAG = "ClockState"
-
-        const val FACE_TOOL = 0
-        const val FACE_NUMBERS = 1
-        const val FACE_LITE = 2
-
-        private var singleton: ClockState? = null
-
-        // instead, they'll go through this
-        fun getState(): ClockState {
-            val tmp = singleton
-
-            if(tmp == null) {
-                // total hack to avoid all the null-inference checks in Kotlin
-                val newbie = ClockState()
-                singleton = newbie
-                return newbie
-            } else {
-                return tmp
-            }
         }
     }
 }

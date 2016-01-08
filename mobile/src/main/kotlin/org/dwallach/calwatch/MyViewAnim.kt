@@ -59,7 +59,6 @@ class MyViewAnim(context: Context, attrs: AttributeSet) : View(context, attrs), 
 
         BatteryWrapper.init(context)
         val resources = context.resources
-        val clockState = ClockState.getState()
 
         if (resources == null) {
             Log.e(TAG, "no resources? not good")
@@ -74,7 +73,7 @@ class MyViewAnim(context: Context, attrs: AttributeSet) : View(context, attrs), 
             clockFace = lClockFace
         }
 
-        clockState.addObserver(this)
+        ClockState.addObserver(this)
     }
 
     // this is redundant with CalWatchFaceService.Engine.initCalendarFetcher, but just different enough that it's
@@ -82,18 +81,16 @@ class MyViewAnim(context: Context, attrs: AttributeSet) : View(context, attrs), 
     fun initCalendarFetcher(activity: Activity) {
         Log.v(TAG, "initCalendarFetcher")
 
-        val clockState = ClockState.getState()
-
         calendarFetcher?.kill()
         calendarFetcher = null
 
         val permissionGiven = CalendarPermission.check(activity)
 
-        if (!clockState.calendarPermission && permissionGiven) {
+        if (!ClockState.calendarPermission && permissionGiven) {
             // Hypothetically this isn't necessary, because it's handled in CalendarPermission.handleResult.
             // Nonetheless, paranoia.
-            Log.e(TAG, "we've got permission, need to update the clockState")
-            clockState.calendarPermission = true
+            Log.e(TAG, "we've got permission, need to update the ClockState")
+            ClockState.calendarPermission = true
         }
 
         if (!permissionGiven) {
@@ -133,12 +130,11 @@ class MyViewAnim(context: Context, attrs: AttributeSet) : View(context, attrs), 
 
     fun kill(context: Context) {
         Log.d(TAG, "kill")
-        val clockState = ClockState.getState()
 
         calendarFetcher?.kill()
         calendarFetcher = null
 
-        clockState.deleteObserver(this)
+        ClockState.deleteObserver(this)
 
         clockFace?.kill()
         clockFace = null
@@ -162,7 +158,7 @@ class MyViewAnim(context: Context, attrs: AttributeSet) : View(context, attrs), 
     private var _height: Int = 0
 
 
-    public override fun onDraw(canvas: Canvas) {
+    override fun onDraw(canvas: Canvas) {
         drawCounter++
 
         if (_width == 0 || _height == 0) {
@@ -184,7 +180,7 @@ class MyViewAnim(context: Context, attrs: AttributeSet) : View(context, attrs), 
             TimeWrapper.update() // fetch the time
             lClockFace.drawEverything(canvas)
 
-            if (ClockState.getState().subSecondRefreshNeeded(lClockFace))
+            if (ClockState.subSecondRefreshNeeded(lClockFace))
                 invalidate()
         } catch (t: Throwable) {
             if (drawCounter % 1000 == 0L)

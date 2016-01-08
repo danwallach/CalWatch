@@ -41,9 +41,8 @@ class WearReceiverService : WearableListenerService(), GoogleApiClient.Connectio
 
     private fun newEventBytes(eventBytes: ByteArray) {
         Log.v(TAG, "newEventBytes: " + eventBytes.size)
-        val clockState = ClockState.getState()
 
-        clockState.setProtobuf(eventBytes)
+        ClockState.setProtobuf(eventBytes)
     }
 
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
@@ -62,8 +61,7 @@ class WearReceiverService : WearableListenerService(), GoogleApiClient.Connectio
 
         // and to load any saved data while we're waiting on the phone to give us fresh data
 
-        val clockState = ClockState.getState()
-        if (clockState.wireInitialized) {
+        if (ClockState.wireInitialized) {
             Log.v(TAG, "clock state already initialized, no need to go to saved prefs")
         } else {
             loadPreferences()

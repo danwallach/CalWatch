@@ -21,14 +21,10 @@ import android.util.Log
 import java.lang.ref.WeakReference
 import java.util.*
 
-class CalendarFetcher private constructor(private val contextRef: WeakReference<Context>, private val contentUri: Uri, private val authority: String) {
-
-    // public constructor takes a Context, but we don't want to keep that live; all we want to keep around is a weak reference to it,
-    // thus the private constructor above and the delegation to it from the public constructor, below
-    constructor(initialContext: Context, contentUri: Uri, authority: String) : this(WeakReference(initialContext), contentUri, authority)
-
+class CalendarFetcher(initialContext: Context, val contentUri: Uri, val authority: String) {
     // this will fire when it's time to (re)load the calendar, launching an asynchronous
     // task to do all the dirty work and eventually update ClockState
+    private val contextRef = WeakReference(initialContext)
     private val loaderHandler: MyHandler
     private var isReceiverRegistered: Boolean = false
 
@@ -52,8 +48,7 @@ class CalendarFetcher private constructor(private val contextRef: WeakReference<
     }
 
     init {
-        val context = contextRef.get()
-        this.loaderHandler = MyHandler(context, this)
+        this.loaderHandler = MyHandler(initialContext, this)
         singletonFetcherRef = WeakReference(this)
 
         // hook into watching the calendar (code borrowed from Google's calendar wear app)
@@ -61,27 +56,17 @@ class CalendarFetcher private constructor(private val contextRef: WeakReference<
         val filter = IntentFilter(Intent.ACTION_PROVIDER_CHANGED)
         filter.addDataScheme("content")
         filter.addDataAuthority(authority, null)
-        context.registerReceiver(broadcastReceiver, filter)
+        initialContext.registerReceiver(broadcastReceiver, filter)
         isReceiverRegistered = true
 
         // kick off initial loading of calendar state
         rescan()
     }
 
-    private val context: Context?
-        get() {
-            val context = contextRef.get()
-            if (context == null) {
-                Log.e(TAG, "no context available")
-            }
-
-            return context
-        }
-
     fun kill() {
         Log.v(TAG, "kill")
 
-        val context = context
+        val context: Context? = contextRef.get()
 
         if (isReceiverRegistered && context != null) {
             context.unregisterReceiver(broadcastReceiver)
@@ -120,7 +105,11 @@ class CalendarFetcher private constructor(private val contextRef: WeakReference<
         // local state which we'll eventually return
         val cr = LinkedList<WireEvent>()
 
-        val context = context ?: return emptyList()
+        val context: Context? = contextRef.get()
+        if(context == null) {
+            Log.e(TAG, "no context, can't load content")
+            return emptyList()
+        }
 
         // first, get the list of calendars
         Log.v(TAG, "starting to load content")
@@ -196,8 +185,7 @@ class CalendarFetcher private constructor(private val contextRef: WeakReference<
             // apparently we don't have permission for the calendar!
             Log.e(TAG, "security exception while reading calendar!", e)
             kill()
-            val clockState = ClockState.getState()
-            clockState.calendarPermission = false
+            ClockState.calendarPermission = false
 
             return emptyList()
         }
@@ -218,7 +206,7 @@ class CalendarFetcher private constructor(private val contextRef: WeakReference<
         }
 
         override fun doInBackground(vararg voids: Void): Throwable? {
-            val context = contextRef.get()
+            val context: Context? = contextRef.get()
 
             if (context == null) {
                 Log.e(TAG, "no saved context: can't do background loader")
@@ -235,7 +223,7 @@ class CalendarFetcher private constructor(private val contextRef: WeakReference<
 
             try {
                 val startTime = SystemClock.elapsedRealtimeNanos()
-                ClockState.getState().setWireEventList(fetcher.loadContent())
+                ClockState.setWireEventList(fetcher.loadContent())
                 val endTime = SystemClock.elapsedRealtimeNanos()
                 Log.i(TAG, "total calendar computation time: %.3f ms".format((endTime - startTime) / 1000000.0))
                 return null;
@@ -248,7 +236,7 @@ class CalendarFetcher private constructor(private val contextRef: WeakReference<
         override fun onPostExecute(results: Throwable?) {
             releaseWakeLock()
             fetcher.scanInProgress = false // we're done!
-            ClockState.getState().pingObservers() // now that we're back on the main thread we can notify people of the changes
+            ClockState.pingObservers() // now that we're back on the main thread we can notify people of the changes
 
             Log.v(TAG, "wake lock released")
 

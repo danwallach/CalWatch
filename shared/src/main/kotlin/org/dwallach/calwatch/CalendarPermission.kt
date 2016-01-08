@@ -91,14 +91,13 @@ object CalendarPermission {
      */
     fun handleResult(requestCode: Int, permissions: Array<String>, grantResults: IntArray) {
         if (requestCode == INTERNAL_PERM_REQUEST_CODE) {
-            val state = ClockState.getState()
             // If request is cancelled, the result arrays are empty.
             if (grantResults.size > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
                 Log.v(TAG, "calendar permission granted!")
-                state.calendarPermission = true
+                ClockState.calendarPermission = true
             } else {
                 Log.v(TAG, "calendar permission denied!")
-                state.calendarPermission = false
+                ClockState.calendarPermission = false
             }
         } else {
             Log.e(TAG, "weird permission result: code(%d), perms(%s), results(%s)"

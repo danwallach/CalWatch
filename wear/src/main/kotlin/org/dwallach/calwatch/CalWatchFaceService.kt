@@ -65,17 +65,16 @@ class CalWatchFaceService : CanvasWatchFaceService() {
 
         private fun initCalendarFetcher() {
             Log.v(TAG, "initCalendarFetcher")
-            val clockState = ClockState.getState()
 
             calendarFetcher?.kill()
             calendarFetcher = null
 
             val permissionGiven = CalendarPermission.check(this@CalWatchFaceService)
-            if (!clockState.calendarPermission && permissionGiven) {
+            if (!ClockState.calendarPermission && permissionGiven) {
                 // Hypothetically this isn't necessary, because it's handled in CalendarPermission.handleResult.
                 // Nonetheless, paranoia.
-                Log.e(TAG, "we've got permission, need to update the clockState")
-                clockState.calendarPermission = true
+                Log.e(TAG, "we've got permission, need to update the ClockState")
+                ClockState.calendarPermission = true
             }
 
             if (!permissionGiven) {
@@ -106,7 +105,6 @@ class CalWatchFaceService : CanvasWatchFaceService() {
             Log.d(TAG, "onCreate")
 
             super.onCreate(holder)
-            val clockState = ClockState.getState()
 
             // announce our version number to the logs
             VersionWrapper.logVersion(this@CalWatchFaceService)
@@ -140,7 +138,7 @@ class CalWatchFaceService : CanvasWatchFaceService() {
                 clockFace = lClockFace
             }
 
-            clockState.addObserver(this) // callbacks if something changes
+            ClockState.addObserver(this) // callbacks if something changes
 
             WearReceiverService.kickStart(this@CalWatchFaceService)
             CalendarPermission.init(this@CalWatchFaceService)
@@ -246,7 +244,7 @@ class CalWatchFaceService : CanvasWatchFaceService() {
 
                 // Draw every frame as long as we're visible and doing the sweeping second hand,
                 // otherwise the timer will take care of it.
-                if (isVisible && ClockState.getState().subSecondRefreshNeeded(lClockFace))
+                if (isVisible && ClockState.subSecondRefreshNeeded(lClockFace))
                     invalidate()
             } catch (t: Throwable) {
                 if (drawCounter % 1000 == 0L)
@@ -260,7 +258,7 @@ class CalWatchFaceService : CanvasWatchFaceService() {
                     // if we don't have calendar permission, then that means we're interpreting
                     // watchface taps as permission requests.
                     // TODO be more specific about the x,y coordinates, like check if they're on the right side of the screen
-                    if (!ClockState.getState().calendarPermission)
+                    if (!ClockState.calendarPermission)
                         PermissionActivity.kickStart(this@CalWatchFaceService, false)
                 WatchFaceService.TAP_TYPE_TOUCH_CANCEL -> { } // user lifted their finger, "cancelling" the tap?
                 WatchFaceService.TAP_TYPE_TAP -> { } // user lifted their finger, I guess?
@@ -275,7 +273,7 @@ class CalWatchFaceService : CanvasWatchFaceService() {
             calendarFetcher?.kill()
             calendarFetcher = null
 
-            ClockState.getState().deleteObserver(this)
+            ClockState.deleteObserver(this)
 
             clockFace?.kill()
             clockFace = null
