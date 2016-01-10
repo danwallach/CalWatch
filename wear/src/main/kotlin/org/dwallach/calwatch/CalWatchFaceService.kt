@@ -59,10 +59,16 @@ class CalWatchFaceService : CanvasWatchFaceService() {
         private var clockFace: ClockFace? = null
         private var calendarFetcher: CalendarFetcher? = null
 
+        /**
+         * Call this if there's been a status update in the calendar permissions.
+         */
         fun calendarPermissionUpdate() {
             initCalendarFetcher()
         }
 
+        /**
+         * Internal function for dealing with the calendar fetcher.
+         */
         private fun initCalendarFetcher() {
             Log.v(TAG, "initCalendarFetcher")
 
@@ -78,13 +84,18 @@ class CalWatchFaceService : CanvasWatchFaceService() {
             }
 
             if (!permissionGiven) {
-                // If this succeeds, then it will call calendarPermissionUpdate, which will asynchronously
+                // If we got here, then we don't have permission to read the calendar. Bummer. The
+                // only way to fix this is to create a whole new Activity from which to make the
+                // request of the user.
+
+                // If this succeeds, then it will asynchronously call calendarPermissionUpdate(), which will
                 // call back to initCalendarFetcher(). That's why we're returning right after this.
 
                 // The "firstTimeOnly" bit here is what keeps this from going into infinite recursion.
                 // We'll only launch the activity in this instance if we've never asked the user before.
 
-                // The onTap handler will ask, no matter what, if we don't have permission.
+                // If the user says "no", they'll be given the "empty calendar" icon and can clock the
+                // screen. The onTap handler will also then kickstart the permission activity.
 
                 Log.v(TAG, "no calendar permission given, launching first-time activity to ask")
                 PermissionActivity.kickStart(this@CalWatchFaceService, true)
@@ -133,7 +144,7 @@ class CalWatchFaceService : CanvasWatchFaceService() {
 
             if (clockFace == null) {
                 val lClockFace = ClockFace()
-                val emptyCalendar = BitmapFactory.decodeResource(this@CalWatchFaceService.resources, R.drawable.empty_calendar)
+                val emptyCalendar = BitmapFactory.decodeResource(resources, R.drawable.empty_calendar)
                 lClockFace.setMissingCalendarBitmap(emptyCalendar)
                 clockFace = lClockFace
             }

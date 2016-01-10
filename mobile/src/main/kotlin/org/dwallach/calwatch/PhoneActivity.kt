@@ -7,6 +7,7 @@
 package org.dwallach.calwatch
 
 import android.app.Activity
+import android.content.ContextWrapper
 import android.os.Bundle
 import android.util.Log
 import android.view.Menu
@@ -21,10 +22,6 @@ import kotlinx.android.synthetic.main.activity_phone.*
 
 class PhoneActivity : Activity(), Observer {
     private var disableUICallbacks = false
-
-    init {
-        activityRef = WeakReference<Activity?>(this)
-    }
 
     //
     // this will be called, eventually, from whatever feature is responsible for
@@ -183,18 +180,15 @@ class PhoneActivity : Activity(), Observer {
     companion object {
         private const val TAG = "PhoneActivity"
 
-        private var activityRef: WeakReference<Activity?>? = null
-
         /**
          * This will be called when the user clicks on the watchface, presumably because they want
          * us to request calendar permissions.
          */
-        internal fun watchfaceClick(view: MyViewAnim) {
+        fun watchfaceClick(view: MyViewAnim) {
             Log.v(TAG, "Watchface clicked!")
 
-            val activity: Activity? = activityRef?.get() ?: return
-            if(activity == null) return
-            // can't do anything with an activity
+            val activity = view.toActivity()
+            if(activity == null) return // can't do anything with an activity
 
             if (!ClockState.calendarPermission) {
                 Log.v(TAG, "Requesting permissions")
@@ -206,3 +200,20 @@ class PhoneActivity : Activity(), Observer {
         }
     }
 }
+
+/**
+ * Helper extension function to convert from a view to its surrounding activity, if that activity exists.
+ */
+fun View.toActivity(): Activity? {
+    // See: http://stackoverflow.com/questions/8276634/android-get-hosting-activity-from-a-view
+    var context = this.getContext()
+    while(context is ContextWrapper) {
+        if(context is Activity) {
+            return context
+        } else {
+            context = context.baseContext
+        }
+    }
+    return null
+}
+
