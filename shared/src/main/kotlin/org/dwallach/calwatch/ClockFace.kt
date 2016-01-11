@@ -428,8 +428,7 @@ class ClockFace : Observer {
                 strokeWidth = colorBig.strokeWidth
 
 
-            var i = 0
-            while (i < 60) {
+            for(i in 0..59 step 5) {
                 if (i == 0) {
                     // top of watch: special
                     if (localFaceMode != ClockState.FACE_NUMBERS) {
@@ -451,7 +450,6 @@ class ClockFace : Observer {
                             drawRadialLine(lFacePathCache, strokeWidth, i.toDouble(), .75f, 1.0f, false, bottomHack)
                     }
                 }
-                i += 5
             }
 
             facePathCache = lFacePathCache
@@ -687,8 +685,8 @@ class ClockFace : Observer {
             r1 = calendarRingMinRadius
             x1 = clockX(stippleTime.toDouble(), r1)
             y1 = clockY(stippleTime.toDouble(), r1)
-            var i = 0
-            while (i < 8) {
+
+            for(i in 0..7) {
                 r2 = r1 + calendarRingWidth / 8f
                 x2 = clockX(stippleTime.toDouble(), r2)
                 y2 = clockY(stippleTime.toDouble(), r2)
@@ -707,7 +705,6 @@ class ClockFace : Observer {
                 lStipplePathCache.lineTo(x2, y2)
                 lStipplePathCache.lineTo(xhigh, yhigh)
                 lStipplePathCache.close()
-                i++
                 r1 = r2
                 x1 = x2
                 y1 = y2
