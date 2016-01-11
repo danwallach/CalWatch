@@ -36,6 +36,7 @@ Marshmallow permissions / updates
 
     Other stuff, while we're overhauling things:
     TODO Heisenbug investigation: when starting on a freshly wiped phone, weird rendering artifacts (negative numbers?) but it goes away
+    - possibly fixed! (issue when event.startTime == event.endTime, which can happen after clipping)
     TODO Change phone config panel to show three simultaneous watchfaces with picker rather than three text names
 
     TODO Adopt Wear Compatibility Library
@@ -44,17 +45,14 @@ Marshmallow permissions / updates
     - Unclear if there's any real benefit for CalWatch in these libraries
 
     TODO Validate that CrashReporter still works
-    TODO Figure out how to get ProGuard working again
 
 Refactoring / reengineering
     TODO significant code overlap between mobile/MyViewAnim and wear/CalWatchFaceService
     - but differences are significant enough that it's not going to be very easy to move to /shared
+    - factoring out the GoogleAPI stuff wasn't too bad, probably straightforward to refactor other stuff the same way
 
     TODO fix Gradle, presently requiring me to have the git version code in three places to work right
     (I tried putting it just in settings.gradle or the top-level build.gradle and this didn't work)
-
-    TODO Convert everything to Kotlin, because why not? Might as well use something newer and cleaner
-    https://kotlinlang.org/docs/tutorials/kotlin-android.html
 
     TODO Rip out Observer/Listener logic (getting untenable) and redo with functional-reactive style
 

@@ -56,13 +56,7 @@ class MyViewAnim(context: Context, attrs: AttributeSet) : View(context, attrs), 
 
         // announce our version number to the logs
         VersionWrapper.logVersion(context)
-
         BatteryWrapper.init(context)
-        val resources = context.resources
-
-        if (resources == null) {
-            Log.e(TAG, "no resources? not good")
-        }
 
         resume(context)
     }
@@ -135,8 +129,13 @@ class MyViewAnim(context: Context, attrs: AttributeSet) : View(context, attrs), 
         Log.d(TAG, "resume")
 
         clockFace = ClockFace()
-        val emptyCalendar = BitmapFactory.decodeResource(context.resources, R.drawable.empty_calendar)
-        clockFace.setMissingCalendarBitmap(emptyCalendar)
+
+        if(context.resources == null) {
+            Log.e(TAG, "no resources? not good")
+        } else {
+            val emptyCalendar = BitmapFactory.decodeResource(context.resources, R.drawable.empty_calendar)
+            clockFace.setMissingCalendarBitmap(emptyCalendar)
+        }
         clockFace.setSize(_width, _height)
 
         ClockState.addObserver(this)
