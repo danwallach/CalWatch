@@ -30,7 +30,7 @@ object PaintCan {
      */
     fun getCalendarPaint(argb: Int): Paint {
         // Log.v(TAG, "get paint: " + Integer.toHexString(argb));
-        return paintMap.get(argb) ?: {
+        return paintMap[argb] ?: {
             val newPaint = Paint(Paint.ANTI_ALIAS_FLAG)
             newPaint.strokeJoin = Paint.Join.BEVEL
             newPaint.color = argb

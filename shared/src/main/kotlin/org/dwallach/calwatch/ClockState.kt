@@ -58,7 +58,7 @@ object ClockState : Observable() {
     fun setWireEventList(eventList: List<WireEvent>) {
         Log.v(TAG, "fresh calendar event list, " + eventList.size + " entries")
         val (visibleEventList, maxLevel) = clipToVisible(eventList)
-        Log.v(TAG, "--> " + visibleEventList + " visible events")
+        Log.v(TAG, "--> $visibleEventList visible events")
         this.eventList = eventList
         this.visibleEventList = visibleEventList
         this.maxLevel = maxLevel

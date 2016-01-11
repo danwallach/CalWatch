@@ -7,9 +7,14 @@
 package org.dwallach.calwatch
 
 import android.graphics.Paint
+import android.graphics.Path
 
 class EventWrapper(val wireEvent: WireEvent) {
-    val pathCache: PathCache
+    /**
+     * The first time this event is rendered, it will be rendered to a Path, so subsequent calls to
+     * render it will go much faster.
+     */
+    var path: Path? = null
     private val paint: Paint
     private val greyPaint: Paint
     private val lowBitPaint: Paint
@@ -18,10 +23,9 @@ class EventWrapper(val wireEvent: WireEvent) {
 
 
     init {
-        this.pathCache = PathCache()
         this.paint = PaintCan.getCalendarPaint(wireEvent.displayColor)
         this.greyPaint = PaintCan.getCalendarGreyPaint(wireEvent.displayColor)
-        this.lowBitPaint = PaintCan.get(true, true, PaintCan.colorBlackFill)
+        this.lowBitPaint = PaintCan[true, true, PaintCan.colorBlackFill]
         this.minLevel = 0
         this.maxLevel = 0  // fill this in later on...
     }
@@ -43,7 +47,4 @@ class EventWrapper(val wireEvent: WireEvent) {
     override fun toString(): String {
         return "%d -> %d, color(%08x), levels(%d,%d)".format(wireEvent.startTime, wireEvent.endTime, wireEvent.displayColor, minLevel, maxLevel)
     }
-//    companion object {
-//        private val TAG = "EventWrapper"
-//    }
 }

@@ -12,7 +12,6 @@ import android.util.Log
 import com.google.android.gms.common.ConnectionResult
 import com.google.android.gms.common.api.Api
 import com.google.android.gms.common.api.GoogleApiClient
-import com.google.android.gms.wearable.Wearable
 
 /**
  * Unified support for dealing with the Google API client.

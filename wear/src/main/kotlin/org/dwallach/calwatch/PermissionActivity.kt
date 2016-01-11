@@ -16,7 +16,6 @@ import android.util.Log
  * We need a separate activity for the sole purpose of requesting permissions.
  */
 class PermissionActivity : Activity() {
-
     override fun onRequestPermissionsResult(requestCode: Int, permissions: Array<String>, grantResults: IntArray) {
         Log.v(TAG, "onRequestPermissionsResult")
         CalendarPermission.handleResult(requestCode, permissions, grantResults)
@@ -33,7 +32,6 @@ class PermissionActivity : Activity() {
         super.onStart()
 
         Log.v(TAG, "starting PermissionActivity")
-
         CalendarPermission.request(this)
     }
 

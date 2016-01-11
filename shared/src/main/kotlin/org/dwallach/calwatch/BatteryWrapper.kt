@@ -59,6 +59,7 @@ object BatteryWrapper {
     }
 
     fun init(context: Context) {
+        Log.i(TAG, "init")
         this.context = context
         fetchStatus()
     }

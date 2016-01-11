@@ -145,7 +145,7 @@ class ClockFace : Observer {
         // everything else. I want the hands to not be chopped off, even though everything
         // else will be.
         if (peekCardRect != null && ambientMode)
-            canvas.drawRect(peekCardRect, PaintCan.get(ambientLowBit, ambientMode, PaintCan.colorBlackFill))
+            canvas.drawRect(peekCardRect, PaintCan[ambientLowBit, ambientMode, PaintCan.colorBlackFill])
 
         drawHands(canvas)
 
@@ -222,7 +222,12 @@ class ClockFace : Observer {
                 clockY(30.0, radius))// bottom
     }
 
-    private fun drawRadialArc(canvas: Canvas, pc: PathCache?, secondsStart: Double, secondsEnd: Double, startRadiusRatio: Float, endRadiusRatio: Float, paint: Paint, outlinePaint: Paint?, lowBitSquish: Boolean = true) {
+    /**
+     * Draws a radial arc on the canvas with all the specific start and end times, paint, etc.
+     * The path used for drawing is returned and may be passed back in next time, to the *path*
+     * argument, which will make things go much faster.
+     */
+    private fun drawRadialArc(canvas: Canvas, path: Path?, secondsStart: Double, secondsEnd: Double, startRadiusRatio: Float, endRadiusRatio: Float, paint: Paint, outlinePaint: Paint?, lowBitSquish: Boolean = true): Path {
         var startRadius = startRadiusRatio
         var endRadius = endRadiusRatio
         /*
@@ -244,9 +249,7 @@ class ClockFace : Observer {
             endRadius *= ratio
         }
 
-        var p: Path? = null
-
-        if (pc != null) p = pc.get()
+        var p: Path? = path
 
         if (p == null) {
             p = Path()
@@ -271,16 +274,19 @@ class ClockFace : Observer {
                 //            Log.e(TAG, "--> arcTo: startOval, " + Float.toString((float) (secondsStart * 6 - 90)) + ", " +  Float.toString((float) ((secondsEnd - secondsStart) * 6)));
                 //            Log.e(TAG, "--> arcTo: endOval, " + Float.toString((float) (secondsEnd * 6 - 90)) + ", " +  Float.toString((float) (-(secondsEnd - secondsStart) * 6)));
             }
-
-            pc?.set(p)
         }
 
         canvas.drawPath(p, paint)
         canvas.drawPath(p, outlinePaint)
+
+        return p
     }
 
-    //    private int flatCounter = 0;
+    /**
+     * This variant of drawRadialArc is meant for drawing the timer and stopwatch arcs around the edge of the dial.
+     */
     private fun drawRadialArcFlatBottom(canvas: Canvas, seconds: Float, startRadiusRatio: Float, endRadiusRatio: Float, paint: Paint, outlinePaint: Paint?) {
+        // TODO: should we cache this result like we do with the calendar arcs?
         var startRadius = startRadiusRatio
         var endRadius = endRadiusRatio
         //        flatCounter++;
@@ -389,7 +395,7 @@ class ClockFace : Observer {
     }
 
     private fun drawFace(canvas: Canvas) {
-        var p = facePathCache // make a local copy, avoid concurrency crap
+        var lFacePathCache = facePathCache
         // draw thin lines (indices)
 
         val bottomHack = missingBottomPixels > 0
@@ -402,17 +408,17 @@ class ClockFace : Observer {
         val colorTextShadow = PaintCan[ambientLowBit, ambientMode, PaintCan.colorBigShadow]
 
         // check if we've already rendered the face
-        if (localFaceMode != facePathCacheMode || p == null) {
+        if (localFaceMode != facePathCacheMode || lFacePathCache == null) {
             Log.v(TAG, "drawFace: cx($cx), cy($cy), r($radius)")
 
-            p = Path()
+            lFacePathCache = Path()
 
             Log.v(TAG, "rendering new face, faceMode($localFaceMode)")
 
             if (localFaceMode == ClockState.FACE_TOOL)
                 for (i in 1..59)
                     if (i % 5 != 0)
-                        drawRadialLine(p, colorSmall.strokeWidth, i.toDouble(), .9f, 1.0f, false, bottomHack)
+                        drawRadialLine(lFacePathCache, colorSmall.strokeWidth, i.toDouble(), .9f, 1.0f, false, bottomHack)
 
             val strokeWidth: Float
 
@@ -427,12 +433,12 @@ class ClockFace : Observer {
                 if (i == 0) {
                     // top of watch: special
                     if (localFaceMode != ClockState.FACE_NUMBERS) {
-                        drawRadialLine(p, strokeWidth, -0.4, .75f, 1.0f, true, false)
-                        drawRadialLine(p, strokeWidth, 0.4, .75f, 1.0f, true, false)
+                        drawRadialLine(lFacePathCache, strokeWidth, -0.4, .75f, 1.0f, true, false)
+                        drawRadialLine(lFacePathCache, strokeWidth, 0.4, .75f, 1.0f, true, false)
                     }
                 } else if (i == 45 && !ambientMode && showDayDate) {
                     // 9 o'clock, don't extend into the inside
-                    drawRadialLine(p, strokeWidth, i.toDouble(), 0.9f, 1.0f, false, false)
+                    drawRadialLine(lFacePathCache, strokeWidth, i.toDouble(), 0.9f, 1.0f, false, false)
                 } else {
                     // we want lines for 1, 2, 4, 5, 7, 8, 10, and 11 no matter what
                     if (localFaceMode != ClockState.FACE_NUMBERS || !(i == 15 || i == 30 || i == 45)) {
@@ -440,23 +446,23 @@ class ClockFace : Observer {
                         // going to make the 6 o'clock index line the same length as the other lines
                         // so it doesn't stand out as much
                         if (i == 30 && bottomHack)
-                            drawRadialLine(p, strokeWidth, i.toDouble(), .9f, 1.0f, false, bottomHack)
+                            drawRadialLine(lFacePathCache, strokeWidth, i.toDouble(), .9f, 1.0f, false, bottomHack)
                         else
-                            drawRadialLine(p, strokeWidth, i.toDouble(), .75f, 1.0f, false, bottomHack)
+                            drawRadialLine(lFacePathCache, strokeWidth, i.toDouble(), .75f, 1.0f, false, bottomHack)
                     }
                 }
                 i += 5
             }
 
-            facePathCache = p
+            facePathCache = lFacePathCache
             facePathCacheMode = localFaceMode
         }
 
-        canvas.drawPath(p, colorSmall)
+        canvas.drawPath(lFacePathCache, colorSmall)
 
         // only draw the shadows when we're in high-bit mode
         if (!ambientLowBit || !ambientMode)
-            canvas.drawPath(p, colorTickShadow)
+            canvas.drawPath(lFacePathCache, colorTickShadow)
 
         if (localFaceMode == ClockState.FACE_NUMBERS) {
             // in this case, we'll draw "12", "3", and "6". No "9" because that's where the
@@ -572,7 +578,7 @@ class ClockFace : Observer {
         stipplePathCache = null
         stippleTimeCache = -1
 
-        eventList.forEach { it.pathCache.set(null) }
+        eventList.forEach { it.path = null }
     }
 
     private var stippleTimeCache: Long = -1
@@ -613,7 +619,7 @@ class ClockFace : Observer {
             val arcColor = it.getPaint(ambientLowBit, ambientMode)
             val arcShadow = PaintCan[ambientLowBit, ambientMode, PaintCan.colorArcShadow]
 
-            drawRadialArc(canvas, it.pathCache, arcStart, arcEnd,
+            it.path = drawRadialArc(canvas, it.path, arcStart, arcEnd,
                     calendarRingMaxRadius - evMinLevel * calendarRingWidth / (maxLevel + 1),
                     calendarRingMaxRadius - (evMaxLevel + 1) * calendarRingWidth / (maxLevel + 1),
                     arcColor, arcShadow)

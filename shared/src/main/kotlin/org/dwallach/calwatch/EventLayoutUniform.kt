@@ -27,14 +27,13 @@ object EventLayoutUniform {
      * *
      * @return true if it worked, false if it failed
      */
-    fun go(events: List<EventWrapper>?): Boolean {
-        Log.i(TAG, "Running uniform event layout with %d events".format(events?.size ?: 0))
+    fun go(events: List<EventWrapper>): Boolean {
+        Log.i(TAG, "Running uniform event layout with %d events".format(events.size))
 
         var i: Int
         var j: Int
         val nEvents: Int
 
-        if (events == null) return true // degenerate case, in which we trivially succeed
         nEvents = events.size
         if (nEvents == 0) return true // degenerate case, in which we trivially succeed
 

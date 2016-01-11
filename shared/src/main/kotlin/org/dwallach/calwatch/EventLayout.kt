@@ -14,13 +14,14 @@ object EventLayout {
 
     /**
      * Takes a list of calendar events and mutates their minLevel and maxLevel for calendar side-by-side
-     * non-overlapping layout.
+     * non-overlapping layout. Note that this class is obsoleted by EventLayoutUniform, which uses a
+     * fancy simplex solver, but which might on rare occasions blow up. This class serves as our fallbaack.
+     *
      * @param events list of events
-     * *
      * @return maximum level of any calendar event
      */
-    fun go(events: List<EventWrapper>?): Int {
-        Log.i(TAG, "Running event layout with %d events".format(events?.size ?: 0))
+    fun go(events: List<EventWrapper>): Int {
+        Log.i(TAG, "Running event layout with %d events".format(events.size))
 
         // We're going to execute a greedy O(n^2) algorithm that runs like this:
 
@@ -48,7 +49,6 @@ object EventLayout {
         val nEvents: Int
         var maxLevelAnywhere = 0
 
-        if (events == null) return 0  // degenerate case, shouldn't happen
         nEvents = events.size
         if (nEvents == 0) return 0    // another degnerate case
 

@@ -14,7 +14,6 @@ import android.view.Menu
 import android.view.MenuItem
 import android.view.View
 
-import java.lang.ref.WeakReference
 import java.util.Observable
 import java.util.Observer
 
@@ -179,8 +178,8 @@ class PhoneActivity : Activity(), Observer {
         fun watchfaceClick(view: MyViewAnim) {
             Log.v(TAG, "Watchface clicked!")
 
-            val activity = view.toActivity()
-            if(activity == null) return // can't do anything with an activity
+            // can't do anything without an activity
+            val activity = view.toActivity() ?: return
 
             if (!ClockState.calendarPermission) {
                 Log.v(TAG, "Requesting permissions")
@@ -198,7 +197,7 @@ class PhoneActivity : Activity(), Observer {
  */
 fun View.toActivity(): Activity? {
     // See: http://stackoverflow.com/questions/8276634/android-get-hosting-activity-from-a-view
-    var context = this.getContext()
+    var context = this.context
     while(context is ContextWrapper) {
         if(context is Activity) {
             return context
@@ -208,4 +207,3 @@ fun View.toActivity(): Activity? {
     }
     return null
 }
-
