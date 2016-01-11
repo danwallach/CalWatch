@@ -43,9 +43,6 @@ object EventLayout {
 
         // (In degenerate cases, this could actually get to O(n^3). Highly unlikely.)
 
-        var i: Int
-        var j: Int
-        var k: Int
         val nEvents: Int
         var maxLevelAnywhere = 0
 
@@ -58,8 +55,7 @@ object EventLayout {
         e.minLevel = 0
         e.maxLevel = 0
 
-        i = 1
-        while (i < nEvents) {
+        for(i in 1..nEvents-1) {
             e = events[i]
 
             // not sure this is necessary but it can't hurt
@@ -68,16 +64,13 @@ object EventLayout {
             e.path = null
 
             // clear the levels used mask
-            j = 0
-            while (j <= nEvents) {
+            for(j in 0..nEvents) {
                 levelsFull[j] = false
                 printLevelsFull[j] = '.'
-                j++
             }
 
             // now fill out the levels based on events from [0, N-1]
-            j = 0
-            while (j < i) {
+            for(j in 0..i-1) {
                 val pe = events[j]
 
                 // note: all of these loops for bit manipulation seem gratuitously inefficient and
@@ -86,14 +79,12 @@ object EventLayout {
                 // the root of all evil. So maybe later. Probably never.
                 if (e.overlaps(pe)) {
                     val peMaxLevel = pe.maxLevel
-                    k = pe.minLevel
-                    while (k <= peMaxLevel) {
+
+                    for(k in pe.minLevel..peMaxLevel) {
                         levelsFull[k] = true
                         printLevelsFull[k] = '@'
-                        k++
                     }
                 }
-                j++
             }
             levelsFull[maxLevelAnywhere + 1] = true // one extra one on the end to make the state machine below run cleanly
 
@@ -111,8 +102,7 @@ object EventLayout {
 
             // note the <= here; we need to run one level beyond, to have the state machine
             // hit a slot that's full no matter what, so it always sorts out the best hole
-            k = 0
-            while (k <= maxLevelAnywhere) {
+            for(k in 0..maxLevelAnywhere) {
                 if (searching) {
                     if (!levelsFull[k]) {
                         // Log.v(TAG, "--> found start level: " + k);
@@ -132,7 +122,6 @@ object EventLayout {
                         break
                     }// sad, this search is over
                 }
-                k++
             }
             if (holeStart != -1) {
                 // okay, we found a hole for the new event
@@ -147,8 +136,7 @@ object EventLayout {
 
                 // Sigh. Now we need to loop through all the previous events to see if
                 // anybody else can expand out to occupy the new level
-                j = 0
-                while (j < i) {
+                for(j in 0..i-1) {
                     val pe = events[j]
                     val peMaxLevel = pe.maxLevel
 
@@ -156,12 +144,10 @@ object EventLayout {
                         // Log.v(TAG, "=== expanding event " + j);
                         pe.maxLevel = peMaxLevel + 1
                     }
-                    j++
                 }
 
                 maxLevelAnywhere++
             }
-            i++
         }
         return maxLevelAnywhere
     }
@@ -172,7 +158,7 @@ object EventLayout {
         for (i in 0..nEvents - 1) {
             val e = events[i]
             if (e.minLevel < 0 || e.maxLevel > maxLevel) {
-                Log.e(TAG, "malformed eventwrapper (" + blurb + "): " + e.toString())
+                Log.e(TAG, "malformed eventwrapper ($blurb): ${e.toString()}")
             }
         }
     }
