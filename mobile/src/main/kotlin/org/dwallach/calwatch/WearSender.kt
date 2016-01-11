@@ -67,7 +67,7 @@ class WearSender(private val context: Context) {
 
     protected fun onCreate() {
         Log.v(TAG, "onCreate!")
-        GoogleApi.initGoogle(context, Wearable.API, { sendAllToWatch() })
+        GoogleApi.connect(context, Wearable.API, { sendAllToWatch() })
     }
 
     companion object {

@@ -15,7 +15,7 @@ import com.google.android.gms.common.api.GoogleApiClient
 import com.google.android.gms.wearable.Wearable
 
 /**
- * Unified support for dealing with the Google API client
+ * Unified support for dealing with the Google API client.
  */
 
 object GoogleApi: GoogleApiClient.ConnectionCallbacks, GoogleApiClient.OnConnectionFailedListener {
@@ -27,9 +27,10 @@ object GoogleApi: GoogleApiClient.ConnectionCallbacks, GoogleApiClient.OnConnect
 
     /**
      * Call this to initialize the connection to the Google API, along with two lambdas for
-     * what do to when things are successful.
+     * what do to when things are successful. The optional lambdas for success and failure
+     * provide callbacks if you want to do something when those events occur.
      */
-    fun initGoogle(context: Context, api: Api<out Api.ApiOptions.NotRequiredOptions>, success: ()->Unit = {}, failure: ()->Unit = {}) {
+    fun connect(context: Context, api: Api<out Api.ApiOptions.NotRequiredOptions>, success: ()->Unit = {}, failure: ()->Unit = {}) {
         if (client == null) {
             Log.v(TAG, "Trying to connect to GoogleApi")
             val lClient = GoogleApiClient
@@ -50,7 +51,8 @@ object GoogleApi: GoogleApiClient.ConnectionCallbacks, GoogleApiClient.OnConnect
     /**
      * Call this to tear down the connection to the Google API. Apparently not particularly necessary.
      */
-    fun closeGoogle() {
+    fun close() {
+        // we're going to eat any errors that happen here -- clients don't need to know or care
         try {
             Log.v(TAG, "cleaning up Google API")
             val lClient = client
@@ -65,7 +67,7 @@ object GoogleApi: GoogleApiClient.ConnectionCallbacks, GoogleApiClient.OnConnect
 
     override fun onConnected(connectionHint: Bundle?) {
         // Apparently unrelated to connections with the phone.
-        Log.v(TAG, "Connected to Google Api Service")
+        Log.v(TAG, "Connected to Google Api Service!")
         successFunc()
     }
 
@@ -77,8 +79,8 @@ object GoogleApi: GoogleApiClient.ConnectionCallbacks, GoogleApiClient.OnConnect
         // Apparently unrelated to connections with the phone.
 
         Log.v(TAG, "suspended connection!")
+        close()
         failureFunc()
-        closeGoogle()
     }
 
     override fun onConnectionFailed(result: ConnectionResult?) {
@@ -88,7 +90,7 @@ object GoogleApi: GoogleApiClient.ConnectionCallbacks, GoogleApiClient.OnConnect
         // Apparently unrelated to connections with the phone.
 
         Log.v(TAG, "lost connection!")
+        close()
         failureFunc()
-        closeGoogle()
     }
 }

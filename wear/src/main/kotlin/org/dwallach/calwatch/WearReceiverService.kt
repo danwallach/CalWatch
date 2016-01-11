@@ -39,7 +39,7 @@ class WearReceiverService : WearableListenerService() {
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
         Log.v(TAG, "service starting!")
 
-        GoogleApi.initGoogle(this, Wearable.API)
+        GoogleApi.connect(this, Wearable.API)
 
         // Nicholas Pomepuy's crash reporting library claims to be able to pass things
         // going kaboom all the way out to the Play Store for us. Let's see if it works.
@@ -86,7 +86,7 @@ class WearReceiverService : WearableListenerService() {
         super.onCreate()
 
         Log.v(TAG, "onCreate!")
-        GoogleApi.initGoogle(this, Wearable.API) // overkill or paranoia? no big deal to try again
+        GoogleApi.connect(this, Wearable.API) // overkill or paranoia? no big deal to try again
     }
 
     override fun onPeerConnected(peer: Node?) {
