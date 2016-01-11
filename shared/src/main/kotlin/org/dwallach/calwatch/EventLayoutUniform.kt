@@ -46,7 +46,7 @@ object EventLayoutUniform {
             // not sure this is necessary but it can't hurt
             e.minLevel = 0
             e.maxLevel = 0
-            e.pathCache.set(null)
+            e.path = null
             i++
         }
 
