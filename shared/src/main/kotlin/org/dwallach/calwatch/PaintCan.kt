@@ -9,7 +9,6 @@ package org.dwallach.calwatch
 import android.graphics.Color
 import android.graphics.Paint
 import android.util.Log
-import android.util.SparseArray
 
 /**
  * Cheesy helper for getting Paint values for calendar events and making sure we don't allocate
@@ -18,38 +17,42 @@ import android.util.SparseArray
  */
 object PaintCan {
     private const val TAG = "PaintCan"
-    private var map: SparseArray<Paint>? = null
+    private var paintMap = emptyMap<Int,Paint>()
 
+    /**
+     * This gets a Paint of a given color. If the same color is requested more than once,
+     * the Paint will only be created once and is internally cached. We use this for the
+     * calendar wedges, where the colors are coming from the user's calendar.
+     *
+     * This is *not* meant for use in low-bit mode, when anti-aliasing is forbidden.
+     * In that mode, we behave completely differently, drawing thin arcs rather than
+     * large wedges.
+     */
     fun getCalendarPaint(argb: Int): Paint {
-        var retPaint: Paint?
-        val argbInt = argb
-
-        if (map == null)
-            map = SparseArray<Paint>()
-
-        retPaint = map?.get(argbInt) ?: null
-        if (retPaint == null) {
-            retPaint = Paint(Paint.ANTI_ALIAS_FLAG)
-            retPaint.strokeJoin = Paint.Join.BEVEL
-            retPaint.color = argb
-            retPaint.style = Paint.Style.FILL
-
-            map!!.put(argbInt, retPaint)
-
-        }
         // Log.v(TAG, "get paint: " + Integer.toHexString(argb));
+        return paintMap.get(argb) ?: {
+            val newPaint = Paint(Paint.ANTI_ALIAS_FLAG)
+            newPaint.strokeJoin = Paint.Join.BEVEL
+            newPaint.color = argb
+            newPaint.style = Paint.Style.FILL
 
-        return retPaint
+            paintMap = paintMap.plus(Pair(argb, newPaint))
+            newPaint
+        }.invoke()
     }
 
-    private var palette: Array<Array<Paint?>>? = null
+    private lateinit var palette: Array<Array<Paint?>>
 
     const val styleNormal = 0
     const val styleAmbient = 1
     const val styleLowBit = 2
     const val styleMax = 2
 
-    private fun newPaint(argb: Int, style: Int, textSize: Float, strokeWidth: Float): Paint {
+    /**
+     * This generates all the Paint that we'll need for drawing the watchface. These are all cached
+     * in the palette and accessed elsewhere via PaintCan.get().
+     */
+    private fun watchfacePaint(argb: Int, style: Int, textSize: Float, strokeWidth: Float): Paint {
         val retPaint = Paint(Paint.SUBPIXEL_TEXT_FLAG or Paint.HINTING_ON)
         retPaint.strokeCap = Paint.Cap.SQUARE
         retPaint.strokeWidth = strokeWidth
@@ -76,7 +79,7 @@ object PaintCan {
                 retPaint.color = argbToGreyARGB(argb)
             }
 
-            else -> Log.e(TAG, "newPaint: unknown style: " + style)
+            else -> Log.e(TAG, "watchfacePaint: unknown style: " + style)
         }
 
         return retPaint
@@ -116,77 +119,76 @@ object PaintCan {
         val smTextSize = radius / 6f
         val lineWidth = radius / 20f
 
-        // TODO: redo this in a functional or at least immediate way
-
-        val lpalette = Array(styleMax + 1) { arrayOfNulls<Paint>(colorMax + 1) }
+        palette = Array(styleMax + 1) { arrayOfNulls<Paint>(colorMax + 1) }
 
         for (style in 0..styleMax) {
-            lpalette[style][colorBatteryLow] = newPaint(Color.YELLOW, style, smTextSize, lineWidth / 3f)
-            lpalette[style][colorBatteryCritical] = newPaint(Color.RED, style, smTextSize, lineWidth / 3f)
-            lpalette[style][colorSecondHand] = newPaint(Color.RED, style, smTextSize, lineWidth / 3f)
-            lpalette[style][colorSecondHandShadow] = newPaint(Color.BLACK, style, smTextSize, lineWidth / 8f)
-            lpalette[style][colorMinuteHand] = newPaint(Color.WHITE, style, textSize, lineWidth)
-            lpalette[style][colorHourHand] = newPaint(Color.WHITE, style, textSize, lineWidth * 1.5f)
-            lpalette[style][colorArcShadow] = newPaint(Color.BLACK, style, smTextSize, lineWidth / 6f)
-            lpalette[style][colorSmallTextAndLines] = newPaint(Color.WHITE, style, smTextSize, lineWidth / 3f)
-            lpalette[style][colorBigTextAndLines] = newPaint(Color.WHITE, style, textSize, lineWidth)
-            lpalette[style][colorBigShadow] = newPaint(Color.BLACK, style, textSize, lineWidth / 2f)
-            lpalette[style][colorBlackFill] = newPaint(Color.BLACK, style, textSize, lineWidth)
-            lpalette[style][colorSmallShadow] = newPaint(Color.BLACK, style, smTextSize, lineWidth / 4f)
+            palette[style][colorBatteryLow] = watchfacePaint(Color.YELLOW, style, smTextSize, lineWidth / 3f)
+            palette[style][colorBatteryCritical] = watchfacePaint(Color.RED, style, smTextSize, lineWidth / 3f)
+            palette[style][colorSecondHand] = watchfacePaint(Color.RED, style, smTextSize, lineWidth / 3f)
+            palette[style][colorSecondHandShadow] = watchfacePaint(Color.BLACK, style, smTextSize, lineWidth / 8f)
+            palette[style][colorMinuteHand] = watchfacePaint(Color.WHITE, style, textSize, lineWidth)
+            palette[style][colorHourHand] = watchfacePaint(Color.WHITE, style, textSize, lineWidth * 1.5f)
+            palette[style][colorArcShadow] = watchfacePaint(Color.BLACK, style, smTextSize, lineWidth / 6f)
+            palette[style][colorSmallTextAndLines] = watchfacePaint(Color.WHITE, style, smTextSize, lineWidth / 3f)
+            palette[style][colorBigTextAndLines] = watchfacePaint(Color.WHITE, style, textSize, lineWidth)
+            palette[style][colorBigShadow] = watchfacePaint(Color.BLACK, style, textSize, lineWidth / 2f)
+            palette[style][colorBlackFill] = watchfacePaint(Color.BLACK, style, textSize, lineWidth)
+            palette[style][colorSmallShadow] = watchfacePaint(Color.BLACK, style, smTextSize, lineWidth / 4f)
 
             // toInt because of a Kotlin bug: https://youtrack.jetbrains.com/issue/KT-4749
-            lpalette[style][colorStopwatchSeconds] = newPaint(0xFF80A3F2.toInt(), style, smTextSize, lineWidth / 8f)  // light blue
-            lpalette[style][colorStopwatchStroke] = newPaint(0xFF80A3F2.toInt(), style, smTextSize, lineWidth / 3f)  // light blue
-            lpalette[style][colorStopwatchFill] = newPaint(0x9080A3F2.toInt(), style, smTextSize, lineWidth / 3f)  // light blue + transparency
-            lpalette[style][colorTimerStroke] = newPaint(0xFFF2CF80.toInt(), style, smTextSize, lineWidth / 3f) // orange-ish
-            lpalette[style][colorTimerFill] = newPaint(0x90F2CF80.toInt(), style, smTextSize, lineWidth / 3f) // orange-ish + transparency
+            palette[style][colorStopwatchSeconds] = watchfacePaint(0xFF80A3F2.toInt(), style, smTextSize, lineWidth / 8f)  // light blue
+            palette[style][colorStopwatchStroke] = watchfacePaint(0xFF80A3F2.toInt(), style, smTextSize, lineWidth / 3f)  // light blue
+            palette[style][colorStopwatchFill] = watchfacePaint(0x9080A3F2.toInt(), style, smTextSize, lineWidth / 3f)  // light blue + transparency
+            palette[style][colorTimerStroke] = watchfacePaint(0xFFF2CF80.toInt(), style, smTextSize, lineWidth / 3f) // orange-ish
+            palette[style][colorTimerFill] = watchfacePaint(0x90F2CF80.toInt(), style, smTextSize, lineWidth / 3f) // orange-ish + transparency
 
             // shadows are stroke, not fill, so we fix that here
-            lpalette[style][colorSecondHandShadow]?.style = Paint.Style.STROKE
-            lpalette[style][colorArcShadow]?.style = Paint.Style.STROKE
-            lpalette[style][colorSmallShadow]?.style = Paint.Style.STROKE
-            lpalette[style][colorBigShadow]?.style = Paint.Style.STROKE
-            lpalette[style][colorStopwatchStroke]?.style = Paint.Style.STROKE
-            lpalette[style][colorTimerStroke]?.style = Paint.Style.STROKE
+            palette[style][colorSecondHandShadow]?.style = Paint.Style.STROKE
+            palette[style][colorArcShadow]?.style = Paint.Style.STROKE
+            palette[style][colorSmallShadow]?.style = Paint.Style.STROKE
+            palette[style][colorBigShadow]?.style = Paint.Style.STROKE
+            palette[style][colorStopwatchStroke]?.style = Paint.Style.STROKE
+            palette[style][colorTimerStroke]?.style = Paint.Style.STROKE
 
             // by default, text is centered, but some styles want it on the left
             // (these are the places where we'll eventually have to do more work for RTL languages)
-            lpalette[style][colorSmallTextAndLines]?.textAlign = Paint.Align.LEFT
-            lpalette[style][colorSmallShadow]?.textAlign = Paint.Align.LEFT
+            palette[style][colorSmallTextAndLines]?.textAlign = Paint.Align.LEFT
+            palette[style][colorSmallShadow]?.textAlign = Paint.Align.LEFT
         }
 
         // a couple things that are backwards for low-bit mode: we'll be drawing some "shadows" as
         // white outlines around black centers, "hollowing out" the hands as we're supposed to do
-        lpalette[styleLowBit][colorSecondHandShadow]?.color = Color.WHITE
-        lpalette[styleLowBit][colorSecondHandShadow]?.strokeWidth = lineWidth / 6f
-        lpalette[styleLowBit][colorMinuteHand]?.color = Color.BLACK
-        lpalette[styleLowBit][colorHourHand]?.color = Color.BLACK
-        lpalette[styleLowBit][colorArcShadow]?.color = Color.WHITE
-        lpalette[styleLowBit][colorSmallShadow]?.color = Color.WHITE
-        lpalette[styleLowBit][colorBigShadow]?.color = Color.WHITE
-        lpalette[styleLowBit][colorTimerFill]?.color = Color.BLACK
-        lpalette[styleLowBit][colorStopwatchFill]?.color = Color.BLACK
-        lpalette[styleLowBit][colorTimerStroke]?.strokeWidth = lineWidth / 6f
-        lpalette[styleLowBit][colorStopwatchStroke]?.strokeWidth = lineWidth / 6f
-
-        palette = lpalette
+        palette[styleLowBit][colorSecondHandShadow]?.color = Color.WHITE
+        palette[styleLowBit][colorSecondHandShadow]?.strokeWidth = lineWidth / 6f
+        palette[styleLowBit][colorMinuteHand]?.color = Color.BLACK
+        palette[styleLowBit][colorHourHand]?.color = Color.BLACK
+        palette[styleLowBit][colorArcShadow]?.color = Color.WHITE
+        palette[styleLowBit][colorSmallShadow]?.color = Color.WHITE
+        palette[styleLowBit][colorBigShadow]?.color = Color.WHITE
+        palette[styleLowBit][colorTimerFill]?.color = Color.BLACK
+        palette[styleLowBit][colorStopwatchFill]?.color = Color.BLACK
+        palette[styleLowBit][colorTimerStroke]?.strokeWidth = lineWidth / 6f
+        palette[styleLowBit][colorStopwatchStroke]?.strokeWidth = lineWidth / 6f
     }
 
-    operator fun get(style: Int, colorID: Int): Paint {
-        return palette!![style][colorID]!!
+    /**
+     * This will return a Paint of a given style and colorID, where those are the constants
+     * defined in this file. Anything else will cause an exception.
+     */
+    operator fun get(style: Int, colorID: Int): Paint =
+        palette[style][colorID] ?: throw RuntimeException("undefined paintcan color, style($style), colorID($colorID)")
+
+    /**
+     * This will return a Paint for the specified ambient modes and the given colorID, based on the constants
+     * defined in this class. Anything else will cause an exception.
+     */
+    operator fun get(ambientLowBit: Boolean, ambientMode: Boolean, colorID: Int): Paint = when {
+        ambientLowBit && ambientMode -> get(styleLowBit, colorID)
+        ambientMode -> get(styleAmbient, colorID)
+        else -> get(styleNormal, colorID)
     }
 
-    operator fun get(ambientLowBit: Boolean, ambientMode: Boolean, colorID: Int): Paint {
-        if (ambientLowBit && ambientMode)
-            return get(styleLowBit, colorID)
-        if (ambientMode)
-            return get(styleAmbient, colorID)
-        return get(styleNormal, colorID)
-    }
-
-    fun getCalendarGreyPaint(argb: Int): Paint {
-        return getCalendarPaint(argbToGreyARGB(argb))
-    }
+    fun getCalendarGreyPaint(argb: Int) = getCalendarPaint(argbToGreyARGB(argb))
 
     private fun argbToLuminance(argb: Int): Float {
         val r = (argb and 0xff0000) shr 16

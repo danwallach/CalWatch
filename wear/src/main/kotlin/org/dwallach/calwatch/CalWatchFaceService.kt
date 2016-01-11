@@ -50,13 +50,13 @@ import java.util.Observer
  */
 class CalWatchFaceService : CanvasWatchFaceService() {
     override fun onCreateEngine(): Engine {
-        val lEngineRef = WeakReference(Engine())
-        engineRef = lEngineRef
-        return lEngineRef.get()
+        val engine = Engine()
+        engineRef = WeakReference(engine)
+        return engine
     }
 
     inner class Engine : CanvasWatchFaceService.Engine(), Observer {
-        private var clockFace: ClockFace? = null
+        private lateinit var clockFace: ClockFace
         private var calendarFetcher: CalendarFetcher? = null
 
         /**
@@ -73,7 +73,7 @@ class CalWatchFaceService : CanvasWatchFaceService() {
             Log.v(TAG, "initCalendarFetcher")
 
             calendarFetcher?.kill()
-            calendarFetcher = null
+            calendarFetcher = null // no point keeping a live reference to a non-useful calendarFetcher
 
             val permissionGiven = CalendarPermission.check(this@CalWatchFaceService)
             if (!ClockState.calendarPermission && permissionGiven) {
@@ -142,12 +142,9 @@ class CalWatchFaceService : CanvasWatchFaceService() {
                 Log.e(TAG, "no resources? not good")
             }
 
-            if (clockFace == null) {
-                val lClockFace = ClockFace()
-                val emptyCalendar = BitmapFactory.decodeResource(resources, R.drawable.empty_calendar)
-                lClockFace.setMissingCalendarBitmap(emptyCalendar)
-                clockFace = lClockFace
-            }
+            clockFace = ClockFace()
+            clockFace.setMissingCalendarBitmap(
+                    BitmapFactory.decodeResource(resources, R.drawable.empty_calendar))
 
             ClockState.addObserver(this) // callbacks if something changes
 
@@ -166,15 +163,15 @@ class CalWatchFaceService : CanvasWatchFaceService() {
                 return;
             }
 
-            if(clockFace == null) {
-                Log.d(TAG, "onPropertiesChanged: null clockFace?")
-                return
-            }
+//            if(clockFace == null) {
+//                Log.d(TAG, "onPropertiesChanged: null clockFace?")
+//                return
+//            }
 
             val lowBitAmbientMode = properties.getBoolean(WatchFaceService.PROPERTY_LOW_BIT_AMBIENT, false)
             val burnInProtection = properties.getBoolean(WatchFaceService.PROPERTY_BURN_IN_PROTECTION, false)
-            clockFace?.setAmbientLowBit(lowBitAmbientMode)
-            clockFace?.setBurnInProtection(burnInProtection)
+            clockFace.setAmbientLowBit(lowBitAmbientMode)
+            clockFace.setBurnInProtection(burnInProtection)
             Log.d(TAG, "onPropertiesChanged: low-bit ambient = $lowBitAmbientMode, burn-in protection = $burnInProtection")
         }
 
@@ -191,15 +188,15 @@ class CalWatchFaceService : CanvasWatchFaceService() {
         override fun onAmbientModeChanged(inAmbientMode: Boolean) {
             super.onAmbientModeChanged(inAmbientMode)
 
-            val lClockFace = clockFace
-            if(lClockFace == null) {
-                Log.d(TAG, "onAmbientModeChanged: null clockFace?")
-                return
-            }
+//            val lClockFace = clockFace
+//            if(lClockFace == null) {
+//                Log.d(TAG, "onAmbientModeChanged: null clockFace?")
+//                return
+//            }
 
 
             Log.d(TAG, "onAmbientModeChanged: " + inAmbientMode)
-            lClockFace.setAmbientMode(inAmbientMode)
+            clockFace.setAmbientMode(inAmbientMode)
 
             // If we just switched *to* ambient mode, then we've got some FPS data to report
             // to the logs. Otherwise, we're coming *back* from ambient mode, so it's a good
@@ -214,7 +211,7 @@ class CalWatchFaceService : CanvasWatchFaceService() {
 
         override fun onInterruptionFilterChanged(interruptionFilter: Int) {
             super.onInterruptionFilterChanged(interruptionFilter)
-            clockFace?.setMuteMode(interruptionFilter == WatchFaceService.INTERRUPTION_FILTER_NONE)
+            clockFace.setMuteMode(interruptionFilter == WatchFaceService.INTERRUPTION_FILTER_NONE)
             invalidate()
         }
 
@@ -226,11 +223,11 @@ class CalWatchFaceService : CanvasWatchFaceService() {
             //                Log.v(TAG, "onDraw");
             drawCounter++
 
-            val lClockFace = clockFace
-            if(lClockFace == null) {
-                Log.e(TAG, "onDraw: can't draw without a clockface")
-                return
-            }
+//            val lClockFace = clockFace
+//            if(lClockFace == null) {
+//                Log.e(TAG, "onDraw: can't draw without a clockface")
+//                return
+//            }
 
             if(bounds == null || canvas == null) {
                 Log.d(TAG, "onDraw: null bounds and/or canvas")
@@ -243,7 +240,7 @@ class CalWatchFaceService : CanvasWatchFaceService() {
             if (width != oldWidth || height != oldHeight) {
                 oldWidth = width
                 oldHeight = height
-                lClockFace.setSize(width, height)
+                clockFace.setSize(width, height)
             }
 
             try {
@@ -251,11 +248,11 @@ class CalWatchFaceService : CanvasWatchFaceService() {
                 canvas.drawColor(Color.TRANSPARENT, PorterDuff.Mode.CLEAR)
 
                 TimeWrapper.update() // fetch the time
-                lClockFace.drawEverything(canvas)
+                clockFace.drawEverything(canvas)
 
                 // Draw every frame as long as we're visible and doing the sweeping second hand,
                 // otherwise the timer will take care of it.
-                if (isVisible && ClockState.subSecondRefreshNeeded(lClockFace))
+                if (isVisible && ClockState.subSecondRefreshNeeded(clockFace))
                     invalidate()
             } catch (t: Throwable) {
                 if (drawCounter % 1000 == 0L)
@@ -274,20 +271,14 @@ class CalWatchFaceService : CanvasWatchFaceService() {
                 WatchFaceService.TAP_TYPE_TOUCH_CANCEL -> { } // user lifted their finger, "cancelling" the tap?
                 WatchFaceService.TAP_TYPE_TAP -> { } // user lifted their finger, I guess?
             }
-
         }
-
 
         override fun onDestroy() {
             Log.v(TAG, "onDestroy")
 
-            calendarFetcher?.kill()
-            calendarFetcher = null
-
             ClockState.deleteObserver(this)
-
-            clockFace?.kill()
-            clockFace = null
+            calendarFetcher?.kill()
+            clockFace.kill()
 
             super.onDestroy()
         }
@@ -301,7 +292,7 @@ class CalWatchFaceService : CanvasWatchFaceService() {
 
             Log.d(TAG, "onPeekCardPositionUpdate: " + bounds + " (" + bounds.width() + ", " + bounds.height() + ")")
 
-            clockFace?.setPeekCardRect(bounds)
+            clockFace.setPeekCardRect(bounds)
 
             invalidate()
         }
@@ -314,13 +305,12 @@ class CalWatchFaceService : CanvasWatchFaceService() {
 
             Log.v(TAG, "onApplyWindowInsets (round: $isRound), (chinSize: $chinSize)")
 
-            clockFace?.setRound(isRound)
-            clockFace?.setMissingBottomPixels(chinSize)
+            clockFace.setRound(isRound)
+            clockFace.setMissingBottomPixels(chinSize)
         }
 
         override fun onVisibilityChanged(visible: Boolean) {
             super.onVisibilityChanged(visible)
-
 
             if (visible) {
                 invalidate()
@@ -333,7 +323,6 @@ class CalWatchFaceService : CanvasWatchFaceService() {
                 TimeWrapper.frameReport()
             else
                 TimeWrapper.frameReset()
-
         }
     }
 
@@ -342,11 +331,7 @@ class CalWatchFaceService : CanvasWatchFaceService() {
 
         private var engineRef: WeakReference<Engine>? = null
 
-        val engine: Engine
-            get() {
-                val result: Engine? = engineRef?.get() ?: null
-                if(result == null) throw RuntimeException("no engine available?!")
-                return result
-            }
+        val engine: Engine?
+            get() = engineRef?.get()
     }
 }

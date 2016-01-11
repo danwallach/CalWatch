@@ -195,7 +195,7 @@ class CalendarFetcher(initialContext: Context, val contentUri: Uri, val authorit
      * Asynchronous task to load the calendar instances.
      */
     class CalLoaderTask internal constructor(context: Context, private val fetcher: CalendarFetcher) : AsyncTask<Void, Void, Throwable?>() {
-        private var wakeLock: PowerManager.WakeLock? = null
+        private lateinit var wakeLock: PowerManager.WakeLock
 
         // using a weak-reference to the context rather than holding the context itself,
         // per http://www.androiddesignpatterns.com/2013/01/inner-class-handler-memory-leak.html
@@ -214,10 +214,8 @@ class CalendarFetcher(initialContext: Context, val contentUri: Uri, val authorit
             }
 
             val powerManager = context.getSystemService(Context.POWER_SERVICE) as PowerManager
-            val lWakeLock = powerManager.newWakeLock(
-                    PowerManager.PARTIAL_WAKE_LOCK, "CalWatchWakeLock")
-            lWakeLock.acquire()
-            wakeLock = lWakeLock
+            val wakeLock = powerManager.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, "CalWatchWakeLock")
+            wakeLock.acquire()
 
             Log.v(TAG, "wake lock acquired")
 
@@ -234,38 +232,27 @@ class CalendarFetcher(initialContext: Context, val contentUri: Uri, val authorit
         }
 
         override fun onPostExecute(results: Throwable?) {
-            releaseWakeLock()
+            wakeLock.release()
             fetcher.scanInProgress = false // we're done!
             ClockState.pingObservers() // now that we're back on the main thread we can notify people of the changes
 
             Log.v(TAG, "wake lock released")
-
         }
 
         override fun onCancelled() {
-            releaseWakeLock()
-        }
-
-        private fun releaseWakeLock() {
-            wakeLock?.release()
-            wakeLock = null
+            wakeLock.release()
         }
     }
 
     class MyHandler(context: Context, private val fetcher: CalendarFetcher) : Handler() {
-        private var loaderTask: AsyncTask<Void, Void, Throwable?>? = null
+        private lateinit var loaderTask: AsyncTask<Void, Void, Throwable?>
 
         // using a weak-reference to the context rather than holding the context itself,
         // per http://www.androiddesignpatterns.com/2013/01/inner-class-handler-memory-leak.html
-        private val contextRef: WeakReference<Context>
-
-        init {
-            this.contextRef = WeakReference(context)
-        }
+        private val contextRef = WeakReference(context)
 
         fun cancelLoaderTask() {
-            loaderTask?.cancel(true)
-            loaderTask = null
+            loaderTask.cancel(true)
         }
 
         override fun handleMessage(message: Message) {
@@ -281,7 +268,7 @@ class CalendarFetcher(initialContext: Context, val contentUri: Uri, val authorit
                     Log.v(TAG, "launching calendar loader task")
 
                     loaderTask = CalLoaderTask(context, fetcher)
-                    loaderTask?.execute()
+                    loaderTask.execute()
                 }
                 else -> Log.e(TAG, "unexpected message: " + message.toString())
             }

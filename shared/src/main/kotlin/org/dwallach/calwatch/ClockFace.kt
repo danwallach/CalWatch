@@ -159,17 +159,17 @@ class ClockFace : Observer {
             canvas.drawPath(p, shadowPaint)
     }
 
-    private fun drawRadialLine(path: Path, strokeWidth: Float, seconds: Double, startRadius: Float, endRadius: Float, forceVertical: Boolean, flatBottomHack: Boolean) {
-        var seconds = seconds
-        var startRadius = startRadius
-        var endRadius = endRadius
+    private fun drawRadialLine(path: Path, strokeWidth: Float, seconds: Double, startRadiusRatio: Float, endRadiusRatio: Float, forceVertical: Boolean, flatBottomHack: Boolean) {
+        var lseconds = seconds
+        var startRadius = startRadiusRatio
+        var endRadius = endRadiusRatio
         val x1: Float
         var x2: Float
         val y1: Float
         val y2: Float
 
         if (flatBottomHack) {
-            val clipRadius = radiusToEdge(seconds)
+            val clipRadius = radiusToEdge(lseconds)
             if (endRadius > clipRadius) {
                 val dr = endRadius - clipRadius
                 startRadius -= dr
@@ -185,17 +185,17 @@ class ClockFace : Observer {
             endRadius *= ratio
         }
 
-        x1 = clockX(seconds, startRadius)
-        y1 = clockY(seconds, startRadius)
-        x2 = clockX(seconds, endRadius)
-        y2 = clockY(seconds, endRadius)
+        x1 = clockX(lseconds, startRadius)
+        y1 = clockY(lseconds, startRadius)
+        x2 = clockX(lseconds, endRadius)
+        y2 = clockY(lseconds, endRadius)
         if (forceVertical) {
-            seconds = 0.0
+            lseconds = 0.0
             x2 = x1
         }
 
-        val dx = (clockX(seconds + 15, 1f) - cx) * 0.5f * strokeWidth / radius
-        val dy = (clockY(seconds + 15, 1f) - cy) * 0.5f * strokeWidth / radius
+        val dx = (clockX(lseconds + 15, 1f) - cx) * 0.5f * strokeWidth / radius
+        val dy = (clockY(lseconds + 15, 1f) - cy) * 0.5f * strokeWidth / radius
 
         path.moveTo(x1 + dx, y1 + dy)
         path.lineTo(x2 + dx, y2 + dy)
@@ -213,9 +213,9 @@ class ClockFace : Observer {
                 clockY(30.0, radius))// bottom
     }
 
-    private fun drawRadialArc(canvas: Canvas, pc: PathCache?, secondsStart: Double, secondsEnd: Double, startRadius: Float, endRadius: Float, paint: Paint, outlinePaint: Paint?, lowBitSquish: Boolean = true) {
-        var startRadius = startRadius
-        var endRadius = endRadius
+    private fun drawRadialArc(canvas: Canvas, pc: PathCache?, secondsStart: Double, secondsEnd: Double, startRadiusRatio: Float, endRadiusRatio: Float, paint: Paint, outlinePaint: Paint?, lowBitSquish: Boolean = true) {
+        var startRadius = startRadiusRatio
+        var endRadius = endRadiusRatio
         /*
          * Below is an attempt to do this "correctly" using the arc functionality supported natively
          * by Android's Path.
@@ -271,9 +271,9 @@ class ClockFace : Observer {
     }
 
     //    private int flatCounter = 0;
-    private fun drawRadialArcFlatBottom(canvas: Canvas, seconds: Float, startRadius: Float, endRadius: Float, paint: Paint, outlinePaint: Paint?) {
-        var startRadius = startRadius
-        var endRadius = endRadius
+    private fun drawRadialArcFlatBottom(canvas: Canvas, seconds: Float, startRadiusRatio: Float, endRadiusRatio: Float, paint: Paint, outlinePaint: Paint?) {
+        var startRadius = startRadiusRatio
+        var endRadius = endRadiusRatio
         //        flatCounter++;
 
         if (startRadius < 0 || startRadius > 1 || endRadius < 0 || endRadius > 1) {
@@ -566,7 +566,7 @@ class ClockFace : Observer {
         stipplePathCache = null
         stippleTimeCache = -1
 
-        eventList?.forEach { it.pathCache.set(null) }
+        eventList.forEach { it.pathCache.set(null) }
     }
 
     private var stippleTimeCache: Long = -1
@@ -587,16 +587,9 @@ class ClockFace : Observer {
         // we know we've always got an up to date set of calendar wedges
         updateEventList()
 
-        val lEventList = eventList
-
-        if (lEventList == null) {
-            if (calendarTicker % 1000 == 0) Log.v(TAG, "drawCalendar starting, eventList is null")
-            return  // not be ready yet
-        }
-
         val time = TimeWrapper.localTime
 
-        lEventList.forEach {
+        eventList.forEach {
             val arcStart: Double
             val arcEnd: Double
             val e = it.wireEvent
@@ -728,7 +721,7 @@ class ClockFace : Observer {
     private fun drawBattery(canvas: Canvas) {
         val time = TimeWrapper.gmtTime
 
-        // we don't want to poll *too* often; this translates to about once per five minute
+        // we don't want to poll *too* often; the code below translates to about once per five minute
         if (batteryPathCache == null || time - batteryCacheTime > 300000) {
             Log.v(TAG, "fetching new battery status")
             BatteryWrapper.fetchStatus()
@@ -737,7 +730,7 @@ class ClockFace : Observer {
             val lBatteryPathCache = Path()
 
             //
-            // New idea: draw nothing unless the battery is low. At 50%, we start a small yellow
+            // The concept: draw nothing unless the battery is low. At 50%, we start a small yellow
             // circle. This scales in radius until it hits max size at 10%, then it switches to red.
             //
 
@@ -764,16 +757,9 @@ class ClockFace : Observer {
 
         // note that we'll flip the color from white to red once the battery gets below 10%
         // (in ambient mode, we can't show it at all because of burn-in issues)
-        if (batteryPathCache != null) {
-            val paint: Paint
-
-            if (batteryCritical)
-                paint = PaintCan[PaintCan.styleNormal, PaintCan.colorBatteryCritical]
-            else
-                paint = PaintCan[PaintCan.styleNormal, PaintCan.colorBatteryLow]
-
-            if (!ambientMode)
-                canvas.drawPath(batteryPathCache, paint)
+        if (batteryPathCache != null && !ambientMode) {
+            val paint = PaintCan[PaintCan.styleNormal, if (batteryCritical) PaintCan.colorBatteryCritical else PaintCan.colorBatteryLow]
+            canvas.drawPath(batteryPathCache, paint)
         }
     }
 
@@ -963,9 +949,7 @@ class ClockFace : Observer {
         //        float x2 = interpolate(flatBottomCornerX2_R80, 0.8f, flatBottomCornerX2_R100, 1f, radius);
         //        return interpolate(x1, flatBottomCornerTime, x2, 60 - flatBottomCornerTime, time);
 
-        // new shiny approach: project a line from the center, intersect it with a line, but
-        // make the height of that line consistent with our pre-computed flatBottomCorner values,
-        // otherwise we'd have the height of the intersection changing as the time got closer to 6 o'clock.
+        // new shiny approach: project a line from the center, intersect it with the flat-bottom line
 
         val finalY = flatBottomY(time, radius)
         val r1X = clockX(time.toDouble(), 1f)
@@ -1020,12 +1004,8 @@ class ClockFace : Observer {
             return 1f
     }
 
-    private var faceMode: Int = 0
-    // nothing changed
+    private var faceMode = 0
     private var ambientMode = false
-
-    // using explicit getters and setters rather than Kotlin implicit ones on a hunch that
-    // the implicit ones might be causing problems
 
     fun getAmbientMode() = ambientMode
     fun setAmbientMode(ambientMode: Boolean): Unit {
@@ -1034,7 +1014,7 @@ class ClockFace : Observer {
         this.ambientMode = ambientMode
         wipeCaches()
     }
-    private var eventList: List<EventWrapper>? = null
+    private var eventList: List<EventWrapper> = emptyList()
     private var maxLevel: Int = 0
 
 

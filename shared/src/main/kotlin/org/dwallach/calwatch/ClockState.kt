@@ -22,8 +22,8 @@ object ClockState : Observable() {
     var showSeconds: Boolean = Constants.DefaultShowSeconds
     var showDayDate: Boolean = Constants.DefaultShowDayDate
 
-    private var eventList: List<WireEvent>? = null
-    private var visibleEventList: List<EventWrapper>? = null
+    private var eventList: List<WireEvent> = emptyList()
+    private var visibleEventList: List<EventWrapper> = emptyList()
 
     var maxLevel: Int = 0
         private set
@@ -146,7 +146,7 @@ object ClockState : Observable() {
      * This returns a list of *visible* events on the watchface, cropped to size, and adjusted to
      * the *local* timezone.
      */
-    fun getVisibleEventList(): List<EventWrapper>? {
+    fun getVisibleEventList(): List<EventWrapper> {
         // should be fast, since mostly it will detect that nothing has changed
         recomputeVisibleEvents()
         return visibleEventList
@@ -165,7 +165,7 @@ object ClockState : Observable() {
      * Load the ClockState with a protobuf containing a complete update
      * @param eventBytes a marshalled protobuf of type WireUpdate
      */
-    fun setProtobuf(eventBytes: ByteArray): Unit {
+    fun setProtobuf(eventBytes: ByteArray) {
         Log.i(TAG, "setting protobuf: %d bytes".format(eventBytes.size))
         val wireUpdate: WireUpdate
 
@@ -201,12 +201,12 @@ object ClockState : Observable() {
 
     private fun debugDump() {
         Log.v(TAG, "All events in the DB:")
-        eventList?.forEach {
+        eventList.forEach {
             Log.v(TAG, "--> displayColor(" + Integer.toHexString(it.displayColor) + "), startTime(" + it.startTime + "), endTime(" + it.endTime + ")")
         }
 
         Log.v(TAG, "Visible:")
-        visibleEventList?.forEach {
+        visibleEventList.forEach {
             Log.v(TAG, "--> displayColor(" + Integer.toHexString(it.wireEvent.displayColor) + "), minLevel(" + it.minLevel + "), maxLevel(" + it.maxLevel + "), startTime(" + it.wireEvent.startTime + "), endTime(" + it.wireEvent.endTime + ")")
         }
     }

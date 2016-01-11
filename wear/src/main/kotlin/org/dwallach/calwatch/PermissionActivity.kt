@@ -20,8 +20,11 @@ class PermissionActivity : Activity() {
     override fun onRequestPermissionsResult(requestCode: Int, permissions: Array<String>, grantResults: IntArray) {
         Log.v(TAG, "onRequestPermissionsResult")
         CalendarPermission.handleResult(requestCode, permissions, grantResults)
-        val engine = CalWatchFaceService.engine
-        engine.calendarPermissionUpdate()
+
+        // If there's no engine, which might happen if the watch face changes while the permission dialog
+        // is up, or something equally weird, then the below line turns into a no-op, which is probably
+        // the best we can do.
+        CalWatchFaceService.engine?.calendarPermissionUpdate()
         Log.v(TAG, "finishing PermissionActivity")
         this.finish() // we're done, so this shuts everything down
     }
