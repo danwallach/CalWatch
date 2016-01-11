@@ -42,7 +42,6 @@ class WatchCalendarService : Service(), Observer {
         super.onCreate()
         Log.v(TAG, "service created!")
 
-        BatteryWrapper.init(this)
         ClockState.addObserver(this)
         wearSender = WearSender(this)
 

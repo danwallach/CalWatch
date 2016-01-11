@@ -45,12 +45,7 @@ class WearReceiverService : WearableListenerService() {
         // going kaboom all the way out to the Play Store for us. Let's see if it works.
         CrashReporter.getInstance(this).start()
 
-        // this also seems a reasonable place to set up the battery monitor
-
-        BatteryWrapper.init(this)
-
-        // and to load any saved data while we're waiting on the phone to give us fresh data
-
+        // load any saved data while we're waiting on the phone to give us fresh data
         if (ClockState.wireInitialized) {
             Log.v(TAG, "clock state already initialized, no need to go to saved prefs")
         } else {
