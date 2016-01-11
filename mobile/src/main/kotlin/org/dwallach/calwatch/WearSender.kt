@@ -15,29 +15,12 @@ import com.google.android.gms.common.api.GoogleApiClient
 import com.google.android.gms.wearable.PutDataMapRequest
 import com.google.android.gms.wearable.Wearable
 
-class WearSender(private val context: Context) : GoogleApiClient.ConnectionCallbacks, GoogleApiClient.OnConnectionFailedListener {
-
+class WearSender(private val context: Context) {
     // yes, we're hanging onto a context here, as part the phone side of sending state to the watch,
     // and yes, hanging onto contexts is frowned upon. However, this context is only held alive
     // by virtue of the instance of WearSender, which is in turn only held alive by virtue of the
     // WatchCalendarService. And that thing can and will be summarily killed by the system at any
     // time, so this context won't leak.
-
-    private var googleApiClient: GoogleApiClient? = null
-
-    private fun initGoogle() {
-        if (googleApiClient == null) {
-            Log.v(TAG, "initializing GoogleApiClient")
-            //            readyToSend = false;
-            val lClient = GoogleApiClient
-                    .Builder(context)
-                    .addApi(Wearable.API)
-                    .addConnectionCallbacks(this)
-                    .addOnConnectionFailedListener(this).build()
-            lClient.connect()
-            googleApiClient = lClient
-        }
-    }
 
     fun sendAllToWatch() {
         try {
@@ -50,9 +33,9 @@ class WearSender(private val context: Context) : GoogleApiClient.ConnectionCallb
              * Useful source: http://toastdroid.com/2014/08/18/messageapi-simple-conversations-with-android-wear/
              * Major source: https://developer.android.com/google/auth/api-client.html
              */
-            val lClient = googleApiClient
+            val lClient = GoogleApi.client
 
-            if (lClient != null &&  lClient.isConnected) {
+            if (lClient != null && lClient.isConnected) {
                 val putDataMapReq = PutDataMapRequest.create(Constants.SettingsPath)
                 putDataMapReq.dataMap.putByteArray(Constants.DataKey, wireBytesToSend)
                 val putDataReq = putDataMapReq.asPutDataRequest()
@@ -61,14 +44,13 @@ class WearSender(private val context: Context) : GoogleApiClient.ConnectionCallb
 
                 // this callback isn't strictly necessary for correctness, but it will be
                 // exceptionally useful for log debugging
-                pendingResult.setResultCallback { result ->
-                    if (result.status.isSuccess) {
-                        Log.d(TAG, "Data item set: " + result.dataItem.uri)
+                pendingResult.setResultCallback {
+                    if (it.status.isSuccess) {
+                        Log.d(TAG, "Data item set: " + it.dataItem.uri)
                     } else {
-                        Log.e(TAG, "Data item failed? " + result.status.toString())
+                        Log.e(TAG, "Data item failed? " + it.status.toString())
                     }
                 }
-
             }
 
         } catch (throwable: Throwable) {
@@ -85,57 +67,7 @@ class WearSender(private val context: Context) : GoogleApiClient.ConnectionCallb
 
     protected fun onCreate() {
         Log.v(TAG, "onCreate!")
-        initGoogle()
-    }
-
-    //    private boolean readyToSend = false;
-    override fun onConnected(connectionHint: Bundle?) {
-        Log.v(TAG, "connected to Google API!")
-        // Connected to Google Play services!
-        // The good stuff goes here.
-        //        readyToSend = true;
-
-        // shouldn't ever happen, but might explain the weird null pointer exceptions that
-        // rarely show up in the logs
-        if (googleApiClient == null) {
-            Log.e(TAG, "unexpected null googleApiClient")
-            closeGoogle()
-            initGoogle()
-            return
-        }
-
-        sendAllToWatch()
-    }
-
-    override fun onConnectionSuspended(cause: Int) {
-        // The connection has been interrupted.
-        // Disable any UI components that depend on Google APIs
-        // until onConnected() is called.
-        Log.v(TAG, "suspended connection!")
-        closeGoogle()
-    }
-
-    override fun onConnectionFailed(result: ConnectionResult?) {
-        // This callback is important for handling errors that
-        // may occur while attempting to connect with Google.
-        //
-        // More about this in the next section.
-
-        Log.v(TAG, "lost connection!")
-        closeGoogle()
-    }
-
-    private fun closeGoogle() {
-        try {
-            Log.v(TAG, "cleaning up Google API")
-            //            readyToSend = false;
-            val lClient = googleApiClient
-            if (lClient != null && lClient.isConnected) {
-                lClient.disconnect()
-            }
-        } finally {
-            googleApiClient = null
-        }
+        GoogleApi.initGoogle(context, Wearable.API, { sendAllToWatch() })
     }
 
     companion object {

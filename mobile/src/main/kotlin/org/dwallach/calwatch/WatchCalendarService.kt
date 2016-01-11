@@ -18,7 +18,7 @@ import java.util.Observer
 import fr.nicolaspomepuy.androidwearcrashreport.mobile.CrashReport
 
 class WatchCalendarService : Service(), Observer {
-    private var wearSender: WearSender? = null
+    private lateinit var wearSender: WearSender
 
     init {
         singletonService = this
@@ -26,7 +26,7 @@ class WatchCalendarService : Service(), Observer {
 
     // this is called when there's something new from the calendar DB
     fun sendAllToWatch() {
-        wearSender?.sendAllToWatch() ?: Log.e(TAG, "no wear sender?!")
+        wearSender.sendAllToWatch()
     }
 
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
@@ -38,7 +38,10 @@ class WatchCalendarService : Service(), Observer {
         return Service.START_STICKY
     }
 
-    private fun initInternal() {
+    override fun onCreate() {
+        super.onCreate()
+        Log.v(TAG, "service created!")
+
         BatteryWrapper.init(this)
         ClockState.addObserver(this)
         wearSender = WearSender(this)
@@ -53,13 +56,6 @@ class WatchCalendarService : Service(), Observer {
             Log.e(TAG, "wear-side crash detected!", crashInfo.throwable)
             CrashReport.getInstance(this@WatchCalendarService).reportToPlayStore(this@WatchCalendarService)
         }
-    }
-
-    override fun onCreate() {
-        super.onCreate()
-        Log.v(TAG, "service created!")
-
-        initInternal()
     }
 
     override fun onDestroy() {
@@ -88,9 +84,7 @@ class WatchCalendarService : Service(), Observer {
 
         fun kickStart(ctx: Context) {
             // start the calendar service, if it's not already running
-            val watchCalendarService = WatchCalendarService.singletonService
-
-            if (watchCalendarService == null) {
+            if (singletonService == null) {
                 Log.v(TAG, "launching watch calendar service")
                 val serviceIntent = Intent(ctx, WatchCalendarService::class.java)
                 ctx.startService(serviceIntent)

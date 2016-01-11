@@ -98,8 +98,7 @@ class PhoneActivity : Activity(), Observer {
         super.onPause()
         Log.v(TAG, "Pause!")
 
-        if (surfaceView != null)
-            surfaceView.kill(this)
+        surfaceView.pause(this)
 
         ClockState.deleteObserver(this)
     }
@@ -136,11 +135,8 @@ class PhoneActivity : Activity(), Observer {
         Log.v(TAG, "Resume!")
 
         ClockState.addObserver(this)
-
-        if (surfaceView != null) {
-            surfaceView.init(this)
-            surfaceView.invalidate()
-        }
+        surfaceView.resume(this)
+        surfaceView.invalidate()
     }
 
     override fun onCreateOptionsMenu(menu: Menu?): Boolean {
@@ -166,13 +162,9 @@ class PhoneActivity : Activity(), Observer {
 
     override fun onRequestPermissionsResult(requestCode: Int, permissions: Array<String>, grantResults: IntArray) {
         Log.v(TAG, "onRequestPermissionsResult")
-        CalendarPermission.handleResult(requestCode, permissions, grantResults)
 
-        if (surfaceView != null) {
-            Log.e(TAG, "no clockview available?!")
-        } else {
-            surfaceView.initCalendarFetcher(this)
-        }
+        CalendarPermission.handleResult(requestCode, permissions, grantResults)
+        surfaceView.initCalendarFetcher(this)
 
         Log.v(TAG, "finishing PermissionActivity")
     }

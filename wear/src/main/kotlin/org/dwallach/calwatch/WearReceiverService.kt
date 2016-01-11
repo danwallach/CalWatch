@@ -9,12 +9,9 @@ package org.dwallach.calwatch
 import android.app.Service
 import android.content.Context
 import android.content.Intent
-import android.os.Bundle
 import android.util.Base64
 import android.util.Log
 
-import com.google.android.gms.common.ConnectionResult
-import com.google.android.gms.common.api.GoogleApiClient
 import com.google.android.gms.wearable.DataEvent
 import com.google.android.gms.wearable.DataEventBuffer
 import com.google.android.gms.wearable.DataMapItem
@@ -28,13 +25,7 @@ import fr.nicolaspomepuy.androidwearcrashreport.wear.CrashReporter
  * This class pairs up with WearSender
  * Created by dwallach on 8/25/14.
  */
-class WearReceiverService : WearableListenerService(), GoogleApiClient.ConnectionCallbacks, GoogleApiClient.OnConnectionFailedListener {
-
-    // private List<EventWrapper> eventList = null;
-    // private int maxLevel = 0;
-    // private int faceMode = ClockFace.FACE_TOOL;
-    private var googleApiClient: GoogleApiClient? = null
-
+class WearReceiverService : WearableListenerService() {
     init {
         Log.v(TAG, "starting listening service")
     }
@@ -48,8 +39,7 @@ class WearReceiverService : WearableListenerService(), GoogleApiClient.Connectio
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
         Log.v(TAG, "service starting!")
 
-        // why is this necessary?
-        initGoogle()
+        GoogleApi.initGoogle(this, Wearable.API)
 
         // Nicholas Pomepuy's crash reporting library claims to be able to pass things
         // going kaboom all the way out to the Play Store for us. Let's see if it works.
@@ -82,73 +72,26 @@ class WearReceiverService : WearableListenerService(), GoogleApiClient.Connectio
         dataEvents
                 .filter { it.type == DataEvent.TYPE_CHANGED }
                 .map { it.dataItem }
-                .forEach { item ->
-                    Log.d(TAG, "--> item found: " + item.toString())
-                    if (item.uri.path.compareTo(Constants.SettingsPath) == 0) {
-                        val dataMap = DataMapItem.fromDataItem(item).dataMap
+                .forEach {
+                    Log.d(TAG, "--> item found: " + it.toString())
+                    if (it.uri.path.compareTo(Constants.SettingsPath) == 0) {
+                        val dataMap = DataMapItem.fromDataItem(it).dataMap
                         val eventbuf = dataMap.getByteArray(Constants.DataKey)
                         Log.d(TAG, "----> it's an event for us, nbytes: " + eventbuf.size)
 
-                        // the first time through, this seems to be null; weird, but at
-                        // least it's easy to ignore the nullness
-                        newEventBytes(eventbuf)
-                        savePreferences(eventbuf) // save this for subsequent restarts
+                        if(eventbuf != null) {
+                            newEventBytes(eventbuf)
+                            savePreferences(eventbuf) // save this for subsequent restarts
+                        }
                     }
                 }
-    }
-
-    private fun initGoogle() {
-        if (googleApiClient == null) {
-            Log.v(TAG, "Trying to connect to GoogleApi")
-            val lClient =  GoogleApiClient
-                    .Builder(this)
-                    .addApi(Wearable.API)
-                    .addConnectionCallbacks(this)
-                    .addOnConnectionFailedListener(this)
-                    .build()
-            lClient.connect()
-
-            googleApiClient = lClient
-        }
     }
 
     override fun onCreate() {
         super.onCreate()
 
         Log.v(TAG, "onCreate!")
-        initGoogle()
-    }
-
-    override fun onConnected(connectionHint: Bundle?) {
-        // Apparently unrelated to connections with the phone.
-        Log.v(TAG, "Connected to Google Api Service")
-    }
-
-    private fun killGoogleClient() {
-        val lClient = googleApiClient
-        if (lClient != null && lClient.isConnected)
-            lClient.disconnect()
-        googleApiClient = null
-    }
-
-    override fun onConnectionSuspended(cause: Int) {
-        // The connection has been interrupted.
-        // Disable any UI components that depend on Google APIs
-        // until onConnected() is called.
-
-        // Apparently unrelated to connections with the phone.
-        Log.v(TAG, "suspended connection!")
-        killGoogleClient()
-    }
-
-    override fun onConnectionFailed(result: ConnectionResult?) {
-        // This callback is important for handling errors that
-        // may occur while attempting to connect with Google.
-
-        // Apparently unrelated to connections with the phone.
-
-        Log.v(TAG, "lost connection!")
-        killGoogleClient()
+        GoogleApi.initGoogle(this, Wearable.API) // overkill or paranoia? no big deal to try again
     }
 
     override fun onPeerConnected(peer: Node?) {

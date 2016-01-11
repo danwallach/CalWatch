@@ -72,9 +72,6 @@ class CalWatchFaceService : CanvasWatchFaceService() {
         private fun initCalendarFetcher() {
             Log.v(TAG, "initCalendarFetcher")
 
-            calendarFetcher?.kill()
-            calendarFetcher = null // no point keeping a live reference to a non-useful calendarFetcher
-
             val permissionGiven = CalendarPermission.check(this@CalWatchFaceService)
             if (!ClockState.calendarPermission && permissionGiven) {
                 // Hypothetically this isn't necessary, because it's handled in CalendarPermission.handleResult.
@@ -102,6 +99,7 @@ class CalWatchFaceService : CanvasWatchFaceService() {
                 return
             }
 
+            calendarFetcher?.kill()
             calendarFetcher = CalendarFetcher(this@CalWatchFaceService, WearableCalendarContract.Instances.CONTENT_URI, WearableCalendarContract.AUTHORITY)
         }
 

@@ -23,7 +23,7 @@ object BatteryWrapper {
     // yes, we're holding a context live, and that's generally considered a bad thing, but the
     // BatteryWrapper is only held alive by the activity. If it goes away, so does the context,
     // so no leakage issues here to worry about.
-    private var context: Context? = null
+    private lateinit var context: Context
 
     var isCharging: Boolean = false
         private set
@@ -35,12 +35,9 @@ object BatteryWrapper {
         // official docs.
         // http://developer.android.com/training/monitoring-device-state/battery-monitoring.html
 
-        val lcontext = context
-        if(lcontext == null) return;
-
         try {
             val ifilter = IntentFilter(Intent.ACTION_BATTERY_CHANGED)
-            val batteryStatus = lcontext.registerReceiver(null, ifilter)
+            val batteryStatus = context.registerReceiver(null, ifilter)
 
             // Are we charging / charged?
             val status = batteryStatus.getIntExtra(BatteryManager.EXTRA_STATUS, -1)
@@ -65,6 +62,4 @@ object BatteryWrapper {
         this.context = context
         fetchStatus()
     }
-
-    fun getWrapper() = this
 }

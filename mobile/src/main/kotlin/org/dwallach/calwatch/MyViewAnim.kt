@@ -22,13 +22,15 @@ import java.util.Observable
 import java.util.Observer
 
 class MyViewAnim(context: Context, attrs: AttributeSet) : View(context, attrs), Observer {
+
     init {
         setWillNotDraw(false)
-        init(context)
+//        init(context)
     }
 
-    private var clockFace: ClockFace? = null
+    private lateinit var clockFace: ClockFace
     private var visible = false
+    private var calendarFetcher: CalendarFetcher? = null
 
     override fun onVisibilityChanged(changedView: View?, visibility: Int) {
         visible = visibility == View.VISIBLE
@@ -49,8 +51,6 @@ class MyViewAnim(context: Context, attrs: AttributeSet) : View(context, attrs), 
         invalidate()
     }
 
-    private var calendarFetcher: CalendarFetcher? = null
-
     fun init(context: Context) {
         Log.d(TAG, "init")
 
@@ -64,25 +64,13 @@ class MyViewAnim(context: Context, attrs: AttributeSet) : View(context, attrs), 
             Log.e(TAG, "no resources? not good")
         }
 
-        if (clockFace == null) {
-            val lClockFace = ClockFace()
-            val emptyCalendar = BitmapFactory.decodeResource(context.resources, R.drawable.empty_calendar)
-            lClockFace.setMissingCalendarBitmap(emptyCalendar)
-            lClockFace.setSize(_width, _height)
-
-            clockFace = lClockFace
-        }
-
-        ClockState.addObserver(this)
+        resume(context)
     }
 
     // this is redundant with CalWatchFaceService.Engine.initCalendarFetcher, but just different enough that it's
     // not really worth trying to have a grand unified thing.
     fun initCalendarFetcher(activity: Activity) {
         Log.v(TAG, "initCalendarFetcher")
-
-        calendarFetcher?.kill()
-        calendarFetcher = null
 
         val permissionGiven = CalendarPermission.check(activity)
 
@@ -99,6 +87,7 @@ class MyViewAnim(context: Context, attrs: AttributeSet) : View(context, attrs), 
             return
         }
 
+        calendarFetcher?.kill() // kill if it's already there
         calendarFetcher = CalendarFetcher(activity, CalendarContract.Instances.CONTENT_URI, CalendarContract.AUTHORITY)
     }
 
@@ -125,23 +114,35 @@ class MyViewAnim(context: Context, attrs: AttributeSet) : View(context, attrs), 
         this._height = lHeight
 
         Log.v(TAG, "onWindowFocusChanged: $_width, $_height")
-        clockFace?.setSize(_width, _height)
+        clockFace.setSize(_width, _height)
     }
 
-    fun kill(context: Context) {
+    /**
+     * Call this when the activity is paused, causes other internal things to be cleaned up.
+     */
+    fun pause(context: Context) {
         Log.d(TAG, "kill")
 
-        calendarFetcher?.kill()
-        calendarFetcher = null
-
         ClockState.deleteObserver(this)
-
-        clockFace?.kill()
-        clockFace = null
+        calendarFetcher?.kill()
+        clockFace.kill()
     }
 
+    /**
+     * Call this when the activity is restarted/resumed, causes other internal things to get going again.
+     */
+    fun resume(context: Context) {
+        Log.d(TAG, "resume")
 
-    private var drawCounter: Long = 0
+        clockFace = ClockFace()
+        val emptyCalendar = BitmapFactory.decodeResource(context.resources, R.drawable.empty_calendar)
+        clockFace.setMissingCalendarBitmap(emptyCalendar)
+        clockFace.setSize(_width, _height)
+
+        ClockState.addObserver(this)
+        initCalendarFetcher(this.toActivity() ?: throw RuntimeException("no activity available for resuming calendar?!"))
+    }
+
 
     override fun onSizeChanged(w: Int, h: Int, oldw: Int, oldh: Int) {
         super.onSizeChanged(w, h, oldw, oldh)
@@ -149,14 +150,16 @@ class MyViewAnim(context: Context, attrs: AttributeSet) : View(context, attrs), 
         Log.v(TAG, "onSizeChanged: $w, $h")
         this._width = w
         this._height = h
-        clockFace?.setSize(_width, _height)
+        clockFace.setSize(_width, _height)
     }
 
     // We're using underscores here to make these distinct from "width" and "height" which are
-    // properties on the View, which would turn into function calls if we just used them.
+    // properties on the View, which would turn into function calls if we just used them with those names.
     private var _width: Int = 0
     private var _height: Int = 0
 
+    // Used for performance counters, and rate-limiting logcat entries.
+    private var drawCounter: Long = 0
 
     override fun onDraw(canvas: Canvas) {
         drawCounter++
@@ -168,19 +171,12 @@ class MyViewAnim(context: Context, attrs: AttributeSet) : View(context, attrs), 
         }
 
         try {
-            val lClockFace = clockFace
-            // clear the screen
-
-            if(lClockFace == null) {
-                Log.e(TAG, "can't draw when we have no clockface")
-                return
-            }
             canvas.drawColor(Color.TRANSPARENT, PorterDuff.Mode.CLEAR)
 
             TimeWrapper.update() // fetch the time
-            lClockFace.drawEverything(canvas)
+            clockFace.drawEverything(canvas)
 
-            if (ClockState.subSecondRefreshNeeded(lClockFace))
+            if (ClockState.subSecondRefreshNeeded(clockFace))
                 invalidate()
         } catch (t: Throwable) {
             if (drawCounter % 1000 == 0L)
