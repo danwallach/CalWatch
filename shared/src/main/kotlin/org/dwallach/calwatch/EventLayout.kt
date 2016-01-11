@@ -65,7 +65,7 @@ object EventLayout {
             // not sure this is necessary but it can't hurt
             e.minLevel = 0
             e.maxLevel = 0
-            e.pathCache.set(null)
+            e.path = null
 
             // clear the levels used mask
             j = 0
