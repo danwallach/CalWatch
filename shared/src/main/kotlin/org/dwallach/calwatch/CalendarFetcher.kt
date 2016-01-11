@@ -73,7 +73,6 @@ class CalendarFetcher(initialContext: Context, val contentUri: Uri, val authorit
             isReceiverRegistered = false
         }
 
-        loaderHandler.cancelLoaderTask()
         loaderHandler.removeMessages(MyHandler.MSG_LOAD_CAL)
 
         scanInProgress = false
@@ -93,8 +92,6 @@ class CalendarFetcher(initialContext: Context, val contentUri: Uri, val authorit
         }
 
         scanInProgress = true
-
-        loaderHandler.cancelLoaderTask()
         loaderHandler.sendEmptyMessage(MyHandler.MSG_LOAD_CAL)
     }
 
@@ -214,7 +211,7 @@ class CalendarFetcher(initialContext: Context, val contentUri: Uri, val authorit
             }
 
             val powerManager = context.getSystemService(Context.POWER_SERVICE) as PowerManager
-            val wakeLock = powerManager.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, "CalWatchWakeLock")
+            wakeLock = powerManager.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, "CalWatchWakeLock")
             wakeLock.acquire()
 
             Log.v(TAG, "wake lock acquired")
@@ -251,10 +248,6 @@ class CalendarFetcher(initialContext: Context, val contentUri: Uri, val authorit
         // per http://www.androiddesignpatterns.com/2013/01/inner-class-handler-memory-leak.html
         private val contextRef = WeakReference(context)
 
-        fun cancelLoaderTask() {
-            loaderTask.cancel(true)
-        }
-
         override fun handleMessage(message: Message) {
             val context: Context? = contextRef.get()
             if (context == null) {
@@ -264,7 +257,6 @@ class CalendarFetcher(initialContext: Context, val contentUri: Uri, val authorit
 
             when (message.what) {
                 MSG_LOAD_CAL -> {
-                    cancelLoaderTask()
                     Log.v(TAG, "launching calendar loader task")
 
                     loaderTask = CalLoaderTask(context, fetcher)

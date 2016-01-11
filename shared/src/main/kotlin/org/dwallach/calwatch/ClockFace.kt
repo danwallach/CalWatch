@@ -39,6 +39,15 @@ class ClockFace : Observer {
     private var missingCalendarY: Float = 0.toFloat()
     private var missingCalendarBitmap: Bitmap? = null
 
+    private var eventList: List<EventWrapper> = emptyList()
+    private var maxLevel: Int = 0
+
+    private var facePathCache: Path? = null
+    private var facePathCacheMode = -1
+
+    private var faceMode = 0
+    private var ambientMode = false
+
     // dealing with the "flat tire" a.k.a. "chin" of Moto 360 and any other watches that pull the same trick
     fun setMissingBottomPixels(missingBottomPixels: Int) {
         if (forceMotoFlatBottom)
@@ -378,9 +387,6 @@ class ClockFace : Observer {
         canvas.drawText(text, x, y, shadowPaint)
         canvas.drawText(text, x, y, paint)
     }
-
-    @Volatile private var facePathCache: Path? = null
-    @Volatile private var facePathCacheMode = -1
 
     private fun drawFace(canvas: Canvas) {
         var p = facePathCache // make a local copy, avoid concurrency crap
@@ -1004,9 +1010,6 @@ class ClockFace : Observer {
             return 1f
     }
 
-    private var faceMode = 0
-    private var ambientMode = false
-
     fun getAmbientMode() = ambientMode
     fun setAmbientMode(ambientMode: Boolean): Unit {
         Log.i(TAG, "Ambient mode: " + this.ambientMode + " -> " + ambientMode)
@@ -1014,9 +1017,6 @@ class ClockFace : Observer {
         this.ambientMode = ambientMode
         wipeCaches()
     }
-    private var eventList: List<EventWrapper> = emptyList()
-    private var maxLevel: Int = 0
-
 
     // call this if you want this instance to head to the garbage collector; this disconnects
     // it from paying attention to changes in the ClockState
