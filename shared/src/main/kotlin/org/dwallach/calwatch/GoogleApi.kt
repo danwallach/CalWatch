@@ -49,7 +49,7 @@ object GoogleApi: GoogleApiClient.ConnectionCallbacks, GoogleApiClient.OnConnect
     }
 
     /**
-     * Call this to tear down the connection to the Google API. Apparently not particularly necessary.
+     * Call this to tear down the connection to the Google API.
      */
     fun close() {
         // we're going to eat any errors that happen here -- clients don't need to know or care
