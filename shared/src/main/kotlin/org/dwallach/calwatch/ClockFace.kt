@@ -397,11 +397,9 @@ class ClockFace : Observer {
 
     private fun drawFace(canvas: Canvas) {
         var lFacePathCache = facePathCache
-        // draw thin lines (indices)
 
         val bottomHack = missingBottomPixels > 0
-
-        val localFaceMode = faceMode
+        val lFaceMode = faceMode
 
         val colorTickShadow = PaintCan[ambientLowBit, ambientMode, PaintCan.colorSecondHandShadow]
         val colorSmall = PaintCan[ambientLowBit, ambientMode, PaintCan.colorSmallTextAndLines]
@@ -409,21 +407,21 @@ class ClockFace : Observer {
         val colorTextShadow = PaintCan[ambientLowBit, ambientMode, PaintCan.colorBigShadow]
 
         // check if we've already rendered the face
-        if (localFaceMode != facePathCacheMode || lFacePathCache == null) {
+        if (lFaceMode != facePathCacheMode || lFacePathCache == null) {
             Log.v(TAG, "drawFace: cx($cx), cy($cy), r($radius)")
 
             lFacePathCache = Path()
 
-            Log.v(TAG, "rendering new face, faceMode($localFaceMode)")
+            Log.v(TAG, "rendering new face, faceMode($lFaceMode)")
 
-            if (localFaceMode == ClockState.FACE_TOOL)
+            if (lFaceMode == ClockState.FACE_TOOL)
                 for (i in 1..59)
                     if (i % 5 != 0)
                         drawRadialLine(lFacePathCache, colorSmall.strokeWidth, i.toDouble(), .9f, 1.0f, false, bottomHack)
 
             val strokeWidth: Float
 
-            if (localFaceMode == ClockState.FACE_LITE || localFaceMode == ClockState.FACE_NUMBERS)
+            if (lFaceMode == ClockState.FACE_LITE || lFaceMode == ClockState.FACE_NUMBERS)
                 strokeWidth = colorSmall.strokeWidth
             else
                 strokeWidth = colorBig.strokeWidth
@@ -432,7 +430,7 @@ class ClockFace : Observer {
             for(i in 0..59 step 5) {
                 if (i == 0) {
                     // top of watch: special
-                    if (localFaceMode != ClockState.FACE_NUMBERS) {
+                    if (lFaceMode != ClockState.FACE_NUMBERS) {
                         drawRadialLine(lFacePathCache, strokeWidth, -0.4, .75f, 1.0f, true, false)
                         drawRadialLine(lFacePathCache, strokeWidth, 0.4, .75f, 1.0f, true, false)
                     }
@@ -441,7 +439,7 @@ class ClockFace : Observer {
                     drawRadialLine(lFacePathCache, strokeWidth, i.toDouble(), 0.9f, 1.0f, false, false)
                 } else {
                     // we want lines for 1, 2, 4, 5, 7, 8, 10, and 11 no matter what
-                    if (localFaceMode != ClockState.FACE_NUMBERS || !(i == 15 || i == 30 || i == 45)) {
+                    if (lFaceMode != ClockState.FACE_NUMBERS || !(i == 15 || i == 30 || i == 45)) {
                         // in the particular case of 6 o'clock and the Moto 360 bottomHack, we're
                         // going to make the 6 o'clock index line the same length as the other lines
                         // so it doesn't stand out as much
@@ -454,7 +452,7 @@ class ClockFace : Observer {
             }
 
             facePathCache = lFacePathCache
-            facePathCacheMode = localFaceMode
+            facePathCacheMode = lFaceMode
         }
 
         canvas.drawPath(lFacePathCache, colorSmall)
@@ -463,7 +461,7 @@ class ClockFace : Observer {
         if (!ambientLowBit || !ambientMode)
             canvas.drawPath(lFacePathCache, colorTickShadow)
 
-        if (localFaceMode == ClockState.FACE_NUMBERS) {
+        if (lFaceMode == ClockState.FACE_NUMBERS) {
             // in this case, we'll draw "12", "3", and "6". No "9" because that's where the
             // month and day will go
             var x: Float
