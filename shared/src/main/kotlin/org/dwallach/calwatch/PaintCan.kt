@@ -53,24 +53,25 @@ object PaintCan {
      * This generates all the Paint that we'll need for drawing the watchface. These are all cached
      * in the palette and accessed elsewhere via PaintCan.get().
      */
-    private fun watchfacePaint(argb: Int, style: Int, textSize: Float, strokeWidth: Float): Paint {
+    private fun watchfacePaint(_argb: Int, _style: Int, _textSize: Float, _strokeWidth: Float): Paint {
+        // underscores in the formal parameters to clarify the ambiguity in the apply block, below
         val retPaint = Paint(Paint.SUBPIXEL_TEXT_FLAG or Paint.HINTING_ON).apply {
-            this.strokeCap = Paint.Cap.SQUARE
-            this.strokeWidth = strokeWidth
-            this.textSize = textSize
-            this.style = Paint.Style.FILL
-            this.textAlign = Paint.Align.CENTER
+            strokeCap = Paint.Cap.SQUARE
+            strokeWidth = _strokeWidth
+            textSize = _textSize
+            style = Paint.Style.FILL
+            textAlign = Paint.Align.CENTER
         }
 
-        when (style) {
+        when (_style) {
             styleNormal -> {
                 retPaint.isAntiAlias = true
-                retPaint.color = argb
+                retPaint.color = _argb
             }
 
             styleLowBit -> {
                 retPaint.isAntiAlias = false
-                if (argb and 16777215 > 0)
+                if (_argb and 16777215 > 0)
                     retPaint.color = -1 // any non-black color mapped to pure white
                 else
                     retPaint.color = -16777216
@@ -78,10 +79,10 @@ object PaintCan {
 
             styleAmbient -> {
                 retPaint.isAntiAlias = true
-                retPaint.color = argbToGreyARGB(argb)
+                retPaint.color = argbToGreyARGB(_argb)
             }
 
-            else -> Log.e(TAG, "watchfacePaint: unknown style: $style")
+            else -> Log.e(TAG, "watchfacePaint: unknown style: $_style")
         }
 
         return retPaint
