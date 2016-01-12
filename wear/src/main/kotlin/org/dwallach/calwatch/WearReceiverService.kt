@@ -139,7 +139,7 @@ class WearReceiverService : WearableListenerService() {
             } catch (e: IllegalArgumentException) {
                 Log.e(TAG, "failed to decode base64 saved state", e)
             }
-t       }
+        }
     }
 
     companion object {
