@@ -48,13 +48,14 @@ class CalendarFetcher(initialContext: Context, val contentUri: Uri, val authorit
 
     init {
         this.loaderHandler = MyHandler(initialContext, this)
-        singletonFetcherRef = WeakReference(this)
+        singletonFetcher = this
 
         // hook into watching the calendar (code borrowed from Google's calendar wear app)
         Log.v(TAG, "setting up intent receiver")
-        val filter = IntentFilter(Intent.ACTION_PROVIDER_CHANGED)
-        filter.addDataScheme("content")
-        filter.addDataAuthority(authority, null)
+        val filter = IntentFilter(Intent.ACTION_PROVIDER_CHANGED).apply {
+            addDataScheme("content")
+            addDataAuthority(authority, null)
+        }
         initialContext.registerReceiver(broadcastReceiver, filter)
         isReceiverRegistered = true
 
@@ -89,8 +90,9 @@ class CalendarFetcher(initialContext: Context, val contentUri: Uri, val authorit
      */
     fun rescan() {
         if(!isReceiverRegistered) {
-            // this means that we're reusing an ancient CalendarFetcher, which is bad, but we don't
-            // want to just fail out.
+            // this means that we're reusing a `killed` CalendarFetcher, which is bad, because it
+            // won't be listening to the broadcasts any more. Log so we can discover it, but otherwise
+            // continue running. At least it will update once an hour...
             Log.e(TAG, "no receiver registered!")
         }
 
@@ -212,11 +214,7 @@ class CalendarFetcher(initialContext: Context, val contentUri: Uri, val authorit
 
         // using a weak-reference to the context rather than holding the context itself,
         // per http://www.androiddesignpatterns.com/2013/01/inner-class-handler-memory-leak.html
-        private val contextRef: WeakReference<Context>
-
-        init {
-            this.contextRef = WeakReference(context)
-        }
+        private val contextRef = WeakReference(context)
 
         override fun doInBackground(vararg voids: Void): Throwable? {
             val context: Context? = contextRef.get()
@@ -296,11 +294,11 @@ class CalendarFetcher(initialContext: Context, val contentUri: Uri, val authorit
 
     companion object {
         private const val TAG = "CalendarFetcher"
-        private var singletonFetcherRef: WeakReference<CalendarFetcher>? = null
+        private var singletonFetcher: CalendarFetcher? = null
 
         fun requestRescan() {
             Log.i(TAG, "requestRescan")
-            singletonFetcherRef?.get()?.rescan()
+            singletonFetcher?.rescan()
         }
     }
 }

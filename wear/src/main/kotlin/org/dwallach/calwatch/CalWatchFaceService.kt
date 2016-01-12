@@ -267,12 +267,11 @@ class CalWatchFaceService : CanvasWatchFaceService() {
             super.onPeekCardPositionUpdate(bounds)
             if(bounds == null) {
                 Log.d(TAG, "onPeekcardPositionUpdate: null bounds?!")
-                return
+            } else {
+                Log.d(TAG, "onPeekCardPositionUpdate: $bounds (${bounds.width()}, ${bounds.height()})")
             }
 
-            Log.d(TAG, "onPeekCardPositionUpdate: " + bounds + " (" + bounds.width() + ", " + bounds.height() + ")")
-
-            clockFace.setPeekCardRect(bounds)
+            clockFace.peekCardRect = bounds
 
             invalidate()
         }

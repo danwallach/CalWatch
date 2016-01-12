@@ -58,21 +58,21 @@ class PhoneActivity : Activity(), Observer {
 
     private fun getFaceModeFromUI() {
         Log.v(TAG, "getFaceModeFromUI")
-        var mode = -1
 
         if (!uiButtonsReady()) {
             Log.v(TAG, "trying to get UI mode without buttons active yet")
             return
         }
 
-        if (toolButton.isChecked)
-            mode = ClockState.FACE_TOOL
-        else if (numbersButton.isChecked)
-            mode = ClockState.FACE_NUMBERS
-        else if (liteButton.isChecked)
-            mode = ClockState.FACE_LITE
-        else
-            Log.v(TAG, "no buttons are selected? weird.")
+        val mode = when {
+            toolButton.isChecked -> ClockState.FACE_TOOL
+            numbersButton.isChecked -> ClockState.FACE_NUMBERS
+            liteButton.isChecked -> ClockState.FACE_LITE
+            else -> {
+                Log.v(TAG, "no buttons are selected? weird.")
+                -1
+            }
+        }
 
         val showSeconds = showSeconds.isChecked
         val showDayDate = showDayDate.isChecked

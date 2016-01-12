@@ -31,7 +31,7 @@ class WearReceiverService : WearableListenerService() {
     }
 
     private fun newEventBytes(eventBytes: ByteArray) {
-        Log.v(TAG, "newEventBytes: " + eventBytes.size)
+        Log.v(TAG, "newEventBytes: ${eventBytes.size}")
 
         ClockState.setProtobuf(eventBytes)
     }
@@ -68,11 +68,11 @@ class WearReceiverService : WearableListenerService() {
                 .filter { it.type == DataEvent.TYPE_CHANGED }
                 .map { it.dataItem }
                 .forEach {
-                    Log.d(TAG, "--> item found: " + it.toString())
+                    Log.d(TAG, "--> item found: ${it.toString()}")
                     if (it.uri.path.compareTo(Constants.SettingsPath) == 0) {
                         val dataMap = DataMapItem.fromDataItem(it).dataMap
                         val eventbuf = dataMap.getByteArray(Constants.DataKey)
-                        Log.d(TAG, "----> it's an event for us, nbytes: " + eventbuf.size)
+                        Log.d(TAG, "----> it's an event for us, nbytes: ${eventbuf.size}")
 
                         if(eventbuf != null) {
                             newEventBytes(eventbuf)
@@ -90,11 +90,11 @@ class WearReceiverService : WearableListenerService() {
     }
 
     override fun onPeerConnected(peer: Node?) {
-        Log.v(TAG, "phone is connected: " + (peer?.displayName ?: "null peer"))
+        Log.v(TAG, "phone is connected: ${peer?.displayName ?: "null peer"}")
     }
 
     override fun onPeerDisconnected(peer: Node?) {
-        Log.v(TAG, "phone is disconnected: " + (peer?.displayName ?: "null peer"))
+        Log.v(TAG, "phone is disconnected: ${peer?.displayName ?: "null peer"}")
     }
 
     /**
@@ -106,7 +106,7 @@ class WearReceiverService : WearableListenerService() {
         if (eventBytes == null || eventBytes.size < 1)
             return
 
-        Log.v(TAG, "savePreferences: " + eventBytes.size + " bytes")
+        Log.v(TAG, "savePreferences: ${eventBytes.size} bytes")
         val prefs = getSharedPreferences(Constants.PrefsKey, Context.MODE_PRIVATE)
         val editor = prefs.edit()
 
@@ -137,10 +137,9 @@ class WearReceiverService : WearableListenerService() {
                 newEventBytes(eventBytes)
 
             } catch (e: IllegalArgumentException) {
-                Log.e(TAG, "failed to decode base64 saved state: " + e.toString())
+                Log.e(TAG, "failed to decode base64 saved state", e)
             }
-
-        }
+t       }
     }
 
     companion object {

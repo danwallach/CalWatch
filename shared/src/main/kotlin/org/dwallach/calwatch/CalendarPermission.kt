@@ -66,7 +66,7 @@ object CalendarPermission {
     fun request(activity: Activity) {
         if (!check(activity)) {
             numRequests++
-            Log.v(TAG, "this will be check #" + numRequests)
+            Log.v(TAG, "this will be check #$numRequests")
             ActivityCompat.requestPermissions(activity,
                     arrayOf(Manifest.permission.READ_CALENDAR),
                     INTERNAL_PERM_REQUEST_CODE)

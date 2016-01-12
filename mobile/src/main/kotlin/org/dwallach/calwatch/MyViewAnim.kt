@@ -25,7 +25,6 @@ class MyViewAnim(context: Context, attrs: AttributeSet) : View(context, attrs), 
 
     init {
         setWillNotDraw(false)
-//        init(context)
     }
 
     private lateinit var clockFace: ClockFace
@@ -96,19 +95,16 @@ class MyViewAnim(context: Context, attrs: AttributeSet) : View(context, attrs), 
     override fun onWindowFocusChanged(hasFocus: Boolean) {
         super.onWindowFocusChanged(hasFocus)
 
-        val lWidth = width // properties of the View, reflected into a Kotlin variable
-        val lHeight = height
-
-        if (lWidth == 0 || lHeight == 0) {
+        // properties of the View, reflected into a Kotlin variable
+        if (width == 0 || height == 0) {
             Log.v(TAG, "onWindowFocusChanged: got zeros for width or height")
             return
         }
 
-        this._width = lWidth
-        this._height = lHeight
+        zeroSizedScreen = (width == 0 || height == 0)
 
-        Log.v(TAG, "onWindowFocusChanged: $_width, $_height")
-        clockFace.setSize(_width, _height)
+        Log.v(TAG, "onWindowFocusChanged: $width, $height")
+        clockFace.setSize(width, height)
     }
 
     /**
@@ -136,7 +132,7 @@ class MyViewAnim(context: Context, attrs: AttributeSet) : View(context, attrs), 
             val emptyCalendar = BitmapFactory.decodeResource(context.resources, R.drawable.empty_calendar)
             clockFace.setMissingCalendarBitmap(emptyCalendar)
         }
-        clockFace.setSize(_width, _height)
+        clockFace.setSize(width, height)
 
         ClockState.addObserver(this)
         initCalendarFetcher(requireNotNull(this.toActivity(), { "no activity available for resuming calendar?!" }))
@@ -146,16 +142,14 @@ class MyViewAnim(context: Context, attrs: AttributeSet) : View(context, attrs), 
     override fun onSizeChanged(w: Int, h: Int, oldw: Int, oldh: Int) {
         super.onSizeChanged(w, h, oldw, oldh)
 
+        zeroSizedScreen = (w == 0 || h == 0)
+
         Log.v(TAG, "onSizeChanged: $w, $h")
-        this._width = w
-        this._height = h
-        clockFace.setSize(_width, _height)
+        clockFace.setSize(w, h)
     }
 
-    // We're using underscores here to make these distinct from "width" and "height" which are
-    // properties on the View, which would turn into function calls if we just used them with those names.
-    private var _width: Int = 0
-    private var _height: Int = 0
+    // Keeping track of whether we have a width and height yet.
+    private var zeroSizedScreen = true
 
     // Used for performance counters, and rate-limiting logcat entries.
     private var drawCounter: Long = 0
@@ -163,7 +157,7 @@ class MyViewAnim(context: Context, attrs: AttributeSet) : View(context, attrs), 
     override fun onDraw(canvas: Canvas) {
         drawCounter++
 
-        if (_width == 0 || _height == 0) {
+        if (zeroSizedScreen) {
             if (drawCounter % 1000 == 1L)
                 Log.e(TAG, "zero-width or zero-height, can't draw yet")
             return
@@ -178,7 +172,7 @@ class MyViewAnim(context: Context, attrs: AttributeSet) : View(context, attrs), 
             if (ClockState.subSecondRefreshNeeded(clockFace))
                 invalidate()
         } catch (t: Throwable) {
-            if (drawCounter % 1000 == 0L)
+            if (drawCounter % 1000 == 1L)
                 Log.e(TAG, "Something blew up while drawing", t)
         }
     }

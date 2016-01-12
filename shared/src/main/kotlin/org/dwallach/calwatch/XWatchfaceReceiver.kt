@@ -33,6 +33,15 @@ import android.util.Log
 
  * If you want to get some sort of notification, then you should hack that behavior into the onReceive
  * method somewhere.
+ *
+ * This class is instantiated by putting it into your AndroidManifest.xml file, e.g.
+ *
+ *         <receiver android:name=".XWatchfaceReceiver">
+ *           <intent-filter>
+ *           <action android:name="org.dwallach.x.stopwatch.update" />
+ *           <action android:name="org.dwallach.x.timer.update" />
+ *           </intent-filter>
+ *           </receiver>
  */
 class XWatchfaceReceiver : BroadcastReceiver() {
 
@@ -166,7 +175,7 @@ class XWatchfaceReceiver : BroadcastReceiver() {
         /**
          * Call this and it will ask external stopwatches and timers to report back with their
          * state. If we already *have* state locally and nothing has changed remotely, then this
-         * be a no-op.
+         * is just a no-op.
 
          * If you've called this and the state in the relevant variables here is still empty,
          * then it's possible there are no stopwatches running at all. If one of them shows up,

@@ -34,7 +34,7 @@ class ClockFace : Observer {
     private var missingBottomPixels = 0 // Moto 360 hack; set to non-zero number to pull up the indicia
     private var flatBottomCornerTime = 30f // Moto 360 hack: set to < 30.0 seconds for where the flat bottom starts
 
-    private var peekCardRect: Rect? = null
+    var peekCardRect: Rect? = null
     private var missingCalendarX: Float = 0.toFloat()
     private var missingCalendarY: Float = 0.toFloat()
     private var missingCalendarBitmap: Bitmap? = null
@@ -56,10 +56,6 @@ class ClockFace : Observer {
             this.missingBottomPixels = missingBottomPixels
 
         computeFlatBottomCorners()
-    }
-
-    fun setPeekCardRect(rect: Rect) {
-        peekCardRect = rect
     }
 
     /**
@@ -310,12 +306,14 @@ class ClockFace : Observer {
             endRadius *= ratio
         }
 
-        // This one always starts at the top and goes clockwise to the time indicated (seconds).
-        // This computation is much easier than doing it for the general case.
+        if (missingBottomPixels == 0) {
+            // This one always starts at the top and goes clockwise to the time indicated (seconds).
+            // This computation is much easier than doing it for the general case.
 
-        if (missingBottomPixels == 0)
             drawRadialArc(canvas, null, 0.0, seconds.toDouble(), startRadius, endRadius, paint, outlinePaint, false)
-        else {
+        } else {
+            // This one is more work. We need to deal with the flat bottom.
+
             val p = Path()
 
             val startOval = getRectRadius(startRadius)
@@ -419,12 +417,11 @@ class ClockFace : Observer {
                     if (i % 5 != 0)
                         drawRadialLine(lFacePathCache, colorSmall.strokeWidth, i.toDouble(), .9f, 1.0f, false, bottomHack)
 
-            val strokeWidth: Float
-
-            if (lFaceMode == ClockState.FACE_LITE || lFaceMode == ClockState.FACE_NUMBERS)
-                strokeWidth = colorSmall.strokeWidth
-            else
-                strokeWidth = colorBig.strokeWidth
+            val strokeWidth =
+                    if (lFaceMode == ClockState.FACE_LITE || lFaceMode == ClockState.FACE_NUMBERS)
+                        colorSmall.strokeWidth
+                    else
+                        colorBig.strokeWidth
 
 
             for(i in 0..59 step 5) {

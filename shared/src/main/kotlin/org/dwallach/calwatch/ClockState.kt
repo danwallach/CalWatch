@@ -157,10 +157,8 @@ object ClockState : Observable() {
      * a protobuf, in ancient days, when we had to ship the entire calendar from
      * phone to watch, but now it's just a simple string.)
      */
-    fun getProtobuf(): ByteArray {
-        val wireUpdate = WireUpdate(faceMode, showSeconds, showDayDate)
-        return wireUpdate.toByteArray()
-    }
+    fun getProtobuf() = WireUpdate(faceMode, showSeconds, showDayDate).toByteArray()
+
     /**
      * Load the ClockState with a protobuf containing a complete update
      * @param eventBytes a marshalled protobuf of type WireUpdate

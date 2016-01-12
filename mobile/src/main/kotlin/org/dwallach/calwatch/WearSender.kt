@@ -60,21 +60,11 @@ class WearSender(private val context: Context) {
     }
 
     init {
-        if (singleton == null)
-            singleton = this
-        onCreate()
-    }
-
-    protected fun onCreate() {
-        Log.v(TAG, "onCreate!")
+        Log.v(TAG, "init!")
         GoogleApi.connect(context, Wearable.API, { sendAllToWatch() })
     }
 
     companion object {
         private const val TAG = "WearSender"
-
-        //    private String nodeId;
-
-        private var singleton: WearSender? = null
     }
 }

@@ -15,36 +15,22 @@ class EventWrapper(val wireEvent: WireEvent) {
      * render it will go much faster.
      */
     var path: Path? = null
-    private val paint: Paint
-    private val greyPaint: Paint
-    private val lowBitPaint: Paint
+    private val paint = PaintCan.getCalendarPaint(wireEvent.displayColor)
+    private val greyPaint = PaintCan.getCalendarGreyPaint(wireEvent.displayColor)
+    private val lowBitPaint = PaintCan[true, true, PaintCan.colorBlackFill]
     var minLevel: Int = 0
     var maxLevel: Int = 0
 
-
-    init {
-        this.paint = PaintCan.getCalendarPaint(wireEvent.displayColor)
-        this.greyPaint = PaintCan.getCalendarGreyPaint(wireEvent.displayColor)
-        this.lowBitPaint = PaintCan[true, true, PaintCan.colorBlackFill]
-        this.minLevel = 0
-        this.maxLevel = 0  // fill this in later on...
+    fun getPaint(ambientLowBit: Boolean, ambientMode: Boolean) = when {
+        ambientMode && ambientLowBit -> lowBitPaint
+        ambientMode -> greyPaint
+        else -> paint
     }
 
-    fun getPaint(ambientLowBit: Boolean, ambientMode: Boolean): Paint {
-        if (ambientMode)
-            if (ambientLowBit)
-                return lowBitPaint
-            else
-                return greyPaint
-        else
-            return paint
-    }
+    fun overlaps(e: EventWrapper) =
+            this.wireEvent.startTime < e.wireEvent.endTime && e.wireEvent.startTime < this.wireEvent.endTime
 
-    fun overlaps(e: EventWrapper): Boolean {
-        return this.wireEvent.startTime < e.wireEvent.endTime && e.wireEvent.startTime < this.wireEvent.endTime
-    }
-
-    override fun toString(): String {
-        return "%d -> %d, color(%08x), levels(%d,%d)".format(wireEvent.startTime, wireEvent.endTime, wireEvent.displayColor, minLevel, maxLevel)
-    }
+    override fun toString() =
+            "%d -> %d, color(%08x), levels(%d,%d)"
+                    .format(wireEvent.startTime, wireEvent.endTime, wireEvent.displayColor, minLevel, maxLevel)
 }
