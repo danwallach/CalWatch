@@ -21,10 +21,7 @@ import java.io.IOException
  */
 data class WireUpdate(val faceMode: Int, val showSecondHand: Boolean, val showDayDate: Boolean) {
 
-    fun toByteArray(): ByteArray {
-        val output = "$HEADER;$faceMode;$showSecondHand;$showDayDate;$TRAILER"
-        return output.toByteArray()
-    }
+    fun toByteArray() = "$HEADER;$faceMode;$showSecondHand;$showDayDate;$TRAILER".toByteArray()
 
     companion object {
         private const val TAG = "WireUpdate"
@@ -45,10 +42,7 @@ data class WireUpdate(val faceMode: Int, val showSecondHand: Boolean, val showDa
                         java.lang.Boolean.parseBoolean(inputs[3]))
                 Log.v(TAG, "parsed: " + result.toString())
                 return result
-            } else {
-                // got something bogus
-                throw IOException("Got bogus wire message: " + inputStr)
-            }
+            } else error("Got bogus wire message: $inputStr")
         }
     }
 }

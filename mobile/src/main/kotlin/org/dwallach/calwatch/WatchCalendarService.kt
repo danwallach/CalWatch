@@ -66,7 +66,7 @@ class WatchCalendarService : Service(), Observer {
 
     override fun onBind(intent: Intent?): IBinder? {
         Log.e(TAG, "onBind: we should support this")
-        throw UnsupportedOperationException("Not yet implemented")
+        error("Not yet implemented")
     }
 
     override fun update(observable: Observable?, data: Any?) {

@@ -139,7 +139,7 @@ class MyViewAnim(context: Context, attrs: AttributeSet) : View(context, attrs), 
         clockFace.setSize(_width, _height)
 
         ClockState.addObserver(this)
-        initCalendarFetcher(this.toActivity() ?: throw RuntimeException("no activity available for resuming calendar?!"))
+        initCalendarFetcher(requireNotNull(this.toActivity(), { "no activity available for resuming calendar?!" }))
     }
 
 

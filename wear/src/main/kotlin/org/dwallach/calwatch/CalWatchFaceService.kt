@@ -161,11 +161,6 @@ class CalWatchFaceService : CanvasWatchFaceService() {
                 return;
             }
 
-//            if(clockFace == null) {
-//                Log.d(TAG, "onPropertiesChanged: null clockFace?")
-//                return
-//            }
-
             val lowBitAmbientMode = properties.getBoolean(WatchFaceService.PROPERTY_LOW_BIT_AMBIENT, false)
             val burnInProtection = properties.getBoolean(WatchFaceService.PROPERTY_BURN_IN_PROTECTION, false)
             clockFace.setAmbientLowBit(lowBitAmbientMode)
@@ -185,13 +180,6 @@ class CalWatchFaceService : CanvasWatchFaceService() {
 
         override fun onAmbientModeChanged(inAmbientMode: Boolean) {
             super.onAmbientModeChanged(inAmbientMode)
-
-//            val lClockFace = clockFace
-//            if(lClockFace == null) {
-//                Log.d(TAG, "onAmbientModeChanged: null clockFace?")
-//                return
-//            }
-
 
             Log.d(TAG, "onAmbientModeChanged: " + inAmbientMode)
             clockFace.setAmbientMode(inAmbientMode)
@@ -220,12 +208,6 @@ class CalWatchFaceService : CanvasWatchFaceService() {
         override fun onDraw(canvas: Canvas?, bounds: Rect?) {
             //                Log.v(TAG, "onDraw");
             drawCounter++
-
-//            val lClockFace = clockFace
-//            if(lClockFace == null) {
-//                Log.e(TAG, "onDraw: can't draw without a clockface")
-//                return
-//            }
 
             if(bounds == null || canvas == null) {
                 Log.d(TAG, "onDraw: null bounds and/or canvas")

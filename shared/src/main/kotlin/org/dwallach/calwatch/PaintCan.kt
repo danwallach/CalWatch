@@ -176,7 +176,7 @@ object PaintCan {
      * defined in this file. Anything else will cause an exception.
      */
     operator fun get(style: Int, colorID: Int): Paint =
-        palette[style][colorID] ?: throw RuntimeException("undefined paintcan color, style($style), colorID($colorID)")
+        requireNotNull(palette[style][colorID], { "undefined paintcan color, style($style), colorID($colorID)" })
 
     /**
      * This will return a Paint for the specified ambient modes and the given colorID, based on the constants
