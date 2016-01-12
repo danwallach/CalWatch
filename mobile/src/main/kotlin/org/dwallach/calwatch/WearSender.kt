@@ -27,7 +27,7 @@ class WearSender(private val context: Context) {
             val wireBytesToSend = ClockState.getProtobuf()
             if (wireBytesToSend.size == 0) return
 
-            Log.v(TAG, "preparing event list for transmission, length(" + wireBytesToSend.size + " bytes)")
+            Log.v(TAG, "preparing event list for transmission, length(${wireBytesToSend.size} bytes)")
 
             /*
              * Useful source: http://toastdroid.com/2014/08/18/messageapi-simple-conversations-with-android-wear/

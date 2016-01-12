@@ -236,8 +236,9 @@ class ClockFace : Observer {
          */
 
         if (startRadius < 0 || startRadius > 1 || endRadius < 0 || endRadius > 1) {
-            Log.e(TAG, "arc too big! radius(" + java.lang.Float.toString(startRadius) + "," + java.lang.Float.toString(endRadius) +
-                    "), seconds(" + java.lang.Float.toString(secondsStart.toFloat()) + "," + java.lang.Float.toString(secondsEnd.toFloat()) + ")")
+            val errString = "arc too big! radius(%.2f -> %.2f), seconds(%.2f -> %.2f)".format(startRadius, endRadius, secondsStart, secondsEnd)
+            Log.e(TAG, errString)
+            error(errString)
         }
 
         if (burnInProtection && ambientMode) {
@@ -297,7 +298,7 @@ class ClockFace : Observer {
         }
 
         if (seconds < 0 || seconds > 60) {
-            Log.e(TAG, "drawRadialArcFlatBottom: seconds out of range: " + seconds)
+            Log.e(TAG, "drawRadialArcFlatBottom: seconds out of range: $seconds")
             return
         }
 

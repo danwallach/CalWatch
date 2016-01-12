@@ -38,7 +38,7 @@ object CalendarPermission {
      */
     fun check(context: Context): Boolean {
         val result = ContextCompat.checkSelfPermission(context, Manifest.permission.READ_CALENDAR)
-        Log.v(TAG, "calendar permissions check: " + result + " (granted = " + PackageManager.PERMISSION_GRANTED + ")")
+        Log.v(TAG, "calendar permissions check: $result (granted = ${PackageManager.PERMISSION_GRANTED})")
 
         return result == PackageManager.PERMISSION_GRANTED
     }

@@ -31,10 +31,11 @@ object PaintCan {
     fun getCalendarPaint(argb: Int): Paint {
         // Log.v(TAG, "get paint: " + Integer.toHexString(argb));
         return paintMap[argb] ?: {
-            val newPaint = Paint(Paint.ANTI_ALIAS_FLAG)
-            newPaint.strokeJoin = Paint.Join.BEVEL
-            newPaint.color = argb
-            newPaint.style = Paint.Style.FILL
+            val newPaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
+                strokeJoin = Paint.Join.BEVEL
+                color = argb
+                style = Paint.Style.FILL
+            }
 
             paintMap += Pair(argb, newPaint)
             newPaint
@@ -53,12 +54,13 @@ object PaintCan {
      * in the palette and accessed elsewhere via PaintCan.get().
      */
     private fun watchfacePaint(argb: Int, style: Int, textSize: Float, strokeWidth: Float): Paint {
-        val retPaint = Paint(Paint.SUBPIXEL_TEXT_FLAG or Paint.HINTING_ON)
-        retPaint.strokeCap = Paint.Cap.SQUARE
-        retPaint.strokeWidth = strokeWidth
-        retPaint.textSize = textSize
-        retPaint.style = Paint.Style.FILL
-        retPaint.textAlign = Paint.Align.CENTER
+        val retPaint = Paint(Paint.SUBPIXEL_TEXT_FLAG or Paint.HINTING_ON).apply {
+            this.strokeCap = Paint.Cap.SQUARE
+            this.strokeWidth = strokeWidth
+            this.textSize = textSize
+            this.style = Paint.Style.FILL
+            this.textAlign = Paint.Align.CENTER
+        }
 
         when (style) {
             styleNormal -> {
@@ -79,7 +81,7 @@ object PaintCan {
                 retPaint.color = argbToGreyARGB(argb)
             }
 
-            else -> Log.e(TAG, "watchfacePaint: unknown style: " + style)
+            else -> Log.e(TAG, "watchfacePaint: unknown style: $style")
         }
 
         return retPaint
