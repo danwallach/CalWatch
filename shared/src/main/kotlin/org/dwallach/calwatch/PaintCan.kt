@@ -36,7 +36,7 @@ object PaintCan {
             newPaint.color = argb
             newPaint.style = Paint.Style.FILL
 
-            paintMap = paintMap.plus(Pair(argb, newPaint))
+            paintMap += Pair(argb, newPaint)
             newPaint
         }.invoke()
     }
