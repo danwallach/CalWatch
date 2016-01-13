@@ -159,15 +159,17 @@ object PaintCan {
             palette[style][colorSmallShadow]?.textAlign = Paint.Align.LEFT
         }
 
-        // a couple things that are backwards for low-bit mode: we'll be drawing some "shadows" as
-        // white outlines around black centers, "hollowing out" the hands as we're supposed to do
-        palette[styleLowBit][colorSecondHandShadow]?.color = Color.WHITE
-        palette[styleLowBit][colorSecondHandShadow]?.strokeWidth = lineWidth / 6f
-        palette[styleLowBit][colorMinuteHand]?.color = Color.BLACK
-        palette[styleLowBit][colorHourHand]?.color = Color.BLACK
-        palette[styleLowBit][colorArcShadow]?.color = Color.WHITE
-        palette[styleLowBit][colorSmallShadow]?.color = Color.WHITE
-        palette[styleLowBit][colorBigShadow]?.color = Color.WHITE
+        // Original, backwards design for low-bit mode: we'll be drawing some "shadows" as
+        // white outlines around black centers, "hollowing out" the hands as we're supposed to do.
+        // Commented out because it just didn't look very good in practice -- seeing how it looks
+        // with the "original" style.
+//        palette[styleLowBit][colorSecondHandShadow]?.color = Color.WHITE
+//        palette[styleLowBit][colorSecondHandShadow]?.strokeWidth = lineWidth / 6f
+//        palette[styleLowBit][colorMinuteHand]?.color = Color.BLACK
+//        palette[styleLowBit][colorHourHand]?.color = Color.BLACK
+//        palette[styleLowBit][colorArcShadow]?.color = Color.WHITE
+//        palette[styleLowBit][colorSmallShadow]?.color = Color.WHITE
+//        palette[styleLowBit][colorBigShadow]?.color = Color.WHITE
         palette[styleLowBit][colorTimerFill]?.color = Color.BLACK
         palette[styleLowBit][colorStopwatchFill]?.color = Color.BLACK
         palette[styleLowBit][colorTimerStroke]?.strokeWidth = lineWidth / 6f

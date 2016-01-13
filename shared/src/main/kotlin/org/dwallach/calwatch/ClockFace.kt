@@ -123,15 +123,13 @@ class ClockFace : Observer {
         TimeWrapper.frameStart()
 
         // the calendar goes on the very bottom and everything else stacks above
-
         drawCalendar(canvas)
 
-
+        // next, we draw the indices or numbers of the watchface
         drawFace(canvas)
 
-        // okay, we're drawing the stopwatch and countdown timers next: they've got partial transparency
+        // next, we're drawing the stopwatch and countdown timers next: they've got partial transparency
         // that will let the watchface tick marks show through, except they're opaque in low-bit mode
-
         drawTimers(canvas)
 
         // Kludge for peek card until we come up with something better:
@@ -256,8 +254,9 @@ class ClockFace : Observer {
             val startOval = getRectRadius(startRadius)
             val endOval = getRectRadius(endRadius)
             if (ambientMode && ambientLowBit && lowBitSquish) {
-                // in ambient low-bit mode, we're going to draw some slender arcs of fixed width at roughly the center of the big
-                // colored pie wedge which we normally show when we're not in ambient mode
+                // In ambient low-bit mode, we originally drew some slender arcs of fixed width at roughly the center of the big
+                // colored pie wedge which we normally show when we're not in ambient mode. Currently this is dead code because
+                // drawCalendar() becomes a no-op in ambientLowBit mode.
                 p.arcTo(midOval, (secondsStart * 6 - 90).toFloat(), ((secondsEnd - secondsStart) * 6).toFloat(), true)
                 p.arcTo(midOvalDelta, (secondsEnd * 6 - 90).toFloat(), (-(secondsEnd - secondsStart) * 6).toFloat())
                 p.close()
@@ -587,6 +586,8 @@ class ClockFace : Observer {
             return
         }
 
+        // temporary (?) fix for ugly looking arcs in low-bit mode
+        if(ambientLowBit) return
 
         // this line represents a big change; we're still an observer of the clock state, but now
         // we're also polling it; it promises to support this polling efficiently, and in return,
