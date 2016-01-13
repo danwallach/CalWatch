@@ -1097,7 +1097,7 @@ class ClockFace : Observer {
 
             // two components here: the non-linear part (with Math.pow and Math.sin) and then a linear
             // part (with iFrac). This make sure we still have some motion. The second hand never entirely stops.
-            0.5 * Math.pow((1.0 + Math.sin(thetaMinusPi2)) / 2.0, 8.0) + 0.5 * iFrac
+            0.7 * Math.pow((1.0 + Math.sin(thetaMinusPi2)) / 2.0, 8.0) + 0.3 * iFrac
         }
 
         /**
