@@ -586,8 +586,8 @@ class ClockFace : Observer {
             return
         }
 
-        // temporary (?) fix for ugly looking arcs in low-bit mode
-        if(ambientLowBit) return
+        // temporary (?) fix for ugly looking arcs in low-bit mode: hide them entirely
+        if(ambientMode && ambientLowBit) return
 
         // this line represents a big change; we're still an observer of the clock state, but now
         // we're also polling it; it promises to support this polling efficiently, and in return,
