@@ -37,9 +37,9 @@ object PaintCan {
                 style = Paint.Style.FILL
             }
 
-            paintMap += Pair(argb, newPaint)
+            paintMap += argb to newPaint // cache the resulting Paint object for next time
             newPaint
-        }.invoke()
+        }()
     }
 
     private lateinit var palette: Array<Array<Paint?>>
@@ -53,40 +53,33 @@ object PaintCan {
      * This generates all the Paint that we'll need for drawing the watchface. These are all cached
      * in the palette and accessed elsewhere via PaintCan.get().
      */
-    private fun watchfacePaint(_argb: Int, _style: Int, _textSize: Float, _strokeWidth: Float): Paint {
-        // underscores in the formal parameters to clarify the ambiguity in the apply block, below
-        val retPaint = Paint(Paint.SUBPIXEL_TEXT_FLAG or Paint.HINTING_ON).apply {
+    private fun watchfacePaint(_argb: Int, _style: Int, _textSize: Float, _strokeWidth: Float) =
+        // underscores in the formal parameters to fix the variable shadowing in the apply block, below
+        Paint(Paint.SUBPIXEL_TEXT_FLAG or Paint.HINTING_ON).apply {
             strokeCap = Paint.Cap.SQUARE
             strokeWidth = _strokeWidth
             textSize = _textSize
             style = Paint.Style.FILL
             textAlign = Paint.Align.CENTER
+            isAntiAlias = _style != styleLowBit
+
+            color = when (_style) {
+                styleNormal -> _argb
+
+                styleLowBit ->
+                    if (_argb and 0xffffff > 0)
+                        0xffffffff.toInt() // any non-black color mapped to pure white
+                    else
+                        0xff000000.toInt() // otherwise pure black
+
+                styleAmbient -> argbToGreyARGB(_argb)
+
+                else -> {
+                    Log.e(TAG, "watchfacePaint: unknown style: $_style")
+                    0
+                }
+            }
         }
-
-        when (_style) {
-            styleNormal -> {
-                retPaint.isAntiAlias = true
-                retPaint.color = _argb
-            }
-
-            styleLowBit -> {
-                retPaint.isAntiAlias = false
-                if (_argb and 16777215 > 0)
-                    retPaint.color = -1 // any non-black color mapped to pure white
-                else
-                    retPaint.color = -16777216
-            }
-
-            styleAmbient -> {
-                retPaint.isAntiAlias = true
-                retPaint.color = argbToGreyARGB(_argb)
-            }
-
-            else -> Log.e(TAG, "watchfacePaint: unknown style: $_style")
-        }
-
-        return retPaint
-    }
 
     const val colorBatteryLow = 0
     const val colorBatteryCritical = 1
@@ -161,8 +154,8 @@ object PaintCan {
 
         // Original, backwards design for low-bit mode: we'll be drawing some "shadows" as
         // white outlines around black centers, "hollowing out" the hands as we're supposed to do.
-        // Commented out because it just didn't look very good in practice -- seeing how it looks
-        // with the "original" style.
+        // Commented out because it just didn't look very good in practice -- for now, looks
+        // much better with the "original" style.
 //        palette[styleLowBit][colorSecondHandShadow]?.color = Color.WHITE
 //        palette[styleLowBit][colorSecondHandShadow]?.strokeWidth = lineWidth / 6f
 //        palette[styleLowBit][colorMinuteHand]?.color = Color.BLACK
@@ -170,6 +163,10 @@ object PaintCan {
 //        palette[styleLowBit][colorArcShadow]?.color = Color.WHITE
 //        palette[styleLowBit][colorSmallShadow]?.color = Color.WHITE
 //        palette[styleLowBit][colorBigShadow]?.color = Color.WHITE
+
+        // But, we're still going to change the style for the stopwatch and timer rendering, since our only
+        // choices are black or white, we'll go with black for the fills. The outlines will still be white
+        // (see the "stroke" paints versus the "fill" paints).
         palette[styleLowBit][colorTimerFill]?.color = Color.BLACK
         palette[styleLowBit][colorStopwatchFill]?.color = Color.BLACK
         palette[styleLowBit][colorTimerStroke]?.strokeWidth = lineWidth / 6f
