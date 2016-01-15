@@ -242,14 +242,31 @@ class CalWatchFaceService : CanvasWatchFaceService() {
 
         override fun onTapCommand(tapType: Int, x: Int, y: Int, eventTime: Long) {
             when (tapType) {
-                WatchFaceService.TAP_TYPE_TOUCH ->
+                WatchFaceService.TAP_TYPE_TOUCH -> {
+                    // user touched the screen, but we're not allowed to act yet
+
+                    // TODO add some kind of feedback that the user touched the screen and we're planning to launch the calendar permission dialog
+                    // -- animate a color transition? put a circle around it?
+
+                    // for now, this is a no-op
+                }
+
+                WatchFaceService.TAP_TYPE_TOUCH_CANCEL -> {
+                    // if we were animating on the "touch" part, this would tell us to give up
+
+                    // for now, this is a no-op
+                }
+
+                WatchFaceService.TAP_TYPE_TAP -> {
+                    // user lifted their finger, so now we're allowed to act
+
+                    // TODO be more specific about the x,y coordinates, like check if they're on the right side of the screen (probably needs to play nicely with the touch-down transition)
+
                     // if we don't have calendar permission, then that means we're interpreting
                     // watchface taps as permission requests.
-                    // TODO be more specific about the x,y coordinates, like check if they're on the right side of the screen
                     if (!ClockState.calendarPermission)
                         PermissionActivity.kickStart(this@CalWatchFaceService, false)
-                WatchFaceService.TAP_TYPE_TOUCH_CANCEL -> { } // user lifted their finger, "cancelling" the tap?
-                WatchFaceService.TAP_TYPE_TAP -> { } // user lifted their finger, I guess?
+                }
             }
         }
 
