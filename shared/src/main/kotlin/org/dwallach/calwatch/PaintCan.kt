@@ -47,7 +47,8 @@ object PaintCan {
     const val styleNormal = 0
     const val styleAmbient = 1
     const val styleLowBit = 2
-    const val styleMax = 2
+    const val styleAntiBurnIn = 3
+    const val styleMax = 3
 
     /**
      * This generates all the Paint that we'll need for drawing the watchface. These are all cached
@@ -66,7 +67,7 @@ object PaintCan {
             color = when (_style) {
                 styleNormal -> _argb
 
-                styleLowBit ->
+                styleLowBit,styleAntiBurnIn ->
                     if (_argb and 0xffffff > 0)
                         0xffffffff.toInt() // any non-black color mapped to pure white
                     else
@@ -91,14 +92,15 @@ object PaintCan {
     const val colorSmallTextAndLines = 7
     const val colorBigTextAndLines = 8
     const val colorBlackFill = 9
-    const val colorSmallShadow = 10
-    const val colorBigShadow = 11
-    const val colorStopwatchStroke = 12
-    const val colorStopwatchFill = 13
-    const val colorStopwatchSeconds = 14
-    const val colorTimerStroke = 15
-    const val colorTimerFill = 16
-    const val colorMax = 16
+    const val colorLowBitCalendarFill = 10
+    const val colorSmallShadow = 11
+    const val colorBigShadow = 12
+    const val colorStopwatchStroke = 13
+    const val colorStopwatchFill = 14
+    const val colorStopwatchSeconds = 15
+    const val colorTimerStroke = 16
+    const val colorTimerFill = 17
+    const val colorMax = 17
 
 
     /**
@@ -129,6 +131,7 @@ object PaintCan {
             palette[style][colorBigTextAndLines] = watchfacePaint(Color.WHITE, style, textSize, lineWidth)
             palette[style][colorBigShadow] = watchfacePaint(Color.BLACK, style, textSize, lineWidth / 2f)
             palette[style][colorBlackFill] = watchfacePaint(Color.BLACK, style, textSize, lineWidth)
+            palette[style][colorLowBitCalendarFill] = watchfacePaint(Color.WHITE, style, textSize, lineWidth) // the docs claim we have access to other colors here, like CYAN, but that's not true at least on the Moto 360 Sport
             palette[style][colorSmallShadow] = watchfacePaint(Color.BLACK, style, smTextSize, lineWidth / 4f)
 
             // toInt because of a Kotlin bug: https://youtrack.jetbrains.com/issue/KT-4749
@@ -152,17 +155,15 @@ object PaintCan {
             palette[style][colorSmallShadow]?.textAlign = Paint.Align.LEFT
         }
 
-        // Original, backwards design for low-bit mode: we'll be drawing some "shadows" as
+        // In low-bit anti-burnin mode: we'll be drawing some "shadows" as
         // white outlines around black centers, "hollowing out" the hands as we're supposed to do.
-        // Commented out because it just didn't look very good in practice -- for now, looks
-        // much better with the "original" style.
-//        palette[styleLowBit][colorSecondHandShadow]?.color = Color.WHITE
-//        palette[styleLowBit][colorSecondHandShadow]?.strokeWidth = lineWidth / 6f
-//        palette[styleLowBit][colorMinuteHand]?.color = Color.BLACK
-//        palette[styleLowBit][colorHourHand]?.color = Color.BLACK
-//        palette[styleLowBit][colorArcShadow]?.color = Color.WHITE
-//        palette[styleLowBit][colorSmallShadow]?.color = Color.WHITE
-//        palette[styleLowBit][colorBigShadow]?.color = Color.WHITE
+        palette[styleAntiBurnIn][colorSecondHandShadow]?.color = Color.WHITE
+        palette[styleAntiBurnIn][colorSecondHandShadow]?.strokeWidth = lineWidth / 3f
+        palette[styleAntiBurnIn][colorMinuteHand]?.color = Color.BLACK
+        palette[styleAntiBurnIn][colorHourHand]?.color = Color.BLACK
+        palette[styleAntiBurnIn][colorArcShadow]?.color = Color.WHITE
+        palette[styleAntiBurnIn][colorSmallShadow]?.color = Color.WHITE
+        palette[styleAntiBurnIn][colorBigShadow]?.color = Color.WHITE
 
         // But, we're still going to change the style for the stopwatch and timer rendering, since our only
         // choices are black or white, we'll go with black for the fills. The outlines will still be white
@@ -171,6 +172,11 @@ object PaintCan {
         palette[styleLowBit][colorStopwatchFill]?.color = Color.BLACK
         palette[styleLowBit][colorTimerStroke]?.strokeWidth = lineWidth / 6f
         palette[styleLowBit][colorStopwatchStroke]?.strokeWidth = lineWidth / 6f
+
+        palette[styleAntiBurnIn][colorTimerFill]?.color = Color.BLACK
+        palette[styleAntiBurnIn][colorStopwatchFill]?.color = Color.BLACK
+        palette[styleAntiBurnIn][colorTimerStroke]?.strokeWidth = lineWidth / 6f
+        palette[styleAntiBurnIn][colorStopwatchStroke]?.strokeWidth = lineWidth / 6f
     }
 
     /**

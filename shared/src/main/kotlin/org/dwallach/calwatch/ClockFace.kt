@@ -144,12 +144,12 @@ class ClockFace : Observer {
         drawHands(canvas)
 
         // something a real watch can't do: float the text over the hands
-        // (note that we don't do this at all in ambient mode)
-        if (!ambientMode && showDayDate) drawMonthBox(canvas)
+        // (but disable when we're in ambientMode with burnInProtection)
+        if (!(burnInProtection && ambientMode) && showDayDate) drawMonthBox(canvas)
 
         // and lastly, the battery meter
-        // (not in ambient mode, because we don't want to cause burn-in)
-        if (!ambientMode) drawBattery(canvas)
+        // (but disable when we're in ambientMode with burnInProtection)
+        if (!(ambientMode && burnInProtection)) drawBattery(canvas)
 
         TimeWrapper.frameEnd()
     }
@@ -253,10 +253,10 @@ class ClockFace : Observer {
             val midOvalDelta = getRectRadius((startRadius + endRadius) / 2f - 0.025f)
             val startOval = getRectRadius(startRadius)
             val endOval = getRectRadius(endRadius)
-            if (ambientMode && ambientLowBit && lowBitSquish) {
+            if (ambientMode && burnInProtection && lowBitSquish) {
                 // In ambient low-bit mode, we originally drew some slender arcs of fixed width at roughly the center of the big
                 // colored pie wedge which we normally show when we're not in ambient mode. Currently this is dead code because
-                // drawCalendar() becomes a no-op in ambientLowBit mode.
+                // drawCalendar() becomes a no-op in ambientLowBit when burn-in protection is on.
                 p.arcTo(midOval, (secondsStart * 6 - 90).toFloat(), ((secondsEnd - secondsStart) * 6).toFloat(), true)
                 p.arcTo(midOvalDelta, (secondsEnd * 6 - 90).toFloat(), (-(secondsEnd - secondsStart) * 6).toFloat())
                 p.close()
@@ -396,7 +396,9 @@ class ClockFace : Observer {
         var lFacePathCache = facePathCache
 
         val bottomHack = missingBottomPixels > 0
-        val lFaceMode = faceMode
+
+        // force "lite" mode when in burn-in protection mode
+        val lFaceMode = if(ambientMode && burnInProtection) ClockState.FACE_LITE else faceMode
 
         val colorTickShadow = PaintCan[ambientLowBit, ambientMode, PaintCan.colorSecondHandShadow]
         val colorSmall = PaintCan[ambientLowBit, ambientMode, PaintCan.colorSmallTextAndLines]
@@ -430,7 +432,7 @@ class ClockFace : Observer {
                         drawRadialLine(lFacePathCache, strokeWidth, -0.4, .75f, 1.0f, true, false)
                         drawRadialLine(lFacePathCache, strokeWidth, 0.4, .75f, 1.0f, true, false)
                     }
-                } else if (i == 45 && !ambientMode && showDayDate) {
+                } else if (i == 45 && !(burnInProtection && ambientMode) && showDayDate) {
                     // 9 o'clock, don't extend into the inside
                     drawRadialLine(lFacePathCache, strokeWidth, i.toDouble(), 0.9f, 1.0f, false, false)
                 } else {
@@ -586,8 +588,9 @@ class ClockFace : Observer {
             return
         }
 
-        // temporary (?) fix for ugly looking arcs in low-bit mode: hide them entirely
-        if(ambientMode && ambientLowBit) return
+        // when we're required to do burn-in protection, we're giving up on the calendar wedges,
+        // but otherwise, we'll just draw them in white on the black background
+        if(ambientMode && burnInProtection) return
 
         // this line represents a big change; we're still an observer of the clock state, but now
         // we're also polling it; it promises to support this polling efficiently, and in return,

@@ -46,6 +46,10 @@ Marshmallow permissions / updates
 
     TODO Validate that CrashReporter still works
 
+Low-bit / burn-in protection
+    TODO low-bit on, burn-in off: add back in the calendar wedges
+    TODO low-bit on, burn-in on: hollow out the hands, limit the backdrop to "lite", no calendar
+
 Refactoring / reengineering
     TODO significant code overlap between mobile/MyViewAnim and wear/CalWatchFaceService
     - but differences are significant enough that it's not going to be very easy to move to /shared
