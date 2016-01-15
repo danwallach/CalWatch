@@ -97,7 +97,7 @@ class CalendarFetcher(initialContext: Context, val contentUri: Uri, val authorit
         }
 
         if(scanInProgress) {
-            Log.v(TAG, "rescan already in progress, redundant rescan request ignored")
+//            Log.v(TAG, "rescan already in progress, redundant rescan request ignored")
             return
         } else {
             Log.v(TAG, "rescan starting asynchronously")
@@ -297,7 +297,7 @@ class CalendarFetcher(initialContext: Context, val contentUri: Uri, val authorit
         private var singletonFetcher: CalendarFetcher? = null
 
         fun requestRescan() {
-            Log.i(TAG, "requestRescan")
+//            Log.i(TAG, "requestRescan")
             singletonFetcher?.rescan()
         }
     }
