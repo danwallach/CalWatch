@@ -62,7 +62,7 @@ object PaintCan {
             textSize = _textSize
             style = Paint.Style.FILL
             textAlign = Paint.Align.CENTER
-            isAntiAlias = _style != styleLowBit
+            isAntiAlias = _style == styleNormal || _style == styleAmbient // anti-aliasing is forbidden in the low-bit modes
 
             color = when (_style) {
                 styleNormal -> _argb
@@ -185,16 +185,6 @@ object PaintCan {
      */
     operator fun get(style: Int, colorID: Int): Paint =
         requireNotNull(palette[style][colorID], { "undefined paintcan color, style($style), colorID($colorID)" })
-
-    /**
-     * This will return a Paint for the specified ambient modes and the given colorID, based on the constants
-     * defined in this class. Anything else will cause an exception.
-     */
-    operator fun get(ambientLowBit: Boolean, ambientMode: Boolean, colorID: Int): Paint = when {
-        ambientLowBit && ambientMode -> get(styleLowBit, colorID)
-        ambientMode -> get(styleAmbient, colorID)
-        else -> get(styleNormal, colorID)
-    }
 
     fun getCalendarGreyPaint(argb: Int) = getCalendarPaint(argbToGreyARGB(argb))
 

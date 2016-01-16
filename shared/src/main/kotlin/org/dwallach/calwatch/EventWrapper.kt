@@ -17,13 +17,13 @@ class EventWrapper(val wireEvent: WireEvent) {
     var path: Path? = null
     private val paint = PaintCan.getCalendarPaint(wireEvent.displayColor)
     private val greyPaint = PaintCan.getCalendarGreyPaint(wireEvent.displayColor)
-    private val lowBitPaint = PaintCan[true, true, PaintCan.colorLowBitCalendarFill]
+    private val lowBitPaint = PaintCan[PaintCan.styleLowBit, PaintCan.colorLowBitCalendarFill]
     var minLevel: Int = 0
     var maxLevel: Int = 0
 
-    fun getPaint(ambientLowBit: Boolean, ambientMode: Boolean) = when {
-        ambientMode && ambientLowBit -> lowBitPaint
-        ambientMode -> greyPaint
+    fun getPaint(drawStyle: Int) = when(drawStyle) {
+        PaintCan.styleAntiBurnIn,PaintCan.styleLowBit -> lowBitPaint // for now anyway, we're behaving identically for lowBit and for burnInProtection
+        PaintCan.styleAmbient -> greyPaint
         else -> paint
     }
 

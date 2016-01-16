@@ -48,6 +48,8 @@ class ClockFace : Observer {
     private var faceMode = 0
     private var ambientMode = false
 
+    private var drawStyle = PaintCan.styleNormal // see setDrawStyle
+
     // dealing with the "flat tire" a.k.a. "chin" of Moto 360 and any other watches that pull the same trick
     fun setMissingBottomPixels(missingBottomPixels: Int) {
         if (forceMotoFlatBottom)
@@ -70,6 +72,17 @@ class ClockFace : Observer {
     fun setAmbientLowBit(ambientLowBit: Boolean) {
         Log.v(TAG, "ambient low bit: " + ambientLowBit)
         this.ambientLowBit = ambientLowBit || forceAmbientLowBit
+
+        setDrawStyle()
+    }
+
+    private fun setDrawStyle() {
+        drawStyle = when {
+            ambientMode && ambientLowBit && burnInProtection -> PaintCan.styleAntiBurnIn
+            ambientMode && ambientLowBit -> PaintCan.styleLowBit
+            ambientMode -> PaintCan.styleAmbient
+            else -> PaintCan.styleNormal
+        }
     }
 
     init {
@@ -115,15 +128,16 @@ class ClockFace : Observer {
         Log.v(TAG, "missing calendar bitmap size: (%d,%d), coordinates: (%.1f,%.1f),  (cy: %d, radius: %d)".format(width, height, missingCalendarX, missingCalendarY, cy, radius))
     }
 
-    /*
-     * the expectation is that you call this method *not* from the UI thread but instead
-     * from a helper thread, elsewhere
+    /**
+     * Call this from your onDraw() method. Note that one possible side-effect of this will
+     * be the asynchronous refresh of the calendar database (inside CalendarFetcher), which might
+     * not complete for seconds after drawEverything() returns.
      */
     fun drawEverything(canvas: Canvas) {
         TimeWrapper.frameStart()
 
         // the calendar goes on the very bottom and everything else stacks above
-        drawCalendar(canvas)
+        if(drawStyle != PaintCan.styleAntiBurnIn) drawCalendar(canvas)
 
         // next, we draw the indices or numbers of the watchface
         drawFace(canvas)
@@ -138,18 +152,18 @@ class ClockFace : Observer {
         // Note that we're doing this *before* drawing the hands but *after* drawing
         // everything else. I want the hands to not be chopped off, even though everything
         // else will be.
-        if (peekCardRect != null && ambientMode)
-            canvas.drawRect(peekCardRect, PaintCan[ambientLowBit, ambientMode, PaintCan.colorBlackFill])
+        if (peekCardRect != null && drawStyle != PaintCan.styleNormal)
+            canvas.drawRect(peekCardRect, PaintCan[drawStyle, PaintCan.colorBlackFill])
 
         drawHands(canvas)
 
         // something a real watch can't do: float the text over the hands
         // (but disable when we're in ambientMode with burnInProtection)
-        if (!(burnInProtection && ambientMode) && showDayDate) drawMonthBox(canvas)
+        if (drawStyle != PaintCan.styleAntiBurnIn && showDayDate) drawMonthBox(canvas)
 
         // and lastly, the battery meter
         // (but disable when we're in ambientMode with burnInProtection)
-        if (!(ambientMode && burnInProtection)) drawBattery(canvas)
+        if (drawStyle != PaintCan.styleAntiBurnIn) drawBattery(canvas)
 
         TimeWrapper.frameEnd()
     }
@@ -180,7 +194,7 @@ class ClockFace : Observer {
             }
         }
 
-        if (burnInProtection && ambientMode) {
+        if (drawStyle == PaintCan.styleAntiBurnIn) {
             // scale down everything to leave a 10 pixel margin
 
             val ratio = (radius - 10f) / radius
@@ -235,7 +249,7 @@ class ClockFace : Observer {
             error(errString)
         }
 
-        if (burnInProtection && ambientMode) {
+        if (drawStyle == PaintCan.styleAntiBurnIn) {
             // scale down everything to leave a 10 pixel margin
 
             val ratio = (radius - 10f) / radius
@@ -253,7 +267,7 @@ class ClockFace : Observer {
             val midOvalDelta = getRectRadius((startRadius + endRadius) / 2f - 0.025f)
             val startOval = getRectRadius(startRadius)
             val endOval = getRectRadius(endRadius)
-            if (ambientMode && burnInProtection && lowBitSquish) {
+            if (drawStyle == PaintCan.styleAntiBurnIn && lowBitSquish) {
                 // In ambient low-bit mode, we originally drew some slender arcs of fixed width at roughly the center of the big
                 // colored pie wedge which we normally show when we're not in ambient mode. Currently this is dead code because
                 // drawCalendar() becomes a no-op in ambientLowBit when burn-in protection is on.
@@ -297,7 +311,7 @@ class ClockFace : Observer {
             return
         }
 
-        if (burnInProtection && ambientMode) {
+        if (drawStyle == PaintCan.styleAntiBurnIn) {
             // scale down everything to leave a 10 pixel margin
             val ratio = (radius - 10f) / radius
 
@@ -374,8 +388,8 @@ class ClockFace : Observer {
         x1 = clockX(45.0, .85f)
         y1 = clockY(45.0, .85f)
 
-        val paint = PaintCan[ambientLowBit, ambientMode, PaintCan.colorSmallTextAndLines]
-        val shadow = PaintCan[ambientLowBit, ambientMode, PaintCan.colorSmallShadow]
+        val paint = PaintCan[drawStyle, PaintCan.colorSmallTextAndLines]
+        val shadow = PaintCan[drawStyle, PaintCan.colorSmallShadow]
 
         // AA note: we only draw the month box when in normal mode, not ambient, so no AA gymnastics here
 
@@ -398,12 +412,12 @@ class ClockFace : Observer {
         val bottomHack = missingBottomPixels > 0
 
         // force "lite" mode when in burn-in protection mode
-        val lFaceMode = if(ambientMode && burnInProtection) ClockState.FACE_LITE else faceMode
+        val lFaceMode = if(drawStyle == PaintCan.styleAntiBurnIn) ClockState.FACE_LITE else faceMode
 
-        val colorTickShadow = PaintCan[ambientLowBit, ambientMode, PaintCan.colorSecondHandShadow]
-        val colorSmall = PaintCan[ambientLowBit, ambientMode, PaintCan.colorSmallTextAndLines]
-        val colorBig = PaintCan[ambientLowBit, ambientMode, PaintCan.colorBigTextAndLines]
-        val colorTextShadow = PaintCan[ambientLowBit, ambientMode, PaintCan.colorBigShadow]
+        val colorTickShadow = PaintCan[drawStyle, PaintCan.colorSecondHandShadow]
+        val colorSmall = PaintCan[drawStyle, PaintCan.colorSmallTextAndLines]
+        val colorBig = PaintCan[drawStyle, PaintCan.colorBigTextAndLines]
+        val colorTextShadow = PaintCan[drawStyle, PaintCan.colorBigShadow]
 
         // check if we've already rendered the face
         if (lFaceMode != facePathCacheMode || lFacePathCache == null) {
@@ -432,8 +446,10 @@ class ClockFace : Observer {
                         drawRadialLine(lFacePathCache, strokeWidth, -0.4, .75f, 1.0f, true, false)
                         drawRadialLine(lFacePathCache, strokeWidth, 0.4, .75f, 1.0f, true, false)
                     }
-                } else if (i == 45 && !(burnInProtection && ambientMode) && showDayDate) {
-                    // 9 o'clock, don't extend into the inside
+                } else if (i == 45 && drawStyle != PaintCan.styleAntiBurnIn && showDayDate) {
+                    // 9 o'clock, don't extend into the inside, where we'd overlap with the DayDate display
+                    // except, of course, when we're not showing the DayDate display, which might happen
+                    // via user preference or because we're in burnInProtection ambient mode
                     drawRadialLine(lFacePathCache, strokeWidth, i.toDouble(), 0.9f, 1.0f, false, false)
                 } else {
                     // we want lines for 1, 2, 4, 5, 7, 8, 10, and 11 no matter what
@@ -454,10 +470,7 @@ class ClockFace : Observer {
         }
 
         canvas.drawPath(lFacePathCache, colorSmall)
-
-        // only draw the shadows when we're in high-bit mode
-        if (!ambientLowBit || !ambientMode)
-            canvas.drawPath(lFacePathCache, colorTickShadow)
+        canvas.drawPath(lFacePathCache, colorTickShadow)
 
         if (lFaceMode == ClockState.FACE_NUMBERS) {
             // in this case, we'll draw "12", "3", and "6". No "9" because that's where the
@@ -517,7 +530,7 @@ class ClockFace : Observer {
             // 9 o'clock
             //
 
-            if (ambientMode || !showDayDate) {
+            if (!showDayDate) {
                 r = 0.9f
                 val nineWidth = colorBig.measureText("9")
 
@@ -543,15 +556,15 @@ class ClockFace : Observer {
         val secondsColor: Paint
         val shadowColor: Paint
 
-        shadowColor = PaintCan[ambientLowBit, ambientMode, PaintCan.colorSecondHandShadow]
-        hourColor = PaintCan[ambientLowBit, ambientMode, PaintCan.colorHourHand]
-        minuteColor = PaintCan[ambientLowBit, ambientMode, PaintCan.colorMinuteHand]
-//        secondsColor = PaintCan[ambientLowBit, ambientMode, PaintCan.colorSecondHand];
+        shadowColor = PaintCan[drawStyle, PaintCan.colorSecondHandShadow]
+        hourColor = PaintCan[drawStyle, PaintCan.colorHourHand]
+        minuteColor = PaintCan[drawStyle, PaintCan.colorMinuteHand]
+//        secondsColor = PaintCan[drawStyle, PaintCan.colorSecondHand];
 
         drawRadialLine(canvas, hours, 0.1f, 0.6f, hourColor, shadowColor)
         drawRadialLine(canvas, minutes, 0.1f, 0.9f, minuteColor, shadowColor)
 
-        if (!ambientMode && showSeconds) {
+        if (drawStyle == PaintCan.styleNormal && showSeconds) {
             secondsColor = PaintCan[PaintCan.styleNormal, PaintCan.colorSecondHand]
             // ugly details: we might run 10% or more away from our targets at 4Hz, making the second
             // hand miss the indices. Ugly. Thus, some hackery.
@@ -582,15 +595,12 @@ class ClockFace : Observer {
     private fun drawCalendar(canvas: Canvas) {
         calendarTicker++
 
-        // if we don't have permission to see the calendar, then we'll let the user know
-        if (!ClockState.calendarPermission && missingCalendarBitmap != null && !ambientMode) {
+        // if we don't have permission to see the calendar, then we'll let the user know, but we won't
+        // bug them in any of the ambient modes.
+        if (!ClockState.calendarPermission && missingCalendarBitmap != null && drawStyle == PaintCan.styleNormal) {
             canvas.drawBitmap(missingCalendarBitmap, missingCalendarX, missingCalendarY, null)
             return
         }
-
-        // when we're required to do burn-in protection, we're giving up on the calendar wedges,
-        // but otherwise, we'll just draw them in white on the black background
-        if(ambientMode && burnInProtection) return
 
         // this line represents a big change; we're still an observer of the clock state, but now
         // we're also polling it; it promises to support this polling efficiently, and in return,
@@ -614,8 +624,8 @@ class ClockFace : Observer {
 
             // path caching happens inside drawRadialArc
 
-            val arcColor = it.getPaint(ambientLowBit, ambientMode)
-            val arcShadow = PaintCan[ambientLowBit, ambientMode, PaintCan.colorArcShadow]
+            val arcColor = it.getPaint(drawStyle)
+            val arcShadow = PaintCan[drawStyle, PaintCan.colorArcShadow]
 
             it.path = drawRadialArc(canvas, it.path, arcStart, arcEnd,
                     calendarRingMaxRadius - evMinLevel * calendarRingWidth / (maxLevel + 1),
@@ -720,7 +730,7 @@ class ClockFace : Observer {
 
             stipplePathCache = lStipplePathCache
         }
-        canvas.drawPath(stipplePathCache, PaintCan[ambientLowBit, ambientMode, PaintCan.colorBlackFill])
+        canvas.drawPath(stipplePathCache, PaintCan[drawStyle, PaintCan.colorBlackFill])
     }
 
     private var batteryPathCache: Path? = null
@@ -766,8 +776,8 @@ class ClockFace : Observer {
 
         // note that we'll flip the color from white to red once the battery gets below 10%
         // (in ambient mode, we can't show it at all because of burn-in issues)
-        if (batteryPathCache != null && !ambientMode) {
-            val paint = PaintCan[PaintCan.styleNormal, if (batteryCritical) PaintCan.colorBatteryCritical else PaintCan.colorBatteryLow]
+        if (batteryPathCache != null) {
+            val paint = PaintCan[drawStyle, if (batteryCritical) PaintCan.colorBatteryCritical else PaintCan.colorBatteryLow]
             canvas.drawPath(batteryPathCache, paint)
         }
     }
@@ -775,11 +785,11 @@ class ClockFace : Observer {
     fun drawTimers(canvas: Canvas) {
         val currentTime = TimeWrapper.gmtTime // note that we're *not* using local time here
 
-        val colorStopwatchSeconds = PaintCan[ambientLowBit, ambientMode, PaintCan.colorStopwatchSeconds]
-        val colorStopwatchStroke = PaintCan[ambientLowBit, ambientMode, PaintCan.colorStopwatchStroke]
-        val colorStopwatchFill = PaintCan[ambientLowBit, ambientMode, PaintCan.colorStopwatchFill]
-        val colorTimerStroke = PaintCan[ambientLowBit, ambientMode, PaintCan.colorTimerStroke]
-        val colorTimerFill = PaintCan[ambientLowBit, ambientMode, PaintCan.colorTimerFill]
+        val colorStopwatchSeconds = PaintCan[drawStyle, PaintCan.colorStopwatchSeconds]
+        val colorStopwatchStroke = PaintCan[drawStyle, PaintCan.colorStopwatchStroke]
+        val colorStopwatchFill = PaintCan[drawStyle, PaintCan.colorStopwatchFill]
+        val colorTimerStroke = PaintCan[drawStyle, PaintCan.colorTimerStroke]
+        val colorTimerFill = PaintCan[drawStyle, PaintCan.colorTimerFill]
 
         // Radius 0.9 is the start of the tick marks and the end of the normal minute hand. The normal
         // second hand goes to 0.95. If there's a stopwatch but no timer, then the stopwatch second and minute
@@ -826,7 +836,7 @@ class ClockFace : Observer {
             val stopWatchR2 = if (XWatchfaceReceiver.timerIsReset || timerRemaining == 0L) 0.995f else 0.945f
 
             // Stopwatch second hand only drawn if we're not in ambient mode.
-            if (!ambientMode)
+            if (drawStyle == PaintCan.styleNormal)
                 drawRadialLine(canvas, seconds.toDouble(), 0.1f, 0.945f, colorStopwatchSeconds, null)
 
             // Stopwatch minute hand. Same thin gauge as second hand, but will be attached to the arc,
@@ -1018,6 +1028,8 @@ class ClockFace : Observer {
         Log.i(TAG, "Ambient mode: " + this.ambientMode + " -> " + ambientMode)
         if (ambientMode == this.ambientMode) return // nothing changed, so we're good
         this.ambientMode = ambientMode
+
+        setDrawStyle()
         wipeCaches()
     }
 
@@ -1051,6 +1063,8 @@ class ClockFace : Observer {
 
     fun setBurnInProtection(burnInProtection: Boolean) {
         this.burnInProtection = burnInProtection || forceBurnInProtection
+
+        setDrawStyle()
     }
 
     /**
