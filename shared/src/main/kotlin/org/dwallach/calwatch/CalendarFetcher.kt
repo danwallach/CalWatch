@@ -109,15 +109,9 @@ class CalendarFetcher(initialContext: Context, val contentUri: Uri, val authorit
     /**
      * queries the calendar database with proper Android APIs (ugly stuff)
      */
-    private fun loadContent(): Pair<List<WireEvent>,Exception?> {
+    private fun loadContent(context: Context): Pair<List<WireEvent>,Exception?> {
         // local state which we'll eventually return
         var cr = emptyList<WireEvent>()
-
-        val context: Context? = contextRef.get()
-        if(context == null) {
-            Log.e(TAG, "loadContent: no context, can't load content")
-            return Pair(emptyList(),null)
-        }
 
         // first, get the list of calendars
         Log.v(TAG, "loadContent: starting to load content")
@@ -210,20 +204,16 @@ class CalendarFetcher(initialContext: Context, val contentUri: Uri, val authorit
     /**
      * Asynchronous task to load the calendar instances.
      */
-    class CalLoaderTask internal constructor(context: Context, private val fetcher: CalendarFetcher) : AsyncTask<Void, Void, Pair<List<WireEvent>,Exception?>>() {
+    class CalLoaderTask internal constructor(private val fetcher: CalendarFetcher) : AsyncTask<Context, Void, Pair<List<WireEvent>,Exception?>>() {
         private lateinit var wakeLock: PowerManager.WakeLock
 
-        // using a weak-reference to the context rather than holding the context itself,
-        // per http://www.androiddesignpatterns.com/2013/01/inner-class-handler-memory-leak.html
-        private val contextRef = WeakReference(context)
-
-        override fun doInBackground(vararg voids: Void): Pair<List<WireEvent>,Exception?> {
-            val context: Context? = contextRef.get()
-
-            if (context == null) {
-                Log.e(TAG, "doInBackground: no saved context: can't do background loader")
-                return Pair(emptyList(),null)
+        override fun doInBackground(vararg contexts: Context): Pair<List<WireEvent>,Exception?> {
+            if(contexts.size == 0) {
+                Log.e(TAG, "doInBackground: context required!")
+                return Pair(emptyList(), null)
             }
+
+            val context: Context = contexts[0]
 
             val powerManager = context.getSystemService(Context.POWER_SERVICE) as PowerManager
             wakeLock = powerManager.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, "CalWatchWakeLock")
@@ -233,7 +223,7 @@ class CalendarFetcher(initialContext: Context, val contentUri: Uri, val authorit
 
             try {
                 val startTime = SystemClock.elapsedRealtimeNanos()
-                val result = fetcher.loadContent()
+                val result = fetcher.loadContent(context)
                 val endTime = SystemClock.elapsedRealtimeNanos()
                 Log.i(TAG, "doInBackground: total calendar computation time: %.3f ms".format((endTime - startTime) / 1000000.0))
                 return result
@@ -270,7 +260,7 @@ class CalendarFetcher(initialContext: Context, val contentUri: Uri, val authorit
     }
 
     class MyHandler(context: Context, private val fetcher: CalendarFetcher) : Handler() {
-        private lateinit var loaderTask: AsyncTask<Void, Void, Pair<List<WireEvent>,Exception?>>
+        private lateinit var loaderTask: AsyncTask<Context, Void, Pair<List<WireEvent>,Exception?>>
 
         // using a weak-reference to the context rather than holding the context itself,
         // per http://www.androiddesignpatterns.com/2013/01/inner-class-handler-memory-leak.html
@@ -287,8 +277,8 @@ class CalendarFetcher(initialContext: Context, val contentUri: Uri, val authorit
                 MSG_LOAD_CAL -> {
                     Log.v(TAG, "handleMessage: launching calendar loader task")
 
-                    loaderTask = CalLoaderTask(context, fetcher)
-                    loaderTask.execute()
+                    loaderTask = CalLoaderTask(fetcher)
+                    loaderTask.execute(context)
                 }
                 else -> Log.e(TAG, "handleMessage: unexpected message: ${message.toString()}")
             }
