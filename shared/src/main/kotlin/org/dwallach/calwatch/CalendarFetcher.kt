@@ -109,14 +109,14 @@ class CalendarFetcher(initialContext: Context, val contentUri: Uri, val authorit
     /**
      * queries the calendar database with proper Android APIs (ugly stuff)
      */
-    private fun loadContent(): List<WireEvent> {
+    private fun loadContent(): Pair<List<WireEvent>,Exception?> {
         // local state which we'll eventually return
         var cr = emptyList<WireEvent>()
 
         val context: Context? = contextRef.get()
         if(context == null) {
             Log.e(TAG, "loadContent: no context, can't load content")
-            return emptyList()
+            return Pair(emptyList(),null)
         }
 
         // first, get the list of calendars
@@ -189,12 +189,13 @@ class CalendarFetcher(initialContext: Context, val contentUri: Uri, val authorit
 
                 // Third-priority sort: startTime, with objects starting later (smaller) appearing first in the sort.
 
-                return cr.sortedWith(
-                        compareBy<WireEvent> { it.displayColor }
-                                .thenBy { it.endTime }
-                                .thenByDescending { it.startTime });
+                return Pair(cr.sortedWith(
+                            compareBy<WireEvent> { it.displayColor }
+                                    .thenBy { it.endTime }
+                                    .thenByDescending { it.startTime }),
+                        null);
             } else {
-                return emptyList()
+                return Pair(emptyList(),null)
             }
         } catch (e: SecurityException) {
             // apparently we don't have permission for the calendar!
@@ -202,26 +203,26 @@ class CalendarFetcher(initialContext: Context, val contentUri: Uri, val authorit
             kill()
             ClockState.calendarPermission = false
 
-            return emptyList()
+            return Pair(emptyList(),e)
         }
     }
 
     /**
      * Asynchronous task to load the calendar instances.
      */
-    class CalLoaderTask internal constructor(context: Context, private val fetcher: CalendarFetcher) : AsyncTask<Void, Void, Throwable?>() {
+    class CalLoaderTask internal constructor(context: Context, private val fetcher: CalendarFetcher) : AsyncTask<Void, Void, Pair<List<WireEvent>,Exception?>>() {
         private lateinit var wakeLock: PowerManager.WakeLock
 
         // using a weak-reference to the context rather than holding the context itself,
         // per http://www.androiddesignpatterns.com/2013/01/inner-class-handler-memory-leak.html
         private val contextRef = WeakReference(context)
 
-        override fun doInBackground(vararg voids: Void): Throwable? {
+        override fun doInBackground(vararg voids: Void): Pair<List<WireEvent>,Exception?> {
             val context: Context? = contextRef.get()
 
             if (context == null) {
                 Log.e(TAG, "doInBackground: no saved context: can't do background loader")
-                return null
+                return Pair(emptyList(),null)
             }
 
             val powerManager = context.getSystemService(Context.POWER_SERVICE) as PowerManager
@@ -232,22 +233,28 @@ class CalendarFetcher(initialContext: Context, val contentUri: Uri, val authorit
 
             try {
                 val startTime = SystemClock.elapsedRealtimeNanos()
-                ClockState.setWireEventList(fetcher.loadContent())
+                val result = fetcher.loadContent()
                 val endTime = SystemClock.elapsedRealtimeNanos()
                 Log.i(TAG, "doInBackground: total calendar computation time: %.3f ms".format((endTime - startTime) / 1000000.0))
-                return null;
-            } catch (t: Throwable) {
-                Log.e(TAG, "doInBackground: unexpected failure setting wire event list from calendar", t)
-                return t;
+                return result
+            } catch (e: Exception) {
+                Log.e(TAG, "doInBackground: unexpected failure setting wire event list from calendar", e)
+                return Pair(emptyList(),e);
             }
         }
 
-        override fun onPostExecute(results: Throwable?) {
+        override fun onPostExecute(results: Pair<List<WireEvent>,Exception?>) {
             // this method gets called if the task completes; we'll be back running on the main UI
             // thread, so we can notify observers that there's new data available.
             wakeLock.release()
             fetcher.scanInProgress = false
-            ClockState.pingObservers()
+            if(results.second != null) {
+                Log.v(TAG, "onPostException: failure in background computation", results.second)
+            } else {
+                // only update if there was no exception
+                ClockState.setWireEventList(results.first)
+                ClockState.pingObservers()
+            }
 
             Log.v(TAG, "onPostExecute: complete")
         }
@@ -263,7 +270,7 @@ class CalendarFetcher(initialContext: Context, val contentUri: Uri, val authorit
     }
 
     class MyHandler(context: Context, private val fetcher: CalendarFetcher) : Handler() {
-        private lateinit var loaderTask: AsyncTask<Void, Void, Throwable?>
+        private lateinit var loaderTask: AsyncTask<Void, Void, Pair<List<WireEvent>,Exception?>>
 
         // using a weak-reference to the context rather than holding the context itself,
         // per http://www.androiddesignpatterns.com/2013/01/inner-class-handler-memory-leak.html
