@@ -165,9 +165,13 @@ object PaintCan {
         palette[styleAntiBurnIn][colorSmallShadow]?.color = Color.WHITE
         palette[styleAntiBurnIn][colorBigShadow]?.color = Color.WHITE
 
-        // But, we're still going to change the style for the stopwatch and timer rendering, since our only
+        // Also, we're still going to change the style for the stopwatch and timer rendering, since our only
         // choices are black or white, we'll go with black for the fills. The outlines will still be white
         // (see the "stroke" paints versus the "fill" paints).
+
+        // Technically, we have access to other colors when in low-bit, but they're not consistently supported
+        // across Wear devices. We can only count on black and white, and nothing else, so we might as well
+        // try to make it look tolerable that way.
         palette[styleLowBit][colorTimerFill]?.color = Color.WHITE
         palette[styleLowBit][colorStopwatchFill]?.color = Color.WHITE
         palette[styleLowBit][colorTimerStroke]?.strokeWidth = lineWidth / 6f
