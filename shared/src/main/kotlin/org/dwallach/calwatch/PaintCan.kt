@@ -168,8 +168,8 @@ object PaintCan {
         // But, we're still going to change the style for the stopwatch and timer rendering, since our only
         // choices are black or white, we'll go with black for the fills. The outlines will still be white
         // (see the "stroke" paints versus the "fill" paints).
-        palette[styleLowBit][colorTimerFill]?.color = Color.BLACK
-        palette[styleLowBit][colorStopwatchFill]?.color = Color.BLACK
+        palette[styleLowBit][colorTimerFill]?.color = Color.WHITE
+        palette[styleLowBit][colorStopwatchFill]?.color = Color.WHITE
         palette[styleLowBit][colorTimerStroke]?.strokeWidth = lineWidth / 6f
         palette[styleLowBit][colorStopwatchStroke]?.strokeWidth = lineWidth / 6f
 
