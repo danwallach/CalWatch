@@ -171,9 +171,12 @@ object PaintCan {
 
         // Technically, we have access to other colors when in low-bit, but they're not consistently supported
         // across Wear devices. We can only count on black and white, and nothing else, so we might as well
-        // try to make it look tolerable that way.
-        palette[styleLowBit][colorTimerFill]?.color = Color.WHITE
-        palette[styleLowBit][colorStopwatchFill]?.color = Color.WHITE
+        // try to make it look tolerable that way. Here, the fill colors will be black, and the outlines
+        // will be white (per the colorTimerStroke and colorStopwatchStroke above). It would look better
+        // in b&w to have the whole outer ring be white, but this would violate Google's rules about
+        // max percentage of pixels on while in low-bit mode.
+        palette[styleLowBit][colorTimerFill]?.color = Color.BLACK
+        palette[styleLowBit][colorStopwatchFill]?.color = Color.BLACK
         palette[styleLowBit][colorTimerStroke]?.strokeWidth = lineWidth / 6f
         palette[styleLowBit][colorStopwatchStroke]?.strokeWidth = lineWidth / 6f
 

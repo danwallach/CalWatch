@@ -136,8 +136,12 @@ class ClockFace : Observer {
     fun drawEverything(canvas: Canvas) {
         TimeWrapper.frameStart()
 
-        // the calendar goes on the very bottom and everything else stacks above
-        if(drawStyle != PaintCan.styleAntiBurnIn) drawCalendar(canvas)
+        // the calendar goes on the very bottom and everything else stacks above; the code for calendar drawing
+        // works great in low-bit mode, leaving big white wedges, but this violates the rules, per Google:
+        // "For OLED screens, you must use a black background. Non-background pixels must be less than 10
+        // percent of total pixels. You can use low-bit color for up to 5 percent of pixels on screens that support it."
+        // -- http://developer.android.com/design/wear/watchfaces.html
+        if(drawStyle == PaintCan.styleNormal || drawStyle == PaintCan.styleAmbient) drawCalendar(canvas)
 
         // next, we draw the indices or numbers of the watchface
         drawFace(canvas)
