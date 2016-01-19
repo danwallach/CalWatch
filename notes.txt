@@ -56,6 +56,9 @@ Refactoring / reengineering
       in-the-morning behavior where you pull the watch off the charger, you briefly see a partial calendar,
       or none at all, but it's quickly replaced with your proper calendar.
 
+    TODO too much .toFloat() and .toDouble() in ClockFace -- cleanup?!
+    - We could try to standardize everything with Float, but many of the trig function in Math require Double
+
 Right-to-left support
     TODO detect when we're in RTL mode
     TODO swap day/date block from 9 o'clock to 3 o'clock or leave alone?
