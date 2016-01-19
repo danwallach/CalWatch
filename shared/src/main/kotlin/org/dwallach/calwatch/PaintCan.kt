@@ -67,11 +67,24 @@ object PaintCan {
             color = when (_style) {
                 styleNormal -> _argb
 
-                styleLowBit,styleAntiBurnIn ->
-                    if (_argb and 0xffffff > 0)
-                        0xffffffff.toInt() // any non-black color mapped to pure white
-                    else
-                        0xff000000.toInt() // otherwise pure black
+                styleLowBit, styleAntiBurnIn -> when(_argb) {
+                    //
+                    // Says Google: One reduced color space power saving method is to use a
+                    // "low-bit" mode. In low-bit mode, the available colors are limited to
+                    // black, white, blue, red, magenta, green, cyan, and yellow.
+                    //
+                    // http://developer.android.com/design/wear/watchfaces.html
+                    //
+                    // So we'll pass those colors through unmolested.
+                    //
+                    Color.BLACK, Color.WHITE, Color.BLUE, Color.RED, Color.MAGENTA,
+                    Color.GREEN, Color.CYAN, Color.YELLOW -> _argb
+
+                    //
+                    // Any other color is mashed into being pure white or black
+                    //
+                    else -> if (_argb and 0xffffff > 0) 0xffffffff.toInt() else 0xff000000.toInt()
+                }
 
                 styleAmbient -> argbToGreyARGB(_argb)
 

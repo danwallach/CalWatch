@@ -20,11 +20,11 @@ class ClockFace : Observer {
     private val instanceID: Int
 
     // initial values to get the ball rolling (avoids a div by zero problem in computeFlatBottomCorners)
-    private var cx = savedCx
-    private var oldCx = -1
-    private var cy = savedCy
-    private var oldCy = -1
-    private var radius = savedRadius
+    private var cx: Int = initialCx
+    private var oldCx: Int = -1
+    private var cy: Int = initialCy
+    private var oldCy: Int = -1
+    private var radius: Int = initialRadius
 
     private var showSeconds = true
     private var showDayDate = true
@@ -35,8 +35,8 @@ class ClockFace : Observer {
     private var flatBottomCornerTime = 30f // Moto 360 hack: set to < 30.0 seconds for where the flat bottom starts
 
     var peekCardRect: Rect? = null
-    private var missingCalendarX: Float = 0.toFloat()
-    private var missingCalendarY: Float = 0.toFloat()
+    private var missingCalendarX: Float = 0f
+    private var missingCalendarY: Float = 0f
     private var missingCalendarBitmap: Bitmap? = null
 
     private var eventList: List<EventWrapper> = emptyList()
@@ -70,7 +70,7 @@ class ClockFace : Observer {
      * If true, ambient redrawing will be purely black and white, without any anti-aliasing (default: off).
      */
     fun setAmbientLowBit(ambientLowBit: Boolean) {
-        Log.v(TAG, "ambient low bit: " + ambientLowBit)
+        Log.v(TAG, "ambient low bit: $ambientLowBit")
         this.ambientLowBit = ambientLowBit || forceAmbientLowBit
 
         setDrawStyle()
@@ -122,8 +122,8 @@ class ClockFace : Observer {
         val height = lMissingCalendarBitmap.height
         val width = lMissingCalendarBitmap.width
 
-        missingCalendarX = clockX(15.0, 0.2f)
-        missingCalendarY = clockY(0.0, 0f) - height / 2
+        missingCalendarX = clockX(15f, 0.2f)
+        missingCalendarY = clockY(0f, 0f) - height / 2
 
         Log.v(TAG, "missing calendar bitmap size: (%d,%d), coordinates: (%.1f,%.1f),  (cy: %d, radius: %d)".format(width, height, missingCalendarX, missingCalendarY, cy, radius))
     }
@@ -172,7 +172,7 @@ class ClockFace : Observer {
         TimeWrapper.frameEnd()
     }
 
-    private fun drawRadialLine(canvas: Canvas, seconds: Double, startRadius: Float, endRadius: Float, paint: Paint, shadowPaint: Paint?, forceVertical: Boolean = false) {
+    private fun drawRadialLine(canvas: Canvas, seconds: Float, startRadius: Float, endRadius: Float, paint: Paint, shadowPaint: Paint?, forceVertical: Boolean = false) {
         val p = Path()
         drawRadialLine(p, paint.strokeWidth, seconds, startRadius, endRadius, forceVertical, false)
         canvas.drawPath(p, paint)
@@ -180,7 +180,7 @@ class ClockFace : Observer {
             canvas.drawPath(p, shadowPaint)
     }
 
-    private fun drawRadialLine(path: Path, strokeWidth: Float, seconds: Double, startRadiusRatio: Float, endRadiusRatio: Float, forceVertical: Boolean, flatBottomHack: Boolean) {
+    private fun drawRadialLine(path: Path, strokeWidth: Float, seconds: Float, startRadiusRatio: Float, endRadiusRatio: Float, forceVertical: Boolean, flatBottomHack: Boolean) {
         var lseconds = seconds
         var startRadius = startRadiusRatio
         var endRadius = endRadiusRatio
@@ -211,7 +211,7 @@ class ClockFace : Observer {
         x2 = clockX(lseconds, endRadius)
         y2 = clockY(lseconds, endRadius)
         if (forceVertical) {
-            lseconds = 0.0
+            lseconds = 0f
             x2 = x1
         }
 
@@ -228,10 +228,10 @@ class ClockFace : Observer {
 
     private fun getRectRadius(radius: Float): RectF {
         return RectF(
-                clockX(45.0, radius), // left
-                clockY(0.0, radius), // top
-                clockX(15.0, radius), // right
-                clockY(30.0, radius))// bottom
+                clockX(45f, radius), // left
+                clockY(0f, radius), // top
+                clockX(15f, radius), // right
+                clockY(30f, radius)) // bottom
     }
 
     /**
@@ -239,7 +239,7 @@ class ClockFace : Observer {
      * The path used for drawing is returned and may be passed back in next time, to the *path*
      * argument, which will make things go much faster.
      */
-    private fun drawRadialArc(canvas: Canvas, path: Path?, secondsStart: Double, secondsEnd: Double, startRadiusRatio: Float, endRadiusRatio: Float, paint: Paint, outlinePaint: Paint?, lowBitSquish: Boolean = true): Path {
+    private fun drawRadialArc(canvas: Canvas, path: Path?, secondsStart: Float, secondsEnd: Float, startRadiusRatio: Float, endRadiusRatio: Float, paint: Paint, outlinePaint: Paint?, lowBitSquish: Boolean = true): Path {
         var startRadius = startRadiusRatio
         var endRadius = endRadiusRatio
         /*
@@ -267,20 +267,21 @@ class ClockFace : Observer {
         if (p == null) {
             p = Path()
 
-            val midOval = getRectRadius((startRadius + endRadius) / 2f + 0.025f)
-            val midOvalDelta = getRectRadius((startRadius + endRadius) / 2f - 0.025f)
             val startOval = getRectRadius(startRadius)
             val endOval = getRectRadius(endRadius)
+
             if (drawStyle == PaintCan.styleAntiBurnIn && lowBitSquish) {
                 // In ambient low-bit mode, we originally drew some slender arcs of fixed width at roughly the center of the big
                 // colored pie wedge which we normally show when we're not in ambient mode. Currently this is dead code because
                 // drawCalendar() becomes a no-op in ambientLowBit when burn-in protection is on.
-                p.arcTo(midOval, (secondsStart * 6 - 90).toFloat(), ((secondsEnd - secondsStart) * 6).toFloat(), true)
-                p.arcTo(midOvalDelta, (secondsEnd * 6 - 90).toFloat(), (-(secondsEnd - secondsStart) * 6).toFloat())
+                val midOval = getRectRadius((startRadius + endRadius) / 2f + 0.025f)
+                val midOvalDelta = getRectRadius((startRadius + endRadius) / 2f - 0.025f)
+                p.arcTo(midOval, secondsStart * 6f - 90f, (secondsEnd - secondsStart) * 6f, true)
+                p.arcTo(midOvalDelta, secondsEnd * 6f - 90f, -(secondsEnd - secondsStart) * 6f)
                 p.close()
             } else {
-                p.arcTo(startOval, (secondsStart * 6 - 90).toFloat(), ((secondsEnd - secondsStart) * 6).toFloat(), true)
-                p.arcTo(endOval, (secondsEnd * 6 - 90).toFloat(), (-(secondsEnd - secondsStart) * 6).toFloat())
+                p.arcTo(startOval, secondsStart * 6f - 90f, (secondsEnd - secondsStart) * 6f, true)
+                p.arcTo(endOval, secondsEnd * 6f - 90f, -(secondsEnd - secondsStart) * 6f)
                 p.close()
 
                 //            Log.e(TAG, "New arc: radius(" + Float.toString((float) startRadius) + "," + Float.toString((float) endRadius) +
@@ -327,7 +328,7 @@ class ClockFace : Observer {
             // This one always starts at the top and goes clockwise to the time indicated (seconds).
             // This computation is much easier than doing it for the general case.
 
-            drawRadialArc(canvas, null, 0.0, seconds.toDouble(), startRadius, endRadius, paint, outlinePaint, false)
+            drawRadialArc(canvas, null, 0f, seconds.toFloat(), startRadius, endRadius, paint, outlinePaint, false)
         } else {
             // This one is more work. We need to deal with the flat bottom.
 
@@ -387,10 +388,8 @@ class ClockFace : Observer {
         // for now, hard-coded to the 9-oclock position
         val m = TimeWrapper.localMonthDay()
         val d = TimeWrapper.localDayOfWeek()
-        val x1: Float
-        val y1: Float
-        x1 = clockX(45.0, .85f)
-        y1 = clockY(45.0, .85f)
+        val x1 = clockX(45f, .85f)
+        val y1 = clockY(45f, .85f)
 
         val paint = PaintCan[drawStyle, PaintCan.colorSmallTextAndLines]
         val shadow = PaintCan[drawStyle, PaintCan.colorSmallShadow]
@@ -434,7 +433,7 @@ class ClockFace : Observer {
             if (lFaceMode == ClockState.FACE_TOOL)
                 for (i in 1..59)
                     if (i % 5 != 0)
-                        drawRadialLine(lFacePathCache, colorSmall.strokeWidth, i.toDouble(), .9f, 1.0f, false, bottomHack)
+                        drawRadialLine(lFacePathCache, colorSmall.strokeWidth, i.toFloat(), .9f, 1.0f, false, bottomHack)
 
             val strokeWidth =
                     if (lFaceMode == ClockState.FACE_LITE || lFaceMode == ClockState.FACE_NUMBERS)
@@ -447,14 +446,14 @@ class ClockFace : Observer {
                 if (i == 0) {
                     // top of watch: special
                     if (lFaceMode != ClockState.FACE_NUMBERS) {
-                        drawRadialLine(lFacePathCache, strokeWidth, -0.4, .75f, 1.0f, true, false)
-                        drawRadialLine(lFacePathCache, strokeWidth, 0.4, .75f, 1.0f, true, false)
+                        drawRadialLine(lFacePathCache, strokeWidth, -0.4f, .75f, 1.0f, true, false)
+                        drawRadialLine(lFacePathCache, strokeWidth, 0.4f, .75f, 1.0f, true, false)
                     }
                 } else if (i == 45 && drawStyle != PaintCan.styleAntiBurnIn && showDayDate) {
                     // 9 o'clock, don't extend into the inside, where we'd overlap with the DayDate display
                     // except, of course, when we're not showing the DayDate display, which might happen
                     // via user preference or because we're in burnInProtection ambient mode
-                    drawRadialLine(lFacePathCache, strokeWidth, i.toDouble(), 0.9f, 1.0f, false, false)
+                    drawRadialLine(lFacePathCache, strokeWidth, i.toFloat(), 0.9f, 1.0f, false, false)
                 } else {
                     // we want lines for 1, 2, 4, 5, 7, 8, 10, and 11 no matter what
                     if (lFaceMode != ClockState.FACE_NUMBERS || !(i == 15 || i == 30 || i == 45)) {
@@ -462,9 +461,9 @@ class ClockFace : Observer {
                         // going to make the 6 o'clock index line the same length as the other lines
                         // so it doesn't stand out as much
                         if (i == 30 && bottomHack)
-                            drawRadialLine(lFacePathCache, strokeWidth, i.toDouble(), .9f, 1.0f, false, bottomHack)
+                            drawRadialLine(lFacePathCache, strokeWidth, i.toFloat(), .9f, 1.0f, false, bottomHack)
                         else
-                            drawRadialLine(lFacePathCache, strokeWidth, i.toDouble(), .75f, 1.0f, false, bottomHack)
+                            drawRadialLine(lFacePathCache, strokeWidth, i.toFloat(), .75f, 1.0f, false, bottomHack)
                     }
                 }
             }
@@ -494,14 +493,15 @@ class ClockFace : Observer {
             //
             r = 0.9f
 
-            x = clockX(0.0, r)
-            y = clockY(0.0, r) - metrics.ascent / 1.5f
+            x = clockX(0f, r)
+            y = clockY(0f, r) - metrics.ascent / 1.5f
 
             drawShadowText(canvas, "12", x, y, colorBig, colorTextShadow)
 
             if (!debugMetricsPrinted) {
+                // we only want to print these one time
                 debugMetricsPrinted = true
-                Log.v(TAG, "x(" + java.lang.Float.toString(x) + "), y(" + java.lang.Float.toString(y) + "), metrics.descent(" + java.lang.Float.toString(metrics.descent) + "), metrics.ascent(" + java.lang.Float.toString(metrics.ascent) + ")")
+                Log.v(TAG, "x(%.2f), y(%.2f), metrics.descent(%.2f), metrics.ascent(%.2f)".format(x, y, metrics.descent, metrics.ascent))
             }
 
             //
@@ -511,8 +511,8 @@ class ClockFace : Observer {
             r = 0.9f
             val threeWidth = colorBig.measureText("3")
 
-            x = clockX(15.0, r) - threeWidth / 2f
-            y = clockY(15.0, r) - metrics.ascent / 2f - metrics.descent / 2f // empirically gets the middle of the "3" -- actually a smidge off with Roboto but close enough for now and totally font-dependent with no help from metrics
+            x = clockX(15f, r) - threeWidth / 2f
+            y = clockY(15f, r) - metrics.ascent / 2f - metrics.descent / 2f // empirically gets the middle of the "3" -- actually a smidge off with Roboto but close enough for now and totally font-dependent with no help from metrics
 
             drawShadowText(canvas, "3", x, y, colorBig, colorTextShadow)
 
@@ -522,11 +522,11 @@ class ClockFace : Observer {
 
             r = 0.9f
 
-            x = clockX(30.0, r)
+            x = clockX(30f, r)
             if (missingBottomPixels != 0)
-                y = clockY(30.0, r) + metrics.descent - missingBottomPixels // another hack for Moto 360
+                y = clockY(30f, r) + metrics.descent - missingBottomPixels // another hack for Moto 360
             else
-                y = clockY(30.0, r) + 0.75f * metrics.descent // scoot it up a tiny bit
+                y = clockY(30f, r) + 0.75f * metrics.descent // scoot it up a tiny bit
 
             drawShadowText(canvas, "6", x, y, colorBig, colorTextShadow)
 
@@ -538,8 +538,8 @@ class ClockFace : Observer {
                 r = 0.9f
                 val nineWidth = colorBig.measureText("9")
 
-                x = clockX(45.0, r) + nineWidth / 2f
-                y = clockY(45.0, r) - metrics.ascent / 2f - metrics.descent / 2f
+                x = clockX(45f, r) + nineWidth / 2f
+                y = clockY(45f, r) - metrics.ascent / 2f - metrics.descent / 2f
 
                 drawShadowText(canvas, "9", x, y, colorBig, colorTextShadow)
 
@@ -551,35 +551,26 @@ class ClockFace : Observer {
     private fun drawHands(canvas: Canvas) {
         val time = TimeWrapper.localTime
 
-        var seconds = time / 1000.0
-        val minutes = seconds / 60.0
-        val hours = minutes / 12.0  // because drawRadialLine is scaled to a 60-unit circle
+        var seconds = time / 1000f
+        val minutes = seconds / 60f
+        val hours = minutes / 12f  // because drawRadialLine is scaled to a 60-unit circle
 
-        val hourColor: Paint
-        val minuteColor: Paint
-        val secondsColor: Paint
-        val shadowColor: Paint
-
-        shadowColor = PaintCan[drawStyle, PaintCan.colorSecondHandShadow]
-        hourColor = PaintCan[drawStyle, PaintCan.colorHourHand]
-        minuteColor = PaintCan[drawStyle, PaintCan.colorMinuteHand]
-//        secondsColor = PaintCan[drawStyle, PaintCan.colorSecondHand];
+        val shadowColor = PaintCan[drawStyle, PaintCan.colorSecondHandShadow]
+        val hourColor = PaintCan[drawStyle, PaintCan.colorHourHand]
+        val minuteColor = PaintCan[drawStyle, PaintCan.colorMinuteHand]
 
         drawRadialLine(canvas, hours, 0.1f, 0.6f, hourColor, shadowColor)
         drawRadialLine(canvas, minutes, 0.1f, 0.9f, minuteColor, shadowColor)
 
         if (drawStyle == PaintCan.styleNormal && showSeconds) {
-            secondsColor = PaintCan[PaintCan.styleNormal, PaintCan.colorSecondHand]
-            // ugly details: we might run 10% or more away from our targets at 4Hz, making the second
-            // hand miss the indices. Ugly. Thus, some hackery.
-            if (clipSeconds) seconds = Math.floor(seconds * freqUpdate) / freqUpdate
+            val secondsColor = PaintCan[PaintCan.styleNormal, PaintCan.colorSecondHand]
             drawRadialLine(canvas, nonLinearSeconds(seconds), 0.1f, 0.95f, secondsColor, shadowColor)
         }
     }
 
     /**
-     * call this if external forces at play may have invalidated state
-     * being saved inside ClockFace
+     * Call this if external forces at play may have invalidated state
+     * being saved inside ClockFace.
      */
     fun wipeCaches() {
         Log.v(TAG, "clearing caches")
@@ -614,8 +605,6 @@ class ClockFace : Observer {
         val time = TimeWrapper.localTime
 
         eventList.forEach {
-            val arcStart: Double
-            val arcEnd: Double
             val e = it.wireEvent
             val evMinLevel = it.minLevel
             val evMaxLevel = it.maxLevel
@@ -623,8 +612,8 @@ class ClockFace : Observer {
             val startTime = e.startTime
             val endTime = e.endTime
 
-            arcStart = startTime / 720000.0
-            arcEnd = endTime / 720000.0
+            val arcStart = startTime / 720000f
+            val arcEnd = endTime / 720000f
 
             // path caching happens inside drawRadialArc
 
@@ -637,18 +626,17 @@ class ClockFace : Observer {
                     arcColor, arcShadow)
         }
 
+        //
         // Lastly, draw a stippled pattern at the current hour mark to delineate where the
-        // twelve-hour calendar rendering zone starts and ends.
-
-
-        // integer division gets us the exact hour, then multiply by 5 to scale to our
-        // 60-second circle
+        // twelve-hour calendar rendering zone starts and ends. We try to only draw the stipple
+        // once, since there's a bunch of math going into it, and then save it in a Path.
+        //
+        // Integer division gets us the exact hour, then multiply by 5 to scale to our
+        // 60-second circle.
+        //
         var stippleTime = time / (1000 * 60 * 60)
         stippleTime *= 5
 
-        // we might want to rejigger this to be paranoid about concurrency smashing stipplePathCache,
-        // but it's less of a problem here than with the watchFace, because the external UI isn't
-        // inducing the state here to change
         if (stippleTime != stippleTimeCache || stipplePathCache == null) {
             val lStipplePathCache = Path()
             stippleTimeCache = stippleTime
@@ -657,53 +645,37 @@ class ClockFace : Observer {
             //                Log.v(TAG, "StippleTime(" + stippleTime +
             //                        "),  currentTime(" + Float.toString((time) / 720000f) + ")");
 
-            var r1: Float
-            var r2: Float
-
             // eight little diamonds -- precompute the deltas when we're all the way out at the end,
             // then apply elsewhere
 
-            val dxlow: Float
-            val dylow: Float
-            val dxhigh: Float
-            val dyhigh: Float
-            var x1: Float
-            var y1: Float
-            var x2: Float
-            var y2: Float
-            var xlow: Float
-            var ylow: Float
-            var xmid: Float
-            var ymid: Float
-            var xhigh: Float
-            var yhigh: Float
             val stippleWidth = 0.3f
             val stippleSteps = 8
+            val stippleTimeD = stippleTime.toFloat()
             val rDelta = calendarRingWidth / stippleSteps.toFloat()
 
-            x1 = clockX(stippleTime.toDouble(), calendarRingMaxRadius)
-            y1 = clockY(stippleTime.toDouble(), calendarRingMaxRadius)
-            x2 = clockX(stippleTime.toDouble(), calendarRingMaxRadius - rDelta)
-            y2 = clockY(stippleTime.toDouble(), calendarRingMaxRadius - rDelta)
-            xmid = (x1 + x2) / 2f
-            ymid = (y1 + y2) / 2f
-            xlow = clockX((stippleTime - stippleWidth).toDouble(), calendarRingMaxRadius - rDelta / 2)
-            ylow = clockY((stippleTime - stippleWidth).toDouble(), calendarRingMaxRadius - rDelta / 2)
-            xhigh = clockX((stippleTime + stippleWidth).toDouble(), calendarRingMaxRadius - rDelta / 2)
-            yhigh = clockY((stippleTime + stippleWidth).toDouble(), calendarRingMaxRadius - rDelta / 2)
-            dxlow = xmid - xlow
-            dylow = ymid - ylow
-            dxhigh = xmid - xhigh
-            dyhigh = ymid - yhigh
+            var x1 = clockX(stippleTimeD, calendarRingMaxRadius)
+            var y1 = clockY(stippleTimeD, calendarRingMaxRadius)
+            var x2 = clockX(stippleTimeD, calendarRingMaxRadius - rDelta)
+            var y2 = clockY(stippleTimeD, calendarRingMaxRadius - rDelta)
+            var xmid = (x1 + x2) / 2f
+            var ymid = (y1 + y2) / 2f
+            var xlow = clockX((stippleTime - stippleWidth).toFloat(), calendarRingMaxRadius - rDelta / 2)
+            var ylow = clockY((stippleTime - stippleWidth).toFloat(), calendarRingMaxRadius - rDelta / 2)
+            var xhigh = clockX((stippleTime + stippleWidth).toFloat(), calendarRingMaxRadius - rDelta / 2)
+            var yhigh = clockY((stippleTime + stippleWidth).toFloat(), calendarRingMaxRadius - rDelta / 2)
+            val dxlow = xmid - xlow
+            val dylow = ymid - ylow
+            val dxhigh = xmid - xhigh
+            val dyhigh = ymid - yhigh
 
-            r1 = calendarRingMinRadius
-            x1 = clockX(stippleTime.toDouble(), r1)
-            y1 = clockY(stippleTime.toDouble(), r1)
+            var r1 = calendarRingMinRadius
+            x1 = clockX(stippleTimeD, r1)
+            y1 = clockY(stippleTimeD, r1)
 
             for(i in 0..7) {
-                r2 = r1 + calendarRingWidth / 8f
-                x2 = clockX(stippleTime.toDouble(), r2)
-                y2 = clockY(stippleTime.toDouble(), r2)
+                var r2 = r1 + calendarRingWidth / 8f
+                x2 = clockX(stippleTimeD, r2)
+                y2 = clockY(stippleTimeD, r2)
 
                 xmid = (x1 + x2) / 2f
                 ymid = (y1 + y2) / 2f
@@ -757,17 +729,17 @@ class ClockFace : Observer {
             // circle. This scales in radius until it hits max size at 10%, then it switches to red.
             //
 
-            Log.v(TAG, "battery at " + batteryPct)
+            Log.v(TAG, "battery at $batteryPct")
             if (batteryPct > 0.5f) {
                 // batteryPathCache = null;
             } else {
                 val minRadius = 0.01f
                 val maxRadius = 0.06f
-                val dotRadius: Float
-                if (batteryPct < 0.1)
-                    dotRadius = maxRadius
-                else
-                    dotRadius = maxRadius - (maxRadius - minRadius) * (batteryPct - 0.1f) / 0.4f
+                val dotRadius =
+                        if (batteryPct < 0.1)
+                            maxRadius
+                        else
+                            maxRadius - (maxRadius - minRadius) * (batteryPct - 0.1f) / 0.4f
 
                 lBatteryPathCache.addCircle(cx.toFloat(), cy.toFloat(), radius * dotRadius, Path.Direction.CCW) // direction shouldn't matter
 
@@ -828,12 +800,12 @@ class ClockFace : Observer {
                 stopwatchRenderTime = currentTime - XWatchfaceReceiver.stopwatchStart + XWatchfaceReceiver.stopwatchBase
             }
 
-            val seconds = stopwatchRenderTime / 1000.0f
+            val seconds = stopwatchRenderTime / 1000f
 
             // rather than computing minutes directly (i.e., stopWatchRenderTime / 60000), we're instead going
             // to compute the integer number of hours (using Math.floor) and subtract that, giving us a resulting
             // number that ranges from [0-60).
-            val hours = Math.floor((stopwatchRenderTime / 3600000f).toDouble()).toFloat()
+            val hours = Math.floor(stopwatchRenderTime / 3600000.0).toFloat()
             val minutes = stopwatchRenderTime / 60000.0f - hours * 60f
 
             val stopWatchR1 = 0.90f
@@ -841,11 +813,11 @@ class ClockFace : Observer {
 
             // Stopwatch second hand only drawn if we're not in ambient mode.
             if (drawStyle == PaintCan.styleNormal)
-                drawRadialLine(canvas, seconds.toDouble(), 0.1f, 0.945f, colorStopwatchSeconds, null)
+                drawRadialLine(canvas, seconds.toFloat(), 0.1f, 0.945f, colorStopwatchSeconds, null)
 
             // Stopwatch minute hand. Same thin gauge as second hand, but will be attached to the arc,
             // and thus look super cool.
-            drawRadialLine(canvas, minutes.toDouble(), 0.1f, stopWatchR2 - 0.005f, colorStopwatchStroke, null)
+            drawRadialLine(canvas, minutes.toFloat(), 0.1f, stopWatchR2 - 0.005f, colorStopwatchStroke, null)
             drawRadialArcFlatBottom(canvas, minutes, stopWatchR1, stopWatchR2, colorStopwatchFill, colorStopwatchStroke)
         }
 
@@ -863,7 +835,7 @@ class ClockFace : Observer {
             val timerR1 = if (XWatchfaceReceiver.stopwatchIsReset) 0.90f else 0.952f
             val timerR2 = 0.995f
 
-            drawRadialLine(canvas, angle.toDouble(), 0.1f, timerR2 - 0.005f, colorTimerStroke, null)
+            drawRadialLine(canvas, angle.toFloat(), 0.1f, timerR2 - 0.005f, colorTimerStroke, null)
             drawRadialArcFlatBottom(canvas, angle, timerR1, timerR2, colorTimerFill, colorTimerStroke)
         }
     }
@@ -872,8 +844,6 @@ class ClockFace : Observer {
         Log.v(TAG, "setSize: $width x $height")
         cx = width / 2
         cy = height / 2
-        savedCx = cx
-        savedCy = cy
 
         if (cx == oldCx && cy == oldCy) return  // nothing changed, we're done
 
@@ -881,7 +851,6 @@ class ClockFace : Observer {
         oldCy = cy
 
         radius = if (cx > cy) cy else cx // minimum of the two
-        savedRadius = radius
 
         // This creates all the Paint objects used throughout the draw routines
         // here. Everything scales with the radius of the watchface, which is why
@@ -903,14 +872,8 @@ class ClockFace : Observer {
     // (we'll be bilinearly interpolating between these two points, to determine a location on the flat bottom
     //  for any given time and radius -- see flatBottomX() and flatBottomY())
 
-    //    private float flatBottomCornerX1_R100;
-    private var flatBottomCornerY1_R100: Float = 0.toFloat()
-    //    private float flatBottomCornerX2_R100;
-    //    private float flatBottomCornerY2_R100;
-    //    private float flatBottomCornerX1_R80;
-    private var flatBottomCornerY1_R80: Float = 0.toFloat()
-    //    private float flatBottomCornerX2_R80;
-    //    private float flatBottomCornerY2_R80;
+    private var flatBottomCornerY1_R100: Float = 0f
+    private var flatBottomCornerY1_R80: Float = 0f
 
     private fun computeFlatBottomCorners() {
         // What angle does the flat bottom begin and end?
@@ -931,20 +894,13 @@ class ClockFace : Observer {
         //    it's a non-rectangular screen, and (to date anyway) no flat tire to worry about
 
         if (missingBottomPixels != 0) {
-            val angle = Math.asin(1.0 - missingBottomPixels.toDouble() / cy.toDouble())
+            val angle = Math.asin(1.0 - missingBottomPixels.toFloat() / cy.toFloat())
 
             flatBottomCornerTime = (angle * 30.0 / Math.PI + 15).toFloat()
             Log.v(TAG, "flatBottomCornerTime($flatBottomCornerTime) <-- angle($angle), missingBottomPixels($missingBottomPixels), cy($cy)")
 
-            //            flatBottomCornerX1_R100 = clockX(flatBottomCornerTime, 1);
-            flatBottomCornerY1_R100 = clockY(flatBottomCornerTime.toDouble(), 1f)
-            //            flatBottomCornerX2_R100 = clockX(60 - flatBottomCornerTime, 1);
-            //            flatBottomCornerY2_R100 = clockY(60 - flatBottomCornerTime, 1);
-
-            //            flatBottomCornerX1_R80 = clockX(flatBottomCornerTime, 0.80f);
-            flatBottomCornerY1_R80 = clockY(flatBottomCornerTime.toDouble(), 0.80f)
-            //            flatBottomCornerX2_R80 = clockX(60 - flatBottomCornerTime, 0.80f);
-            //            flatBottomCornerY2_R80 = clockY(60 - flatBottomCornerTime, 0.80f);
+            flatBottomCornerY1_R100 = clockY(flatBottomCornerTime.toFloat(), 1f)
+            flatBottomCornerY1_R80 = clockY(flatBottomCornerTime.toFloat(), 0.80f)
         } else {
             Log.v(TAG, "no flat bottom corrections")
         }
@@ -975,8 +931,8 @@ class ClockFace : Observer {
         // new shiny approach: project a line from the center, intersect it with the flat-bottom line
 
         val finalY = flatBottomY(time, radius)
-        val r1X = clockX(time.toDouble(), 1f)
-        val r1Y = clockY(time.toDouble(), 1f)
+        val r1X = clockX(time.toFloat(), 1f)
+        val r1Y = clockY(time.toFloat(), 1f)
 
         return interpolate(r1X, r1Y, cx.toFloat(), cy.toFloat(), finalY)
     }
@@ -994,19 +950,19 @@ class ClockFace : Observer {
 
 
     // clock math
-    private fun clockX(seconds: Double, fractionFromCenter: Float): Float {
+    private fun clockX(seconds: Float, fractionFromCenter: Float): Float {
         val angleRadians = (seconds - 15) * Math.PI * 2.0 / 60.0
-        return (cx + radius.toDouble() * fractionFromCenter.toDouble() * Math.cos(angleRadians)).toFloat()
+        return (cx + radius * fractionFromCenter * Math.cos(angleRadians)).toFloat()
     }
 
-    private fun clockY(seconds: Double, fractionFromCenter: Float): Float {
+    private fun clockY(seconds: Float, fractionFromCenter: Float): Float {
         val angleRadians = (seconds - 15) * Math.PI * 2.0 / 60.0
-        return (cy + radius.toDouble() * fractionFromCenter.toDouble() * Math.sin(angleRadians)).toFloat()
+        return (cy + radius * fractionFromCenter * Math.sin(angleRadians)).toFloat()
     }
 
     // hack for Moto360: given the location on the dial (seconds), and the originally
     // desired radius, this returns your new radius that will touch the flat bottom
-    private fun radiusToEdge(seconds: Double): Float {
+    private fun radiusToEdge(seconds: Float): Float {
         val yOrig = clockY(seconds, 1f)
         if (yOrig > cy * 2 - missingBottomPixels) {
             // given:
@@ -1029,7 +985,7 @@ class ClockFace : Observer {
 
     fun getAmbientMode() = ambientMode
     fun setAmbientMode(ambientMode: Boolean): Unit {
-        Log.i(TAG, "Ambient mode: " + this.ambientMode + " -> " + ambientMode)
+        Log.i(TAG, "Ambient mode: ${this.ambientMode} -> $ambientMode")
         if (ambientMode == this.ambientMode) return // nothing changed, so we're good
         this.ambientMode = ambientMode
 
@@ -1090,35 +1046,37 @@ class ClockFace : Observer {
         private var instanceCounter = 0
 
 
-        // these ones are static so subsequent instances of this class can recover state; we start
+        // these ones are in the companion-object so subsequent instances of this class can recover state; we start
         // them off non-zero, but they'll be changed quickly enough
-        private var savedCx = 140
-        private var savedCy = 140
-        private var savedRadius = 140
-
-        private const val freqUpdate = 5f  // 5 Hz, or 0.20sec for second hand
+        private const val initialCx = 140
+        private const val initialCy = 140
+        private const val initialRadius = 140
 
         private const val calendarRingMinRadius = 0.2f
         private const val calendarRingMaxRadius = 0.9f
         private const val calendarRingWidth = calendarRingMaxRadius - calendarRingMinRadius
 
-        private const val clipSeconds = false // force second hand to align with FPS boundaries (good for low-FPS drawing)
-
+        // we'll print the font metrics once and once only
         private var debugMetricsPrinted = false
 
         private const val NON_LINEAR_TABLE_SIZE = 1000
-        private val NON_LINEAR_TABLE = DoubleArray(NON_LINEAR_TABLE_SIZE) { i ->
+        private val NON_LINEAR_TABLE = FloatArray(NON_LINEAR_TABLE_SIZE) { i ->
+            //
             // This is where we initialize our non-linear second hand table.
             // We're implementing y=[(1+sin(theta - pi/2))/2] ^ pow over x in [0,pi]
             // Adjusting the power makes the second hand hang out closer to its
             // starting position and then launch faster to hit the target when we
             // get closer to the next second.
+            //
             val iFrac: Double = i.toDouble() / NON_LINEAR_TABLE_SIZE.toDouble()
-            val thetaMinusPi2: Double = (iFrac - 0.5) * Math.PI
+            val thetaMinusPi2: Double = (iFrac - 0.5f) * Math.PI
 
-            // two components here: the non-linear part (with Math.pow and Math.sin) and then a linear
-            // part (with iFrac). This make sure we still have some motion. The second hand never entirely stops.
-            0.7 * Math.pow((1.0 + Math.sin(thetaMinusPi2)) / 2.0, 8.0) + 0.3 * iFrac
+            //
+            // Two components here: the non-linear part (with Math.pow and Math.sin) and then a linear
+            // part (with iFrac). This make sure we still have some motion. By adjusting the coefficients
+            // below -- the 0.7 and 0.3 -- you can dial in as much non-linearity as you want.
+            //
+            (0.7f * Math.pow((1.0 + Math.sin(thetaMinusPi2)) / 2.0, 8.0) + 0.3f * iFrac).toFloat()
         }
 
         /**
@@ -1128,8 +1086,8 @@ class ClockFace : Observer {
          * a performance vs. memory tradeoff here. Rather than interpolating on the table, we're just
          * making the table bigger and clipping to the nearest table entry.
          */
-        private fun nonLinearSeconds(linearSeconds: Double): Double {
-            val secFloor = Math.floor(linearSeconds)
+        private fun nonLinearSeconds(linearSeconds: Float): Float {
+            val secFloor = Math.floor(linearSeconds.toDouble()).toFloat()
             val secFrac = linearSeconds - secFloor
             return secFloor + NON_LINEAR_TABLE[(secFrac * NON_LINEAR_TABLE_SIZE).toInt()]
         }

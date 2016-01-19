@@ -47,7 +47,7 @@ class CalendarFetcher(initialContext: Context, val contentUri: Uri, val authorit
     }
 
     init {
-        this.loaderHandler = MyHandler(initialContext, this)
+        this.loaderHandler = MyHandler(this)
         singletonFetcher = this
 
         // hook into watching the calendar (code borrowed from Google's calendar wear app)
@@ -63,6 +63,10 @@ class CalendarFetcher(initialContext: Context, val contentUri: Uri, val authorit
         rescan()
     }
 
+    fun getContext(): Context? {
+        return contextRef.get()
+    }
+
     /**
      * Call this when the CalendarFetcher is no longer going to be used. This will get rid
      * of broadcast receivers and other such things. Once you do this, the CalendarFetcher
@@ -71,15 +75,15 @@ class CalendarFetcher(initialContext: Context, val contentUri: Uri, val authorit
     fun kill() {
         Log.v(TAG, "kill")
 
-        val context: Context? = contextRef.get()
+        val context: Context? = getContext()
 
         if (isReceiverRegistered && context != null) {
             context.unregisterReceiver(broadcastReceiver)
-            isReceiverRegistered = false
         }
 
         loaderHandler.removeMessages(MyHandler.MSG_LOAD_CAL)
 
+        isReceiverRegistered = false
         scanInProgress = false
     }
 
@@ -107,9 +111,13 @@ class CalendarFetcher(initialContext: Context, val contentUri: Uri, val authorit
     }
 
     /**
-     * queries the calendar database with proper Android APIs (ugly stuff)
+     * Queries the calendar database with proper Android APIs (ugly stuff). Note that we're returning
+     * two things: a list of events -- the thing we really want -- and an optional exception, which
+     * would be accompanied by an emptyList if it were non-null. We're doing this, rather than throwing
+     * an exception, because this result is meant to be saved across threads, which a thrown exception
+     * can't do very well.
      */
-    private fun loadContent(context: Context): Pair<List<WireEvent>,Exception?> {
+    private fun loadContent(context: Context): Pair<List<WireEvent>, Exception?> {
         // local state which we'll eventually return
         var cr = emptyList<WireEvent>()
 
@@ -189,7 +197,7 @@ class CalendarFetcher(initialContext: Context, val contentUri: Uri, val authorit
                                     .thenByDescending { it.startTime }),
                         null);
             } else {
-                return Pair(emptyList(),null)
+                return Pair(emptyList(), null)
             }
         } catch (e: SecurityException) {
             // apparently we don't have permission for the calendar!
@@ -197,7 +205,7 @@ class CalendarFetcher(initialContext: Context, val contentUri: Uri, val authorit
             kill()
             ClockState.calendarPermission = false
 
-            return Pair(emptyList(),e)
+            return Pair(emptyList(), e)
         }
     }
 
@@ -213,8 +221,22 @@ class CalendarFetcher(initialContext: Context, val contentUri: Uri, val authorit
                 return Pair(emptyList(), null)
             }
 
+            //
+            // Design note: we could have done this with fetcher.getContext(), but that has the
+            // potential to return null, which we don't want. The way we're doing it, by passing
+            // the non-null context as an argument to the background task, we'll never be here
+            // unless we have a valid context for doing the necessary calculations.
+            //
+            // See MyHandler.handleMessage for the null-handling logic.
+            //
             val context: Context = contexts[0]
 
+            //
+            // Why a wake-lock? In part, because the Google sample code does it this way, and in part
+            // because it makes sense. We want this task to finish quickly. In practice, the "total
+            // calendar computation" number, reported below seems to be around a second or less -- running
+            // once an hour -- so we're not killing the battery in any case.
+            //
             val powerManager = context.getSystemService(Context.POWER_SERVICE) as PowerManager
             wakeLock = powerManager.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, "CalWatchWakeLock")
             wakeLock.acquire()
@@ -229,19 +251,26 @@ class CalendarFetcher(initialContext: Context, val contentUri: Uri, val authorit
                 return result
             } catch (e: Exception) {
                 Log.e(TAG, "doInBackground: unexpected failure setting wire event list from calendar", e)
-                return Pair(emptyList(),e);
+                return Pair(emptyList(), e);
+            } finally {
+                // no matter what, we want to release the wake lock
+                wakeLock.release()
             }
         }
 
         override fun onPostExecute(results: Pair<List<WireEvent>,Exception?>) {
+            //
             // this method gets called if the task completes; we'll be back running on the main UI
             // thread, so we can notify observers that there's new data available.
-            wakeLock.release()
+            //
             fetcher.scanInProgress = false
             if(results.second != null) {
                 Log.v(TAG, "onPostException: failure in background computation", results.second)
             } else {
-                // only update if there was no exception
+                //
+                // This is the place where side-effects from the background computation happen.
+                // Any subsequent redraw will use the new calendar wedges.
+                //
                 ClockState.setWireEventList(results.first)
                 ClockState.pingObservers()
             }
@@ -250,8 +279,10 @@ class CalendarFetcher(initialContext: Context, val contentUri: Uri, val authorit
         }
 
         override fun onCancelled() {
+            //
             // this method gets called if the task is cancelled, which we never actually do (easier to
             // just let the task complete, since it doesn't take *that* long to execute)
+            //
             wakeLock.release()
             fetcher.scanInProgress = false
 
@@ -259,15 +290,11 @@ class CalendarFetcher(initialContext: Context, val contentUri: Uri, val authorit
         }
     }
 
-    class MyHandler(context: Context, private val fetcher: CalendarFetcher) : Handler() {
+    class MyHandler(private val fetcher: CalendarFetcher) : Handler() {
         private lateinit var loaderTask: AsyncTask<Context, Void, Pair<List<WireEvent>,Exception?>>
 
-        // using a weak-reference to the context rather than holding the context itself,
-        // per http://www.androiddesignpatterns.com/2013/01/inner-class-handler-memory-leak.html
-        private val contextRef = WeakReference(context)
-
         override fun handleMessage(message: Message) {
-            val context: Context? = contextRef.get()
+            val context: Context? = fetcher.getContext()
             if (context == null) {
                 Log.e(TAG, "handleMessage: no available context, nothing to do")
                 return

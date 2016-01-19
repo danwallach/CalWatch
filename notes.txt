@@ -27,16 +27,10 @@ Daydream?
     http://developer.android.com/reference/android/service/dreams/DreamService.html
     -- looks almost exactly the same as implementing an activity, or the watchface API
 
-Marshmallow permissions / updates
-    http://android-developers.blogspot.com/2015/11/api-23-sdk-now-available-for-android.html
-    http://developer.android.com/training/articles/wear-permissions.html
-
-    TODO kill off the long-running service, doesn't need to start at boot time (on either platform)
+Miscellaneous updates
     TODO better no-calendar icon
 
     Other stuff, while we're overhauling things:
-    TODO Heisenbug investigation: when starting on a freshly wiped phone, weird rendering artifacts (negative numbers?) but it goes away
-    - possibly fixed! (issue when event.startTime == event.endTime, which can happen after clipping)
     TODO Change phone config panel to show three simultaneous watchfaces with picker rather than three text names
 
     TODO Adopt Wear Compatibility Library
@@ -45,10 +39,6 @@ Marshmallow permissions / updates
     - Unclear if there's any real benefit for CalWatch in these libraries
 
     TODO Validate that CrashReporter still works
-
-Low-bit / burn-in protection
-    TODO low-bit on, burn-in off: add back in the calendar wedges
-    TODO low-bit on, burn-in on: hollow out the hands, limit the backdrop to "lite", no calendar
 
 Refactoring / reengineering
     TODO significant code overlap between mobile/MyViewAnim and wear/CalWatchFaceService
@@ -59,6 +49,12 @@ Refactoring / reengineering
     (I tried putting it just in settings.gradle or the top-level build.gradle and this didn't work)
 
     TODO Rip out Observer/Listener logic (getting untenable) and redo with functional-reactive style
+    - Changes would be localized to CalendarFetcher, which is now working in a vaguely functional style,
+      in that the background task has no side-effects whatsoever, and the ultimate assignment that sticks
+      around happens on the UI thread. Another big change with release4 was that the CalendarFetcher doesn't
+      run at all when the watch is asleep. The background service is gone. This leads to the first-thing-
+      in-the-morning behavior where you pull the watch off the charger, you briefly see a partial calendar,
+      or none at all, but it's quickly replaced with your proper calendar.
 
 Right-to-left support
     TODO detect when we're in RTL mode
@@ -70,22 +66,7 @@ Add internationalization strings
 Deal with multiday events that aren't "all day" events
     TODO idea: resurrect all-day events by rendering them (and long events) as thin rings, perhaps separate from the main time wedges
 
-TODO reshape around peek card?
-    - Notes: the rect we get back is the rect *covered* by the card. Using the "top"
-      of the rect, we'll know that from (0,0) - (full-width, rect-top) we're good to draw.
-
-    - Given how large the cards are, we probably don't want to mess with the Moto 360 hack
-      but instead just want to draw the face small, completely round, and be done with it.
-
-    - Current kludge: draw a solid black rectangle inside the rect we're given
-
-    - Potential real solution: extend the Moto 360 flat-bottom hack
-      - Option 1: same watch center, just increase missingBottomPixels
-      - Option 2: move watch center up partly
-
 TODO update the slides
     Now a standard lecture in Comp215, so some updates in there already, but should it change
-    from an "evolution of CalWatch" into a "how to code for Android" talk? Or not?
-
-Longer-term items
-    TODO custom background images?
+    from an "evolution of CalWatch" into a "how to code for Android" talk? Or not? Also, worth
+    adding Kotlin material.
