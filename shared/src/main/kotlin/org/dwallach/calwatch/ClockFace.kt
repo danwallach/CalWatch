@@ -236,7 +236,7 @@ class ClockFace : Observer {
      * The path used for drawing is returned and may be passed back in next time, to the *path*
      * argument, which will make things go much faster.
      */
-    private fun drawRadialArc(canvas: Canvas, path: Path?, secondsStart: Float, secondsEnd: Float, startRadiusRatio: Float, endRadiusRatio: Float, paint: Paint, outlinePaint: Paint?, lowBitSquish: Boolean = true): Path {
+    private fun drawRadialArc(canvas: Canvas, path: Path?, secondsStart: Double, secondsEnd: Double, startRadiusRatio: Float, endRadiusRatio: Float, paint: Paint, outlinePaint: Paint?, lowBitSquish: Boolean = true): Path {
         var startRadius = startRadiusRatio
         var endRadius = endRadiusRatio
         /*
@@ -272,12 +272,12 @@ class ClockFace : Observer {
                 // In ambient low-bit mode, we originally drew some slender arcs of fixed width at roughly the center of the big
                 // colored pie wedge which we normally show when we're not in ambient mode. Currently this is dead code because
                 // drawCalendar() becomes a no-op in ambientLowBit when burn-in protection is on.
-                p.arcTo(midOval, (secondsStart * 6 - 90), ((secondsEnd - secondsStart) * 6), true)
-                p.arcTo(midOvalDelta, (secondsEnd * 6 - 90), (-(secondsEnd - secondsStart) * 6))
+                p.arcTo(midOval, (secondsStart * 6 - 90).toFloat(), ((secondsEnd - secondsStart) * 6).toFloat(), true)
+                p.arcTo(midOvalDelta, (secondsEnd * 6 - 90).toFloat(), (-(secondsEnd - secondsStart) * 6).toFloat())
                 p.close()
             } else {
-                p.arcTo(startOval, (secondsStart * 6 - 90), ((secondsEnd - secondsStart) * 6), true)
-                p.arcTo(endOval, (secondsEnd * 6 - 90), (-(secondsEnd - secondsStart) * 6))
+                p.arcTo(startOval, (secondsStart * 6 - 90).toFloat(), ((secondsEnd - secondsStart) * 6).toFloat(), true)
+                p.arcTo(endOval, (secondsEnd * 6 - 90).toFloat(), (-(secondsEnd - secondsStart) * 6).toFloat())
                 p.close()
 
                 //            Log.e(TAG, "New arc: radius(" + Float.toString((float) startRadius) + "," + Float.toString((float) endRadius) +
@@ -324,7 +324,7 @@ class ClockFace : Observer {
             // This one always starts at the top and goes clockwise to the time indicated (seconds).
             // This computation is much easier than doing it for the general case.
 
-            drawRadialArc(canvas, null, 0.0f, seconds, startRadius, endRadius, paint, outlinePaint, false)
+            drawRadialArc(canvas, null, 0.0, seconds.toDouble(), startRadius, endRadius, paint, outlinePaint, false)
         } else {
             // This one is more work. We need to deal with the flat bottom.
 
@@ -610,8 +610,8 @@ class ClockFace : Observer {
             val startTime = e.startTime
             val endTime = e.endTime
 
-            val arcStart = startTime / 720000.0f
-            val arcEnd = endTime / 720000.0f
+            val arcStart: Double = startTime / 720000.0
+            val arcEnd: Double = endTime / 720000.0
 
             // path caching happens inside drawRadialArc
 
@@ -650,24 +650,38 @@ class ClockFace : Observer {
             // eight little diamonds -- precompute the deltas when we're all the way out at the end,
             // then apply elsewhere
 
+            val dxlow: Float
+            val dylow: Float
+            val dxhigh: Float
+            val dyhigh: Float
+            var x1: Float
+            var y1: Float
+            var x2: Float
+            var y2: Float
+            var xlow: Float
+            var ylow: Float
+            var xmid: Float
+            var ymid: Float
+            var xhigh: Float
+            var yhigh: Float
             val stippleWidth = 0.3f
             val stippleSteps = 8
             val rDelta = calendarRingWidth / stippleSteps.toFloat()
 
-            var x1 = clockX(stippleTime.toDouble(), calendarRingMaxRadius)
-            var y1 = clockY(stippleTime.toDouble(), calendarRingMaxRadius)
-            var x2 = clockX(stippleTime.toDouble(), calendarRingMaxRadius - rDelta)
-            var y2 = clockY(stippleTime.toDouble(), calendarRingMaxRadius - rDelta)
-            var xmid = (x1 + x2) / 2f
-            var ymid = (y1 + y2) / 2f
-            var xlow = clockX((stippleTime - stippleWidth).toDouble(), calendarRingMaxRadius - rDelta / 2)
-            var ylow = clockY((stippleTime - stippleWidth).toDouble(), calendarRingMaxRadius - rDelta / 2)
-            var xhigh = clockX((stippleTime + stippleWidth).toDouble(), calendarRingMaxRadius - rDelta / 2)
-            var yhigh = clockY((stippleTime + stippleWidth).toDouble(), calendarRingMaxRadius - rDelta / 2)
-            val dxlow = xmid - xlow
-            val dylow = ymid - ylow
-            val dxhigh = xmid - xhigh
-            val dyhigh = ymid - yhigh
+            x1 = clockX(stippleTime.toDouble(), calendarRingMaxRadius)
+            y1 = clockY(stippleTime.toDouble(), calendarRingMaxRadius)
+            x2 = clockX(stippleTime.toDouble(), calendarRingMaxRadius - rDelta)
+            y2 = clockY(stippleTime.toDouble(), calendarRingMaxRadius - rDelta)
+            xmid = (x1 + x2) / 2f
+            ymid = (y1 + y2) / 2f
+            xlow = clockX((stippleTime - stippleWidth).toDouble(), calendarRingMaxRadius - rDelta / 2)
+            ylow = clockY((stippleTime - stippleWidth).toDouble(), calendarRingMaxRadius - rDelta / 2)
+            xhigh = clockX((stippleTime + stippleWidth).toDouble(), calendarRingMaxRadius - rDelta / 2)
+            yhigh = clockY((stippleTime + stippleWidth).toDouble(), calendarRingMaxRadius - rDelta / 2)
+            dxlow = xmid - xlow
+            dylow = ymid - ylow
+            dxhigh = xmid - xhigh
+            dyhigh = ymid - yhigh
 
             r1 = calendarRingMinRadius
             x1 = clockX(stippleTime.toDouble(), r1)
@@ -907,17 +921,16 @@ class ClockFace : Observer {
         }
     }
 
+    // given two values a1 and a2 associated with time parameters t1 and t2, find the
+    // interpolated value for a given the time t
+    //
+    // example: a1 = 4, a2 = 10, t1=10, t2=30
+    // interpolateT: t -> a
+    //    10 -> 4
+    //    20 -> 7
+    //    30 -> 10
+    //    50 -> 16  (we keep extrapolating on either end)
     private fun interpolate(a1: Float, t1: Float, a2: Float, t2: Float, t: Float): Float {
-        // given two values a1 and a2 associated with time parameters t1 and t2, find the
-        // interpolated value for a given the time t
-        //
-        // example: a1 = 4, a2 = 10, t1=10, t2=30
-        // interpolateT: t -> a
-        //    10 -> 4
-        //    20 -> 7
-        //    30 -> 10
-        //    50 -> 16  (we keep extrapolating on either end)
-
         val da = a2 - a1
         val dt = t2 - t1
         val ratio = (t - t1) / dt
@@ -962,10 +975,8 @@ class ClockFace : Observer {
         return (cy + radius.toDouble() * fractionFromCenter.toDouble() * Math.sin(angleRadians)).toFloat()
     }
 
-    /**
-     * Hack for Moto360: given the location on the dial (seconds), and the originally
-     * desired radius, this returns your new radius that will touch the flat bottom.
-     */
+    // hack for Moto360: given the location on the dial (seconds), and the originally
+    // desired radius, this returns your new radius that will touch the flat bottom
     private fun radiusToEdge(seconds: Double): Float {
         val yOrig = clockY(seconds, 1f)
         if (yOrig > cy * 2 - missingBottomPixels) {
@@ -997,10 +1008,8 @@ class ClockFace : Observer {
         wipeCaches()
     }
 
-    /**
-     * Call this if you want this instance to head to the garbage collector; this disconnects it
-     * from paying attention to changes in the ClockState
-     */
+    // call this if you want this instance to head to the garbage collector; this disconnects
+    // it from paying attention to changes in the ClockState
     fun kill() {
         ClockState.deleteObserver(this)
     }
