@@ -17,6 +17,11 @@ import java.util.Observer
 
 import fr.nicolaspomepuy.androidwearcrashreport.mobile.CrashReport
 
+/**
+ * This class handles all of the communications between the phone and the watch. Right now,
+ * that means two things: sending messages *to* the watch (by calling out to WearSender) and
+ * receiving messages *from* the watch (currently only CrashReports).
+ */
 class WatchCalendarService : Service(), Observer {
     private lateinit var wearSender: WearSender
 
@@ -49,7 +54,7 @@ class WatchCalendarService : Service(), Observer {
 
         // Nicholas Pomepuy's crash reporting library will collect exceptions on the watch,
         // pass them along via the Data API, and they'll end up here, where we will then
-        // pass them along to the Google Play Store. I'll be amazed if this works.
+        // pass them along to the Google Play Store. Seems to work.
         CrashReport.getInstance(this).setOnCrashListener { crashInfo ->
             // Manage the crash
             Log.e(TAG, "wear-side crash detected!", crashInfo.throwable)
@@ -65,8 +70,8 @@ class WatchCalendarService : Service(), Observer {
     }
 
     override fun onBind(intent: Intent?): IBinder? {
-        Log.e(TAG, "onBind: we should support this")
-        error("Not yet implemented")
+        Log.e(TAG, "onBind: not supported")
+        return null // "May return null if clients can not bind to the service." -- which is exactly what we want
     }
 
     override fun update(observable: Observable?, data: Any?) {

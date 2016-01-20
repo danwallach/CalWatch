@@ -15,13 +15,7 @@ import com.google.android.gms.common.api.GoogleApiClient
 import com.google.android.gms.wearable.PutDataMapRequest
 import com.google.android.gms.wearable.Wearable
 
-class WearSender(private val context: Context) {
-    // yes, we're hanging onto a context here, as part the phone side of sending state to the watch,
-    // and yes, hanging onto contexts is frowned upon. However, this context is only held alive
-    // by virtue of the instance of WearSender, which is in turn only held alive by virtue of the
-    // WatchCalendarService. And that thing can and will be summarily killed by the system at any
-    // time, so this context won't leak.
-
+class WearSender(context: Context) {
     fun sendAllToWatch() {
         try {
             val wireBytesToSend = ClockState.getProtobuf()
@@ -46,9 +40,9 @@ class WearSender(private val context: Context) {
                 // exceptionally useful for log debugging
                 pendingResult.setResultCallback {
                     if (it.status.isSuccess) {
-                        Log.d(TAG, "Data item set: " + it.dataItem.uri)
+                        Log.d(TAG, "Data item set: ${it.dataItem.uri}")
                     } else {
-                        Log.e(TAG, "Data item failed? " + it.status.toString())
+                        Log.e(TAG, "Data item failed? ${it.status.toString()}")
                     }
                 }
             }

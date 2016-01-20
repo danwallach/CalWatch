@@ -16,6 +16,11 @@ import android.util.Log
 import java.util.Observable
 import java.util.Observer
 
+/**
+ * All of the graphics calls for drawing watchfaces happen here. Note that this class knows
+ * nothing about Android widgets, views, or activities. That stuff is handled in MyViewAnim/PhoneActivity
+ * (on the phone) and CalWatchFaceService (on the watch).
+ */
 class ClockFace : Observer {
     private val instanceID: Int
 
@@ -1008,16 +1013,22 @@ class ClockFace : Observer {
     override fun update(observable: Observable?, data: Any?) {
         Log.v(TAG, "update - start, instance($instanceID)")
         wipeCaches()
-        TimeWrapper.update()
+//        TimeWrapper.update() -- not necessary any more because we update on every redraw
         this.faceMode = ClockState.faceMode
         this.showDayDate = ClockState.showDayDate
         this.showSeconds = ClockState.showSeconds
-        updateEventList()
+
+//        updateEventList() -- not necessary any more because we call this in drawCalendar()
+
         Log.v(TAG, "update - end")
     }
 
     private fun updateEventList() {
-        // this is cheap enough that we can afford to do it at 60Hz
+        // This is cheap enough that we can afford to do it at 60Hz, although the call to getVisibleEventList()
+        // might start a task, on a different thread, to update the events from the calendar. If that happens,
+        // ClockState will be updated asynchronously, and the next time we come here, we'll get the latest
+        // events. While that background task is running, this call will give us the original events
+        // every time.
         this.maxLevel = ClockState.maxLevel
         this.eventList = ClockState.getVisibleEventList()
     }
@@ -1029,7 +1040,7 @@ class ClockFace : Observer {
     }
 
     /**
-     * Let us know if we're on a square or round watchface; we don't really care.
+     * Let us know if we're on a square or round watchface. (We don't really care. For now.)
      */
     fun setRound(round: Boolean) {
     }

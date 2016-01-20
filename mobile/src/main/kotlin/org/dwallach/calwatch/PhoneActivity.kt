@@ -69,7 +69,7 @@ class PhoneActivity : Activity(), Observer {
             numbersButton.isChecked -> ClockState.FACE_NUMBERS
             liteButton.isChecked -> ClockState.FACE_LITE
             else -> {
-                Log.v(TAG, "no buttons are selected? weird.")
+                Log.e(TAG, "no buttons are selected? weird.")
                 -1
             }
         }
@@ -83,7 +83,7 @@ class PhoneActivity : Activity(), Observer {
         ClockState.showSeconds = showSeconds
         ClockState.showDayDate = showDayDate
 
-        ClockState.pingObservers() // we only need to do this once, versus a whole bunch of times when it was happening internally
+        ClockState.pingObservers() // we only need to do this once
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {

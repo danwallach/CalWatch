@@ -11,6 +11,16 @@ import android.util.Log
 import java.io.IOException
 import java.util.Observable
 
+/**
+ * We're doing something of the model-view-controller thing here, where ClockState has the "model" --
+ * everything necessary to render a clockface including what style it is, whether we're supposed
+ * to show the seconds-hand or the day-date display, and the list of events. The "controller" part
+ * is different on the phone and on the watch (MyViewAnim/PhoneActivity vs. CalWatchFaceService).
+ * The "view" (i.e., all the actual graphics calls) lives in ClockFace.
+ *
+ * The idea is that there is a ClockState singleton, and it doesn't know anything about Android
+ * contexts or any of that stuff. The only imported Android class is for Logging.
+ */
 object ClockState : Observable() {
     private const val TAG = "ClockState"
 
@@ -153,9 +163,10 @@ object ClockState : Observable() {
     }
 
     /**
-     * Marshalls into a protobuf for transmission elsewhere. (Well, it used to be
+     * Marshals into a protobuf for transmission elsewhere. (Well, it used to be
      * a protobuf, in ancient days, when we had to ship the entire calendar from
-     * phone to watch, but now it's just a simple string.)
+     * phone to watch, but now it's just a simple string. Keeping the "protobuf"
+     * nomenclature around in case we decide to go back to that at some later point.)
      */
     fun getProtobuf() = WireUpdate(faceMode, showSeconds, showDayDate).toByteArray()
 
@@ -190,6 +201,9 @@ object ClockState : Observable() {
         Log.v(TAG, "event update complete")
     }
 
+    /**
+     * Call this for all the ClockState observers to get updated.
+     */
     fun pingObservers() {
         // this incantation will make observers elsewhere aware that there's new content
         setChanged()
