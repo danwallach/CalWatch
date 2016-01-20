@@ -650,38 +650,24 @@ class ClockFace : Observer {
             // eight little diamonds -- precompute the deltas when we're all the way out at the end,
             // then apply elsewhere
 
-            val dxlow: Float
-            val dylow: Float
-            val dxhigh: Float
-            val dyhigh: Float
-            var x1: Float
-            var y1: Float
-            var x2: Float
-            var y2: Float
-            var xlow: Float
-            var ylow: Float
-            var xmid: Float
-            var ymid: Float
-            var xhigh: Float
-            var yhigh: Float
             val stippleWidth = 0.3f
             val stippleSteps = 8
             val rDelta = calendarRingWidth / stippleSteps.toFloat()
 
-            x1 = clockX(stippleTime.toDouble(), calendarRingMaxRadius)
-            y1 = clockY(stippleTime.toDouble(), calendarRingMaxRadius)
-            x2 = clockX(stippleTime.toDouble(), calendarRingMaxRadius - rDelta)
-            y2 = clockY(stippleTime.toDouble(), calendarRingMaxRadius - rDelta)
-            xmid = (x1 + x2) / 2f
-            ymid = (y1 + y2) / 2f
-            xlow = clockX((stippleTime - stippleWidth).toDouble(), calendarRingMaxRadius - rDelta / 2)
-            ylow = clockY((stippleTime - stippleWidth).toDouble(), calendarRingMaxRadius - rDelta / 2)
-            xhigh = clockX((stippleTime + stippleWidth).toDouble(), calendarRingMaxRadius - rDelta / 2)
-            yhigh = clockY((stippleTime + stippleWidth).toDouble(), calendarRingMaxRadius - rDelta / 2)
-            dxlow = xmid - xlow
-            dylow = ymid - ylow
-            dxhigh = xmid - xhigh
-            dyhigh = ymid - yhigh
+            var x1: Float = clockX(stippleTime.toDouble(), calendarRingMaxRadius)
+            var y1: Float = clockY(stippleTime.toDouble(), calendarRingMaxRadius)
+            var x2: Float = clockX(stippleTime.toDouble(), calendarRingMaxRadius - rDelta)
+            var y2: Float = clockY(stippleTime.toDouble(), calendarRingMaxRadius - rDelta)
+            var xmid: Float = (x1 + x2) / 2f
+            var ymid: Float = (y1 + y2) / 2f
+            var xlow: Float = clockX((stippleTime - stippleWidth).toDouble(), calendarRingMaxRadius - rDelta / 2)
+            var ylow: Float = clockY((stippleTime - stippleWidth).toDouble(), calendarRingMaxRadius - rDelta / 2)
+            var xhigh: Float = clockX((stippleTime + stippleWidth).toDouble(), calendarRingMaxRadius - rDelta / 2)
+            var yhigh: Float = clockY((stippleTime + stippleWidth).toDouble(), calendarRingMaxRadius - rDelta / 2)
+            val dxlow: Float = xmid - xlow
+            val dylow: Float = ymid - ylow
+            val dxhigh: Float = xmid - xhigh
+            val dyhigh: Float = ymid - yhigh
 
             r1 = calendarRingMinRadius
             x1 = clockX(stippleTime.toDouble(), r1)
@@ -921,16 +907,16 @@ class ClockFace : Observer {
         }
     }
 
-    // given two values a1 and a2 associated with time parameters t1 and t2, find the
-    // interpolated value for a given the time t
-    //
-    // example: a1 = 4, a2 = 10, t1=10, t2=30
-    // interpolateT: t -> a
-    //    10 -> 4
-    //    20 -> 7
-    //    30 -> 10
-    //    50 -> 16  (we keep extrapolating on either end)
     private fun interpolate(a1: Float, t1: Float, a2: Float, t2: Float, t: Float): Float {
+        // given two values a1 and a2 associated with time parameters t1 and t2, find the
+        // interpolated value for a given the time t
+        //
+        // example: a1 = 4, a2 = 10, t1=10, t2=30
+        // interpolateT: t -> a
+        //    10 -> 4
+        //    20 -> 7
+        //    30 -> 10
+        //    50 -> 16  (we keep extrapolating on either end)
         val da = a2 - a1
         val dt = t2 - t1
         val ratio = (t - t1) / dt

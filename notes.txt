@@ -58,6 +58,9 @@ Refactoring / reengineering
 
     TODO too much .toFloat() and .toDouble() in ClockFace -- cleanup?!
     - We could try to standardize everything with Float, but many of the trig function in Math require Double
+    - Twice I've tried standardizing on Float and things break: loss of the second-hand (!), and misalignment of the stipple pattern,
+      so the thing to try next is standardizing on Double.
+    - There's something really subtle and weird about how Kotlin does floating point that I'm clearly missing.
 
 Right-to-left support
     TODO detect when we're in RTL mode
