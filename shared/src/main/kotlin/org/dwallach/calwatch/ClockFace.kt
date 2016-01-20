@@ -907,16 +907,17 @@ class ClockFace : Observer {
         }
     }
 
-    // given two values a1 and a2 associated with time parameters t1 and t2, find the
-    // interpolated value for a given the time t
-    //
-    // example: a1 = 4, a2 = 10, t1=10, t2=30
-    // interpolateT: t -> a
-    //    10 -> 4
-    //    20 -> 7
-    //    30 -> 10
-    //    50 -> 16  (we keep extrapolating on either end)
     private fun interpolate(a1: Float, t1: Float, a2: Float, t2: Float, t: Float): Float {
+        // given two values a1 and a2 associated with time parameters t1 and t2, find the
+        // interpolated value for a given the time t
+        //
+        // example: a1 = 4, a2 = 10, t1=10, t2=30
+        // interpolateT: t -> a
+        //    10 -> 4
+        //    20 -> 7
+        //    30 -> 10
+        //    50 -> 16  (we keep extrapolating on either end)
+
         val da = a2 - a1
         val dt = t2 - t1
         val ratio = (t - t1) / dt
@@ -961,8 +962,10 @@ class ClockFace : Observer {
         return (cy + radius.toDouble() * fractionFromCenter.toDouble() * Math.sin(angleRadians)).toFloat()
     }
 
-    // hack for Moto360: given the location on the dial (seconds), and the originally
-    // desired radius, this returns your new radius that will touch the flat bottom
+    /**
+     * Hack for Moto360: given the location on the dial (seconds), and the originally
+     * desired radius, this returns your new radius that will touch the flat bottom.
+     */
     private fun radiusToEdge(seconds: Double): Float {
         val yOrig = clockY(seconds, 1f)
         if (yOrig > cy * 2 - missingBottomPixels) {
@@ -994,8 +997,10 @@ class ClockFace : Observer {
         wipeCaches()
     }
 
-    // call this if you want this instance to head to the garbage collector; this disconnects
-    // it from paying attention to changes in the ClockState
+    /**
+     * Call this if you want this instance to head to the garbage collector; this disconnects it
+     * from paying attention to changes in the ClockState
+     */
     fun kill() {
         ClockState.deleteObserver(this)
     }
