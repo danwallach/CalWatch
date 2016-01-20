@@ -236,7 +236,7 @@ class ClockFace : Observer {
      * The path used for drawing is returned and may be passed back in next time, to the *path*
      * argument, which will make things go much faster.
      */
-    private fun drawRadialArc(canvas: Canvas, path: Path?, secondsStart: Double, secondsEnd: Double, startRadiusRatio: Float, endRadiusRatio: Float, paint: Paint, outlinePaint: Paint?, lowBitSquish: Boolean = true): Path {
+    private fun drawRadialArc(canvas: Canvas, path: Path?, secondsStart: Float, secondsEnd: Float, startRadiusRatio: Float, endRadiusRatio: Float, paint: Paint, outlinePaint: Paint?, lowBitSquish: Boolean = true): Path {
         var startRadius = startRadiusRatio
         var endRadius = endRadiusRatio
         /*
@@ -272,12 +272,12 @@ class ClockFace : Observer {
                 // In ambient low-bit mode, we originally drew some slender arcs of fixed width at roughly the center of the big
                 // colored pie wedge which we normally show when we're not in ambient mode. Currently this is dead code because
                 // drawCalendar() becomes a no-op in ambientLowBit when burn-in protection is on.
-                p.arcTo(midOval, (secondsStart * 6 - 90).toFloat(), ((secondsEnd - secondsStart) * 6).toFloat(), true)
-                p.arcTo(midOvalDelta, (secondsEnd * 6 - 90).toFloat(), (-(secondsEnd - secondsStart) * 6).toFloat())
+                p.arcTo(midOval, (secondsStart * 6 - 90), ((secondsEnd - secondsStart) * 6), true)
+                p.arcTo(midOvalDelta, (secondsEnd * 6 - 90), (-(secondsEnd - secondsStart) * 6))
                 p.close()
             } else {
-                p.arcTo(startOval, (secondsStart * 6 - 90).toFloat(), ((secondsEnd - secondsStart) * 6).toFloat(), true)
-                p.arcTo(endOval, (secondsEnd * 6 - 90).toFloat(), (-(secondsEnd - secondsStart) * 6).toFloat())
+                p.arcTo(startOval, (secondsStart * 6 - 90), ((secondsEnd - secondsStart) * 6), true)
+                p.arcTo(endOval, (secondsEnd * 6 - 90), (-(secondsEnd - secondsStart) * 6))
                 p.close()
 
                 //            Log.e(TAG, "New arc: radius(" + Float.toString((float) startRadius) + "," + Float.toString((float) endRadius) +
@@ -324,7 +324,7 @@ class ClockFace : Observer {
             // This one always starts at the top and goes clockwise to the time indicated (seconds).
             // This computation is much easier than doing it for the general case.
 
-            drawRadialArc(canvas, null, 0.0, seconds.toDouble(), startRadius, endRadius, paint, outlinePaint, false)
+            drawRadialArc(canvas, null, 0.0f, seconds, startRadius, endRadius, paint, outlinePaint, false)
         } else {
             // This one is more work. We need to deal with the flat bottom.
 
@@ -610,8 +610,8 @@ class ClockFace : Observer {
             val startTime = e.startTime
             val endTime = e.endTime
 
-            val arcStart = startTime / 720000.0
-            val arcEnd = endTime / 720000.0
+            val arcStart = startTime / 720000.0f
+            val arcEnd = endTime / 720000.0f
 
             // path caching happens inside drawRadialArc
 
