@@ -20,8 +20,8 @@ notes.txt -- ongoing work, notes, to-do items, etc.
 /logdumps -- logcat plus notes from the various times that CalWatch has blown up
 
 /mobile -- code that runs only on the phone
-    src/androidTest/java/ -- some unit tests for event layout
-    src/main/java/ -- CalWatch Java files
+    src/androidTest/java/ -- some old unit tests for event layout
+    src/main/kotlin/ -- CalWatch source-code files
 
 /shared -- code that runs on both the phone and on the watch
     src/main/java/
@@ -33,6 +33,10 @@ notes.txt -- ongoing work, notes, to-do items, etc.
           updates to use the newer parametric HashMap versus the
           older non-parametric Hashtable.
 
-        org.dwallach.calwatch/ -- CalWatch Java files
+    src/main/kotlin/
+        org.dwallach.calwatch/ -- CalWatch Kotlin files
 
 /wear -- code that runs only on the watch
+
+If you look at code prior to release4, you'll see that this project was written entirely in Java.
+Starting with release4, I ported most everything to Kotlin and did a ton of code cleanup.
