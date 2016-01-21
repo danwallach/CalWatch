@@ -186,10 +186,11 @@ class ClockFace : Observer {
             canvas.drawPath(p, shadowPaint)
     }
 
-    private fun drawRadialLine(path: Path, strokeWidth: Float, seconds: Double, startRadiusRatio: Float, endRadiusRatio: Float, forceVertical: Boolean, flatBottomHack: Boolean) {
+    private fun drawRadialLine(path: Path, startStrokeWidth: Float, seconds: Double, startRadiusRatio: Float, endRadiusRatio: Float, forceVertical: Boolean, flatBottomHack: Boolean) {
         var lseconds = seconds
         var startRadius = startRadiusRatio
         var endRadius = endRadiusRatio
+        var strokeWidth = startStrokeWidth
 
         if (flatBottomHack) {
             val clipRadius = radiusToEdge(lseconds)
@@ -206,6 +207,7 @@ class ClockFace : Observer {
             val ratio = (radius - 10f) / radius
             startRadius *= ratio
             endRadius *= ratio
+            strokeWidth *= ratio
         }
 
         val x1 = clockX(lseconds, startRadius)
@@ -418,7 +420,7 @@ class ClockFace : Observer {
         // force "lite" mode when in burn-in protection mode
         val lFaceMode = if(drawStyle == PaintCan.styleAntiBurnIn) ClockState.FACE_LITE else faceMode
 
-        val colorTickShadow = PaintCan[drawStyle, PaintCan.colorSecondHandShadow]
+        val colorTickShadow = PaintCan[drawStyle, PaintCan.colorTickShadow]
         val colorSmall = PaintCan[drawStyle, PaintCan.colorSmallTextAndLines]
         val colorBig = PaintCan[drawStyle, PaintCan.colorBigTextAndLines]
         val colorTextShadow = PaintCan[drawStyle, PaintCan.colorBigShadow]
@@ -556,7 +558,7 @@ class ClockFace : Observer {
         val hours = minutes / 12.0  // because drawRadialLine is scaled to a 60-unit circle
 
 
-        val shadowColor = PaintCan[drawStyle, PaintCan.colorSecondHandShadow]
+        val shadowColor = PaintCan[drawStyle, PaintCan.colorHandShadow]
         val hourColor = PaintCan[drawStyle, PaintCan.colorHourHand]
         val minuteColor = PaintCan[drawStyle, PaintCan.colorMinuteHand]
 
@@ -1058,11 +1060,11 @@ class ClockFace : Observer {
         private var instanceCounter = 0
 
 
-        // these ones are static so subsequent instances of this class can recover state; we start
-        // them off non-zero, but they'll be changed quickly enough
-        private val defaultCx = 140
-        private val defaultCy = 140
-        private val defaultRadius = 140
+        // Android Wear eventually tells us these numbers, but best to start off with something in
+        // the meanwhile.
+        private const val defaultCx = 140
+        private const val defaultCy = 140
+        private const val defaultRadius = 140
 
         private const val calendarRingMinRadius = 0.2f
         private const val calendarRingMaxRadius = 0.9f

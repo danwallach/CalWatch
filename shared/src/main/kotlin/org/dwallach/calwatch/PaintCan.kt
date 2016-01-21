@@ -54,7 +54,7 @@ object PaintCan {
      * This generates all the Paint that we'll need for drawing the watchface. These are all cached
      * in the palette and accessed elsewhere via PaintCan.get().
      */
-    private fun watchfacePaint(_argb: Int, _style: Int, _textSize: Float, _strokeWidth: Float) =
+    private fun watchfacePaint(_argb: Int, _style: Int, _textSize: Float, _strokeWidth: Float, forceColorAmbient: Boolean = false) =
         // underscores in the formal parameters to fix the variable shadowing in the apply block, below
         Paint(Paint.SUBPIXEL_TEXT_FLAG or Paint.HINTING_ON).apply {
             strokeCap = Paint.Cap.SQUARE
@@ -64,18 +64,22 @@ object PaintCan {
             textAlign = Paint.Align.CENTER
             isAntiAlias = _style == styleNormal || _style == styleAmbient // anti-aliasing is forbidden in the low-bit modes
 
-            color = when (_style) {
+            // In specific cases, we're going to force colors to be colorful even in ambient mode (see below)
+            val effectiveStyle = if(_style == styleAmbient && forceColorAmbient) styleNormal else _style
+
+            color = when (effectiveStyle) {
                 styleNormal -> _argb
 
                 styleLowBit, styleAntiBurnIn -> when(_argb) {
                     //
-                    // Says Google: One reduced color space power saving method is to use a
+                    // Quoth the Google: One reduced color space power saving method is to use a
                     // "low-bit" mode. In low-bit mode, the available colors are limited to
                     // black, white, blue, red, magenta, green, cyan, and yellow.
                     //
                     // http://developer.android.com/design/wear/watchfaces.html
                     //
-                    // So we'll pass those colors through unmolested.
+                    // So we'll pass those colors through unmolested. On some watches, like the Moto 360 Sport,
+                    // you still only get black & white, so all of these non-black colors just become white.
                     //
                     Color.BLACK, Color.WHITE, Color.BLUE, Color.RED, Color.MAGENTA,
                     Color.GREEN, Color.CYAN, Color.YELLOW -> _argb
@@ -98,22 +102,23 @@ object PaintCan {
     const val colorBatteryLow = 0
     const val colorBatteryCritical = 1
     const val colorSecondHand = 2
-    const val colorSecondHandShadow = 3
-    const val colorMinuteHand = 4
-    const val colorHourHand = 5
-    const val colorArcShadow = 6
-    const val colorSmallTextAndLines = 7
-    const val colorBigTextAndLines = 8
-    const val colorBlackFill = 9
-    const val colorLowBitCalendarFill = 10
-    const val colorSmallShadow = 11
-    const val colorBigShadow = 12
-    const val colorStopwatchStroke = 13
-    const val colorStopwatchFill = 14
-    const val colorStopwatchSeconds = 15
-    const val colorTimerStroke = 16
-    const val colorTimerFill = 17
-    const val colorMax = 17
+    const val colorHandShadow = 3
+    const val colorTickShadow = 4
+    const val colorMinuteHand = 5
+    const val colorHourHand = 6
+    const val colorArcShadow = 7
+    const val colorSmallTextAndLines = 8
+    const val colorBigTextAndLines = 9
+    const val colorBlackFill = 10
+    const val colorLowBitCalendarFill = 11
+    const val colorSmallShadow = 12
+    const val colorBigShadow = 13
+    const val colorStopwatchStroke = 14
+    const val colorStopwatchFill = 15
+    const val colorStopwatchSeconds = 16
+    const val colorTimerStroke = 17
+    const val colorTimerFill = 18
+    const val colorMax = 18
 
 
     /**
@@ -133,10 +138,15 @@ object PaintCan {
         palette = Array(styleMax + 1) { arrayOfNulls<Paint>(colorMax + 1) }
 
         for (style in 0..styleMax) {
-            palette[style][colorBatteryLow] = watchfacePaint(Color.YELLOW, style, smTextSize, lineWidth / 3f)
-            palette[style][colorBatteryCritical] = watchfacePaint(Color.RED, style, smTextSize, lineWidth / 3f)
+            // Quoth the Google: "You can use color elements for up to 5 percent of total pixels." We're going to
+            // do this exclusively for the remaining battery indicator, which is well under the required 5%.
+            // http://developer.android.com/design/wear/watchfaces.html
+            palette[style][colorBatteryLow] = watchfacePaint(Color.YELLOW, style, smTextSize, lineWidth / 3f, true)
+            palette[style][colorBatteryCritical] = watchfacePaint(Color.RED, style, smTextSize, lineWidth / 3f, true)
+
             palette[style][colorSecondHand] = watchfacePaint(Color.RED, style, smTextSize, lineWidth / 3f)
-            palette[style][colorSecondHandShadow] = watchfacePaint(Color.BLACK, style, smTextSize, lineWidth / 8f)
+            palette[style][colorHandShadow] = watchfacePaint(Color.BLACK, style, smTextSize, lineWidth / 8f)
+            palette[style][colorTickShadow] = watchfacePaint(Color.BLACK, style, smTextSize, lineWidth / 8f)
             palette[style][colorMinuteHand] = watchfacePaint(Color.WHITE, style, textSize, lineWidth)
             palette[style][colorHourHand] = watchfacePaint(Color.WHITE, style, textSize, lineWidth * 1.5f)
             palette[style][colorArcShadow] = watchfacePaint(Color.BLACK, style, smTextSize, lineWidth / 6f)
@@ -155,7 +165,8 @@ object PaintCan {
             palette[style][colorTimerFill] = watchfacePaint(0x90F2CF80.toInt(), style, smTextSize, lineWidth / 3f) // orange-ish + transparency
 
             // shadows are stroke, not fill, so we fix that here
-            palette[style][colorSecondHandShadow]?.style = Paint.Style.STROKE
+            palette[style][colorHandShadow]?.style = Paint.Style.STROKE
+            palette[style][colorTickShadow]?.style = Paint.Style.STROKE
             palette[style][colorArcShadow]?.style = Paint.Style.STROKE
             palette[style][colorSmallShadow]?.style = Paint.Style.STROKE
             palette[style][colorBigShadow]?.style = Paint.Style.STROKE
@@ -170,10 +181,15 @@ object PaintCan {
 
         // In low-bit anti-burnin mode: we'll be drawing some "shadows" as
         // white outlines around black centers, "hollowing out" the hands as we're supposed to do.
-        palette[styleAntiBurnIn][colorSecondHandShadow]?.color = Color.WHITE
-        palette[styleAntiBurnIn][colorSecondHandShadow]?.strokeWidth = lineWidth / 3f
+        palette[styleAntiBurnIn][colorHandShadow]?.color = Color.WHITE
+        palette[styleAntiBurnIn][colorHandShadow]?.strokeWidth = lineWidth / 6f
+
         palette[styleAntiBurnIn][colorMinuteHand]?.color = Color.BLACK
+        palette[styleAntiBurnIn][colorMinuteHand]?.style = Paint.Style.STROKE
+
         palette[styleAntiBurnIn][colorHourHand]?.color = Color.BLACK
+        palette[styleAntiBurnIn][colorHourHand]?.style = Paint.Style.STROKE
+
         palette[styleAntiBurnIn][colorArcShadow]?.color = Color.WHITE
         palette[styleAntiBurnIn][colorSmallShadow]?.color = Color.WHITE
         palette[styleAntiBurnIn][colorBigShadow]?.color = Color.WHITE
