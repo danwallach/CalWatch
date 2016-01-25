@@ -157,9 +157,8 @@ object ClockState : Observable() {
      * the *local* timezone.
      */
     fun getVisibleEventList(): List<EventWrapper> {
-        // should be fast, since mostly it will detect that nothing has changed
-        recomputeVisibleEvents()
-        return visibleEventList
+        recomputeVisibleEvents() // might start an async update, might not
+        return visibleEventList // return the best current data we've got
     }
 
     /**

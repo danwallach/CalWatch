@@ -1015,13 +1015,11 @@ class ClockFace : Observer {
     // this gets called when the ClockState updates itself
     override fun update(observable: Observable?, data: Any?) {
         Log.v(TAG, "update - start, instance($instanceID)")
-        wipeCaches()
-//        TimeWrapper.update() -- not necessary any more because we update on every redraw
+        wipeCaches() // nuke saved Paths and such, because all sorts of state may have just changed
+
         this.faceMode = ClockState.faceMode
         this.showDayDate = ClockState.showDayDate
         this.showSeconds = ClockState.showSeconds
-
-//        updateEventList() -- not necessary any more because we call this in drawCalendar()
 
         Log.v(TAG, "update - end")
     }
