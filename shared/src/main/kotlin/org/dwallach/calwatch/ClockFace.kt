@@ -142,6 +142,12 @@ class ClockFace : Observer {
     fun drawEverything(canvas: Canvas) {
         TimeWrapper.frameStart()
 
+        // This will start an asynchronous query to update the calendar state; we're doing this on
+        // every screen refresh because it's dirt cheap and we want to be current. (This call eventually
+        // dives down into CalendarFetcher where it will check if the hour has changed since the last
+        // refresh. If not, it becomes a no-op.)
+        updateEventList()
+
         // the calendar goes on the very bottom and everything else stacks above; the code for calendar drawing
         // works great in low-bit mode, leaving big white wedges, but this violates the rules, per Google:
         // "For OLED screens, you must use a black background. Non-background pixels must be less than 10
@@ -601,11 +607,6 @@ class ClockFace : Observer {
             canvas.drawBitmap(missingCalendarBitmap, missingCalendarX, missingCalendarY, null)
             return
         }
-
-        // this line represents a big change; we're still an observer of the clock state, but now
-        // we're also polling it; it promises to support this polling efficiently, and in return,
-        // we know we've always got an up to date set of calendar wedges
-        updateEventList()
 
         val time = TimeWrapper.localTime
 
