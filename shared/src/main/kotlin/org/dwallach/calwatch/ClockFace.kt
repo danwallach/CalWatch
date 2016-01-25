@@ -95,16 +95,9 @@ class ClockFace : Observer {
         instanceID = instanceCounter++
         Log.v(TAG, "ClockFace setup, instance($instanceID)")
 
-        setupObserver()
-        update(null, null) // initialize variables from initial constants, or whatever else is hanging out in ClockState
-
-        // note: this space used to detect if the Build.MODEL and Build.PRODUCT matched a Moto360 and
-        // called setMissingBottomPixels(). We're removing that now that there are several different
-        // watches with the same property.
-
-        // This is just to get things started. Because of Wear 5, there will be another call
-        // once the watchface is set up and running.
-        setMissingBottomPixels(0)
+        ClockState.addObserver(this) // so we get callbacks when the clock state changes
+        update(null, null) // and we'll do that callback for the first time, just to initialize things
+        setMissingBottomPixels(0) // just to get things started; flat bottom detection happens later
     }
 
     /**
@@ -1006,10 +999,6 @@ class ClockFace : Observer {
     // it from paying attention to changes in the ClockState
     fun kill() {
         ClockState.deleteObserver(this)
-    }
-
-    private fun setupObserver() {
-        ClockState.addObserver(this)
     }
 
     // this gets called when the ClockState updates itself
