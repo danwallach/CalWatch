@@ -20,6 +20,13 @@ import android.util.Log
 
 import java.lang.ref.WeakReference
 
+/**
+ * This class handles all the dirty work of asynchronously loading calendar data from the calendar provider
+ * and updating the state in ClockState. The constructor arguments, contentUri and authority, are used
+ * to specify what database Uri we're querying and what "authority" we're using to set up the IntentFilter.
+ * These are different on wear vs. mobile, so are specified in those subdirectories. Everything else
+ * is portable.
+ */
 class CalendarFetcher(initialContext: Context, val contentUri: Uri, val authority: String) {
     // this will fire when it's time to (re)load the calendar, launching an asynchronous
     // task to do all the dirty work and eventually update ClockState
