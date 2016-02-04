@@ -13,5 +13,7 @@
 -keep public class fr.nicholaspomepuy.** { *; }
 -keep public class kotlin.reflect.** { *; }
 
+-dontwarn kotlin.**
+
 -dontobfuscate
 
