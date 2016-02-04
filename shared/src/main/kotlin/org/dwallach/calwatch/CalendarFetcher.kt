@@ -278,9 +278,9 @@ class CalendarFetcher(initialContext: Context, val contentUri: Uri, val authorit
     }
 
 
+    // Why a Handler? Why not just start the async thing directly from rescan? Hard to say. The
+    // Google reference code uses a Handler this way, so we're basically copying it.
     class MyHandler(private val fetcher: CalendarFetcher) : Handler() {
-        private lateinit var loaderTask: AsyncTask<Context, Void, Pair<List<WireEvent>,Exception?>>
-
         override fun handleMessage(message: Message) {
             val context: Context? = fetcher.getContext()
             if (context == null) {
@@ -290,11 +290,7 @@ class CalendarFetcher(initialContext: Context, val contentUri: Uri, val authorit
 
             when (message.what) {
                 MSG_LOAD_CAL -> {
-                    Log.v(TAG, "handleMessage: launching calendar loader task")
-
-//                    loaderTask = CalLoaderTask(fetcher)
-//                    loaderTask.execute(context)
-
+                    Log.v(TAG, "handleMessage: launching calendar async loader task")
                     fetcher.runAsyncLoader(context)
                 }
                 else -> Log.e(TAG, "handleMessage: unexpected message: ${message.toString()}")
