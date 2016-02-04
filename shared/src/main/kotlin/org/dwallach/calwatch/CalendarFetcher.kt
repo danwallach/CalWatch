@@ -36,7 +36,6 @@ class CalendarFetcher(initialContext: Context, val contentUri: Uri, val authorit
     // this will fire when it's time to (re)load the calendar, launching an asynchronous
     // task to do all the dirty work and eventually update ClockState
     private val contextRef = WeakReference(initialContext)
-    private val loaderHandler = MyHandler(this)
     private var isReceiverRegistered: Boolean = false
 
     private val broadcastReceiver = object : BroadcastReceiver() {
@@ -92,8 +91,6 @@ class CalendarFetcher(initialContext: Context, val contentUri: Uri, val authorit
             context.unregisterReceiver(broadcastReceiver)
         }
 
-        loaderHandler.removeMessages(MyHandler.MSG_LOAD_CAL)
-
         isReceiverRegistered = false
         scanInProgress = false
     }
@@ -117,7 +114,7 @@ class CalendarFetcher(initialContext: Context, val contentUri: Uri, val authorit
         } else {
             Log.v(TAG, "rescan starting asynchronously")
             scanInProgress = true
-            loaderHandler.sendEmptyMessage(MyHandler.MSG_LOAD_CAL)
+            runAsyncLoader()
         }
     }
 
@@ -223,7 +220,10 @@ class CalendarFetcher(initialContext: Context, val contentUri: Uri, val authorit
     /**
      * Asynchronous loader handling via Kotlin's Anko.
      */
-    fun runAsyncLoader(context: Context) {
+    fun runAsyncLoader() {
+        val context: Context? = getContext()
+        if(context == null) return // nothing to do!
+
         var result: Pair<List<WireEvent>, Exception?>? = null
 
         //
@@ -273,31 +273,6 @@ class CalendarFetcher(initialContext: Context, val contentUri: Uri, val authorit
 
                 Log.v(TAG, "uiThread: complete")
             }
-        }
-    }
-
-
-    // Why a Handler? Why not just start the async thing directly from rescan? Hard to say. The
-    // Google reference code uses a Handler this way, so we're basically copying it.
-    class MyHandler(private val fetcher: CalendarFetcher) : Handler() {
-        override fun handleMessage(message: Message) {
-            val context: Context? = fetcher.getContext()
-            if (context == null) {
-                Log.e(TAG, "handleMessage: no available context, nothing to do")
-                return
-            }
-
-            when (message.what) {
-                MSG_LOAD_CAL -> {
-                    Log.v(TAG, "handleMessage: launching calendar async loader task")
-                    fetcher.runAsyncLoader(context)
-                }
-                else -> Log.e(TAG, "handleMessage: unexpected message: ${message.toString()}")
-            }
-        }
-
-        companion object {
-            const val MSG_LOAD_CAL = 1
         }
     }
 
