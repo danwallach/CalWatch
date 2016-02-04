@@ -235,16 +235,16 @@ class CalendarFetcher(initialContext: Context, val contentUri: Uri, val authorit
         val wakeLock = context.powerManager.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, "CalWatchWakeLock")
         wakeLock.acquire()
 
-        Log.v(TAG, "doInBackground: wake lock acquired")
+        Log.v(TAG, "async: wake lock acquired")
 
         async() {
             try {
                 val startTime = SystemClock.elapsedRealtimeNanos()
                 result = loadContent(context)
                 val endTime = SystemClock.elapsedRealtimeNanos()
-                Log.i(TAG, "doInBackground: total calendar computation time: %.3f ms".format((endTime - startTime) / 1000000.0))
+                Log.i(TAG, "async: total calendar computation time: %.3f ms".format((endTime - startTime) / 1000000.0))
             } catch (e: Exception) {
-                Log.e(TAG, "doInBackground: unexpected failure setting wire event list from calendar", e)
+                Log.e(TAG, "async: unexpected failure setting wire event list from calendar", e)
                 result = Pair(emptyList(), e);
             } finally {
                 // no matter what, we want to release the wake lock
@@ -261,7 +261,7 @@ class CalendarFetcher(initialContext: Context, val contentUri: Uri, val authorit
                 val (wireEventList, exceptionMaybe) = localResult
 
                 if (exceptionMaybe != null) {
-                    Log.v(TAG, "onPostException: failure in background computation", exceptionMaybe)
+                    Log.v(TAG, "uiThread: failure in background computation", exceptionMaybe)
                 } else {
                     //
                     // This is the place where side-effects from the background computation happen.
@@ -271,7 +271,7 @@ class CalendarFetcher(initialContext: Context, val contentUri: Uri, val authorit
                     ClockState.pingObservers()
                 }
 
-                Log.v(TAG, "onPostExecute: complete")
+                Log.v(TAG, "uiThread: complete")
             }
         }
     }
