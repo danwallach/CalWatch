@@ -9,8 +9,8 @@ package org.dwallach.calwatch
 
 import android.app.Activity
 import android.content.Context
-import android.content.Intent
 import android.util.Log
+import org.jetbrains.anko.*
 
 /**
  * We need a separate activity for the sole purpose of requesting permissions.
@@ -46,9 +46,12 @@ class PermissionActivity : Activity() {
 
             if (firstTimeOnly && CalendarPermission.numRequests > 0) return  // don't bug the user!
 
-            val activityIntent = Intent(context, PermissionActivity::class.java)
-            activityIntent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
-            context.startActivity(activityIntent)
+//            val activityIntent = Intent(context, PermissionActivity::class.java)
+//            activityIntent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+//            context.startActivity(activityIntent)
+
+            // new goodies with Anko
+            context.startActivity(context.intentFor<PermissionActivity>().newTask())
         }
     }
 }

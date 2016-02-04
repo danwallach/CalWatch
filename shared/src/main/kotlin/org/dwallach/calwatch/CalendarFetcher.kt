@@ -23,6 +23,8 @@ import kotlin.comparisons.compareBy
 import kotlin.comparisons.thenBy
 import kotlin.comparisons.thenByDescending
 
+import org.jetbrains.anko.*
+
 /**
  * This class handles all the dirty work of asynchronously loading calendar data from the calendar provider
  * and updating the state in ClockState. The constructor arguments, contentUri and authority, are used
@@ -219,85 +221,62 @@ class CalendarFetcher(initialContext: Context, val contentUri: Uri, val authorit
     }
 
     /**
-     * Asynchronous task to load the calendar instances.
+     * Asynchronous loader handling via Kotlin's Anko.
      */
-    class CalLoaderTask internal constructor(private val fetcher: CalendarFetcher) : AsyncTask<Context, Void, Pair<List<WireEvent>,Exception?>>() {
-        private lateinit var wakeLock: PowerManager.WakeLock
+    fun runAsyncLoader(context: Context) {
+        var result: Pair<List<WireEvent>, Exception?>? = null
 
-        override fun doInBackground(vararg contexts: Context): Pair<List<WireEvent>,Exception?> {
-            if(contexts.size == 0) {
-                Log.e(TAG, "doInBackground: context required!")
-                return Pair(emptyList(), null)
-            }
+        //
+        // Why a wake-lock? In part, because the Google sample code does it this way, and in part
+        // because it makes sense. We want this task to finish quickly. In practice, the "total
+        // calendar computation" number, reported below seems to be around a second or less -- running
+        // once an hour -- so we're not killing the battery in any case.
+        //
+        val powerManager = context.getSystemService(Context.POWER_SERVICE) as PowerManager
+        val wakeLock = powerManager.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, "CalWatchWakeLock")
+        wakeLock.acquire()
 
-            //
-            // Design note: we could have done this with fetcher.getContext(), but that has the
-            // potential to return null, which we don't want. The way we're doing it, by passing
-            // the non-null context as an argument to the background task, we'll never be here
-            // unless we have a valid context for doing the necessary calculations.
-            //
-            // See MyHandler.handleMessage for the null-handling logic.
-            //
-            val context: Context = contexts[0]
+        Log.v(TAG, "doInBackground: wake lock acquired")
 
-            //
-            // Why a wake-lock? In part, because the Google sample code does it this way, and in part
-            // because it makes sense. We want this task to finish quickly. In practice, the "total
-            // calendar computation" number, reported below seems to be around a second or less -- running
-            // once an hour -- so we're not killing the battery in any case.
-            //
-            val powerManager = context.getSystemService(Context.POWER_SERVICE) as PowerManager
-            wakeLock = powerManager.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, "CalWatchWakeLock")
-            wakeLock.acquire()
-
-            Log.v(TAG, "doInBackground: wake lock acquired")
-
+        async() {
             try {
                 val startTime = SystemClock.elapsedRealtimeNanos()
-                val result = fetcher.loadContent(context)
+                result = loadContent(context)
                 val endTime = SystemClock.elapsedRealtimeNanos()
                 Log.i(TAG, "doInBackground: total calendar computation time: %.3f ms".format((endTime - startTime) / 1000000.0))
-                return result
             } catch (e: Exception) {
                 Log.e(TAG, "doInBackground: unexpected failure setting wire event list from calendar", e)
-                return Pair(emptyList(), e);
+                result = Pair(emptyList(), e);
             } finally {
                 // no matter what, we want to release the wake lock
                 wakeLock.release()
             }
-        }
 
-        override fun onPostExecute(results: Pair<List<WireEvent>,Exception?>) {
-            //
-            // this method gets called if the task completes; we'll be back running on the main UI
-            // thread, so we can notify observers that there's new data available.
-            //
-            fetcher.scanInProgress = false
-            if(results.second != null) {
-                Log.v(TAG, "onPostException: failure in background computation", results.second)
-            } else {
-                //
-                // This is the place where side-effects from the background computation happen.
-                // Any subsequent redraw will use the new calendar wedges.
-                //
-                ClockState.setWireEventList(results.first)
-                ClockState.pingObservers()
+
+            uiThread {
+                // this will run after the above chunk of the async completes
+
+                scanInProgress = false
+
+                val localResult = result ?: Pair(emptyList(), null)
+                val (wireEventList, exceptionMaybe) = localResult
+
+                if (exceptionMaybe != null) {
+                    Log.v(TAG, "onPostException: failure in background computation", exceptionMaybe)
+                } else {
+                    //
+                    // This is the place where side-effects from the background computation happen.
+                    // Any subsequent redraw will use the new calendar wedges.
+                    //
+                    ClockState.setWireEventList(wireEventList)
+                    ClockState.pingObservers()
+                }
+
+                Log.v(TAG, "onPostExecute: complete")
             }
-
-            Log.v(TAG, "onPostExecute: complete")
-        }
-
-        override fun onCancelled() {
-            //
-            // this method gets called if the task is cancelled, which we never actually do (easier to
-            // just let the task complete, since it doesn't take *that* long to execute)
-            //
-            wakeLock.release()
-            fetcher.scanInProgress = false
-
-            Log.v(TAG, "onCancelled")
         }
     }
+
 
     class MyHandler(private val fetcher: CalendarFetcher) : Handler() {
         private lateinit var loaderTask: AsyncTask<Context, Void, Pair<List<WireEvent>,Exception?>>
@@ -313,8 +292,10 @@ class CalendarFetcher(initialContext: Context, val contentUri: Uri, val authorit
                 MSG_LOAD_CAL -> {
                     Log.v(TAG, "handleMessage: launching calendar loader task")
 
-                    loaderTask = CalLoaderTask(fetcher)
-                    loaderTask.execute(context)
+//                    loaderTask = CalLoaderTask(fetcher)
+//                    loaderTask.execute(context)
+
+                    fetcher.runAsyncLoader(context)
                 }
                 else -> Log.e(TAG, "handleMessage: unexpected message: ${message.toString()}")
             }
