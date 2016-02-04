@@ -19,6 +19,9 @@ import android.text.format.DateUtils
 import android.util.Log
 
 import java.lang.ref.WeakReference
+import kotlin.comparisons.compareBy
+import kotlin.comparisons.thenBy
+import kotlin.comparisons.thenByDescending
 
 /**
  * This class handles all the dirty work of asynchronously loading calendar data from the calendar provider
@@ -199,9 +202,9 @@ class CalendarFetcher(initialContext: Context, val contentUri: Uri, val authorit
                 // Third-priority sort: startTime, with objects starting later (smaller) appearing first in the sort.
 
                 return Pair(cr.sortedWith(
-                            compareBy<WireEvent> { it.displayColor }
-                                    .thenBy { it.endTime }
-                                    .thenByDescending { it.startTime }),
+                        compareBy<WireEvent> { it.displayColor }
+                                .thenBy { it.endTime }
+                                .thenByDescending { it.startTime }),
                         null);
             } else {
                 return Pair(emptyList(), null)

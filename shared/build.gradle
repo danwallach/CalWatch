@@ -1,5 +1,6 @@
 apply plugin: 'com.android.library'
 apply plugin: 'kotlin-android'
+apply plugin: 'kotlin-android-extensions'
 
 // idea borrowed from here: http://stackoverflow.com/questions/17097263/automatically-versioning-android-project-from-git-describe-with-android-studio-g
 
@@ -82,9 +83,12 @@ dependencies {
 }
 
 buildscript {
-    ext.kotlin_version = '1.0.0-beta-4589'
+    ext.kotlin_version = '1.0.0-rc-1036'
     repositories {
         mavenCentral()
+        maven {
+            url 'https://dl.bintray.com/kotlin/kotlin-eap/'
+        }
     }
     dependencies {
         classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlin_version"
@@ -93,4 +97,7 @@ buildscript {
 }
 repositories {
     mavenCentral()
+    maven {
+        url 'https://dl.bintray.com/kotlin/kotlin-eap/'
+    }
 }
