@@ -232,8 +232,7 @@ class CalendarFetcher(initialContext: Context, val contentUri: Uri, val authorit
         // calendar computation" number, reported below seems to be around a second or less -- running
         // once an hour -- so we're not killing the battery in any case.
         //
-        val powerManager = context.getSystemService(Context.POWER_SERVICE) as PowerManager
-        val wakeLock = powerManager.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, "CalWatchWakeLock")
+        val wakeLock = context.powerManager.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, "CalWatchWakeLock")
         wakeLock.acquire()
 
         Log.v(TAG, "doInBackground: wake lock acquired")
