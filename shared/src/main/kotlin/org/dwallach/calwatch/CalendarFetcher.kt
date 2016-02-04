@@ -34,7 +34,7 @@ class CalendarFetcher(initialContext: Context, val contentUri: Uri, val authorit
     // this will fire when it's time to (re)load the calendar, launching an asynchronous
     // task to do all the dirty work and eventually update ClockState
     private val contextRef = WeakReference(initialContext)
-    private val loaderHandler: MyHandler
+    private val loaderHandler = MyHandler(this)
     private var isReceiverRegistered: Boolean = false
 
     private val broadcastReceiver = object : BroadcastReceiver() {
@@ -57,7 +57,6 @@ class CalendarFetcher(initialContext: Context, val contentUri: Uri, val authorit
     }
 
     init {
-        this.loaderHandler = MyHandler(this)
         singletonFetcher = this
 
         // hook into watching the calendar (code borrowed from Google's calendar wear app)
