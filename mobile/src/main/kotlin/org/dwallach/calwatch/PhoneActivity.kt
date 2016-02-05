@@ -40,7 +40,7 @@ class PhoneActivity : Activity(), Observer {
                 ClockState.FACE_TOOL -> toolButton.performClick()
                 ClockState.FACE_NUMBERS -> numbersButton.performClick()
                 ClockState.FACE_LITE -> liteButton.performClick()
-                else -> Log.v(TAG, "bogus face mode: " + mode)
+                else -> Log.v(TAG, "bogus face mode: $mode")
             }
 
             this.showSeconds.isChecked = showSecondsP
