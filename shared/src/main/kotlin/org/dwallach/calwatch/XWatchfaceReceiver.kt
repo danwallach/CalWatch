@@ -50,23 +50,25 @@ class XWatchfaceReceiver : BroadcastReceiver() {
         Log.v(TAG, "got intent: " + action)
 
         if (action == stopwatchUpdateIntent) {
-            val extras = intent.extras
-            stopwatchStart = extras.getLong(prefStopwatchStartTime)
-            stopwatchBase = extras.getLong(prefStopwatchBaseTime)
-            stopwatchIsRunning = extras.getBoolean(prefStopwatchRunning)
-            stopwatchIsReset = extras.getBoolean(prefStopwatchReset)
-            stopwatchUpdateTimestamp = extras.getLong(prefStopwatchUpdateTimestamp)
+            intent.extras.apply {
+                stopwatchStart = getLong(prefStopwatchStartTime)
+                stopwatchBase = getLong(prefStopwatchBaseTime)
+                stopwatchIsRunning = getBoolean(prefStopwatchRunning)
+                stopwatchIsReset = getBoolean(prefStopwatchReset)
+                stopwatchUpdateTimestamp = getLong(prefStopwatchUpdateTimestamp)
+            }
 
             Log.v(TAG, "stopwatch update:: start($stopwatchStart), base($stopwatchBase), isRunning($stopwatchIsRunning), isReset($stopwatchIsReset), updateTimestamp($stopwatchUpdateTimestamp)")
 
         } else if (action == timerUpdateIntent) {
-            val extras = intent.extras
-            timerStart = extras.getLong(prefTimerStartTime)
-            timerPauseElapsed = extras.getLong(prefTimerPauseElapsed)
-            timerDuration = extras.getLong(prefTimerDuration)
-            timerIsRunning = extras.getBoolean(prefTimerRunning)
-            timerIsReset = extras.getBoolean(prefTimerReset)
-            timerUpdateTimestamp = extras.getLong(prefTimerUpdateTimestamp)
+            intent.extras.apply {
+                timerStart = getLong(prefTimerStartTime)
+                timerPauseElapsed = getLong(prefTimerPauseElapsed)
+                timerDuration = getLong(prefTimerDuration)
+                timerIsRunning = getBoolean(prefTimerRunning)
+                timerIsReset = getBoolean(prefTimerReset)
+                timerUpdateTimestamp = getLong(prefTimerUpdateTimestamp)
+            }
 
             // sanity checking: if we're coming back from whatever and a formerly running
             // timer has gotten way past the deadline, then just reset things.

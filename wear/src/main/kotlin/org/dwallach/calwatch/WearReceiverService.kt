@@ -15,11 +15,11 @@ import android.util.Log
 import com.google.android.gms.wearable.DataEvent
 import com.google.android.gms.wearable.DataEventBuffer
 import com.google.android.gms.wearable.DataMapItem
-import com.google.android.gms.wearable.Node
 import com.google.android.gms.wearable.Wearable
 import com.google.android.gms.wearable.WearableListenerService
 
 import fr.nicolaspomepuy.androidwearcrashreport.wear.CrashReporter
+import org.jetbrains.anko.*
 
 /**
  * This class pairs up with WearSender
@@ -89,14 +89,6 @@ class WearReceiverService : WearableListenerService() {
         GoogleApi.connect(this, Wearable.API) // overkill or paranoia? no big deal to try again
     }
 
-    override fun onPeerConnected(peer: Node?) {
-        Log.v(TAG, "phone is connected: ${peer?.displayName ?: "null peer"}")
-    }
-
-    override fun onPeerDisconnected(peer: Node?) {
-        Log.v(TAG, "phone is disconnected: ${peer?.displayName ?: "null peer"}")
-    }
-
     /**
      * Take a serialized state update and commit it to stable storage.
      * @param eventBytes protobuf-serialed WireUpdate (typically received from the phone)
@@ -107,19 +99,18 @@ class WearReceiverService : WearableListenerService() {
             return
 
         Log.v(TAG, "savePreferences: ${eventBytes.size} bytes")
-        val prefs = getSharedPreferences(Constants.PrefsKey, Context.MODE_PRIVATE)
-        val editor = prefs.edit()
+        getSharedPreferences(Constants.PrefsKey, Context.MODE_PRIVATE).edit().apply {
+            // TODO there's no reason to save state like this any more; maybe we could merge with mobile/PreferencesHelper
 
-        // TODO there's no reason to save state like this any more; maybe we could merge with mobile/PreferencesHelper
+            // Kinda sad that we need to base64-encode our state before we save it, but the SharedPreferences
+            // interface doesn't allow for arbitrary arrays of bytes. So yeah, base64-encoded,
+            // protobuf-encoded, WireUpdate structure, which itself has a handful of ints and a
+            // variable-length array of WireEvents, which are themselves just a bunch of long's.
+            putString("savedState", Base64.encodeToString(eventBytes, Base64.DEFAULT))
 
-        // Kinda sad that we need to base64-encode our state before we save it, but the SharedPreferences
-        // interface doesn't allow for arbitrary arrays of bytes. So yeah, base64-encoded,
-        // protobuf-encoded, WireUpdate structure, which itself has a handful of ints and a
-        // variable-length array of WireEvents, which are themselves just a bunch of long's.
-        editor.putString("savedState", Base64.encodeToString(eventBytes, Base64.DEFAULT))
-
-        if (!editor.commit())
-            Log.v(TAG, "savePreferences commit failed ?!")
+            if (!commit())
+                Log.v(TAG, "savePreferences commit failed ?!")
+        }
     }
 
     /**
@@ -128,14 +119,11 @@ class WearReceiverService : WearableListenerService() {
     fun loadPreferences() {
         Log.v(TAG, "loadPreferences")
 
-        val prefs = getSharedPreferences(Constants.PrefsKey, Context.MODE_PRIVATE)
-        val savedState = prefs.getString("savedState", "")
+        val savedState = getSharedPreferences(Constants.PrefsKey, Context.MODE_PRIVATE).getString("savedState", "")
 
         if (savedState.length > 0) {
             try {
-                val eventBytes = Base64.decode(savedState, Base64.DEFAULT)
-                newEventBytes(eventBytes)
-
+                newEventBytes(Base64.decode(savedState, Base64.DEFAULT))
             } catch (e: IllegalArgumentException) {
                 Log.e(TAG, "failed to decode base64 saved state", e)
             }
@@ -153,8 +141,7 @@ class WearReceiverService : WearableListenerService() {
             if (!running) {
                 Log.v(TAG, "launching WearReceiverService via intent")
                 running = true
-                val serviceIntent = Intent(context, WearReceiverService::class.java)
-                context.startService(serviceIntent)
+                context.startService<WearReceiverService>()
             }
         }
     }

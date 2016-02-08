@@ -214,13 +214,13 @@ class CalWatchFaceService : CanvasWatchFaceService() {
                 return
             }
 
-            val width = bounds.width()
-            val height = bounds.height()
+            val _width = bounds.width()
+            val _height = bounds.height()
 
-            if (width != oldWidth || height != oldHeight) {
-                oldWidth = width
-                oldHeight = height
-                clockFace.setSize(width, height)
+            if (_width != oldWidth || _height != oldHeight) {
+                oldWidth = _width
+                oldHeight = _height
+                clockFace.setSize(_width, _height)
             }
 
             try {

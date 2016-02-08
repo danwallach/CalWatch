@@ -16,6 +16,7 @@ import java.util.Observable
 import java.util.Observer
 
 import fr.nicolaspomepuy.androidwearcrashreport.mobile.CrashReport
+import org.jetbrains.anko.*
 
 /**
  * This class handles all of the communications between the phone and the watch. Right now,
@@ -90,8 +91,7 @@ class WatchCalendarService : Service(), Observer {
             // start the calendar service, if it's not already running
             if (singletonService == null) {
                 Log.v(TAG, "launching watch calendar service")
-                val serviceIntent = Intent(ctx, WatchCalendarService::class.java)
-                ctx.startService(serviceIntent)
+                ctx.startService<WatchCalendarService>()
             }
         }
     }

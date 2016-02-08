@@ -29,8 +29,7 @@ object CalendarPermission {
         private set
 
     fun init(context: Context) {
-        val prefs = context.getSharedPreferences(Constants.PrefsKey, Context.MODE_PRIVATE)
-        numRequests = prefs.getInt("permissionRequests", 0)
+        numRequests = context.getSharedPreferences(Constants.PrefsKey, Context.MODE_PRIVATE).getInt("permissionRequests", 0)
     }
 
     /**
@@ -76,13 +75,12 @@ object CalendarPermission {
             // but we really want to remember how many requests we've made, so we're dumping this out immediately. This
             // number will be restored on startup by the usual preferences restoration in the two classes above. (Hopefuly.)
             //
-            val prefs = activity.getSharedPreferences("org.dwallach.calwatch.prefs", Activity.MODE_PRIVATE)
-            val editor = prefs.edit()
+            activity.getSharedPreferences("org.dwallach.calwatch.prefs", Activity.MODE_PRIVATE).edit().apply {
+                putInt("permissionRequests", numRequests)
 
-            editor.putInt("permissionRequests", numRequests)
-
-            if (!editor.commit())
-                Log.v(TAG, "savePreferences commit failed ?!")
+                if (!commit())
+                    Log.v(TAG, "savePreferences commit failed ?!")
+            }
         }
     }
 

@@ -14,30 +14,31 @@ object PreferencesHelper {
 
     fun savePreferences(context: Context) {
         Log.v(TAG, "savePreferences")
-        val prefs = context.getSharedPreferences(Constants.PrefsKey, Context.MODE_PRIVATE)
-        val editor = prefs.edit()
 
-        editor.putInt("faceMode", ClockState.faceMode)
-        editor.putBoolean("showSeconds", ClockState.showSeconds)
-        editor.putBoolean("showDayDate", ClockState.showDayDate)
+        context.getSharedPreferences(Constants.PrefsKey, Context.MODE_PRIVATE).edit().apply {
+            putInt("faceMode", ClockState.faceMode)
+            putBoolean("showSeconds", ClockState.showSeconds)
+            putBoolean("showDayDate", ClockState.showDayDate)
 
-        if (!editor.commit())
-            Log.e(TAG, "savePreferences commit failed ?!")
+            if (!commit())
+                Log.e(TAG, "savePreferences commit failed ?!")
+        }
     }
 
     fun loadPreferences(context: Context) {
         Log.v(TAG, "loadPreferences")
 
-        val prefs = context.getSharedPreferences(Constants.PrefsKey, Context.MODE_PRIVATE)
-        val faceMode = prefs.getInt("faceMode", Constants.DefaultWatchFace) // ClockState.FACE_TOOL
-        val showSeconds = prefs.getBoolean("showSeconds", Constants.DefaultShowSeconds)
-        val showDayDate = prefs.getBoolean("showDayDate", Constants.DefaultShowDayDate)
+        context.getSharedPreferences(Constants.PrefsKey, Context.MODE_PRIVATE).apply {
+            val faceMode = getInt("faceMode", Constants.DefaultWatchFace) // ClockState.FACE_TOOL
+            val showSeconds = getBoolean("showSeconds", Constants.DefaultShowSeconds)
+            val showDayDate = getBoolean("showDayDate", Constants.DefaultShowDayDate)
 
-        Log.v(TAG, "faceMode: $faceMode, showSeconds: $showSeconds, showDayDate: $showDayDate")
+            Log.v(TAG, "faceMode: $faceMode, showSeconds: $showSeconds, showDayDate: $showDayDate")
 
-        ClockState.faceMode = faceMode
-        ClockState.showSeconds = showSeconds
-        ClockState.showDayDate = showDayDate
+            ClockState.faceMode = faceMode
+            ClockState.showSeconds = showSeconds
+            ClockState.showDayDate = showDayDate
+        }
 
         ClockState.pingObservers() // we only need to do this once, versus multiple times when done internally
     }
