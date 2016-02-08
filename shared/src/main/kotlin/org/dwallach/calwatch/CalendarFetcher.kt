@@ -222,9 +222,7 @@ class CalendarFetcher(initialContext: Context, val contentUri: Uri, val authorit
      */
     fun runAsyncLoader() {
         val context: Context? = getContext()
-        if(context == null) return // nothing to do!
-
-        var result: Pair<List<WireEvent>, Exception?>? = null
+        if(context == null) return // nothing to do without a context, so give up, surrender!
 
         //
         // Why a wake-lock? In part, because the Google sample code does it this way, and in part
@@ -237,35 +235,50 @@ class CalendarFetcher(initialContext: Context, val contentUri: Uri, val authorit
 
         Log.v(TAG, "async: wake lock acquired")
 
+        //
+        // This is the Anko library being awesome. Rather than messing with AsyncTask and other Android
+        // messiness, we instead say "this block should run asynchronously, and oh by the way, run this
+        // other code on the UI thread once the asynchronous bit is done". Spectacular. The main async
+        // block will be producing its result in the result variable, declared below, which is then
+        // picked up by the UI thread part. Note that we don't want to throw an exception from the
+        // async code. Instead, we catch anything that might have gone wrong and just pass the exception
+        // back as part of the result.
+        //
+        // Mea culpa: I used to think one of the big problem with Google's Go language was that they
+        // didn't embrace exceptions for error handling. Now I get it. Exceptions don't play nicely
+        // with asynchronous/concurrent computations, which is pretty much the whole point of Go.
+        // That said, I still think Go is broken without parametric polymorphism. The Cassowary solver
+        // that we're using was written in Java before Java had generics and there were even comments
+        // next to all of the hash tables and such as to what their generic types should have been,
+        // but when I tried to make those into real parametric Java type declarations, some things
+        // didn't match up quite right.
+        //
+        var result: Pair<List<WireEvent>, Throwable?>
         async() {
             try {
                 val startTime = SystemClock.elapsedRealtimeNanos()
                 result = loadContent(context)
                 val endTime = SystemClock.elapsedRealtimeNanos()
                 Log.i(TAG, "async: total calendar computation time: %.3f ms".format((endTime - startTime) / 1000000.0))
-            } catch (e: Exception) {
-                Log.e(TAG, "async: unexpected failure setting wire event list from calendar", e)
+            } catch (e: Throwable) {
+                // pass the exception back to the UI thread; we'll log it there
                 result = Pair(emptyList(), e);
             } finally {
                 // no matter what, we want to release the wake lock
                 wakeLock.release()
             }
 
-
+            // this will run after the above chunk of the async completes
             uiThread {
-                // this will run after the above chunk of the async completes
-
                 scanInProgress = false
+                val (wireEventList, e) = result
 
-                val localResult = result ?: Pair(emptyList(), null)
-                val (wireEventList, exceptionMaybe) = localResult
-
-                if (exceptionMaybe != null) {
-                    Log.v(TAG, "uiThread: failure in background computation", exceptionMaybe)
+                if (e != null) {
+                    Log.v(TAG, "uiThread: failure in async computation", e)
                 } else {
                     //
-                    // This is the place where side-effects from the background computation happen.
-                    // Any subsequent redraw will use the new calendar wedges.
+                    // This is the place where side-effects from the background computation finally
+                    // become visible. Any subsequent redraw will use the new calendar data.
                     //
                     ClockState.setWireEventList(wireEventList)
                     ClockState.pingObservers()
