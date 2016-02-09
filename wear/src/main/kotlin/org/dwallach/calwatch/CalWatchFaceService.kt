@@ -126,7 +126,9 @@ class CalWatchFaceService : CanvasWatchFaceService() {
                     .setStatusBarGravity(Gravity.CENTER)
                     .setHotwordIndicatorGravity(Gravity.CENTER_HORIZONTAL) // not particularly precise, but seems reasonable
                     .setViewProtectionMode(WatchFaceStyle.PROTECT_HOTWORD_INDICATOR or WatchFaceStyle.PROTECT_STATUS_BAR)
-                    .setPeekOpacityMode(WatchFaceStyle.PEEK_OPACITY_MODE_TRANSLUCENT) // the features below were added in Wear 5.1 (maybe 5.0?) and seem worth tweaking
+
+                    // the features below were added in Wear 5.1 (maybe 5.0?) and seem worth tweaking
+                    .setPeekOpacityMode(WatchFaceStyle.PEEK_OPACITY_MODE_TRANSLUCENT)
                     .setShowUnreadCountIndicator(true)
                     .setAcceptsTapEvents(true)// we need tap events for permission requests
                     .build())
@@ -161,11 +163,13 @@ class CalWatchFaceService : CanvasWatchFaceService() {
                 return;
             }
 
-            val lowBitAmbientMode = properties.getBoolean(WatchFaceService.PROPERTY_LOW_BIT_AMBIENT, false)
-            val burnInProtection = properties.getBoolean(WatchFaceService.PROPERTY_BURN_IN_PROTECTION, false)
-            clockFace.setAmbientLowBit(lowBitAmbientMode)
-            clockFace.setBurnInProtection(burnInProtection)
-            Log.d(TAG, "onPropertiesChanged: low-bit ambient = $lowBitAmbientMode, burn-in protection = $burnInProtection")
+            properties.apply {
+                val lowBitAmbientMode = getBoolean(WatchFaceService.PROPERTY_LOW_BIT_AMBIENT, false)
+                val burnInProtection = getBoolean(WatchFaceService.PROPERTY_BURN_IN_PROTECTION, false)
+                clockFace.setAmbientLowBit(lowBitAmbientMode)
+                clockFace.setBurnInProtection(burnInProtection)
+                Log.d(TAG, "onPropertiesChanged: low-bit ambient = $lowBitAmbientMode, burn-in protection = $burnInProtection")
+            }
         }
 
         override fun onTimeTick() {

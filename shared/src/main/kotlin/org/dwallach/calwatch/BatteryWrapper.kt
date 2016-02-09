@@ -11,6 +11,7 @@ import android.content.Intent
 import android.content.IntentFilter
 import android.os.BatteryManager
 import android.util.Log
+import java.lang.ref.WeakReference
 
 /**
  * This class wraps all of our interaction with Android's BatteryManager. In particular, we only
@@ -20,10 +21,7 @@ import android.util.Log
 object BatteryWrapper {
     private const val TAG = "BatteryWrapper"
 
-    // yes, we're holding a context live, and that's generally considered a bad thing, but the
-    // BatteryWrapper is only held alive by the activity. If it goes away, so does the context,
-    // so no leakage issues here to worry about.
-    private lateinit var context: Context
+    private var contextRef = WeakReference<Context>(null)
 
     var isCharging: Boolean = false
         private set
@@ -31,27 +29,35 @@ object BatteryWrapper {
         private set
 
     fun fetchStatus(): Unit {
+        val context = contextRef.get()
+        if(context == null) {
+            // no context, can't do anything
+            return
+        }
+
         // and now, some code for battery measurement, largely stolen from the
         // official docs.
         // http://developer.android.com/training/monitoring-device-state/battery-monitoring.html
 
         try {
             val ifilter = IntentFilter(Intent.ACTION_BATTERY_CHANGED)
-            val batteryStatus = context.registerReceiver(null, ifilter)
+            context.registerReceiver(null, ifilter).apply {
+                // Are we charging / charged?
+                isCharging = when(getIntExtra(BatteryManager.EXTRA_STATUS, -1)) {
+                    BatteryManager.BATTERY_STATUS_CHARGING, BatteryManager.BATTERY_STATUS_FULL -> true
+                    else -> false
+                }
 
-            // Are we charging / charged?
-            val status = batteryStatus.getIntExtra(BatteryManager.EXTRA_STATUS, -1)
-            isCharging = status == BatteryManager.BATTERY_STATUS_CHARGING || status == BatteryManager.BATTERY_STATUS_FULL
+                // How are we charging?
+                //            val chargePlug = getIntExtra(BatteryManager.EXTRA_PLUGGED, -1)
+                //            val usbCharge = chargePlug == BatteryManager.BATTERY_PLUGGED_USB;
+                //            val acCharge = chargePlug == BatteryManager.BATTERY_PLUGGED_AC;
 
-            // How are we charging?
-            //            val chargePlug = batteryStatus.getIntExtra(BatteryManager.EXTRA_PLUGGED, -1)
-            //            val usbCharge = chargePlug == BatteryManager.BATTERY_PLUGGED_USB;
-            //            val acCharge = chargePlug == BatteryManager.BATTERY_PLUGGED_AC;
+                val level = getIntExtra(BatteryManager.EXTRA_LEVEL, -1)
+                val scale = getIntExtra(BatteryManager.EXTRA_SCALE, -1)
 
-            val level = batteryStatus.getIntExtra(BatteryManager.EXTRA_LEVEL, -1)
-            val scale = batteryStatus.getIntExtra(BatteryManager.EXTRA_SCALE, -1)
-
-            batteryPct = level / scale.toFloat()
+                batteryPct = level / scale.toFloat()
+            }
         } catch (throwable: Throwable) {
             // if something fails, we really don't care; whatever value as in batteryPct from
             // last time is just fine for the next time
@@ -60,7 +66,7 @@ object BatteryWrapper {
 
     fun init(context: Context) {
         Log.i(TAG, "init")
-        this.context = context
+        contextRef = WeakReference<Context>(context)
         fetchStatus()
     }
 }

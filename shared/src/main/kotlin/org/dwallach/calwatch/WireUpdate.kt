@@ -34,12 +34,13 @@ data class WireUpdate(val faceMode: Int, val showSecondHand: Boolean, val showDa
         fun parseFrom(input: ByteArray): WireUpdate {
             val inputStr = String(input)
             Log.v(TAG, "parseFrom: $inputStr")
-            val inputs = inputStr.split(";".toRegex()).dropLastWhile { it.isEmpty() }.toTypedArray()
+
+            val inputs = inputStr.split(";".toRegex())
+                    .dropLastWhile { it.isEmpty() }
+                    .toTypedArray()
 
             if (inputs.size == 5 && inputs[0] == HEADER && inputs[4] == TRAILER) {
-                val result = WireUpdate(Integer.parseInt(inputs[1]),
-                        java.lang.Boolean.parseBoolean(inputs[2]),
-                        java.lang.Boolean.parseBoolean(inputs[3]))
+                val result = WireUpdate(inputs[1].toInt(), inputs[2].toBoolean(), inputs[3].toBoolean())
                 Log.v(TAG, "parsed: ${result.toString()}")
                 return result
             } else error("Got bogus wire message: $inputStr")
