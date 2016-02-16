@@ -43,7 +43,7 @@ def getVersionName = { ->
 }
 
 buildscript {
-    ext.kotlin_version = '1.0.0-rc-1050'
+    ext.kotlin_version = '1.0.0'
     repositories {
         mavenCentral()
         maven {
@@ -103,7 +103,7 @@ dependencies {
 //    compile 'com.android.support:support-v13:23.1.1'
     compile 'fr.nicolaspomepuy.androidwearcrashreport:crashreport-mobile:0.6@aar'
     compile "org.jetbrains.kotlin:kotlin-stdlib:$kotlin_version"
-    compile "org.jetbrains.anko:anko-sdk15:0.8.2"
+    compile "org.jetbrains.anko:anko-sdk15:0.8.2rc3"
 }
 repositories {
     mavenCentral()
