@@ -43,8 +43,8 @@ class PhoneActivity : Activity(), Observer {
                 else -> Log.v(TAG, "bogus face mode: $mode")
             }
 
-            this.showSeconds.isChecked = showSecondsP
-            this.showDayDate.isChecked = showDayDateP
+            showSeconds.isChecked = showSecondsP
+            showDayDate.isChecked = showDayDateP
         } catch (throwable: Throwable) {
             // probably a called-from-wrong-thread-exception, we'll just ignore it
             Log.v(TAG, "ignoring exception while updating button state")
@@ -64,24 +64,18 @@ class PhoneActivity : Activity(), Observer {
             return
         }
 
-        val mode = when {
+        ClockState.faceMode = when {
             toolButton.isChecked -> ClockState.FACE_TOOL
             numbersButton.isChecked -> ClockState.FACE_NUMBERS
             liteButton.isChecked -> ClockState.FACE_LITE
             else -> {
                 Log.e(TAG, "no buttons are selected? weird.")
-                -1
+                ClockState.faceMode // we'll go with whatever's already there, nothing better to choose
             }
         }
 
-        val showSeconds = showSeconds.isChecked
-        val showDayDate = showDayDate.isChecked
-
-        if (mode != -1) {
-            ClockState.faceMode = mode
-        }
-        ClockState.showSeconds = showSeconds
-        ClockState.showDayDate = showDayDate
+        ClockState.showSeconds = showSeconds.isChecked
+        ClockState.showDayDate = showDayDate.isChecked
 
         ClockState.pingObservers() // we only need to do this once
     }
