@@ -162,7 +162,6 @@ class CalendarFetcher(initialContext: Context, val contentUri: Uri, val authorit
             val iCursor = context.contentResolver.query(builder.build(),
                     instancesProjection, null, null, null)
 
-
             // if it's null, which shouldn't ever happen, then we at least won't gratuitously fail here
             if (iCursor != null) {
                 if (iCursor.moveToFirst()) {

@@ -111,14 +111,15 @@ object ClockState : Observable(), AnkoLogger {
         val clipEndMillis = clipStartMillis + 43200000  // 12 hours later
 
         val clippedEvents = events.map {
+            // chop the start/end of the event to fit onscreen
             it.copy(startTime = if(it.startTime < clipStartMillis) clipStartMillis else it.startTime,
                     endTime = if(it.endTime > clipEndMillis) clipEndMillis else it.endTime)
         }.filter {
-            // keep only events that are onscreen
+            // require events to be onscreen
             it.endTime > clipStartMillis && it.startTime < clipEndMillis
-            // get rid of events that go the full twelve-hour range
+            // require events to not fill the full screen
                     && !(it.endTime == clipEndMillis && it.startTime == clipStartMillis)
-            // and get rid of events that start and end at precisely the same time
+            // require events to have some non-zero thickness (clipping can sometimes yield events that start and end at the same time)
                     && it.endTime > it.startTime
         }.map {
             // apply GMT offset, and then wrap with EventWrapper, where the layout will happen
@@ -140,8 +141,8 @@ object ClockState : Observable(), AnkoLogger {
             }
 
             EventLayout.sanityTest(clippedEvents, lMaxLevel, "After new event layout")
-            verbose { "maxLevel for visible events: " + lMaxLevel }
-            verbose { "number of visible events: " + clippedEvents.size }
+            verbose { "maxLevel for visible events: $lMaxLevel" }
+            verbose { "number of visible events: ${clippedEvents.size}" }
 
             return Pair(clippedEvents, lMaxLevel)
         } else {
@@ -172,7 +173,7 @@ object ClockState : Observable(), AnkoLogger {
      * @param eventBytes a marshalled protobuf of type WireUpdate
      */
     fun setProtobuf(eventBytes: ByteArray) {
-        info { "setting protobuf: %d bytes".format(eventBytes.size) }
+        info { "setting protobuf: ${eventBytes.size} bytes" }
         val wireUpdate: WireUpdate
 
         try {
@@ -185,7 +186,7 @@ object ClockState : Observable(), AnkoLogger {
             if (eventBytes.size == 0)
                 error("zero-length message received!")
             else
-                error({ "some other weird failure on protobuf: nbytes(" + eventBytes.size + ")" }, e)
+                error({ "some other weird failure on protobuf: nbytes(${eventBytes.size})" }, e)
             return
         }
 
@@ -211,12 +212,13 @@ object ClockState : Observable(), AnkoLogger {
     private fun debugDump() {
         verbose("All events in the DB:")
         eventList.forEach {
-            verbose { "--> displayColor(" + Integer.toHexString(it.displayColor) + "), startTime(" + it.startTime + "), endTime(" + it.endTime + ")" }
+            verbose { "--> displayColor(%06x), startTime(${it.startTime}), endTime(${it.endTime})".format(it.displayColor) }
         }
 
         verbose("Visible:")
         visibleEventList.forEach {
-            verbose { "--> displayColor(" + Integer.toHexString(it.wireEvent.displayColor) + "), minLevel(" + it.minLevel + "), maxLevel(" + it.maxLevel + "), startTime(" + it.wireEvent.startTime + "), endTime(" + it.wireEvent.endTime + ")" }
+            verbose { "--> displayColor(%06x), minLevel(${it.minLevel}), maxLevel(${it.maxLevel}), startTime(${it.wireEvent.startTime}), endTime(${it.wireEvent.endTime})"
+                    .format(it.wireEvent.displayColor) }
         }
     }
 }
