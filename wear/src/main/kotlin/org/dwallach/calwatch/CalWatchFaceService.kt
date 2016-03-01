@@ -36,10 +36,10 @@ import android.support.wearable.provider.WearableCalendarContract
 import android.support.wearable.watchface.CanvasWatchFaceService
 import android.support.wearable.watchface.WatchFaceService
 import android.support.wearable.watchface.WatchFaceStyle
-import android.util.Log
 import android.view.Gravity
 import android.view.SurfaceHolder
 import android.view.WindowInsets
+import org.jetbrains.anko.*
 
 import java.lang.ref.WeakReference
 import java.util.Observable
@@ -48,7 +48,7 @@ import java.util.Observer
 /**
  * Drawn heavily from the Android Wear SweepWatchFaceService example code.
  */
-class CalWatchFaceService : CanvasWatchFaceService() {
+class CalWatchFaceService : CanvasWatchFaceService(), AnkoLogger {
     override fun onCreateEngine(): Engine {
         val engine = Engine()
         engineRef = WeakReference(engine)
@@ -70,13 +70,13 @@ class CalWatchFaceService : CanvasWatchFaceService() {
          * Internal function for dealing with the calendar fetcher.
          */
         private fun initCalendarFetcher() {
-            Log.v(TAG, "initCalendarFetcher")
+            verbose("initCalendarFetcher")
 
             val permissionGiven = CalendarPermission.check(this@CalWatchFaceService)
             if (!ClockState.calendarPermission && permissionGiven) {
                 // Hypothetically this isn't necessary, because it's handled in CalendarPermission.handleResult.
                 // Nonetheless, paranoia.
-                Log.e(TAG, "we've got permission, need to update the ClockState")
+                error("we've got permission, need to update the ClockState")
                 ClockState.calendarPermission = true
             }
 
@@ -94,7 +94,7 @@ class CalWatchFaceService : CanvasWatchFaceService() {
                 // If the user says "no", they'll be given the "empty calendar" icon and can clock the
                 // screen. The onTap handler will also then kickstart the permission activity.
 
-                Log.v(TAG, "no calendar permission given, launching first-time activity to ask")
+                verbose("no calendar permission given, launching first-time activity to ask")
                 PermissionActivity.kickStart(this@CalWatchFaceService, true)
                 return
             }
@@ -111,7 +111,7 @@ class CalWatchFaceService : CanvasWatchFaceService() {
         }
 
         override fun onCreate(holder: SurfaceHolder?) {
-            Log.d(TAG, "onCreate")
+            debug("onCreate")
 
             super.onCreate(holder)
 
@@ -139,7 +139,7 @@ class CalWatchFaceService : CanvasWatchFaceService() {
 
 
             if (resources == null) {
-                Log.e(TAG, "no resources? not good")
+                error("no resources? not good")
             }
 
             clockFace = ClockFace()
@@ -159,7 +159,7 @@ class CalWatchFaceService : CanvasWatchFaceService() {
             super.onPropertiesChanged(properties)
 
             if(properties == null) {
-                Log.d(TAG, "onPropertiesChanged: empty properties?!")
+                debug("onPropertiesChanged: empty properties?!")
                 return;
             }
 
@@ -168,7 +168,7 @@ class CalWatchFaceService : CanvasWatchFaceService() {
                 val burnInProtection = getBoolean(WatchFaceService.PROPERTY_BURN_IN_PROTECTION, false)
                 clockFace.setAmbientLowBit(lowBitAmbientMode)
                 clockFace.setBurnInProtection(burnInProtection)
-                Log.d(TAG, "onPropertiesChanged: low-bit ambient = $lowBitAmbientMode, burn-in protection = $burnInProtection")
+                debug { "onPropertiesChanged: low-bit ambient = $lowBitAmbientMode, burn-in protection = $burnInProtection" }
             }
         }
 
@@ -185,7 +185,7 @@ class CalWatchFaceService : CanvasWatchFaceService() {
         override fun onAmbientModeChanged(inAmbientMode: Boolean) {
             super.onAmbientModeChanged(inAmbientMode)
 
-            Log.d(TAG, "onAmbientModeChanged: " + inAmbientMode)
+            debug { "onAmbientModeChanged: $inAmbientMode" }
             clockFace.setAmbientMode(inAmbientMode)
 
             // If we just switched *to* ambient mode, then we've got some FPS data to report
@@ -214,7 +214,7 @@ class CalWatchFaceService : CanvasWatchFaceService() {
             drawCounter++
 
             if(bounds == null || canvas == null) {
-                Log.d(TAG, "onDraw: null bounds and/or canvas")
+                debug("onDraw: null bounds and/or canvas")
                 return
             }
 
@@ -240,7 +240,7 @@ class CalWatchFaceService : CanvasWatchFaceService() {
                     invalidate()
             } catch (t: Throwable) {
                 if (drawCounter % 1000 == 0L)
-                    Log.e(TAG, "Something blew up while drawing", t)
+                    error("Something blew up while drawing", t)
             }
         }
 
@@ -275,7 +275,7 @@ class CalWatchFaceService : CanvasWatchFaceService() {
         }
 
         override fun onDestroy() {
-            Log.v(TAG, "onDestroy")
+            verbose("onDestroy")
 
             ClockState.deleteObserver(this)
             calendarFetcher?.kill()
@@ -287,9 +287,9 @@ class CalWatchFaceService : CanvasWatchFaceService() {
         override fun onPeekCardPositionUpdate(bounds: Rect?) {
             super.onPeekCardPositionUpdate(bounds)
             if(bounds == null) {
-                Log.d(TAG, "onPeekcardPositionUpdate: null bounds?!")
+                debug { "onPeekcardPositionUpdate: null bounds?!" }
             } else {
-                Log.d(TAG, "onPeekCardPositionUpdate: $bounds (${bounds.width()}, ${bounds.height()})")
+                debug { "onPeekCardPositionUpdate: $bounds (${bounds.width()}, ${bounds.height()})" }
             }
 
             clockFace.peekCardRect = bounds
@@ -303,7 +303,7 @@ class CalWatchFaceService : CanvasWatchFaceService() {
             val isRound = insets.isRound
             val chinSize = insets.systemWindowInsetBottom
 
-            Log.v(TAG, "onApplyWindowInsets (round: $isRound), (chinSize: $chinSize)")
+            verbose { "onApplyWindowInsets (round: $isRound), (chinSize: $chinSize)" }
 
             clockFace.setRound(isRound)
             clockFace.setMissingBottomPixels(chinSize)
@@ -327,8 +327,6 @@ class CalWatchFaceService : CanvasWatchFaceService() {
     }
 
     companion object {
-        private const val TAG = "CalWatchFaceService"
-
         private var engineRef: WeakReference<Engine>? = null
 
         val engine: Engine?

@@ -7,21 +7,17 @@
 package org.dwallach.calwatch
 
 import android.content.Context
-import android.os.Bundle
-import android.util.Log
-
-import com.google.android.gms.common.ConnectionResult
-import com.google.android.gms.common.api.GoogleApiClient
 import com.google.android.gms.wearable.PutDataMapRequest
 import com.google.android.gms.wearable.Wearable
+import org.jetbrains.anko.*
 
-class WearSender(context: Context) {
+class WearSender(context: Context): AnkoLogger {
     fun sendAllToWatch() {
         try {
             val wireBytesToSend = ClockState.getProtobuf()
             if (wireBytesToSend.size == 0) return
 
-            Log.v(TAG, "preparing event list for transmission, length(${wireBytesToSend.size} bytes)")
+            verbose { "preparing event list for transmission, length(${wireBytesToSend.size} bytes)" }
 
             /*
              * Useful source: http://toastdroid.com/2014/08/18/messageapi-simple-conversations-with-android-wear/
@@ -40,25 +36,21 @@ class WearSender(context: Context) {
                 // exceptionally useful for log debugging
                 pendingResult.setResultCallback {
                     if (it.status.isSuccess) {
-                        Log.d(TAG, "Data item set: ${it.dataItem.uri}")
+                        info { "Data item set: ${it.dataItem.uri}" }
                     } else {
-                        Log.e(TAG, "Data item failed? ${it.status.toString()}")
+                        error { "Data item failed? ${it.status.toString()}" }
                     }
                 }
             }
 
         } catch (throwable: Throwable) {
-            Log.e(TAG, "couldn't manage to send to the watch; not a big deal", throwable)
+            error("couldn't manage to send to the watch; not a big deal", throwable)
         }
 
     }
 
     init {
-        Log.v(TAG, "init!")
+        verbose("init!")
         GoogleApi.connect(context, Wearable.API, { sendAllToWatch() })
-    }
-
-    companion object {
-        private const val TAG = "WearSender"
     }
 }

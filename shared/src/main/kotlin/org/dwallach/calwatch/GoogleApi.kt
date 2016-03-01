@@ -8,17 +8,16 @@ package org.dwallach.calwatch
 
 import android.content.Context
 import android.os.Bundle
-import android.util.Log
 import com.google.android.gms.common.ConnectionResult
 import com.google.android.gms.common.api.Api
 import com.google.android.gms.common.api.GoogleApiClient
+import org.jetbrains.anko.*
 
 /**
  * Unified support for dealing with the Google API client.
  */
 
-object GoogleApi: GoogleApiClient.ConnectionCallbacks, GoogleApiClient.OnConnectionFailedListener {
-    private const val TAG = "GoogleApi"
+object GoogleApi: GoogleApiClient.ConnectionCallbacks, GoogleApiClient.OnConnectionFailedListener, AnkoLogger {
     var client: GoogleApiClient? = null
       private set
     private var successFunc: ()->Unit = {}
@@ -31,7 +30,7 @@ object GoogleApi: GoogleApiClient.ConnectionCallbacks, GoogleApiClient.OnConnect
      */
     fun connect(context: Context, api: Api<out Api.ApiOptions.NotRequiredOptions>, success: ()->Unit = {}, failure: ()->Unit = {}) {
         if (client == null) {
-            Log.v(TAG, "Trying to connect to GoogleApi")
+            verbose("Trying to connect to GoogleApi")
             val lClient = GoogleApiClient
                     .Builder(context)
                     .addApi(api)
@@ -53,7 +52,7 @@ object GoogleApi: GoogleApiClient.ConnectionCallbacks, GoogleApiClient.OnConnect
     fun close() {
         // we're going to eat any errors that happen here -- clients don't need to know or care
         try {
-            Log.v(TAG, "cleaning up Google API")
+            verbose("cleaning up Google API")
             val lClient = client
             if (lClient != null && lClient.isConnected) {
                 lClient.disconnect()
@@ -66,7 +65,7 @@ object GoogleApi: GoogleApiClient.ConnectionCallbacks, GoogleApiClient.OnConnect
 
     override fun onConnected(connectionHint: Bundle?) {
         // Apparently unrelated to connections with the phone.
-        Log.v(TAG, "Connected to Google Api Service!")
+        verbose("Connected to Google Api Service!")
         successFunc()
     }
 
@@ -77,7 +76,7 @@ object GoogleApi: GoogleApiClient.ConnectionCallbacks, GoogleApiClient.OnConnect
 
         // Apparently unrelated to connections with the phone.
 
-        Log.v(TAG, "suspended connection!")
+        verbose("suspended connection!")
         close()
         failureFunc()
     }
@@ -88,7 +87,7 @@ object GoogleApi: GoogleApiClient.ConnectionCallbacks, GoogleApiClient.OnConnect
 
         // Apparently unrelated to connections with the phone.
 
-        Log.v(TAG, "lost connection!")
+        verbose("lost connection!")
         close()
         failureFunc()
     }

@@ -10,7 +10,7 @@ import android.content.Context
 import android.content.Intent
 import android.content.IntentFilter
 import android.os.BatteryManager
-import android.util.Log
+import org.jetbrains.anko.*
 import java.lang.ref.WeakReference
 
 /**
@@ -18,9 +18,7 @@ import java.lang.ref.WeakReference
  * want to make infrequent request to Android for the level of the battery, but we want to support
  * very frequent queries to this wrapper class.
  */
-object BatteryWrapper {
-    private const val TAG = "BatteryWrapper"
-
+object BatteryWrapper: AnkoLogger {
     private var contextRef = WeakReference<Context>(null)
 
     var isCharging: Boolean = false
@@ -65,7 +63,7 @@ object BatteryWrapper {
     }
 
     fun init(context: Context) {
-        Log.i(TAG, "init")
+        info("init")
         contextRef = WeakReference<Context>(context)
         fetchStatus()
     }

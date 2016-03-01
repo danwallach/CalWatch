@@ -10,7 +10,6 @@ import android.app.Service
 import android.content.Context
 import android.content.Intent
 import android.os.IBinder
-import android.util.Log
 
 import java.util.Observable
 import java.util.Observer
@@ -37,7 +36,7 @@ class WatchCalendarService : Service(), Observer {
 
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
         super.onStartCommand(intent, flags, startId)
-        Log.v(TAG, "service starting!")
+        verbose("service starting!")
 
         // We want this service to continue running until it is explicitly
         // stopped, so return sticky.
@@ -46,7 +45,7 @@ class WatchCalendarService : Service(), Observer {
 
     override fun onCreate() {
         super.onCreate()
-        Log.v(TAG, "service created!")
+        verbose("service created!")
 
         ClockState.addObserver(this)
         wearSender = WearSender(this)
@@ -58,31 +57,30 @@ class WatchCalendarService : Service(), Observer {
         // pass them along to the Google Play Store. Seems to work.
         CrashReport.getInstance(this).setOnCrashListener { crashInfo ->
             // Manage the crash
-            Log.e(TAG, "wear-side crash detected!", crashInfo.throwable)
+            error("wear-side crash detected!", crashInfo.throwable)
             CrashReport.getInstance(this@WatchCalendarService).reportToPlayStore(this@WatchCalendarService)
         }
     }
 
     override fun onDestroy() {
         super.onDestroy()
-        Log.v(TAG, "service destroyed!")
+        verbose("service destroyed!")
 
         ClockState.deleteObserver(this)
     }
 
     override fun onBind(intent: Intent?): IBinder? {
-        Log.e(TAG, "onBind: not supported")
+        error("onBind: not supported")
         return null // "May return null if clients can not bind to the service." -- which is exactly what we want
     }
 
     override fun update(observable: Observable?, data: Any?) {
         // somebody updated something in the clock state (new events, new display options, etc.)
-        Log.v(TAG, "internal clock state changed: time to send all to the watch")
+        verbose("internal clock state changed: time to send all to the watch")
         sendAllToWatch()
     }
 
-    companion object {
-        private const val TAG = "WatchCalendarService"
+    companion object: AnkoLogger {
 
         var singletonService: WatchCalendarService? = null
         private set
@@ -90,7 +88,7 @@ class WatchCalendarService : Service(), Observer {
         fun kickStart(ctx: Context) {
             // start the calendar service, if it's not already running
             if (singletonService == null) {
-                Log.v(TAG, "launching watch calendar service")
+                verbose("launching watch calendar service")
                 ctx.startService<WatchCalendarService>()
             }
         }

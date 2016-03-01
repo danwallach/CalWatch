@@ -8,11 +8,9 @@ package org.dwallach.calwatch
 
 import android.content.Context
 import android.content.pm.PackageManager
-import android.util.Log
+import org.jetbrains.anko.*
 
-object VersionWrapper {
-    private const val TAG = "VersionWrapper"
-
+object VersionWrapper: AnkoLogger {
     fun logVersion(activity: Context) {
         try {
             val pinfo = activity.packageManager.getPackageInfo(activity.packageName, 0)
@@ -21,9 +19,9 @@ object VersionWrapper {
 
             val versionString = "Version: $versionName ($versionNumber)"
 
-            Log.i(TAG, versionString)
+            info(versionString)
         } catch (e: PackageManager.NameNotFoundException) {
-            Log.e(TAG, "failed to get package manager!")
+            error("failed to get package manager!", e)
         }
     }
 }

@@ -7,13 +7,11 @@
 package org.dwallach.calwatch
 
 import android.content.Context
-import android.util.Log
+import org.jetbrains.anko.*
 
-object PreferencesHelper {
-    private const val TAG = "PreferencesHelper"
-
+object PreferencesHelper: AnkoLogger {
     fun savePreferences(context: Context) {
-        Log.v(TAG, "savePreferences")
+        verbose("savePreferences")
 
         context.getSharedPreferences(Constants.PrefsKey, Context.MODE_PRIVATE).edit().apply {
             putInt("faceMode", ClockState.faceMode)
@@ -21,19 +19,19 @@ object PreferencesHelper {
             putBoolean("showDayDate", ClockState.showDayDate)
 
             if (!commit())
-                Log.e(TAG, "savePreferences commit failed ?!")
+                error("savePreferences commit failed ?!")
         }
     }
 
     fun loadPreferences(context: Context) {
-        Log.v(TAG, "loadPreferences")
+        verbose("loadPreferences")
 
         context.getSharedPreferences(Constants.PrefsKey, Context.MODE_PRIVATE).apply {
             val faceMode = getInt("faceMode", Constants.DefaultWatchFace) // ClockState.FACE_TOOL
             val showSeconds = getBoolean("showSeconds", Constants.DefaultShowSeconds)
             val showDayDate = getBoolean("showDayDate", Constants.DefaultShowDayDate)
 
-            Log.v(TAG, "faceMode: $faceMode, showSeconds: $showSeconds, showDayDate: $showDayDate")
+            verbose { "faceMode: $faceMode, showSeconds: $showSeconds, showDayDate: $showDayDate" }
 
             ClockState.faceMode = faceMode
             ClockState.showSeconds = showSeconds

@@ -22,7 +22,7 @@ package org.dwallach.calwatch
 import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
-import android.util.Log
+import org.jetbrains.anko.*
 
 /**
  * Simple code to watch for updates (via broadcast intents) to the shared x.stopwatch and
@@ -43,11 +43,11 @@ import android.util.Log
  *           </intent-filter>
  *           </receiver>
  */
-class XWatchfaceReceiver : BroadcastReceiver() {
+class XWatchfaceReceiver : BroadcastReceiver(), AnkoLogger {
 
     override fun onReceive(context: Context, intent: Intent) {
         val action = intent.action
-        Log.v(TAG, "got intent: " + action)
+        verbose { "got intent: $action" }
 
         if (action == stopwatchUpdateIntent) {
             intent.extras.apply {
@@ -58,7 +58,7 @@ class XWatchfaceReceiver : BroadcastReceiver() {
                 stopwatchUpdateTimestamp = getLong(prefStopwatchUpdateTimestamp)
             }
 
-            Log.v(TAG, "stopwatch update:: start($stopwatchStart), base($stopwatchBase), isRunning($stopwatchIsRunning), isReset($stopwatchIsReset), updateTimestamp($stopwatchUpdateTimestamp)")
+            verbose { "stopwatch update:: start($stopwatchStart), base($stopwatchBase), isRunning($stopwatchIsRunning), isReset($stopwatchIsReset), updateTimestamp($stopwatchUpdateTimestamp)" }
 
         } else if (action == timerUpdateIntent) {
             intent.extras.apply {
@@ -79,13 +79,11 @@ class XWatchfaceReceiver : BroadcastReceiver() {
             }
 
 
-            Log.v(TAG, "timer udpate:: start($timerStart), elapsed($timerPauseElapsed), duration($timerDuration), isRunning($timerIsRunning), isReset($timerIsReset), updateTimestamp($timerUpdateTimestamp)")
+            verbose { "timer udpate:: start($timerStart), elapsed($timerPauseElapsed), duration($timerDuration), isRunning($timerIsRunning), isReset($timerIsReset), updateTimestamp($timerUpdateTimestamp)" }
         }
     }
 
-    companion object {
-        private const val TAG = "XWatchfaceReceiver"
-
+    companion object: AnkoLogger {
         const val prefStopwatchRunning = "running"
         const val prefStopwatchReset = "reset"
         const val prefStopwatchStartTime = "start"
@@ -192,11 +190,11 @@ class XWatchfaceReceiver : BroadcastReceiver() {
          */
         fun pingExternalStopwatches(context: Context) {
             if (stopwatchUpdateTimestamp == 0L) {
-                Log.v(TAG, "sending broadcast query for external stopwatches")
+                verbose("sending broadcast query for external stopwatches")
                 context.sendBroadcast(Intent(stopwatchQueryIntent))
             }
             if (timerUpdateTimestamp == 0L) {
-                Log.v(TAG, "sending broadcast query for external timers")
+                verbose("sending broadcast query for external timers")
                 context.sendBroadcast(Intent(timerQueryIntent))
             }
         }

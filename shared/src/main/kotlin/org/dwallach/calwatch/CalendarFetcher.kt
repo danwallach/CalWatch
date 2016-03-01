@@ -16,7 +16,6 @@ import android.net.Uri
 import android.os.*
 import android.provider.CalendarContract
 import android.text.format.DateUtils
-import android.util.Log
 
 import java.lang.ref.WeakReference
 import kotlin.comparisons.compareBy
@@ -32,7 +31,7 @@ import org.jetbrains.anko.*
  * These are different on wear vs. mobile, so are specified in those subdirectories. Everything else
  * is portable.
  */
-class CalendarFetcher(initialContext: Context, val contentUri: Uri, val authority: String) {
+class CalendarFetcher(initialContext: Context, val contentUri: Uri, val authority: String): AnkoLogger {
     // this will fire when it's time to (re)load the calendar, launching an asynchronous
     // task to do all the dirty work and eventually update ClockState
     private val contextRef = WeakReference(initialContext)
@@ -40,7 +39,7 @@ class CalendarFetcher(initialContext: Context, val contentUri: Uri, val authorit
 
     private val broadcastReceiver = object : BroadcastReceiver() {
         override fun onReceive(context: Context, intent: Intent) {
-            Log.v(TAG, "receiver: got intent message.  action(${intent.action}), data(${intent.data}), toString(${intent.toString()})")
+            verbose { "receiver: got intent message.  action(${intent.action}), data(${intent.data}), toString(${intent.toString()})" }
             if (Intent.ACTION_PROVIDER_CHANGED == intent.action) {
 
                 // Google's reference code also checks that the Uri matches intent.getData(), but the URI we're getting back via intent.getData() is:
@@ -51,7 +50,7 @@ class CalendarFetcher(initialContext: Context, val contentUri: Uri, val authorit
 
                 // Solution? Screw it. Whatever we get, we don't care, we'll reload the calendar.
 
-                Log.v(TAG, "receiver: time to load new calendar data")
+                verbose("receiver: time to load new calendar data")
                 rescan()
             }
         }
@@ -61,7 +60,7 @@ class CalendarFetcher(initialContext: Context, val contentUri: Uri, val authorit
         singletonFetcher = this
 
         // hook into watching the calendar (code borrowed from Google's calendar wear app)
-        Log.v(TAG, "setting up intent receiver")
+        verbose("setting up intent receiver")
         val filter = IntentFilter(Intent.ACTION_PROVIDER_CHANGED).apply {
             addDataScheme("content")
             addDataAuthority(authority, null)
@@ -83,7 +82,7 @@ class CalendarFetcher(initialContext: Context, val contentUri: Uri, val authorit
      * cannot be used any more. Make a new one if you want to restart things later.
      */
     fun kill() {
-        Log.v(TAG, "kill")
+        verbose("kill")
 
         val context: Context? = getContext()
 
@@ -105,14 +104,13 @@ class CalendarFetcher(initialContext: Context, val contentUri: Uri, val authorit
             // this means that we're reusing a `killed` CalendarFetcher, which is bad, because it
             // won't be listening to the broadcasts any more. Log so we can discover it, but otherwise
             // continue running. At least it will update once an hour...
-            Log.e(TAG, "no receiver registered!")
+            error("no receiver registered!")
         }
 
         if(scanInProgress) {
-//            Log.v(TAG, "rescan already in progress, redundant rescan request ignored")
             return
         } else {
-            Log.v(TAG, "rescan starting asynchronously")
+            verbose("rescan starting asynchronously")
             scanInProgress = true
             runAsyncLoader()
         }
@@ -130,7 +128,7 @@ class CalendarFetcher(initialContext: Context, val contentUri: Uri, val authorit
         var cr = emptyList<WireEvent>()
 
         // first, get the list of calendars
-        Log.v(TAG, "loadContent: starting to load content")
+        verbose("loadContent: starting to load content")
 
         TimeWrapper.update()
         val time = TimeWrapper.gmtTime
@@ -138,10 +136,10 @@ class CalendarFetcher(initialContext: Context, val contentUri: Uri, val authorit
         val queryEndMillis = queryStartMillis + 86400000 // 24 hours later
 
         try {
-            Log.v(TAG, "loadContent: Query times... Now: %s, QueryStart: %s, QueryEnd: %s"
+            verbose { "loadContent: Query times... Now: %s, QueryStart: %s, QueryEnd: %s"
                     .format(DateUtils.formatDateTime(context, time, DateUtils.FORMAT_SHOW_DATE or DateUtils.FORMAT_SHOW_TIME),
                             DateUtils.formatDateTime(context, queryStartMillis, DateUtils.FORMAT_SHOW_TIME or DateUtils.FORMAT_SHOW_DATE),
-                            DateUtils.formatDateTime(context, queryEndMillis, DateUtils.FORMAT_SHOW_TIME or DateUtils.FORMAT_SHOW_DATE)))
+                            DateUtils.formatDateTime(context, queryEndMillis, DateUtils.FORMAT_SHOW_TIME or DateUtils.FORMAT_SHOW_DATE)) }
         } catch (t: Throwable) {
             // sometimes the date formatting blows up... who knew? best to just ignore and move on
         }
@@ -182,13 +180,12 @@ class CalendarFetcher(initialContext: Context, val contentUri: Uri, val authorit
                             cr += WireEvent(startTime, endTime, displayColor)
 
                     } while (iCursor.moveToNext())
-                    Log.v(TAG, "loadContent: visible instances found: ${cr.size}")
+                    verbose {"loadContent: visible instances found: ${cr.size}" }
                 }
 
                 // lifecycle cleanliness: important to close down when we're done
                 iCursor.close()
             }
-
 
             if (!cr.isEmpty()) {
                 // Primary sort: color, so events from the same calendar will become consecutive wedges
@@ -209,7 +206,7 @@ class CalendarFetcher(initialContext: Context, val contentUri: Uri, val authorit
             }
         } catch (e: SecurityException) {
             // apparently we don't have permission for the calendar!
-            Log.e(TAG, "security exception while reading calendar!", e)
+            error("security exception while reading calendar!", e)
             kill()
             ClockState.calendarPermission = false
 
@@ -227,17 +224,17 @@ class CalendarFetcher(initialContext: Context, val contentUri: Uri, val authorit
         //
         // Why a wake-lock? In part, because the Google sample code does it this way, and in part
         // because it makes sense. We want this task to finish quickly. In practice, the "total
-        // calendar computation" number, reported below seems to be around a second or less -- running
+        // calendar computation" time reported below seems to be around a second or less -- running
         // once an hour -- so we're not killing the battery in any case.
         //
         val wakeLock = context.powerManager.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, "CalWatchWakeLock")
         wakeLock.acquire()
 
-        Log.v(TAG, "async: wake lock acquired")
+        verbose("async: wake lock acquired")
 
         //
-        // This is the Anko library being awesome. Rather than messing with AsyncTask and other Android
-        // messiness, we instead say "this block should run asynchronously, and oh by the way, run this
+        // This is the Anko library being awesome. Rather than using AsyncTask, which can get
+        // messy, we instead say "this block should run asynchronously, and oh by the way, run this
         // other code on the UI thread once the asynchronous bit is done". Spectacular. The main async
         // block will be producing its result in the result variable, declared below, which is then
         // picked up by the UI thread part. Note that we don't want to throw an exception from the
@@ -259,7 +256,7 @@ class CalendarFetcher(initialContext: Context, val contentUri: Uri, val authorit
                 val startTime = SystemClock.elapsedRealtimeNanos()
                 result = loadContent(context)
                 val endTime = SystemClock.elapsedRealtimeNanos()
-                Log.i(TAG, "async: total calendar computation time: %.3f ms".format((endTime - startTime) / 1000000.0))
+                info { "async: total calendar computation time: %.3f ms".format((endTime - startTime) / 1000000.0) }
             } catch (e: Throwable) {
                 // pass the exception back to the UI thread; we'll log it there
                 result = Pair(emptyList(), e);
@@ -268,33 +265,33 @@ class CalendarFetcher(initialContext: Context, val contentUri: Uri, val authorit
                 wakeLock.release()
             }
 
-            // this will run after the above chunk of the async completes
+            //
+            // This will run after the above chunk of the async completes, which could be a while
+            // if the watch goes into "doze" mode, but it will definitely happen when the screen is
+            // being redrawn, which is what we care about. Pretty much all that's going on here are
+            // the calls to ClockState, that make the new calendar state visible the next time
+            // the screen is being redrawn.
+            //
             uiThread {
                 scanInProgress = false
                 val (wireEventList, e) = result
 
                 if (e != null) {
-                    Log.v(TAG, "uiThread: failure in async computation", e)
+                    verbose("uiThread: failure in async computation", e)
                 } else {
-                    //
-                    // This is the place where side-effects from the background computation finally
-                    // become visible. Any subsequent redraw will use the new calendar data.
-                    //
                     ClockState.setWireEventList(wireEventList)
                     ClockState.pingObservers()
                 }
 
-                Log.v(TAG, "uiThread: complete")
+                verbose("uiThread: complete")
             }
         }
     }
 
     companion object {
-        private const val TAG = "CalendarFetcher"
         private var singletonFetcher: CalendarFetcher? = null
 
         fun requestRescan() {
-//            Log.i(TAG, "requestRescan")
             singletonFetcher?.rescan()
         }
     }

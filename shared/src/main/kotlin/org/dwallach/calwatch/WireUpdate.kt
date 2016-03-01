@@ -6,7 +6,7 @@
  */
 package org.dwallach.calwatch
 
-import android.util.Log
+import org.jetbrains.anko.*
 
 import java.io.IOException
 
@@ -16,24 +16,20 @@ import java.io.IOException
  * we used protobufs, which was total overkill with later versions of Wear, where Google dealt
  * with moving the calendars around. We simplified down to this business. We could probably
  * go a step further and replace this with distinct entries in the DataMap, but we might want
- * to add more things later on, so it's easiest to just keep this around. It's expansion room
- * for later on.
+ * to add more things later on, so it's easiest to just keep this around.
  */
 data class WireUpdate(val faceMode: Int, val showSecondHand: Boolean, val showDayDate: Boolean) {
 
     fun toByteArray() = "$HEADER;$faceMode;$showSecondHand;$showDayDate;$TRAILER".toByteArray()
 
-    companion object {
-        private const val TAG = "WireUpdate"
-
-
+    companion object: AnkoLogger {
         private const val HEADER = "CWDATA2"
         private const val TRAILER = "$"
 
         @Throws(IOException::class)
         fun parseFrom(input: ByteArray): WireUpdate {
             val inputStr = String(input)
-            Log.v(TAG, "parseFrom: $inputStr")
+            verbose { "parseFrom: $inputStr" }
 
             val inputs = inputStr.split(";".toRegex())
                     .dropLastWhile { it.isEmpty() }
@@ -41,9 +37,13 @@ data class WireUpdate(val faceMode: Int, val showSecondHand: Boolean, val showDa
 
             if (inputs.size == 5 && inputs[0] == HEADER && inputs[4] == TRAILER) {
                 val result = WireUpdate(inputs[1].toInt(), inputs[2].toBoolean(), inputs[3].toBoolean())
-                Log.v(TAG, "parsed: ${result.toString()}")
+                verbose { "parsed: ${result.toString()}" }
                 return result
-            } else error("Got bogus wire message: $inputStr")
+            } else {
+                val errStr = "Got bogus wire message: $inputStr"
+                error(errStr)
+                throw RuntimeException(errStr)
+            }
         }
     }
 }

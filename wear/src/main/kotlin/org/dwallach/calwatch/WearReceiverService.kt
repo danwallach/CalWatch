@@ -10,7 +10,6 @@ import android.app.Service
 import android.content.Context
 import android.content.Intent
 import android.util.Base64
-import android.util.Log
 
 import com.google.android.gms.wearable.DataEvent
 import com.google.android.gms.wearable.DataEventBuffer
@@ -25,19 +24,19 @@ import org.jetbrains.anko.*
  * This class pairs up with WearSender
  * Created by dwallach on 8/25/14.
  */
-class WearReceiverService : WearableListenerService() {
+class WearReceiverService : WearableListenerService(), AnkoLogger {
     init {
-        Log.v(TAG, "starting listening service")
+        verbose("starting listening service")
     }
 
     private fun newEventBytes(eventBytes: ByteArray) {
-        Log.v(TAG, "newEventBytes: ${eventBytes.size}")
+        verbose { "newEventBytes: ${eventBytes.size}" }
 
         ClockState.setProtobuf(eventBytes)
     }
 
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
-        Log.v(TAG, "service starting!")
+        verbose("service starting!")
 
         GoogleApi.connect(this, Wearable.API)
 
@@ -47,7 +46,7 @@ class WearReceiverService : WearableListenerService() {
 
         // load any saved data while we're waiting on the phone to give us fresh data
         if (ClockState.wireInitialized) {
-            Log.v(TAG, "clock state already initialized, no need to go to saved prefs")
+            verbose("clock state already initialized, no need to go to saved prefs")
         } else {
             loadPreferences()
         }
@@ -59,20 +58,20 @@ class WearReceiverService : WearableListenerService() {
 
     override fun onDataChanged(dataEvents: DataEventBuffer?) {
         if(dataEvents == null) {
-            Log.e(TAG, "onDataChanged with no data?!")
+            error("onDataChanged with no data?!")
             return
         }
 
-        Log.d(TAG, "onDataChanged")
+        debug("onDataChanged")
         dataEvents
                 .filter { it.type == DataEvent.TYPE_CHANGED }
                 .map { it.dataItem }
                 .forEach {
-                    Log.d(TAG, "--> item found: ${it.toString()}")
+                    debug { "--> item found: ${it.toString()}" }
                     if (it.uri.path.compareTo(Constants.SettingsPath) == 0) {
                         val dataMap = DataMapItem.fromDataItem(it).dataMap
                         val eventbuf = dataMap.getByteArray(Constants.DataKey)
-                        Log.d(TAG, "----> it's an event for us, nbytes: ${eventbuf.size}")
+                        debug { "----> it's an event for us, nbytes: ${eventbuf.size}" }
 
                         if(eventbuf != null) {
                             newEventBytes(eventbuf)
@@ -85,7 +84,7 @@ class WearReceiverService : WearableListenerService() {
     override fun onCreate() {
         super.onCreate()
 
-        Log.v(TAG, "onCreate!")
+        verbose("onCreate!")
         GoogleApi.connect(this, Wearable.API) // overkill or paranoia? no big deal to try again
     }
 
@@ -98,7 +97,7 @@ class WearReceiverService : WearableListenerService() {
         if (eventBytes == null || eventBytes.size < 1)
             return
 
-        Log.v(TAG, "savePreferences: ${eventBytes.size} bytes")
+        verbose("savePreferences: ${eventBytes.size} bytes")
         getSharedPreferences(Constants.PrefsKey, Context.MODE_PRIVATE).edit().apply {
             // TODO there's no reason to save state like this any more; maybe we could merge with mobile/PreferencesHelper
 
@@ -109,7 +108,7 @@ class WearReceiverService : WearableListenerService() {
             putString("savedState", Base64.encodeToString(eventBytes, Base64.DEFAULT))
 
             if (!commit())
-                Log.v(TAG, "savePreferences commit failed ?!")
+                warn("savePreferences commit failed ?!")
         }
     }
 
@@ -117,7 +116,7 @@ class WearReceiverService : WearableListenerService() {
      * load saved state, if it's present, and use it to initialize the watchface.
      */
     fun loadPreferences() {
-        Log.v(TAG, "loadPreferences")
+        verbose("loadPreferences")
 
         val savedState = getSharedPreferences(Constants.PrefsKey, Context.MODE_PRIVATE).getString("savedState", "")
 
@@ -125,21 +124,20 @@ class WearReceiverService : WearableListenerService() {
             try {
                 newEventBytes(Base64.decode(savedState, Base64.DEFAULT))
             } catch (e: IllegalArgumentException) {
-                Log.e(TAG, "failed to decode base64 saved state", e)
+                error("failed to decode base64 saved state", e)
             }
         }
     }
 
-    companion object {
-        private const val TAG = "WearReceiverService"
+    companion object: AnkoLogger {
         private var running = false;
 //        var singleton: WearReceiverService
 
         fun kickStart(context: Context) {
-            Log.v(TAG, "kickStart")
+            verbose("kickStart")
             // start the calendar service, if it's not already running
             if (!running) {
-                Log.v(TAG, "launching WearReceiverService via intent")
+                verbose("launching WearReceiverService via intent")
                 running = true
                 context.startService<WearReceiverService>()
             }

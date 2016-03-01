@@ -14,14 +14,14 @@ import android.graphics.Color
 import android.graphics.PorterDuff
 import android.provider.CalendarContract
 import android.util.AttributeSet
-import android.util.Log
 import android.view.MotionEvent
 import android.view.View
+import org.jetbrains.anko.*
 
 import java.util.Observable
 import java.util.Observer
 
-class MyViewAnim(context: Context, attrs: AttributeSet) : View(context, attrs), Observer {
+class MyViewAnim(context: Context, attrs: AttributeSet) : View(context, attrs), Observer, AnkoLogger {
 
     init {
         setWillNotDraw(false)
@@ -51,7 +51,7 @@ class MyViewAnim(context: Context, attrs: AttributeSet) : View(context, attrs), 
     }
 
     fun init(context: Context) {
-        Log.d(TAG, "init")
+        verbose("init")
 
         // announce our version number to the logs
         VersionWrapper.logVersion(context)
@@ -63,19 +63,19 @@ class MyViewAnim(context: Context, attrs: AttributeSet) : View(context, attrs), 
     // this is redundant with CalWatchFaceService.Engine.initCalendarFetcher, but just different enough that it's
     // not really worth trying to have a grand unified thing.
     fun initCalendarFetcher(activity: Activity) {
-        Log.v(TAG, "initCalendarFetcher")
+        verbose("initCalendarFetcher")
 
         val permissionGiven = CalendarPermission.check(activity)
 
         if (!ClockState.calendarPermission && permissionGiven) {
             // Hypothetically this isn't necessary, because it's handled in CalendarPermission.handleResult.
             // Nonetheless, paranoia.
-            Log.e(TAG, "we've got permission, need to update the ClockState")
+            info("we've got permission, need to update the ClockState")
             ClockState.calendarPermission = true
         }
 
         if (!permissionGiven) {
-            Log.v(TAG, "no calendar permission given, requesting if we haven't requested beforehand")
+            verbose("no calendar permission given, requesting if we haven't requested beforehand")
             CalendarPermission.requestFirstTimeOnly(activity)
             return
         }
@@ -97,13 +97,13 @@ class MyViewAnim(context: Context, attrs: AttributeSet) : View(context, attrs), 
 
         // properties of the View, reflected into a Kotlin variable
         if (width == 0 || height == 0) {
-            Log.v(TAG, "onWindowFocusChanged: got zeros for width or height")
+            verbose("onWindowFocusChanged: got zeros for width or height")
             return
         }
 
         zeroSizedScreen = (width == 0 || height == 0)
 
-        Log.v(TAG, "onWindowFocusChanged: $width, $height")
+        verbose { "onWindowFocusChanged: $width, $height" }
         clockFace.setSize(width, height)
     }
 
@@ -111,7 +111,7 @@ class MyViewAnim(context: Context, attrs: AttributeSet) : View(context, attrs), 
      * Call this when the activity is paused, causes other internal things to be cleaned up.
      */
     fun pause(context: Context) {
-        Log.d(TAG, "kill")
+        verbose("kill")
 
         ClockState.deleteObserver(this)
         calendarFetcher?.kill()
@@ -122,12 +122,12 @@ class MyViewAnim(context: Context, attrs: AttributeSet) : View(context, attrs), 
      * Call this when the activity is restarted/resumed, causes other internal things to get going again.
      */
     fun resume(context: Context) {
-        Log.d(TAG, "resume")
+        verbose("resume")
 
         clockFace = ClockFace()
 
         if(context.resources == null) {
-            Log.e(TAG, "no resources? not good")
+            error("no resources? not good")
         } else {
             val emptyCalendar = BitmapFactory.decodeResource(context.resources, R.drawable.empty_calendar)
             clockFace.setMissingCalendarBitmap(emptyCalendar)
@@ -144,7 +144,7 @@ class MyViewAnim(context: Context, attrs: AttributeSet) : View(context, attrs), 
 
         zeroSizedScreen = (w == 0 || h == 0)
 
-        Log.v(TAG, "onSizeChanged: $w, $h")
+        verbose { "onSizeChanged: $w, $h" }
         clockFace.setSize(w, h)
     }
 
@@ -159,7 +159,7 @@ class MyViewAnim(context: Context, attrs: AttributeSet) : View(context, attrs), 
 
         if (zeroSizedScreen) {
             if (drawCounter % 1000 == 1L)
-                Log.e(TAG, "zero-width or zero-height, can't draw yet")
+                error("zero-width or zero-height, can't draw yet")
             return
         }
 
@@ -173,7 +173,7 @@ class MyViewAnim(context: Context, attrs: AttributeSet) : View(context, attrs), 
                 invalidate()
         } catch (t: Throwable) {
             if (drawCounter % 1000 == 1L)
-                Log.e(TAG, "Something blew up while drawing", t)
+                error("Something blew up while drawing", t)
         }
     }
 
@@ -189,10 +189,6 @@ class MyViewAnim(context: Context, attrs: AttributeSet) : View(context, attrs), 
         PhoneActivity.watchfaceClick(this)
 
         return true
-    }
-
-    companion object {
-        private const val TAG = "MyViewAnim"
     }
 }
 

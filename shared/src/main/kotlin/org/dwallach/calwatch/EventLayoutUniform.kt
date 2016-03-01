@@ -7,16 +7,15 @@
 package org.dwallach.calwatch
 
 import android.os.SystemClock
-import android.util.Log
 
 import EDU.Washington.grad.gjb.cassowary.*
+import org.jetbrains.anko.*
 
 /**
  * new variant of event layout, this time with a full-blown constraint solver to make things
  * as pretty as possible
  */
-object EventLayoutUniform {
-    private const val TAG = "EventLayoutUniform"
+object EventLayoutUniform: AnkoLogger {
     const val MAXLEVEL = 10000 // we'll go from 0 to MAXLEVEL, inclusive
 
     /**
@@ -28,7 +27,7 @@ object EventLayoutUniform {
      * @return true if it worked, false if it failed
      */
     fun go(events: List<EventWrapper>): Boolean {
-        Log.i(TAG, "Running uniform event layout with %d events".format(events.size))
+        info { "Running uniform event layout with %d events".format(events.size) }
 
         val nEvents = events.size
         if (nEvents == 0) return true // degenerate case, in which we trivially succeed
@@ -98,7 +97,7 @@ object EventLayoutUniform {
             // and... away we go!
             solver.solve()
 
-            Log.v(TAG, "Event layout success.")
+            verbose("Event layout success.")
 
             for(i in 0..nEvents-1) {
                 val e = events[i]
@@ -109,17 +108,17 @@ object EventLayoutUniform {
                 e.maxLevel = start + size
             }
         } catch (e: ExCLInternalError) {
-            Log.e(TAG, e.toString())
+            error("solver failed", e)
             return false
         } catch (e: ExCLRequiredFailure) {
-            Log.e(TAG, e.toString())
+            error("solver failed", e)
             return false
         } catch (e: ExCLNonlinearExpression) {
-            Log.e(TAG, e.toString())
+            error("solver failed", e)
             return false
         } finally {
             val nanoStop = SystemClock.elapsedRealtimeNanos()
-            Log.v(TAG, "Event layout time: %.3f ms".format((nanoStop - nanoStart) / 1000000.0))
+            verbose { "Event layout time: %.3f ms".format((nanoStop - nanoStart) / 1000000.0) }
         }
 
         return true

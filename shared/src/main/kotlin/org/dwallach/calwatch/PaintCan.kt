@@ -8,15 +8,14 @@ package org.dwallach.calwatch
 
 import android.graphics.Color
 import android.graphics.Paint
-import android.util.Log
+import org.jetbrains.anko.*
 
 /**
  * Cheesy helper for getting Paint values for calendar events and making sure we don't allocate
  * the same color twice.
  * Created by dwallach on 8/15/14.
  */
-object PaintCan {
-    private const val TAG = "PaintCan"
+object PaintCan: AnkoLogger {
     private var paintMap = emptyMap<Int,Paint>()
 
     /**
@@ -29,7 +28,6 @@ object PaintCan {
      * large wedges.
      */
     fun getCalendarPaint(argb: Int): Paint {
-        // Log.v(TAG, "get paint: " + Integer.toHexString(argb));
         return paintMap[argb] ?: {
             val newPaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
                 strokeJoin = Paint.Join.BEVEL
@@ -93,7 +91,7 @@ object PaintCan {
                 styleAmbient -> argbToGreyARGB(_argb)
 
                 else -> {
-                    Log.e(TAG, "watchfacePaint: unknown style: $_style")
+                    error { "watchfacePaint: unknown style: $_style" }
                     0
                 }
             }
@@ -129,7 +127,7 @@ object PaintCan {
      * @param radius Radius of the watch face, used to scale all of the line widths
      */
     fun initPaintBucket(radius: Float) {
-        Log.v(TAG, "initPaintBucket")
+        verbose { "initPaintBucket" }
 
         val textSize = radius / 3f
         val smTextSize = radius / 6f

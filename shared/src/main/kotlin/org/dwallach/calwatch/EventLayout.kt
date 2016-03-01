@@ -6,12 +6,10 @@
  */
 package org.dwallach.calwatch
 
-import android.util.Log
+import org.jetbrains.anko.*
 
 
-object EventLayout {
-    private const val TAG = "EventLayout"
-
+object EventLayout: AnkoLogger {
     /**
      * Takes a list of calendar events and mutates their minLevel and maxLevel for calendar side-by-side
      * non-overlapping layout. Note that this class is obsoleted by EventLayoutUniform, which uses a
@@ -21,7 +19,7 @@ object EventLayout {
      * @return maximum level of any calendar event
      */
     fun go(events: List<EventWrapper>): Int {
-        Log.i(TAG, "Running event layout with %d events".format(events.size))
+        info { "Running event layout with %d events".format(events.size) }
 
         // We're going to execute a greedy O(n^2) algorithm that runs like this:
 
@@ -158,7 +156,7 @@ object EventLayout {
         for (i in 0..nEvents - 1) {
             val e = events[i]
             if (e.minLevel < 0 || e.maxLevel > maxLevel) {
-                Log.e(TAG, "malformed eventwrapper ($blurb): ${e.toString()}")
+                error { "malformed eventwrapper ($blurb): ${e.toString()}" }
             }
         }
     }

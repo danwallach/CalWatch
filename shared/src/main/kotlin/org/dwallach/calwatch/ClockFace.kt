@@ -12,7 +12,7 @@ import android.graphics.Paint
 import android.graphics.Path
 import android.graphics.Rect
 import android.graphics.RectF
-import android.util.Log
+import org.jetbrains.anko.*
 import java.util.Observable
 import java.util.Observer
 
@@ -21,7 +21,7 @@ import java.util.Observer
  * nothing about Android widgets, views, or activities. That stuff is handled in MyViewAnim/PhoneActivity
  * (on the phone) and CalWatchFaceService (on the watch).
  */
-class ClockFace : Observer {
+class ClockFace : Observer, AnkoLogger {
     private val instanceID: Int
 
     // initial values to get the ball rolling (avoids a div by zero problem in computeFlatBottomCorners)
@@ -76,7 +76,7 @@ class ClockFace : Observer {
      * If true, ambient redrawing will be purely black and white, without any anti-aliasing (default: off).
      */
     fun setAmbientLowBit(ambientLowBit: Boolean) {
-        Log.v(TAG, "ambient low bit: $ambientLowBit")
+        verbose { "ambient low bit: $ambientLowBit" }
         this.ambientLowBit = ambientLowBit || forceAmbientLowBit
 
         setDrawStyle()
@@ -93,7 +93,7 @@ class ClockFace : Observer {
 
     init {
         instanceID = instanceCounter++
-        Log.v(TAG, "ClockFace setup, instance($instanceID)")
+        verbose { "ClockFace setup, instance($instanceID)" }
 
         ClockState.addObserver(this) // so we get callbacks when the clock state changes
         update(null, null) // and we'll do that callback for the first time, just to initialize things
@@ -114,7 +114,7 @@ class ClockFace : Observer {
         val lMissingCalendarBitmap = missingCalendarBitmap
 
         if(lMissingCalendarBitmap == null) {
-            Log.e(TAG, "no missing calendar bitmap?!")
+            error("no missing calendar bitmap?!")
             return
         }
 
@@ -124,7 +124,7 @@ class ClockFace : Observer {
         missingCalendarX = clockX(15.0, 0.2f)
         missingCalendarY = clockY(0.0, 0f) - height / 2
 
-        Log.v(TAG, "missing calendar bitmap size: (%d,%d), coordinates: (%.1f,%.1f),  (cy: %d, radius: %d)".format(width, height, missingCalendarX, missingCalendarY, cy, radius))
+        verbose { "missing calendar bitmap size: (%d,%d), coordinates: (%.1f,%.1f),  (cy: %d, radius: %d)".format(width, height, missingCalendarX, missingCalendarY, cy, radius) }
     }
 
     /**
@@ -252,8 +252,8 @@ class ClockFace : Observer {
 
         if (startRadius < 0 || startRadius > 1 || endRadius < 0 || endRadius > 1) {
             val errString = "arc too big! radius(%.2f -> %.2f), seconds(%.2f -> %.2f)".format(startRadius, endRadius, secondsStart, secondsEnd)
-            Log.e(TAG, errString)
             error(errString)
+            throw RuntimeException(errString)
         }
 
         if (drawStyle == PaintCan.styleAntiBurnIn) {
@@ -309,12 +309,12 @@ class ClockFace : Observer {
         //        flatCounter++;
 
         if (startRadius < 0 || startRadius > 1 || endRadius < 0 || endRadius > 1) {
-            Log.e(TAG, "drawRadialArcFlatBottom: arc too big! radius($startRadius,$endRadius), seconds($seconds)")
+            error { "drawRadialArcFlatBottom: arc too big! radius($startRadius,$endRadius), seconds($seconds)" }
             return
         }
 
         if (seconds < 0 || seconds > 60) {
-            Log.e(TAG, "drawRadialArcFlatBottom: seconds out of range: $seconds")
+            error { "drawRadialArcFlatBottom: seconds out of range: $seconds" }
             return
         }
 
@@ -426,11 +426,11 @@ class ClockFace : Observer {
 
         // check if we've already rendered the face
         if (lFaceMode != facePathCacheMode || lFacePathCache == null) {
-            Log.v(TAG, "drawFace: cx($cx), cy($cy), r($radius)")
+            verbose { "drawFace: cx($cx), cy($cy), r($radius)" }
 
             lFacePathCache = Path()
 
-            Log.v(TAG, "rendering new face, faceMode($lFaceMode)")
+            verbose { "rendering new face, faceMode($lFaceMode)" }
 
             if (lFaceMode == ClockState.FACE_TOOL)
                 for (i in 1..59)
@@ -502,7 +502,7 @@ class ClockFace : Observer {
 
             if (!debugMetricsPrinted) {
                 debugMetricsPrinted = true
-                Log.v(TAG, "x(%.2f), y(%.2f), metrics.descent(%.2f), metrics.asacent(%.2f)".format(x, y, metrics.descent, metrics.ascent))
+                verbose { "x(%.2f), y(%.2f), metrics.descent(%.2f), metrics.asacent(%.2f)".format(x, y, metrics.descent, metrics.ascent) }
             }
 
             //
@@ -577,7 +577,7 @@ class ClockFace : Observer {
      * being saved inside ClockFace
      */
     fun wipeCaches() {
-        Log.v(TAG, "clearing caches")
+        verbose { "clearing caches" }
 
         facePathCache = null
         batteryPathCache = null
@@ -720,7 +720,7 @@ class ClockFace : Observer {
 
         // we don't want to poll *too* often; the code below translates to about once per five minute
         if (batteryPathCache == null || time - batteryCacheTime > 300000) {
-            Log.v(TAG, "fetching new battery status")
+            verbose("fetching new battery status")
             BatteryWrapper.fetchStatus()
             val batteryPct = BatteryWrapper.batteryPct
             batteryCacheTime = time
@@ -731,7 +731,7 @@ class ClockFace : Observer {
             // circle. This scales in radius until it hits max size at 10%, then it switches to red.
             //
 
-            Log.v(TAG, "battery at $batteryPct")
+            verbose { "battery at $batteryPct" }
             if (batteryPct > 0.5f) {
                 // batteryPathCache = null;
             } else {
@@ -746,7 +746,7 @@ class ClockFace : Observer {
                 lBatteryPathCache.addCircle(cx.toFloat(), cy.toFloat(), radius * dotRadius, Path.Direction.CCW) // direction shouldn't matter
 
                 batteryCritical = batteryPct <= 0.1f
-                Log.v(TAG, "--> dot radius: $dotRadius, critical: $batteryCritical")
+                verbose { "--> dot radius: $dotRadius, critical: $batteryCritical" }
             }
 
             batteryPathCache = lBatteryPathCache
@@ -843,7 +843,7 @@ class ClockFace : Observer {
     }
 
     fun setSize(width: Int, height: Int) {
-        Log.v(TAG, "setSize: $width x $height")
+        verbose { "setSize: $width x $height" }
         cx = width / 2
         cy = height / 2
 
@@ -899,12 +899,12 @@ class ClockFace : Observer {
             val angle = Math.asin(1.0 - missingBottomPixels.toDouble() / cy.toDouble())
 
             flatBottomCornerTime = (angle * 30.0 / Math.PI + 15).toFloat()
-            Log.v(TAG, "flatBottomCornerTime($flatBottomCornerTime) <-- angle($angle), missingBottomPixels($missingBottomPixels), cy($cy)")
+            verbose { "flatBottomCornerTime($flatBottomCornerTime) <-- angle($angle), missingBottomPixels($missingBottomPixels), cy($cy)" }
 
             flatBottomCornerY1_R100 = clockY(flatBottomCornerTime.toDouble(), 1f)
             flatBottomCornerY1_R80 = clockY(flatBottomCornerTime.toDouble(), 0.80f)
         } else {
-            Log.v(TAG, "no flat bottom corrections")
+            verbose { "no flat bottom corrections" }
         }
     }
 
@@ -987,7 +987,7 @@ class ClockFace : Observer {
 
     fun getAmbientMode() = ambientMode
     fun setAmbientMode(ambientMode: Boolean): Unit {
-        Log.i(TAG, "Ambient mode: ${this.ambientMode} -> $ambientMode")
+        info { "Ambient mode: ${this.ambientMode} -> $ambientMode" }
         if (ambientMode == this.ambientMode) return // nothing changed, so we're good
         this.ambientMode = ambientMode
 
@@ -1003,14 +1003,14 @@ class ClockFace : Observer {
 
     // this gets called when the ClockState updates itself
     override fun update(observable: Observable?, data: Any?) {
-        Log.v(TAG, "update - start, instance($instanceID)")
+        verbose { "update - start, instance($instanceID)" }
         wipeCaches() // nuke saved Paths and such, because all sorts of state may have just changed
 
         this.faceMode = ClockState.faceMode
         this.showDayDate = ClockState.showDayDate
         this.showSeconds = ClockState.showSeconds
 
-        Log.v(TAG, "update - end")
+        verbose("update - end")
     }
 
     private fun updateEventList() {
@@ -1036,8 +1036,6 @@ class ClockFace : Observer {
     }
 
     companion object {
-        private const val TAG = "ClockFace"
-
         // for testing purposes, turn these things on; disable for production
         private const val forceAmbientLowBit = false
         private const val forceBurnInProtection = false

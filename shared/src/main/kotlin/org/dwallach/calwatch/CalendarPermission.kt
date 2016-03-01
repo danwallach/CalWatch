@@ -13,13 +13,12 @@ import android.content.Context
 import android.content.pm.PackageManager
 import android.support.v4.app.ActivityCompat
 import android.support.v4.content.ContextCompat
-import android.util.Log
+import org.jetbrains.anko.*
 
 /**
  * Deal with all the Marshmallow permission machinery.
  */
-object CalendarPermission {
-    private const val TAG = "CalendarPermission"
+object CalendarPermission: AnkoLogger {
     private const val INTERNAL_PERM_REQUEST_CODE = 31337
 
     /**
@@ -37,7 +36,7 @@ object CalendarPermission {
      */
     fun check(context: Context): Boolean {
         val result = ContextCompat.checkSelfPermission(context, Manifest.permission.READ_CALENDAR)
-        Log.v(TAG, "calendar permissions check: $result (granted = ${PackageManager.PERMISSION_GRANTED})")
+        verbose { "calendar permissions check: $result (granted = ${PackageManager.PERMISSION_GRANTED})" }
 
         return result == PackageManager.PERMISSION_GRANTED
     }
@@ -47,7 +46,7 @@ object CalendarPermission {
      */
     fun checkAlreadyAsked(activity: Activity): Boolean {
         val result = ActivityCompat.shouldShowRequestPermissionRationale(activity, Manifest.permission.READ_CALENDAR)
-        Log.v(TAG, "previous checks performed#$numRequests, shouldShowRationale=$result")
+        verbose { "previous checks performed#$numRequests, shouldShowRationale=$result" }
         return result
     }
 
@@ -65,7 +64,7 @@ object CalendarPermission {
     fun request(activity: Activity) {
         if (!check(activity)) {
             numRequests++
-            Log.v(TAG, "this will be check #$numRequests")
+            verbose { "this will be check #$numRequests" }
             ActivityCompat.requestPermissions(activity,
                     arrayOf(Manifest.permission.READ_CALENDAR),
                     INTERNAL_PERM_REQUEST_CODE)
@@ -79,7 +78,7 @@ object CalendarPermission {
                 putInt("permissionRequests", numRequests)
 
                 if (!commit())
-                    Log.v(TAG, "savePreferences commit failed ?!")
+                    verbose { "savePreferences commit failed ?!" }
             }
         }
     }
@@ -91,15 +90,15 @@ object CalendarPermission {
         if (requestCode == INTERNAL_PERM_REQUEST_CODE) {
             // If request is cancelled, the result arrays are empty.
             if (grantResults.size > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-                Log.v(TAG, "calendar permission granted!")
+                verbose { "calendar permission granted!" }
                 ClockState.calendarPermission = true
             } else {
-                Log.v(TAG, "calendar permission denied!")
+                verbose { "calendar permission denied!" }
                 ClockState.calendarPermission = false
             }
         } else {
-            Log.e(TAG, "weird permission result: code(%d), perms(%s), results(%s)"
-                    .format(requestCode, permissions.asList().toString(), grantResults.asList().toString()));
+            error { "weird permission result: code(%d), perms(%s), results(%s)"
+                    .format(requestCode, permissions.asList().toString(), grantResults.asList().toString()) }
         }
     }
 }

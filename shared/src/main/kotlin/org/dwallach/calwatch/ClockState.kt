@@ -6,7 +6,7 @@
  */
 package org.dwallach.calwatch
 
-import android.util.Log
+import org.jetbrains.anko.*
 
 import java.io.IOException
 import java.util.Observable
@@ -19,11 +19,9 @@ import java.util.Observable
  * The "view" (i.e., all the actual graphics calls) lives in ClockFace.
  *
  * The idea is that there is a ClockState singleton, and it doesn't know anything about Android
- * contexts or any of that stuff. The only imported Android class is for Logging.
+ * contexts or any of that stuff.
  */
-object ClockState : Observable() {
-    private const val TAG = "ClockState"
-
+object ClockState : Observable(), AnkoLogger {
     const val FACE_TOOL = 0
     const val FACE_NUMBERS = 1
     const val FACE_LITE = 2
@@ -66,9 +64,9 @@ object ClockState : Observable() {
      * CalendarFetcher does.
      */
     fun setWireEventList(eventList: List<WireEvent>) {
-        Log.v(TAG, "fresh calendar event list, " + eventList.size + " entries")
+        verbose { "fresh calendar event list, " + eventList.size + " entries" }
         val (visibleEventList, maxLevel) = clipToVisible(eventList)
-        Log.v(TAG, "--> $visibleEventList visible events")
+        verbose { "--> $visibleEventList visible events" }
         this.eventList = eventList
         this.visibleEventList = visibleEventList
         this.maxLevel = maxLevel
@@ -137,17 +135,17 @@ object ClockState : Observable() {
                 lMaxLevel = EventLayoutUniform.MAXLEVEL
             } else {
                 // something blew up with the Simplex solver, fall back to the cheesy, greedy algorithm
-                Log.v(TAG, "falling back to older greedy method")
+                verbose("falling back to older greedy method")
                 lMaxLevel = EventLayout.go(clippedEvents)
             }
 
             EventLayout.sanityTest(clippedEvents, lMaxLevel, "After new event layout")
-            Log.v(TAG, "maxLevel for visible events: " + lMaxLevel)
-            Log.v(TAG, "number of visible events: " + clippedEvents.size)
+            verbose { "maxLevel for visible events: " + lMaxLevel }
+            verbose { "number of visible events: " + clippedEvents.size }
 
             return Pair(clippedEvents, lMaxLevel)
         } else {
-            Log.v(TAG, "no events visible!")
+            verbose("no events visible!")
             return Pair(emptyList(), 0)
         }
     }
@@ -174,20 +172,20 @@ object ClockState : Observable() {
      * @param eventBytes a marshalled protobuf of type WireUpdate
      */
     fun setProtobuf(eventBytes: ByteArray) {
-        Log.i(TAG, "setting protobuf: %d bytes".format(eventBytes.size))
+        info { "setting protobuf: %d bytes".format(eventBytes.size) }
         val wireUpdate: WireUpdate
 
         try {
             wireUpdate = WireUpdate.parseFrom(eventBytes)
             wireInitialized = true
         } catch (ioe: IOException) {
-            Log.e(TAG, "parse failure on protobuf", ioe)
+            error("parse failure on protobuf", ioe)
             return
         } catch (e: Exception) {
             if (eventBytes.size == 0)
-                Log.e(TAG, "zero-length message received!")
+                error("zero-length message received!")
             else
-                Log.e(TAG, "some other weird failure on protobuf: nbytes(" + eventBytes.size + ")", e)
+                error({ "some other weird failure on protobuf: nbytes(" + eventBytes.size + ")" }, e)
             return
         }
 
@@ -197,7 +195,7 @@ object ClockState : Observable() {
 
         pingObservers()
 
-        Log.v(TAG, "event update complete")
+        verbose("event update complete")
     }
 
     /**
@@ -211,14 +209,14 @@ object ClockState : Observable() {
     }
 
     private fun debugDump() {
-        Log.v(TAG, "All events in the DB:")
+        verbose("All events in the DB:")
         eventList.forEach {
-            Log.v(TAG, "--> displayColor(" + Integer.toHexString(it.displayColor) + "), startTime(" + it.startTime + "), endTime(" + it.endTime + ")")
+            verbose { "--> displayColor(" + Integer.toHexString(it.displayColor) + "), startTime(" + it.startTime + "), endTime(" + it.endTime + ")" }
         }
 
-        Log.v(TAG, "Visible:")
+        verbose("Visible:")
         visibleEventList.forEach {
-            Log.v(TAG, "--> displayColor(" + Integer.toHexString(it.wireEvent.displayColor) + "), minLevel(" + it.minLevel + "), maxLevel(" + it.maxLevel + "), startTime(" + it.wireEvent.startTime + "), endTime(" + it.wireEvent.endTime + ")")
+            verbose { "--> displayColor(" + Integer.toHexString(it.wireEvent.displayColor) + "), minLevel(" + it.minLevel + "), maxLevel(" + it.maxLevel + "), startTime(" + it.wireEvent.startTime + "), endTime(" + it.wireEvent.endTime + ")" }
         }
     }
 }

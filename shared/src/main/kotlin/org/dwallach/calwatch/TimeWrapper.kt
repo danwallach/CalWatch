@@ -8,7 +8,7 @@ package org.dwallach.calwatch
 
 import android.os.SystemClock
 import android.text.format.DateUtils
-import android.util.Log
+import org.jetbrains.anko.*
 
 import java.util.TimeZone
 
@@ -17,8 +17,7 @@ import java.util.TimeZone
  * is actually having a real impact on performance. That's all centralized here
  * to fix the problem.
  */
-object TimeWrapper {
-    private const val TAG = "TimeWrapper"
+object TimeWrapper: AnkoLogger {
     var gmtOffset: Int = 0
         private set
     var gmtTime: Long = 0
@@ -115,22 +114,20 @@ object TimeWrapper {
         val elapsedTime = currentTime - lastFPSTime // ns since last time we printed something
         if (samples > 0 && elapsedTime > 0) {
             val fps = samples * 1000000000f / elapsedTime  // * 10^9 so we're not just computing frames per nanosecond
-            Log.i(TAG, "FPS: " + java.lang.Float.toString(fps) + ", samples: " + samples)
+            info { "FPS: %.3f, samples: $samples".format(fps) }
 
-            Log.i(TAG, "Min/Avg/Max frame render speed (ms): "
-                    + minRuntime / 1000000f + " / "
-                    + avgRuntimeAccumulator / samples / 1000000f + " / "
-                    + maxRuntime / 1000000f)
+            info { "Min/Avg/Max frame render speed (ms): %.3f / %.3f / %.3f".format(
+                minRuntime / 1000000f, + avgRuntimeAccumulator / samples / 1000000f, + maxRuntime / 1000000f ) }
 
             // this waketime percentage is really a lower bound; it's not counting work in the render thread
             // thread that's outside of the ClockFace rendering methods, and it's also not counting
             // work that happens on other threads
-            Log.i(TAG, "Waketime: " + 100f * avgRuntimeAccumulator / elapsedTime + "%")
+            info { "Waketime: %.3f %%".format(100f * avgRuntimeAccumulator / elapsedTime) }
 
             if (skippedFrames != 0)
-                Log.i(TAG, "Skipped frames: " + skippedFrames)
+                info { "Skipped frames: $skippedFrames" }
             if (zombieFrames != 0)
-                Log.i(TAG, "Zombie frames: " + zombieFrames)
+                info { "Zombie frames: $zombieFrames" }
 
             lastFPSTime = 0
         }
