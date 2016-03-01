@@ -47,7 +47,6 @@ object ClockState : Observable(), AnkoLogger {
         private set
     var calendarPermission = false
 
-
     /**
      * Helper function to determine if we need subsecond refresh intervals.
      */
@@ -90,7 +89,7 @@ object ClockState : Observable(), AnkoLogger {
         if (lastClipTime == localClipTime)
             return
 
-        // If we get here, that means we hit the top of a new hour. We're experimentally leaving
+        // If we get here, that means we hit the top of a new hour. We're leaving
         // the old data alone while we fire off a request to reload the calendar. This might take
         // a whole second or two, but at least it's not happening on the main UI thread.
 
