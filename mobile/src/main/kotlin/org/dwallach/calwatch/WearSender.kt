@@ -46,7 +46,6 @@ class WearSender(context: Context): AnkoLogger {
         } catch (throwable: Throwable) {
             error("couldn't manage to send to the watch; not a big deal", throwable)
         }
-
     }
 
     init {
