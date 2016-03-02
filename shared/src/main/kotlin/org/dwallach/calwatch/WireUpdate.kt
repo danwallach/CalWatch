@@ -38,7 +38,7 @@ data class WireUpdate(val faceMode: Int, val showSecondHand: Boolean, val showDa
                 return result
             } else {
                 // if we got a malformed message, then something really bad is happening; time for a kaboom
-                throw errorAndLog("Got bogus wire message: $inputStr")
+                errorLogAndThrow("Got bogus wire message: $inputStr")
             }
         }
     }
