@@ -8,8 +8,6 @@ package org.dwallach.calwatch
 
 import org.jetbrains.anko.*
 
-import java.io.IOException
-
 /**
  * This data structure deals with serializing and deserializing all the state that we want to
  * get from the phone to the watch. Originally, when we had to send the entire serialized calendar,
@@ -26,7 +24,6 @@ data class WireUpdate(val faceMode: Int, val showSecondHand: Boolean, val showDa
         private const val HEADER = "CWDATA2"
         private const val TRAILER = "$"
 
-        @Throws(IOException::class)
         fun parseFrom(input: ByteArray): WireUpdate {
             val inputStr = String(input)
             verbose { "parseFrom: $inputStr" }
@@ -40,9 +37,8 @@ data class WireUpdate(val faceMode: Int, val showSecondHand: Boolean, val showDa
                 verbose { "parsed: ${result.toString()}" }
                 return result
             } else {
-                val errStr = "Got bogus wire message: $inputStr"
-                error(errStr)
-                throw RuntimeException(errStr)
+                // if we got a malformed message, then something really bad is happening; time for a kaboom
+                throw errorAndLog("Got bogus wire message: $inputStr")
             }
         }
     }

@@ -251,9 +251,8 @@ class ClockFace : Observer, AnkoLogger {
          */
 
         if (startRadius < 0 || startRadius > 1 || endRadius < 0 || endRadius > 1) {
-            val errString = "arc too big! radius(%.2f -> %.2f), seconds(%.2f -> %.2f)".format(startRadius, endRadius, secondsStart, secondsEnd)
-            error(errString)
-            throw RuntimeException(errString)
+            // if this happens, then we've got a serious bug somewhere; time for a kaboom
+            throw errorAndLog("arc too big! radius(%.2f -> %.2f), seconds(%.2f -> %.2f)".format(startRadius, endRadius, secondsStart, secondsEnd))
         }
 
         if (drawStyle == PaintCan.styleAntiBurnIn) {
