@@ -90,8 +90,8 @@ object EventLayoutUniform: AnkoLogger {
 
                 // stronger constraint: each block size is greater than 1/N of the size, for overlap of N
                 // (turns out that this didn't change the results, but removing it sped things up significantly)
-                //                ClLinearInequality equalBlockSize = new ClLinearInequality(sizes[i], CL.GEQ, MAXLEVEL / (1+overlapCounter[i]), ClStrength.strong);
-                //                solver.addConstraint(equalBlockSize);
+                //                ClLinearInequality equalBlockSize = new ClLinearInequality(sizes[i], CL.GEQ, MAXLEVEL / (1+overlapCounter[i]), ClStrength.strong)
+                //                solver.addConstraint(equalBlockSize)
             }
 
             // and... away we go!

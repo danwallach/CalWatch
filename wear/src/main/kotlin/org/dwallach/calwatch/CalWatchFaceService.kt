@@ -160,7 +160,7 @@ class CalWatchFaceService : CanvasWatchFaceService(), AnkoLogger {
 
             if(properties == null) {
                 debug("onPropertiesChanged: empty properties?!")
-                return;
+                return
             }
 
             properties.apply {
@@ -174,7 +174,7 @@ class CalWatchFaceService : CanvasWatchFaceService(), AnkoLogger {
 
         override fun onTimeTick() {
             super.onTimeTick()
-            //            Log.d(TAG, "onTimeTick: ambient = " + isInAmbientMode());
+            //            Log.d(TAG, "onTimeTick: ambient = " + isInAmbientMode())
 
             // this happens exactly once per minute; we're redrawing more often than that,
             // regardless, but this also provides a backstop if something is busted or buggy,
@@ -210,7 +210,7 @@ class CalWatchFaceService : CanvasWatchFaceService(), AnkoLogger {
         private var oldWidth: Int = 0
 
         override fun onDraw(canvas: Canvas?, bounds: Rect?) {
-            //                Log.v(TAG, "onDraw");
+            //                Log.v(TAG, "onDraw")
             drawCounter++
 
             if(bounds == null || canvas == null) {

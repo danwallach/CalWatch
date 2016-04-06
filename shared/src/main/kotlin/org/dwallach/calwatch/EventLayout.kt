@@ -88,7 +88,7 @@ object EventLayout: AnkoLogger {
 
             // Log.v(TAG, "inserting event "+i+" (" + e.title +
             //        "), fullLevels(" + String.valueOf(printLevelsFull) +
-            //        "), maxLevelAnywhere (" + maxLevelAnywhere + ")");
+            //        "), maxLevelAnywhere (" + maxLevelAnywhere + ")")
 
 
             // now, discover the first open hole, from the lowest level, then expand to fill
@@ -103,7 +103,7 @@ object EventLayout: AnkoLogger {
             for(k in 0..maxLevelAnywhere) {
                 if (searching) {
                     if (!levelsFull[k]) {
-                        // Log.v(TAG, "--> found start level: " + k);
+                        // Log.v(TAG, "--> found start level: " + k)
                         searching = false
                         holeStart = k
                         holeEnd = k
@@ -114,9 +114,9 @@ object EventLayout: AnkoLogger {
                     // onward we go!
                     if (!levelsFull[k]) {
                         holeEnd = k
-                        // Log.v(TAG, "--> expanded end level: "+ k);
+                        // Log.v(TAG, "--> expanded end level: "+ k)
                     } else {
-                        // Log.v(TAG, "--> no further holes");
+                        // Log.v(TAG, "--> no further holes")
                         break
                     }// sad, this search is over
                 }
@@ -126,9 +126,9 @@ object EventLayout: AnkoLogger {
                 e.minLevel = holeStart
                 e.maxLevel = holeEnd
 
-                // Log.v(TAG, "--> hole found: (" + e.minLevel + "," + e.maxLevel + ")");
+                // Log.v(TAG, "--> hole found: (" + e.minLevel + "," + e.maxLevel + ")")
             } else {
-                // Log.v(TAG, "--> adding a level");
+                // Log.v(TAG, "--> adding a level")
                 e.minLevel = maxLevelAnywhere + 1
                 e.maxLevel = maxLevelAnywhere + 1
 
@@ -139,7 +139,7 @@ object EventLayout: AnkoLogger {
                     val peMaxLevel = pe.maxLevel
 
                     if (!e.overlaps(pe) && peMaxLevel == maxLevelAnywhere) {
-                        // Log.v(TAG, "=== expanding event " + j);
+                        // Log.v(TAG, "=== expanding event " + j)
                         pe.maxLevel = peMaxLevel + 1
                     }
                 }

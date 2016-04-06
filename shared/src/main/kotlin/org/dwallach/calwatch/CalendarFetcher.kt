@@ -170,7 +170,7 @@ class CalendarFetcher(initialContext: Context, val contentUri: Uri, val authorit
 
                         val startTime = iCursor.getLong(i++)
                         val endTime = iCursor.getLong(i++)
-                        i++ // long eventID = iCursor.getLong(i++);
+                        i++ // long eventID = iCursor.getLong(i++)
                         val displayColor = iCursor.getInt(i++)
                         val allDay = iCursor.getInt(i++) != 0
                         val visible = iCursor.getInt(i) != 0
@@ -199,7 +199,7 @@ class CalendarFetcher(initialContext: Context, val contentUri: Uri, val authorit
                         compareBy<WireEvent> { it.displayColor }
                                 .thenBy { it.endTime }
                                 .thenByDescending { it.startTime }),
-                        null);
+                        null)
             } else {
                 return Pair(emptyList(), null)
             }
@@ -258,7 +258,7 @@ class CalendarFetcher(initialContext: Context, val contentUri: Uri, val authorit
                 info { "async: total calendar computation time: %.3f ms".format((endTime - startTime) / 1000000.0) }
             } catch (e: Throwable) {
                 // pass the exception back to the UI thread; we'll log it there
-                result = Pair(emptyList(), e);
+                result = Pair(emptyList(), e)
             } finally {
                 // no matter what, we want to release the wake lock
                 wakeLock.release()

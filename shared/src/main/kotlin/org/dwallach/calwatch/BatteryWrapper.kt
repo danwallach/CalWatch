@@ -48,8 +48,8 @@ object BatteryWrapper: AnkoLogger {
 
                 // How are we charging?
                 //            val chargePlug = getIntExtra(BatteryManager.EXTRA_PLUGGED, -1)
-                //            val usbCharge = chargePlug == BatteryManager.BATTERY_PLUGGED_USB;
-                //            val acCharge = chargePlug == BatteryManager.BATTERY_PLUGGED_AC;
+                //            val usbCharge = chargePlug == BatteryManager.BATTERY_PLUGGED_USB
+                //            val acCharge = chargePlug == BatteryManager.BATTERY_PLUGGED_AC
 
                 val level = getIntExtra(BatteryManager.EXTRA_LEVEL, -1)
                 val scale = getIntExtra(BatteryManager.EXTRA_SCALE, -1)

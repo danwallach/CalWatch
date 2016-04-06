@@ -130,7 +130,7 @@ class WearReceiverService : WearableListenerService(), AnkoLogger {
     }
 
     companion object: AnkoLogger {
-        private var running = false;
+        private var running = false
 //        var singleton: WearReceiverService
 
         fun kickStart(context: Context) {

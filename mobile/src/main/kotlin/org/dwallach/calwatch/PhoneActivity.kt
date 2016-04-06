@@ -54,7 +54,7 @@ class PhoneActivity : Activity(), Observer {
     }
 
     private fun uiButtonsReady() :Boolean =
-            toolButton != null && numbersButton != null && liteButton != null && showSeconds != null && showDayDate != null;
+            toolButton != null && numbersButton != null && liteButton != null && showSeconds != null && showDayDate != null
 
     private fun getFaceModeFromUI() {
         Log.v(TAG, "getFaceModeFromUI")
@@ -103,7 +103,7 @@ class PhoneActivity : Activity(), Observer {
         val myListener = View.OnClickListener {
             if (!disableUICallbacks)
                 getFaceModeFromUI()
-            surfaceView.invalidate();
+            surfaceView.invalidate()
         }
 
         liteButton.setOnClickListener(myListener)
@@ -134,7 +134,7 @@ class PhoneActivity : Activity(), Observer {
 
     override fun onCreateOptionsMenu(menu: Menu?): Boolean {
         // Inflate the menu; this adds items to the action bar if it is present.
-        //        getMenuInflater().inflate(R.menu.phone, menu);
+        //        getMenuInflater().inflate(R.menu.phone, menu)
         return true
     }
 

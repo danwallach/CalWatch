@@ -23,8 +23,8 @@ object TimeWrapper: AnkoLogger {
     var gmtTime: Long = 0
         private set
 
-    //   private static final long magicOffset = -40 * 60 * 60 * 1000; // 12 hours earlier, for debugging
-    //    private static final long magicOffset = 25 * 60 * 1000;       // 25 minutes later, for debugging
+    //   private static final long magicOffset = -40 * 60 * 60 * 1000 // 12 hours earlier, for debugging
+    //   private static final long magicOffset = 25 * 60 * 1000       // 25 minutes later, for debugging
     private val magicOffset: Long = 0                      // for production use
 
     fun update() {
@@ -71,9 +71,9 @@ object TimeWrapper: AnkoLogger {
         return localDayOfWeekCache
 
         /* -- old version, based on standard Java utils
-        String format = "cccc";
-        SimpleDateFormat sdf = new SimpleDateFormat(format, Locale.getDefault());
-        return sdf.format(new Date());
+        String format = "cccc"
+        SimpleDateFormat sdf = new SimpleDateFormat(format, Locale.getDefault())
+        return sdf.format(new Date())
         */
     }
 

@@ -225,7 +225,7 @@ class ClockFace : Observer, AnkoLogger {
         path.lineTo(x2 + dx, y2 + dy)
         path.lineTo(x2 - dx, y2 - dy)
         path.lineTo(x1 - dx, y1 - dy)
-        // path.lineTo(x1+dx, y1+dy);
+        // path.lineTo(x1+dx, y1+dy)
         path.close()
     }
 
@@ -286,9 +286,9 @@ class ClockFace : Observer, AnkoLogger {
                 p.close()
 
                 //            Log.e(TAG, "New arc: radius(" + Float.toString((float) startRadius) + "," + Float.toString((float) endRadius) +
-                //                    "), seconds(" + Float.toString((float) secondsStart) + "," + Float.toString((float) secondsEnd) + ")");
-                //            Log.e(TAG, "--> arcTo: startOval, " + Float.toString((float) (secondsStart * 6 - 90)) + ", " +  Float.toString((float) ((secondsEnd - secondsStart) * 6)));
-                //            Log.e(TAG, "--> arcTo: endOval, " + Float.toString((float) (secondsEnd * 6 - 90)) + ", " +  Float.toString((float) (-(secondsEnd - secondsStart) * 6)));
+                //                    "), seconds(" + Float.toString((float) secondsStart) + "," + Float.toString((float) secondsEnd) + ")")
+                //            Log.e(TAG, "--> arcTo: startOval, " + Float.toString((float) (secondsStart * 6 - 90)) + ", " +  Float.toString((float) ((secondsEnd - secondsStart) * 6)))
+                //            Log.e(TAG, "--> arcTo: endOval, " + Float.toString((float) (secondsEnd * 6 - 90)) + ", " +  Float.toString((float) (-(secondsEnd - secondsStart) * 6)))
             }
         }
 
@@ -305,7 +305,7 @@ class ClockFace : Observer, AnkoLogger {
         // TODO: should we cache this result like we do with the calendar arcs?
         var startRadius = startRadiusRatio
         var endRadius = endRadiusRatio
-        //        flatCounter++;
+        //        flatCounter++
 
         if (startRadius < 0 || startRadius > 1 || endRadius < 0 || endRadius > 1) {
             error { "drawRadialArcFlatBottom: arc too big! radius($startRadius,$endRadius), seconds($seconds)" }
@@ -342,7 +342,7 @@ class ClockFace : Observer, AnkoLogger {
                 // trivial case: we don't run into the flat tire region
 
                 //                if(flatCounter % 100 == 1) {
-                //                    Log.v(TAG, "flat (case 1): seconds(" + seconds + ") < bottomCornerTime(" + flatBottomCornerTime + ")");
+                //                    Log.v(TAG, "flat (case 1): seconds(" + seconds + ") < bottomCornerTime(" + flatBottomCornerTime + ")")
                 //                }
                 p.arcTo(startOval, -90f, seconds * 6f, true)
                 p.arcTo(endOval, seconds * 6f - 90f, -seconds * 6f)
@@ -350,7 +350,7 @@ class ClockFace : Observer, AnkoLogger {
                 // next case: we're inside the flat-bottom region
 
                 //                if(flatCounter % 100 == 1) {
-                //                    Log.v(TAG, "flat (case 2): seconds(" + seconds + ") < bottomCornerTime(" + flatBottomCornerTime + ")");
+                //                    Log.v(TAG, "flat (case 2): seconds(" + seconds + ") < bottomCornerTime(" + flatBottomCornerTime + ")")
                 //                }
 
                 p.arcTo(startOval, -90f, flatBottomCornerTime * 6f, true)
@@ -368,7 +368,7 @@ class ClockFace : Observer, AnkoLogger {
                 // then up the other side
 
                 //                if(flatCounter % 100 == 1) {
-                //                    Log.v(TAG, "flat (case 3): seconds(" + seconds + ") < bottomCornerTime(" + flatBottomCornerTime + ")");
+                //                    Log.v(TAG, "flat (case 3): seconds(" + seconds + ") < bottomCornerTime(" + flatBottomCornerTime + ")")
                 //                }
                 p.arcTo(startOval, -90f, flatBottomCornerTime * 6f, true)
                 p.arcTo(startOval, -90f + 6f * (60 - flatBottomCornerTime), 6f * (seconds - 60 + flatBottomCornerTime))
@@ -642,7 +642,7 @@ class ClockFace : Observer, AnkoLogger {
 
             //            if(calendarTicker % 1000 == 0)
             //                Log.v(TAG, "StippleTime(" + stippleTime +
-            //                        "),  currentTime(" + Float.toString((time) / 720000f) + ")");
+            //                        "),  currentTime(" + Float.toString((time) / 720000f) + ")")
 
             var r1: Float
             var r2: Float
@@ -686,7 +686,7 @@ class ClockFace : Observer, AnkoLogger {
                 xhigh = xmid - dxhigh
                 yhigh = ymid - dyhigh
 
-                // Path p = new Path();
+                // Path p = new Path()
                 lStipplePathCache.moveTo(x1, y1)
                 lStipplePathCache.lineTo(xlow, ylow)
                 lStipplePathCache.lineTo(x2, y2)
@@ -695,14 +695,14 @@ class ClockFace : Observer, AnkoLogger {
                 r1 = r2
                 x1 = x2
                 y1 = y2
-                // canvas.drawPath(p, black);
+                // canvas.drawPath(p, black)
 
                 //                if(calendarTicker % 1000 == 0)
                 //                    Log.v(TAG, "x1(" + Float.toString(x1) + "), y1(" + Float.toString(y1) +
                 //                            "), x2(" + Float.toString(x1) + "), y2(" + Float.toString(y2) +
                 //                            "), xlow(" + Float.toString(xlow) + "), ylow(" + Float.toString(ylow) +
                 //                            "), xhigh(" + Float.toString(xhigh) + "), yhigh(" + Float.toString(yhigh) +
-                //                            ")");
+                //                            ")")
             }
 
             stipplePathCache = lStipplePathCache
@@ -732,7 +732,7 @@ class ClockFace : Observer, AnkoLogger {
 
             verbose { "battery at $batteryPct" }
             if (batteryPct > 0.5f) {
-                // batteryPathCache = null;
+                // batteryPathCache = null
             } else {
                 val minRadius = 0.01f
                 val maxRadius = 0.06f
@@ -925,9 +925,9 @@ class ClockFace : Observer, AnkoLogger {
 
     private fun flatBottomX(time: Float, radius: Float): Float {
         // old, incorrect approach: linear interpolation between the sides
-        //        float x1 = interpolate(flatBottomCornerX1_R80, 0.8f, flatBottomCornerX1_R100, 1f, radius);
-        //        float x2 = interpolate(flatBottomCornerX2_R80, 0.8f, flatBottomCornerX2_R100, 1f, radius);
-        //        return interpolate(x1, flatBottomCornerTime, x2, 60 - flatBottomCornerTime, time);
+        //        float x1 = interpolate(flatBottomCornerX1_R80, 0.8f, flatBottomCornerX1_R100, 1f, radius)
+        //        float x2 = interpolate(flatBottomCornerX2_R80, 0.8f, flatBottomCornerX2_R100, 1f, radius)
+        //        return interpolate(x1, flatBottomCornerTime, x2, 60 - flatBottomCornerTime, time)
 
         // new shiny approach: project a line from the center, intersect it with the flat-bottom line
 
@@ -940,9 +940,9 @@ class ClockFace : Observer, AnkoLogger {
 
     private fun flatBottomY(time: Float, radius: Float): Float {
         // old, incorrect approach: linear interplation between the sides
-        //        float y1 = interpolate(flatBottomCornerY1_R80, 0.8f, flatBottomCornerY1_R100, 1f, radius);
-        //        float y2 = interpolate(flatBottomCornerY2_R80, 0.8f, flatBottomCornerY2_R100, 1f, radius);
-        //        return interpolate(y1, flatBottomCornerTime, y2, 60 - flatBottomCornerTime, time);
+        //        float y1 = interpolate(flatBottomCornerY1_R80, 0.8f, flatBottomCornerY1_R100, 1f, radius)
+        //        float y2 = interpolate(flatBottomCornerY2_R80, 0.8f, flatBottomCornerY2_R100, 1f, radius)
+        //        return interpolate(y1, flatBottomCornerTime, y2, 60 - flatBottomCornerTime, time)
 
         // new shiny approach: we're just returning the magic Y-value as above
 

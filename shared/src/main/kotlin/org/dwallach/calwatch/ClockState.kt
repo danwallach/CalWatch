@@ -74,7 +74,7 @@ object ClockState : Observable(), AnkoLogger {
     private var lastClipTime: Long = 0
 
     private fun recomputeVisibleEvents() {
-        if(!calendarPermission) return; // nothing we can do!
+        if(!calendarPermission) return // nothing we can do!
 
         // This is going to be called on every screen refresh, so it needs to be fast in the common case.
         // We're going to measure the time and try to figure out whether we've ticked onto
