@@ -29,7 +29,7 @@ object FitnessWrapper: AnkoLogger {
 
         val client = GoogleApi.client
         if(client == null)  {
-            info { "No GoogleApiClient, cannot load Fitness data" }
+            info { "No GoogleApiClient; cannot load Fitness data" }
             return // nothing to do!
         }
 
