@@ -4,7 +4,9 @@ import com.google.android.gms.fitness.Fitness
 import com.google.android.gms.fitness.data.DataType
 import com.google.android.gms.fitness.data.Field
 import org.jetbrains.anko.AnkoLogger
+import org.jetbrains.anko.debug
 import org.jetbrains.anko.info
+import org.jetbrains.anko.verbose
 
 /**
  * This class wraps the Android Fit API and provides a daily step count value, which we
@@ -59,7 +61,12 @@ object FitnessWrapper: AnkoLogger {
                 val totalSet = it.total
                 if(totalSet != null) {
                     stepCount = if (totalSet.isEmpty) 0 else totalSet.dataPoints[0].getValue(Field.FIELD_STEPS).asInt()
+                    verbose { "Step Count: %5d".format(stepCount) }
+                } else {
+                    debug { "No total set; no step count" }
                 }
+            } else {
+                debug { "Callback status: failed! (%s)".format(it.status.toString()) }
             }
             inProgress = false
         }
