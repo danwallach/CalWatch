@@ -197,6 +197,9 @@ class CalWatchFaceService : CanvasWatchFaceService(), AnkoLogger {
             else
                 TimeWrapper.frameReset()
 
+            // Useful to dump at the same time.
+            FitnessWrapper.report()
+
             invalidate()
         }
 
@@ -324,6 +327,9 @@ class CalWatchFaceService : CanvasWatchFaceService(), AnkoLogger {
                 TimeWrapper.frameReport()
             else
                 TimeWrapper.frameReset()
+
+            // Useful to dump at the same time
+            FitnessWrapper.report()
         }
     }
 

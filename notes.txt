@@ -16,7 +16,7 @@ Port to Android Wear
    adb -d forward tcp:5601 tcp:5601
 
 -- How to connect to Bluetooth debugging for Moto 360: http://blog.timmattison.com/archives/2014/07/16/common-android-wear-tasks-for-developers/
-    adb forward tcp:4444 localabstract:/adb-hub; adb connect localhost:4444
+    adb forward tcp:4444 localabstract:/adb-hub; adb connect 127.0.0.1:4444
 
 -- How to get a dump from the watch into a file and see it while it's going
     adb -s localhost:4444 logcat -v time | & tee logdumps/whatever.txt

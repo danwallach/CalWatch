@@ -765,7 +765,7 @@ class ClockFace : Observer, AnkoLogger {
     private var oldStepCount = 0
 
     private fun drawStepCount(canvas: Canvas) {
-        val stepCount = FitnessWrapper.stepCount
+        val stepCount = FitnessWrapper.getStepCount()
 
         if(oldStepCount != stepCount) {
             oldStepCount = stepCount

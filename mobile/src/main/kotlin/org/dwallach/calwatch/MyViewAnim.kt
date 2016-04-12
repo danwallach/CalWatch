@@ -40,6 +40,9 @@ class MyViewAnim(context: Context, attrs: AttributeSet) : View(context, attrs), 
             TimeWrapper.frameReset()
             invalidate()
         }
+
+        // Useful to dump at the same time
+        FitnessWrapper.report()
     }
 
     /**

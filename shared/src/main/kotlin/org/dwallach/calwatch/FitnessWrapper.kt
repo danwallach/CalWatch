@@ -16,16 +16,15 @@ import org.jetbrains.anko.error
  */
 
 object FitnessWrapper: AnkoLogger {
-    var stepCount: Int = 0
-      private set
-    get() {
-        loadStepCount() // start possible asynchronous load
-        return field // return older result
-    }
+    private var stepCount: Int = 0
 
     private var lastSampleTime = 0L
     private var inProgress = false
     private var initialized = false
+    private var cachedResultCounter = 0
+    private var successfulResults = 0
+    private var failedResults = 0
+    private var inProgressCounter = 0
 
     fun init(context: Context) {
         GoogleApi.addApi(Fitness.HISTORY_API)
@@ -35,16 +34,30 @@ object FitnessWrapper: AnkoLogger {
         info { "Initialized GoogleApi for fitness" }
     }
 
+    fun getStepCount(): Int {
+        loadStepCount() // start possible asynchronous load
+        return stepCount // return older result
+    }
+
+    fun report() {
+        info { "prior cached: {$cachedResultCounter}, successful: {$successfulResults}, failed: {$failedResults}, in-progress: ${inProgressCounter}" }
+    }
+
     private fun loadStepCount() {
-        if(inProgress) return
+        if(inProgress) {
+            inProgressCounter++
+            return
+        }
 
         if(!initialized) {
+            failedResults++
             error { "GoogleApi not initialized" }
             return
         }
 
         val client = GoogleApi.client
         if(client == null)  {
+            failedResults++
             info { "No GoogleApiClient; cannot load Fitness data" }
             return // nothing to do!
         }
@@ -64,7 +77,10 @@ object FitnessWrapper: AnkoLogger {
         // mode, but since we're not even vaguely trying to be precise, it doesn't really matter.
         //
         val currentTime = TimeWrapper.gmtTime
-        if(currentTime - lastSampleTime < 30000) return
+        if(currentTime - lastSampleTime < 30000) {
+            cachedResultCounter++
+            return
+        }
         lastSampleTime = currentTime
 
         //
@@ -72,17 +88,21 @@ object FitnessWrapper: AnkoLogger {
         // http://stackoverflow.com/questions/35695336/google-fit-history-api-readdailytotal-non-static-method-in-static-context/
         //
         inProgress = true
-        verbose { "Reading step count asynchronously" }
+        report()
+
         Fitness.HistoryApi.readDailyTotal(client, DataType.TYPE_STEP_COUNT_DELTA).setResultCallback {
             if(it.status.isSuccess) {
                 val totalSet = it.total
                 if(totalSet != null) {
                     stepCount = if (totalSet.isEmpty) 0 else totalSet.dataPoints[0].getValue(Field.FIELD_STEPS).asInt()
+                    successfulResults++
                     verbose { "Step Count: %5d".format(stepCount) }
                 } else {
+                    failedResults++
                     debug { "No total set; no step count" }
                 }
             } else {
+                failedResults++
                 debug { "Callback status: failed! (%s)".format(it.status.toString()) }
             }
             inProgress = false
