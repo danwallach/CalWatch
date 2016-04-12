@@ -50,7 +50,7 @@ class WearSender(context: Context): AnkoLogger {
 
     init {
         verbose("init!")
-        GoogleApi.addApi(Wearable.API)
+        GoogleApi.addModifier { it.addApi(Wearable.API) }
         GoogleApi.connect(context, { sendAllToWatch() })
     }
 }

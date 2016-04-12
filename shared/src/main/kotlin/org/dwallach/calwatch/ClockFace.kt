@@ -780,6 +780,8 @@ class ClockFace : Observer, AnkoLogger {
         val paint = PaintCan[drawStyle, PaintCan.colorStepCount]
         val outlinePaint = PaintCan[drawStyle, PaintCan.colorStepCount]
 
+        if(stepCount == 0) return // nothing to do!
+
         val seconds: Double = if(stepCount > 10000) { 60.0 } else { stepCount * 0.006 }
 
         // the battery ends at radius 0.06f and the hands start there; we're going to draw this arc

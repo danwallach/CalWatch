@@ -1,6 +1,8 @@
 package org.dwallach.calwatch
 
 import android.content.Context
+import com.google.android.gms.common.Scopes
+import com.google.android.gms.common.api.Scope
 import com.google.android.gms.fitness.Fitness
 import com.google.android.gms.fitness.data.DataType
 import com.google.android.gms.fitness.data.Field
@@ -27,7 +29,11 @@ object FitnessWrapper: AnkoLogger {
     private var inProgressCounter = 0
 
     fun init(context: Context) {
-        GoogleApi.addApi(Fitness.HISTORY_API)
+        GoogleApi.addModifier { it
+                .addApi(Fitness.HISTORY_API)
+                .useDefaultAccount()
+                .addScope(Scope(Scopes.FITNESS_ACTIVITY_READ))
+        }
         GoogleApi.connect(context)
         initialized = true
 
@@ -40,7 +46,7 @@ object FitnessWrapper: AnkoLogger {
     }
 
     fun report() {
-        info { "prior cached: {$cachedResultCounter}, successful: {$successfulResults}, failed: {$failedResults}, in-progress: ${inProgressCounter}" }
+        info { "steps: ${stepCount}, prior cached: {$cachedResultCounter}, successful: {$successfulResults}, failed: {$failedResults}, in-progress: ${inProgressCounter}" }
     }
 
     private fun loadStepCount() {

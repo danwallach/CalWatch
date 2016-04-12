@@ -23,14 +23,15 @@ object GoogleApi: GoogleApiClient.ConnectionCallbacks, GoogleApiClient.OnConnect
     private var successFunc: ()->Unit = {}
     private var failureFunc: ()->Unit = {}
 
-    private var apiSet: Set<Api<out Api.ApiOptions.NotRequiredOptions>> = emptySet()
+    private var modifierSet: Set<(GoogleApiClient.Builder)->Unit> = emptySet()
 
     /**
-     * Different parts of your code will want to use different GoogleApis. Add them here,
-     * then call [connect]. Thereafter, the result will stick around the [client] field.
+     * Different parts of your code will want to use different methods on the [GoogleApiClient.Builder].
+     * Those go as lambdas passed in here. After you're done, then call [connect]. Thereafter,
+     * the result will stick around the [client] field.
      */
-    fun addApi(api: Api<out Api.ApiOptions.NotRequiredOptions>) {
-        apiSet = apiSet + api
+    fun addModifier(modifier: (GoogleApiClient.Builder)->Unit) {
+        modifierSet = modifierSet + modifier
         if (client != null) close()
     }
 
@@ -46,7 +47,7 @@ object GoogleApi: GoogleApiClient.ConnectionCallbacks, GoogleApiClient.OnConnect
                     .Builder(context)
                     .addConnectionCallbacks(this)
                     .addOnConnectionFailedListener(this)
-                    .apply { apiSet.forEach { addApi(it) } }
+                    .apply { modifierSet.forEach { it(this) } }
                     .build()
             lClient.connect()
 
