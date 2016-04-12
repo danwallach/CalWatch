@@ -46,7 +46,7 @@ object FitnessWrapper: AnkoLogger {
     }
 
     fun report() {
-        info { "steps: ${stepCount}, prior cached: {$cachedResultCounter}, successful: {$successfulResults}, failed: {$failedResults}, in-progress: ${inProgressCounter}" }
+        info { "steps: ${stepCount}, prior cached: ${cachedResultCounter}, successful: ${successfulResults}, failed: ${failedResults}, in-progress: ${inProgressCounter}" }
     }
 
     private fun loadStepCount() {
