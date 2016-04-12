@@ -116,7 +116,9 @@ object PaintCan: AnkoLogger {
     const val colorStopwatchSeconds = 16
     const val colorTimerStroke = 17
     const val colorTimerFill = 18
-    const val colorMax = 18
+    const val colorStepCount = 19
+    const val colorStepCountShadow = 20
+    const val colorMax = 20
 
 
     /**
@@ -154,6 +156,8 @@ object PaintCan: AnkoLogger {
             palette[style][colorBlackFill] = watchfacePaint(Color.BLACK, style, textSize, lineWidth)
             palette[style][colorLowBitCalendarFill] = watchfacePaint(Color.WHITE, style, textSize, lineWidth) // the docs claim we have access to other colors here, like CYAN, but that's not true at least on the Moto 360 Sport
             palette[style][colorSmallShadow] = watchfacePaint(Color.BLACK, style, smTextSize, lineWidth / 4f)
+            palette[style][colorStepCount] = watchfacePaint(Color.GREEN, style, smTextSize, lineWidth / 2f)
+            palette[style][colorStepCountShadow] = watchfacePaint(Color.BLACK, style, smTextSize, lineWidth / 8f)
 
             // toInt because of a Kotlin bug: https://youtrack.jetbrains.com/issue/KT-4749
             palette[style][colorStopwatchSeconds] = watchfacePaint(0xFF80A3F2.toInt(), style, smTextSize, lineWidth / 8f)  // light blue
@@ -170,6 +174,7 @@ object PaintCan: AnkoLogger {
             palette[style][colorBigShadow]?.style = Paint.Style.STROKE
             palette[style][colorStopwatchStroke]?.style = Paint.Style.STROKE
             palette[style][colorTimerStroke]?.style = Paint.Style.STROKE
+            palette[style][colorStepCountShadow]?.style = Paint.Style.STROKE
 
             // by default, text is centered, but some styles want it on the left
             // (these are the places where we'll eventually have to do more work for RTL languages)

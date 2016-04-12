@@ -170,9 +170,10 @@ class ClockFace : Observer, AnkoLogger {
         // (but disable when we're in ambientMode with burnInProtection)
         if (drawStyle != PaintCan.styleAntiBurnIn && showDayDate) drawMonthBox(canvas)
 
-        // and lastly, the battery meter
+        // and lastly, the step counter and battery meter
         // (but disable when we're in ambientMode with burnInProtection)
         if (drawStyle != PaintCan.styleAntiBurnIn) drawBattery(canvas)
+        drawStepCount(canvas)
 
         TimeWrapper.frameEnd()
     }
@@ -293,7 +294,8 @@ class ClockFace : Observer, AnkoLogger {
         }
 
         canvas.drawPath(p, paint)
-        canvas.drawPath(p, outlinePaint)
+        if(outlinePaint != null)
+            canvas.drawPath(p, outlinePaint)
 
         return p
     }
@@ -759,6 +761,33 @@ class ClockFace : Observer, AnkoLogger {
         }
     }
 
+    private var stepCountPath: Path? = null
+    private var oldStepCount = 0
+
+    private fun drawStepCount(canvas: Canvas) {
+        val stepCount = FitnessWrapper.stepCount
+
+        if(oldStepCount != stepCount) {
+            oldStepCount = stepCount
+            stepCountPath = null // force the path to be recomputed
+        }
+
+        // We're going to draw an arc from 12 o'clock, going clockwise, where an arc, all the way
+        // around represents 10000 steps. That's an arbitrary constant, and Fit allows the user to
+        // change it, but the APIs don't appear to have this.
+        // TODO find easy API access to user's daily step count goal
+
+        val paint = PaintCan[drawStyle, PaintCan.colorStepCount]
+        val outlinePaint = PaintCan[drawStyle, PaintCan.colorStepCount]
+
+        val seconds: Double = if(stepCount > 10000) { 60.0 } else { stepCount * 0.006 }
+
+        // the battery ends at radius 0.06f and the hands start there; we're going to draw this arc
+        // where the battery will eventually overlap with it but the hands never will. We'll draw this
+        // after the battery so it overlays the battery indicator.
+        stepCountPath = drawRadialArc(canvas, stepCountPath, 0.0, seconds, 0.055f, 0.60f, paint, outlinePaint, false)
+    }
+
     fun drawTimers(canvas: Canvas) {
         val currentTime = TimeWrapper.gmtTime // note that we're *not* using local time here
 
@@ -793,7 +822,7 @@ class ClockFace : Observer, AnkoLogger {
 
 
         // we don't draw anything if the stopwatch is non-moving and at 00:00.00
-        var stopwatchRenderTime: Long
+        val stopwatchRenderTime: Long
         if (!XWatchfaceReceiver.stopwatchIsReset) {
             if (!XWatchfaceReceiver.stopwatchIsRunning) {
                 stopwatchRenderTime = XWatchfaceReceiver.stopwatchBase
