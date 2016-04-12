@@ -72,6 +72,7 @@ object FitnessWrapper: AnkoLogger {
         // http://stackoverflow.com/questions/35695336/google-fit-history-api-readdailytotal-non-static-method-in-static-context/
         //
         inProgress = true
+        verbose { "Reading step count asynchronously" }
         Fitness.HistoryApi.readDailyTotal(client, DataType.TYPE_STEP_COUNT_DELTA).setResultCallback {
             if(it.status.isSuccess) {
                 val totalSet = it.total
