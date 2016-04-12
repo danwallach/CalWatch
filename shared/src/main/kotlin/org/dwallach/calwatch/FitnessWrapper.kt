@@ -16,7 +16,7 @@ object FitnessWrapper: AnkoLogger {
       private set
     get() {
         loadStepCount() // start possible asynchronous load
-        return field
+        return field // return older result
     }
 
     private var lastSampleTime = 0L
@@ -31,6 +31,7 @@ object FitnessWrapper: AnkoLogger {
             return // nothing to do!
         }
 
+        //
         // We'll only resample the step counter if our data is old. How old? Quoth Google:
         //   To keep step counts consistent, subscribe to steps in the Google Fit platform
         //   from your fitness app or watch face, and then call this method every 30 seconds
@@ -40,6 +41,10 @@ object FitnessWrapper: AnkoLogger {
         // If we're running in ambient mode, we'll only be asked to redraw the watchface once
         // a minute. Consequently, the logic here only needs to check if we're >= 30 seconds
         // behind.
+        //
+        // This means we'll be displaying a one-minute old reading, whenever we're in ambient
+        // mode, but since we're not even vaguely trying to be precise, it doesn't really matter.
+        //
         val currentTime = TimeWrapper.gmtTime
         if(currentTime - lastSampleTime < 30000) return
         lastSampleTime = currentTime

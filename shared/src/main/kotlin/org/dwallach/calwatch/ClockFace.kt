@@ -155,6 +155,11 @@ class ClockFace : Observer, AnkoLogger {
         // that will let the watchface tick marks show through, except they're opaque in low-bit mode
         drawTimers(canvas)
 
+        // Next up, the step counter and battery meter
+        // (but disable the battery meter when we're in ambientMode with burnInProtection)
+        if (drawStyle != PaintCan.styleAntiBurnIn) drawBattery(canvas)
+        drawStepCount(canvas)
+
         // Kludge for peek card until we come up with something better:
         // if there's a peek card *and* we're in ambient mode, *then* draw
         // a solid black box behind the peek card, which would otherwise be transparent.
@@ -169,11 +174,6 @@ class ClockFace : Observer, AnkoLogger {
         // something a real watch can't do: float the text over the hands
         // (but disable when we're in ambientMode with burnInProtection)
         if (drawStyle != PaintCan.styleAntiBurnIn && showDayDate) drawMonthBox(canvas)
-
-        // and lastly, the step counter and battery meter
-        // (but disable when we're in ambientMode with burnInProtection)
-        if (drawStyle != PaintCan.styleAntiBurnIn) drawBattery(canvas)
-        drawStepCount(canvas)
 
         TimeWrapper.frameEnd()
     }
