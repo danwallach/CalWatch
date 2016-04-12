@@ -115,6 +115,7 @@ class PhoneActivity : Activity(), Observer {
         WatchCalendarService.kickStart(this)  // bring it up, if it's not already up
         PreferencesHelper.loadPreferences(this)
         CalendarPermission.init(this)
+        FitnessWrapper.init(this)
 
         surfaceView.init(this)
         surfaceView.initCalendarFetcher(this)

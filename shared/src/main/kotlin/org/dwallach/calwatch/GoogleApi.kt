@@ -23,19 +23,30 @@ object GoogleApi: GoogleApiClient.ConnectionCallbacks, GoogleApiClient.OnConnect
     private var successFunc: ()->Unit = {}
     private var failureFunc: ()->Unit = {}
 
+    private var apiSet: Set<Api<out Api.ApiOptions.NotRequiredOptions>> = emptySet()
+
     /**
-     * Call this to initialize the connection to the Google API, along with two lambdas for
-     * what do to when things are successful. The optional lambdas for success and failure
-     * provide callbacks if you want to do something when those events occur.
+     * Different parts of your code will want to use different GoogleApis. Add them here,
+     * then call [connect]. Thereafter, the result will stick around the [client] field.
      */
-    fun connect(context: Context, api: Api<out Api.ApiOptions.NotRequiredOptions>, success: ()->Unit = {}, failure: ()->Unit = {}) {
+    fun addApi(api: Api<out Api.ApiOptions.NotRequiredOptions>) {
+        apiSet = apiSet + api
+        if (client != null) close()
+    }
+
+    /**
+     * Call this to initialize the connection to the Google API, along with two optional lambdas
+     * for success and failure, providing callbacks if you want to do something when those events
+     * occur. The resulting GoogleApiClient value can be found in the [client] field.
+     */
+    fun connect(context: Context, success: ()->Unit = {}, failure: ()->Unit = {}) {
         if (client == null) {
             verbose("Trying to connect to GoogleApi")
             val lClient = GoogleApiClient
                     .Builder(context)
-                    .addApi(api)
                     .addConnectionCallbacks(this)
                     .addOnConnectionFailedListener(this)
+                    .apply { apiSet.forEach { addApi(it) } }
                     .build()
             lClient.connect()
 

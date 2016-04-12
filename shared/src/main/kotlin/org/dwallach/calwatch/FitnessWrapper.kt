@@ -1,5 +1,6 @@
 package org.dwallach.calwatch
 
+import android.content.Context
 import com.google.android.gms.fitness.Fitness
 import com.google.android.gms.fitness.data.DataType
 import com.google.android.gms.fitness.data.Field
@@ -7,6 +8,7 @@ import org.jetbrains.anko.AnkoLogger
 import org.jetbrains.anko.debug
 import org.jetbrains.anko.info
 import org.jetbrains.anko.verbose
+import org.jetbrains.anko.error
 
 /**
  * This class wraps the Android Fit API and provides a daily step count value, which we
@@ -23,9 +25,23 @@ object FitnessWrapper: AnkoLogger {
 
     private var lastSampleTime = 0L
     private var inProgress = false
+    private var initialized = false
 
-    private fun loadStepCount(): Unit {
+    fun init(context: Context) {
+        GoogleApi.addApi(Fitness.HISTORY_API)
+        GoogleApi.connect(context)
+        initialized = true
+
+        info { "Initialized GoogleApi for fitness" }
+    }
+
+    private fun loadStepCount() {
         if(inProgress) return
+
+        if(!initialized) {
+            error { "GoogleApi not initialized" }
+            return
+        }
 
         val client = GoogleApi.client
         if(client == null)  {

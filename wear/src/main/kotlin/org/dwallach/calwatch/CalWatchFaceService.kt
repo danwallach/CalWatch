@@ -135,8 +135,9 @@ class CalWatchFaceService : CanvasWatchFaceService(), AnkoLogger {
 
             XWatchfaceReceiver.pingExternalStopwatches(this@CalWatchFaceService)
             BatteryWrapper.init(this@CalWatchFaceService)
-            val resources = this@CalWatchFaceService.resources
+            FitnessWrapper.init(this@CalWatchFaceService)
 
+            val resources = this@CalWatchFaceService.resources
 
             if (resources == null) {
                 error("no resources? not good")
