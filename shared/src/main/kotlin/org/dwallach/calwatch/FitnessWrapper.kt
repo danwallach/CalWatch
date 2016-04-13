@@ -23,7 +23,7 @@ object FitnessWrapper: AnkoLogger {
     private var successfulResults = 0
     private var failedResults = 0
     private var inProgressCounter = 0
-    private var noGoogleApiCounter = 0
+    private var noGoogleApiCounterNull = 0
     private var noGoogleApiCounterConnecting = 0
     private var noGoogleApiCounterConnected = 0
 
@@ -34,7 +34,7 @@ object FitnessWrapper: AnkoLogger {
 
     fun report() {
         info { "steps: ${stepCount}, prior cached: ${cachedResultCounter}, successful: ${successfulResults}," +
-                " noGoogleApi: ${noGoogleApiCounter}/${noGoogleApiCounterConnecting}/${noGoogleApiCounterConnected}," +
+                " noGoogleApi: ${noGoogleApiCounterNull}/${noGoogleApiCounterConnecting}/${noGoogleApiCounterConnected}," +
                 " failed: ${failedResults}, in-progress: ${inProgressCounter}" }
     }
 
@@ -44,9 +44,9 @@ object FitnessWrapper: AnkoLogger {
             return
         }
 
-        val client = GoogleApi.client
+        val client = GoogleApiWrapper.client
         if(client == null)  {
-            noGoogleApiCounter++
+            noGoogleApiCounterNull++
             return // nothing to do!
         }
         if(client.isConnecting) {

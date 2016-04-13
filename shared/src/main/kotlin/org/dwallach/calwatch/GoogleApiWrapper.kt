@@ -22,7 +22,7 @@ import org.jetbrains.anko.*
  * builder, or otherwise generalize this class.
  */
 
-object GoogleApi: GoogleApiClient.ConnectionCallbacks, GoogleApiClient.OnConnectionFailedListener, AnkoLogger {
+object GoogleApiWrapper : GoogleApiClient.ConnectionCallbacks, GoogleApiClient.OnConnectionFailedListener, AnkoLogger {
     var client: GoogleApiClient? = null
       private set
     private var successFunc: ()->Unit = {}
@@ -33,9 +33,10 @@ object GoogleApi: GoogleApiClient.ConnectionCallbacks, GoogleApiClient.OnConnect
      * for success and failure, providing callbacks if you want to do something when those events
      * occur. The resulting GoogleApiClient value can be found in the [client] field.
      */
-    fun connect(context: Context, success: ()->Unit = {}, failure: ()->Unit = {}) {
+    fun startConnection(context: Context, success: ()->Unit = {}, failure: ()->Unit = {}) {
+        verbose { "startConnection" }
         if (client == null) {
-            verbose("Trying to connect")
+            verbose { "Trying to connect" }
             val lClient = GoogleApiClient
                     .Builder(context)
                     .addConnectionCallbacks(this)
@@ -45,14 +46,14 @@ object GoogleApi: GoogleApiClient.ConnectionCallbacks, GoogleApiClient.OnConnect
                     .useDefaultAccount()
                     .addScope(Scope(Scopes.FITNESS_ACTIVITY_READ))
                     .build()
-            lClient.connect()
+            lClient.connect(GoogleApiClient.SIGN_IN_MODE_OPTIONAL) // starts asynchronous connection
 
             client = lClient
 
             successFunc = success
             failureFunc = failure
         } else {
-            verbose("Already connected")
+            verbose { "Already connected" }
             successFunc()
         }
     }
@@ -61,7 +62,7 @@ object GoogleApi: GoogleApiClient.ConnectionCallbacks, GoogleApiClient.OnConnect
      * Call this to tear down the connection to the Google API.
      */
     fun close() {
-        verbose("close")
+        verbose { "close" }
         // we're going to eat any errors that happen here -- clients don't need to know or care
         try {
             val lClient = client
@@ -76,7 +77,7 @@ object GoogleApi: GoogleApiClient.ConnectionCallbacks, GoogleApiClient.OnConnect
 
     override fun onConnected(connectionHint: Bundle?) {
         // Apparently unrelated to connections with the phone.
-        verbose("Connected!")
+        verbose { "Connected!" }
         successFunc()
     }
 
@@ -87,7 +88,7 @@ object GoogleApi: GoogleApiClient.ConnectionCallbacks, GoogleApiClient.OnConnect
 
         // Apparently unrelated to connections with the phone.
 
-        verbose("suspended!")
+        verbose { "suspended!" }
         close()
         failureFunc()
     }
@@ -98,7 +99,7 @@ object GoogleApi: GoogleApiClient.ConnectionCallbacks, GoogleApiClient.OnConnect
 
         // Apparently unrelated to connections with the phone.
 
-        verbose("lost connection!")
+        verbose { "lost connection!" }
         close()
         failureFunc()
     }

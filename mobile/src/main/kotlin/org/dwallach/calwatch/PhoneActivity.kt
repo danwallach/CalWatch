@@ -116,7 +116,7 @@ class PhoneActivity : Activity(), Observer, AnkoLogger {
         WatchCalendarService.kickStart(this)  // bring it up, if it's not already up
         PreferencesHelper.loadPreferences(this)
         CalendarPermission.init(this)
-        GoogleApi.connect(this) { verbose { "GoogleApi ready" } }
+        GoogleApiWrapper.startConnection(this) { verbose { "GoogleApi ready" } }
 
         surfaceView.init(this)
         surfaceView.initCalendarFetcher(this)
@@ -129,7 +129,7 @@ class PhoneActivity : Activity(), Observer, AnkoLogger {
         super.onResume()
         Log.v(TAG, "Resume!")
 
-        GoogleApi.connect(this) { verbose { "GoogleApi ready" } }
+        GoogleApiWrapper.startConnection(this) { verbose { "GoogleApi ready" } }
         ClockState.addObserver(this)
         surfaceView.resume(this)
         surfaceView.invalidate()

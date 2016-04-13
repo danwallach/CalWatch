@@ -23,7 +23,7 @@ class WearSender(context: Context): AnkoLogger {
              * Useful source: http://toastdroid.com/2014/08/18/messageapi-simple-conversations-with-android-wear/
              * Major source: https://developer.android.com/google/auth/api-client.html
              */
-            val lClient = GoogleApi.client
+            val lClient = GoogleApiWrapper.client
 
             if (lClient != null && lClient.isConnected) {
                 val putDataMapReq = PutDataMapRequest.create(Constants.SettingsPath)
@@ -50,7 +50,7 @@ class WearSender(context: Context): AnkoLogger {
 
     init {
         verbose("init!")
-        GoogleApi.connect(context) {
+        GoogleApiWrapper.startConnection(context) {
             verbose { "Ready" }
             sendAllToWatch()
         }
