@@ -11,10 +11,14 @@ import android.os.Bundle
 import com.google.android.gms.common.ConnectionResult
 import com.google.android.gms.common.api.Api
 import com.google.android.gms.common.api.GoogleApiClient
+import com.google.android.gms.fitness.Fitness
+import com.google.android.gms.wearable.Wearable
 import org.jetbrains.anko.*
 
 /**
- * Unified support for dealing with the Google API client.
+ * Unified support for dealing with the Google API client. Note that we're hard-coding the Api's that
+ * we're adding. If you're using this in some other app, you'll either want to edit the calls to the
+ * builder, or otherwise generalize this class.
  */
 
 object GoogleApi: GoogleApiClient.ConnectionCallbacks, GoogleApiClient.OnConnectionFailedListener, AnkoLogger {
@@ -22,18 +26,6 @@ object GoogleApi: GoogleApiClient.ConnectionCallbacks, GoogleApiClient.OnConnect
       private set
     private var successFunc: ()->Unit = {}
     private var failureFunc: ()->Unit = {}
-
-    private var modifierSet: Set<(GoogleApiClient.Builder)->Unit> = emptySet()
-
-    /**
-     * Different parts of your code will want to use different methods on the [GoogleApiClient.Builder].
-     * Those go as lambdas passed in here. After you're done, then call [connect]. Thereafter,
-     * the result will stick around the [client] field.
-     */
-    fun addModifier(modifier: (GoogleApiClient.Builder)->Unit) {
-        modifierSet = modifierSet + modifier
-        if (client != null) close()
-    }
 
     /**
      * Call this to initialize the connection to the Google API, along with two optional lambdas
@@ -47,7 +39,10 @@ object GoogleApi: GoogleApiClient.ConnectionCallbacks, GoogleApiClient.OnConnect
                     .Builder(context)
                     .addConnectionCallbacks(this)
                     .addOnConnectionFailedListener(this)
-                    .apply { modifierSet.forEach { it(this) } }
+                    .addApi(Wearable.API)
+                    .addApi(Fitness.HISTORY_API)
+//                    .useDefaultAccount()
+//                    .addScope(Scope(Scopes.FITNESS_ACTIVITY_READ))
                     .build()
             lClient.connect()
 

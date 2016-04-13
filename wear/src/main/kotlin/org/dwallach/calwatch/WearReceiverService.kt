@@ -38,7 +38,6 @@ class WearReceiverService : WearableListenerService(), AnkoLogger {
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
         verbose("service starting!")
 
-        GoogleApi.addModifier { it.addApi(Wearable.API) }
         GoogleApi.connect(this)
 
         // Nicholas Pomepuy's crash reporting library claims to be able to pass things
@@ -86,7 +85,6 @@ class WearReceiverService : WearableListenerService(), AnkoLogger {
         super.onCreate()
 
         verbose("onCreate!")
-        GoogleApi.addModifier { it.addApi(Wearable.API) }
         GoogleApi.connect(this) // overkill or paranoia? no big deal to try again
     }
 

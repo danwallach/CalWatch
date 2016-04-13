@@ -29,15 +29,10 @@ object FitnessWrapper: AnkoLogger {
     private var inProgressCounter = 0
 
     fun init(context: Context) {
-        GoogleApi.addModifier { it
-                .addApi(Fitness.HISTORY_API)
-                .useDefaultAccount()
-                .addScope(Scope(Scopes.FITNESS_ACTIVITY_READ))
-        }
         GoogleApi.connect(context)
         initialized = true
 
-        info { "Initialized GoogleApi for fitness" }
+        info { "Initialized GoogleApi" }
     }
 
     fun getStepCount(): Int {
