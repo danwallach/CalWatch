@@ -773,16 +773,16 @@ class ClockFace : Observer, AnkoLogger {
         }
 
         // We're going to draw an arc from 12 o'clock, going clockwise, where an arc, all the way
-        // around represents 10000 steps. That's an arbitrary constant, and Fit allows the user to
-        // change it, but the APIs don't appear to have this.
-        // TODO find easy API access to user's daily step count goal
+        // around represents 12000 steps. That's an arbitrary constant, but it fits nicely with
+        // the 12 hours in the dial.
+        // TODO find easy API access to user's daily step count goal, modify arc to go from 0% to 100%
 
         val paint = PaintCan[drawStyle, PaintCan.colorStepCount]
         val outlinePaint = PaintCan[drawStyle, PaintCan.colorStepCount]
 
         if(stepCount == 0) return // nothing to do!
 
-        val seconds: Double = if(stepCount > 10000) { 60.0 } else { stepCount * 0.006 }
+        val seconds: Double = if(stepCount > 12000) { 60.0 } else { stepCount / 200.0 }
 
         // the battery ends at radius 0.06f and the hands start there; we're going to draw this arc
         // where the battery will eventually overlap with it but the hands never will. We'll draw this
