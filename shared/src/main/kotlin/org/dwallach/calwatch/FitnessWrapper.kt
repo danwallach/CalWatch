@@ -6,11 +6,8 @@ import com.google.android.gms.common.api.Scope
 import com.google.android.gms.fitness.Fitness
 import com.google.android.gms.fitness.data.DataType
 import com.google.android.gms.fitness.data.Field
-import org.jetbrains.anko.AnkoLogger
-import org.jetbrains.anko.debug
-import org.jetbrains.anko.info
-import org.jetbrains.anko.verbose
-import org.jetbrains.anko.error
+import org.jetbrains.anko.*
+import java.util.concurrent.TimeUnit
 
 /**
  * This class wraps the Android Fit API and provides a daily step count value, which we
@@ -87,26 +84,38 @@ object FitnessWrapper: AnkoLogger {
         //
         // Example code, via StackOverflow
         // http://stackoverflow.com/questions/35695336/google-fit-history-api-readdailytotal-non-static-method-in-static-context/
+
+        // Converting this to Kotlin, the callback never actually happened, so we switched to a translation
+        // of the official code from Google which uses await, except we do it on an async thread. Because Kotlin.
+        // https://developers.google.com/android/reference/com/google/android/gms/fitness/HistoryApi
         //
         inProgress = true
         report()
 
-        Fitness.HistoryApi.readDailyTotal(client, DataType.TYPE_STEP_COUNT_DELTA).setResultCallback {
-            if(it.status.isSuccess) {
-                val totalSet = it.total
-                if(totalSet != null) {
-                    stepCount = if (totalSet.isEmpty) 0 else totalSet.dataPoints[0].getValue(Field.FIELD_STEPS).asInt()
+        async() {
+            var newStepCount: Int = stepCount
+
+            val result = Fitness.HistoryApi.readDailyTotal(client, DataType.TYPE_STEP_COUNT_DELTA).await(10, TimeUnit.SECONDS)
+
+            if (result.status.isSuccess) {
+                val totalSet = result.total
+                if (totalSet != null) {
+                    newStepCount = if (totalSet.isEmpty) 0 else totalSet.dataPoints[0].getValue(Field.FIELD_STEPS).asInt()
                     successfulResults++
-                    verbose { "Step Count: %5d".format(stepCount) }
+                    verbose { "Step Count: ${stepCount}" }
                 } else {
                     failedResults++
                     debug { "No total set; no step count" }
                 }
             } else {
                 failedResults++
-                debug { "Callback status: failed! (%s)".format(it.status.toString()) }
+                debug { "Failed callback: ${result.status.toString()}" }
             }
-            inProgress = false
+
+            uiThread {
+                stepCount = newStepCount
+                inProgress = false
+            }
         }
     }
 }
