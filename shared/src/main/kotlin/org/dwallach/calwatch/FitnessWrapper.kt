@@ -45,6 +45,7 @@ object FitnessWrapper: AnkoLogger {
         }
 
         val client = GoogleApiWrapper.client
+
         if(client == null)  {
             noGoogleApiCounterNull++
             return // nothing to do!

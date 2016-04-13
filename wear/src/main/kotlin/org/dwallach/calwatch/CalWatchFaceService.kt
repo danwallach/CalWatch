@@ -111,7 +111,7 @@ class CalWatchFaceService : CanvasWatchFaceService(), AnkoLogger {
         }
 
         override fun onCreate(holder: SurfaceHolder?) {
-            debug("onCreate")
+            info("onCreate")
 
             super.onCreate(holder)
 
@@ -135,7 +135,7 @@ class CalWatchFaceService : CanvasWatchFaceService(), AnkoLogger {
 
             XWatchfaceReceiver.pingExternalStopwatches(this@CalWatchFaceService)
             BatteryWrapper.init(this@CalWatchFaceService)
-            GoogleApiWrapper.startConnection(this@CalWatchFaceService) { verbose { "GoogleApi ready" } }
+            GoogleApiWrapper.startConnection(this@CalWatchFaceService.getBaseContext()) { verbose { "GoogleApi ready" } }
 
             val resources = this@CalWatchFaceService.resources
 
@@ -160,7 +160,7 @@ class CalWatchFaceService : CanvasWatchFaceService(), AnkoLogger {
             super.onPropertiesChanged(properties)
 
             if(properties == null) {
-                debug("onPropertiesChanged: empty properties?!")
+                info("onPropertiesChanged: empty properties?!")
                 return
             }
 
@@ -169,7 +169,7 @@ class CalWatchFaceService : CanvasWatchFaceService(), AnkoLogger {
                 val burnInProtection = getBoolean(WatchFaceService.PROPERTY_BURN_IN_PROTECTION, false)
                 clockFace.setAmbientLowBit(lowBitAmbientMode)
                 clockFace.setBurnInProtection(burnInProtection)
-                debug { "onPropertiesChanged: low-bit ambient = $lowBitAmbientMode, burn-in protection = $burnInProtection" }
+                info { "onPropertiesChanged: low-bit ambient = $lowBitAmbientMode, burn-in protection = $burnInProtection" }
             }
         }
 
@@ -186,7 +186,7 @@ class CalWatchFaceService : CanvasWatchFaceService(), AnkoLogger {
         override fun onAmbientModeChanged(inAmbientMode: Boolean) {
             super.onAmbientModeChanged(inAmbientMode)
 
-            debug { "onAmbientModeChanged: $inAmbientMode" }
+            info { "onAmbientModeChanged: $inAmbientMode" }
             clockFace.setAmbientMode(inAmbientMode)
 
             // If we just switched *to* ambient mode, then we've got some FPS data to report
@@ -294,7 +294,7 @@ class CalWatchFaceService : CanvasWatchFaceService(), AnkoLogger {
             if(bounds == null) {
                 debug { "onPeekcardPositionUpdate: null bounds?!" }
             } else {
-                debug { "onPeekCardPositionUpdate: $bounds (${bounds.width()}, ${bounds.height()})" }
+                info { "onPeekCardPositionUpdate: $bounds (${bounds.width()}, ${bounds.height()})" }
             }
 
             clockFace.peekCardRect = bounds

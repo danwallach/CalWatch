@@ -34,26 +34,26 @@ object GoogleApiWrapper : GoogleApiClient.ConnectionCallbacks, GoogleApiClient.O
      * occur. The resulting GoogleApiClient value can be found in the [client] field.
      */
     fun startConnection(context: Context, success: ()->Unit = {}, failure: ()->Unit = {}) {
-        verbose { "startConnection" }
+        info { "startConnection" }
         if (client == null) {
-            verbose { "Trying to connect" }
+            info { "Trying to connect" }
             val lClient = GoogleApiClient
                     .Builder(context)
                     .addConnectionCallbacks(this)
                     .addOnConnectionFailedListener(this)
                     .addApi(Wearable.API)
                     .addApi(Fitness.HISTORY_API)
+                    .addApi(Fitness.RECORDING_API)
                     .useDefaultAccount()
-                    .addScope(Scope(Scopes.FITNESS_ACTIVITY_READ))
                     .build()
-            lClient.connect(GoogleApiClient.SIGN_IN_MODE_OPTIONAL) // starts asynchronous connection
+            lClient.connect() // starts asynchronous connection
 
             client = lClient
 
             successFunc = success
             failureFunc = failure
         } else {
-            verbose { "Already connected" }
+            info { "Already connected (or in progress)" }
             successFunc()
         }
     }
@@ -62,7 +62,7 @@ object GoogleApiWrapper : GoogleApiClient.ConnectionCallbacks, GoogleApiClient.O
      * Call this to tear down the connection to the Google API.
      */
     fun close() {
-        verbose { "close" }
+        info { "close" }
         // we're going to eat any errors that happen here -- clients don't need to know or care
         try {
             val lClient = client
@@ -77,7 +77,7 @@ object GoogleApiWrapper : GoogleApiClient.ConnectionCallbacks, GoogleApiClient.O
 
     override fun onConnected(connectionHint: Bundle?) {
         // Apparently unrelated to connections with the phone.
-        verbose { "Connected!" }
+        info { "Connected!" }
         successFunc()
     }
 
@@ -88,8 +88,8 @@ object GoogleApiWrapper : GoogleApiClient.ConnectionCallbacks, GoogleApiClient.O
 
         // Apparently unrelated to connections with the phone.
 
-        verbose { "suspended!" }
-        close()
+        info { "suspended! cause: ${cause}" }
+//        close()
         failureFunc()
     }
 
@@ -99,7 +99,7 @@ object GoogleApiWrapper : GoogleApiClient.ConnectionCallbacks, GoogleApiClient.O
 
         // Apparently unrelated to connections with the phone.
 
-        verbose { "lost connection!" }
+        error { "lost connection! code: ${result.errorCode}, message: ${result.errorMessage}, hasResolution? ${result.hasResolution()}" }
         close()
         failureFunc()
     }
