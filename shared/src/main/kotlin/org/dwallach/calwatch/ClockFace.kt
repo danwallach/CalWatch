@@ -6,12 +6,12 @@
  */
 package org.dwallach.calwatch
 
-import android.graphics.Bitmap
 import android.graphics.Canvas
 import android.graphics.Paint
 import android.graphics.Path
 import android.graphics.Rect
 import android.graphics.RectF
+import android.graphics.drawable.Drawable
 import org.jetbrains.anko.*
 import java.util.Observable
 import java.util.Observer
@@ -41,9 +41,7 @@ class ClockFace(val wear: Boolean = false) : Observer, AnkoLogger {
 
     var peekCardRect: Rect? = null // updated by CalWatchFaceService if a peek card shows up
 
-    private var missingCalendarX: Float = 0f
-    private var missingCalendarY: Float = 0f
-    private var missingCalendarBitmap: Bitmap? = null
+    private var missingCalendarDrawable: Drawable? = null
 
     private var eventList: List<EventWrapper> = emptyList()
     private var maxLevel: Int = 0
@@ -103,28 +101,31 @@ class ClockFace(val wear: Boolean = false) : Observer, AnkoLogger {
     /**
      * Call this at initialization time to set up the icon for the missing calendar.
      */
-    fun setMissingCalendarBitmap(bitmap: Bitmap) {
-        missingCalendarBitmap = bitmap
+    fun setMissingCalendarDrawable(drawable: Drawable) {
+        missingCalendarDrawable = drawable
 
         updateMissingCalendarRect()
     }
 
 
     private fun updateMissingCalendarRect() {
-        val lMissingCalendarBitmap = missingCalendarBitmap
+        val lMissingCalendarDrawable = missingCalendarDrawable
 
-        if(lMissingCalendarBitmap == null) {
-            error("no missing calendar bitmap?!")
+        if(lMissingCalendarDrawable == null) {
+            error("no missing calendar drawable?!")
             return
         }
 
-        val height = lMissingCalendarBitmap.height
-        val width = lMissingCalendarBitmap.width
+        val height = lMissingCalendarDrawable.intrinsicHeight
+        val width = lMissingCalendarDrawable.intrinsicWidth
 
-        missingCalendarX = clockX(15.0, 0.2f)
-        missingCalendarY = clockY(0.0, 0f) - height / 2
+        val x = clockX(15.0, 0.2f).toInt()
+        val y = (clockY(0.0, 0f) - height / 2).toInt()
 
-        verbose { "missing calendar bitmap size: (%d,%d), coordinates: (%.1f,%.1f),  (cy: %d, radius: %d)".format(width, height, missingCalendarX, missingCalendarY, cy, radius) }
+        lMissingCalendarDrawable.setBounds(x, y, width, height)
+
+        verbose { "missing calendar drawable size: (%d,%d), coordinates: (%.1f,%.1f),  (cy: %d, radius: %d)"
+                .format(width, height, x, y, cy, radius) }
     }
 
     /**
@@ -599,8 +600,8 @@ class ClockFace(val wear: Boolean = false) : Observer, AnkoLogger {
 
         // if we don't have permission to see the calendar, then we'll let the user know, but we won't
         // bug them in any of the ambient modes.
-        if (!ClockState.calendarPermission && missingCalendarBitmap != null && drawStyle == PaintCan.styleNormal) {
-            canvas.drawBitmap(missingCalendarBitmap, missingCalendarX, missingCalendarY, null)
+        if (!ClockState.calendarPermission && drawStyle == PaintCan.styleNormal) {
+            missingCalendarDrawable?.draw(canvas)
             return
         }
 

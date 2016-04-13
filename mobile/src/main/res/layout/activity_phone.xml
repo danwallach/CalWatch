@@ -40,7 +40,7 @@
                 android:layout_gravity="center|left" />
 
             <View
-                android:layout_width="1in"
+                android:layout_width="160dp"
                 android:layout_height="1dp"
                 android:layout_row="1"
                 android:layout_column="0"

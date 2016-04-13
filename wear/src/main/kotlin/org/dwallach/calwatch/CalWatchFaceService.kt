@@ -144,8 +144,8 @@ class CalWatchFaceService : CanvasWatchFaceService(), AnkoLogger {
             }
 
             clockFace = ClockFace(true)
-            clockFace.setMissingCalendarBitmap(
-                    BitmapFactory.decodeResource(resources, R.drawable.empty_calendar))
+
+            clockFace.setMissingCalendarDrawable(getDrawable(R.drawable.ic_empty_calendar));
 
             ClockState.addObserver(this) // callbacks if something changes
 

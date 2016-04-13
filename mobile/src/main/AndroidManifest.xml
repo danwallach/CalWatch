@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
     package="org.dwallach.calwatch">
 
     <uses-feature android:name="android.hardware.type.watch" android:required="false"/>
@@ -35,7 +36,8 @@
             android:exported="false" >
         </service>
 
-        <receiver android:name=".XWatchfaceReceiver">
+        <receiver android:name=".XWatchfaceReceiver"
+            tools:ignore="ExportedReceiver">
             <intent-filter>
                 <action android:name="org.dwallach.x.stopwatch.update" />
                 <action android:name="org.dwallach.x.timer.update" />

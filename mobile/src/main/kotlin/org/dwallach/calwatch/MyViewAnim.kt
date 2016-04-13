@@ -132,7 +132,7 @@ class MyViewAnim(context: Context, attrs: AttributeSet) : View(context, attrs), 
         if(context.resources == null) {
             error("no resources? not good")
         } else {
-            val emptyCalendar = BitmapFactory.decodeResource(context.resources, R.drawable.empty_calendar)
+            val emptyCalendar = BitmapFactory.decodeResource(context.resources, R.drawable.ic_empty_calendar)
             clockFace.setMissingCalendarBitmap(emptyCalendar)
         }
         clockFace.setSize(width, height)

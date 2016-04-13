@@ -40,3 +40,11 @@ notes.txt -- ongoing work, notes, to-do items, etc.
 
 If you look at code prior to release4, you'll see that this project was written entirely in Java.
 Starting with release4, I ported most everything to Kotlin and did a ton of code cleanup.
+
+Credit where credit is due:
+
+    Cassowary linear constraint solver by Greg J. Badros and Alan Borning
+    https://constraints.cs.washington.edu/cassowary/
+
+    "Unavailable calendar" icon by Björn Andersson
+    https://thenounproject.com/term/calendar/139505/
