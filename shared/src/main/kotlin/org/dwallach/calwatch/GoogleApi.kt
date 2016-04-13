@@ -34,7 +34,7 @@ object GoogleApi: GoogleApiClient.ConnectionCallbacks, GoogleApiClient.OnConnect
      */
     fun connect(context: Context, success: ()->Unit = {}, failure: ()->Unit = {}) {
         if (client == null) {
-            verbose("Trying to connect to GoogleApi")
+            verbose("Trying to connect")
             val lClient = GoogleApiClient
                     .Builder(context)
                     .addConnectionCallbacks(this)
@@ -50,6 +50,9 @@ object GoogleApi: GoogleApiClient.ConnectionCallbacks, GoogleApiClient.OnConnect
 
             successFunc = success
             failureFunc = failure
+        } else {
+            verbose("Already connected")
+            successFunc()
         }
     }
 

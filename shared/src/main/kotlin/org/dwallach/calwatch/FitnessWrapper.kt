@@ -24,9 +24,10 @@ object FitnessWrapper: AnkoLogger {
     private var successfulResults = 0
     private var failedResults = 0
     private var inProgressCounter = 0
+    private var noGoogleApiCounter = 0
 
     fun init(context: Context) {
-        GoogleApi.connect(context)
+        GoogleApi.connect(context) { info { "GoogleApi ready" } }
         initialized = true
 
         info { "Initialized GoogleApi" }
@@ -38,7 +39,7 @@ object FitnessWrapper: AnkoLogger {
     }
 
     fun report() {
-        info { "steps: ${stepCount}, prior cached: ${cachedResultCounter}, successful: ${successfulResults}, failed: ${failedResults}, in-progress: ${inProgressCounter}" }
+        info { "steps: ${stepCount}, prior cached: ${cachedResultCounter}, successful: ${successfulResults}, noGoogleApi: ${noGoogleApiCounter}, failed: ${failedResults}, in-progress: ${inProgressCounter}" }
     }
 
     private fun loadStepCount() {
@@ -55,8 +56,7 @@ object FitnessWrapper: AnkoLogger {
 
         val client = GoogleApi.client
         if(client == null)  {
-            failedResults++
-            info { "No GoogleApiClient; cannot load Fitness data" }
+            noGoogleApiCounter++
             return // nothing to do!
         }
 
