@@ -9,8 +9,9 @@ package org.dwallach.calwatch
 import android.content.Context
 import android.os.Bundle
 import com.google.android.gms.common.ConnectionResult
-import com.google.android.gms.common.api.Api
+import com.google.android.gms.common.Scopes
 import com.google.android.gms.common.api.GoogleApiClient
+import com.google.android.gms.common.api.Scope
 import com.google.android.gms.fitness.Fitness
 import com.google.android.gms.wearable.Wearable
 import org.jetbrains.anko.*
@@ -41,8 +42,8 @@ object GoogleApi: GoogleApiClient.ConnectionCallbacks, GoogleApiClient.OnConnect
                     .addOnConnectionFailedListener(this)
                     .addApi(Wearable.API)
                     .addApi(Fitness.HISTORY_API)
-//                    .useDefaultAccount()
-//                    .addScope(Scope(Scopes.FITNESS_ACTIVITY_READ))
+                    .useDefaultAccount()
+                    .addScope(Scope(Scopes.FITNESS_ACTIVITY_READ))
                     .build()
             lClient.connect()
 
@@ -60,9 +61,9 @@ object GoogleApi: GoogleApiClient.ConnectionCallbacks, GoogleApiClient.OnConnect
      * Call this to tear down the connection to the Google API.
      */
     fun close() {
+        verbose("close")
         // we're going to eat any errors that happen here -- clients don't need to know or care
         try {
-            verbose("disconnecting")
             val lClient = client
             if (lClient != null && lClient.isConnected) {
                 lClient.disconnect()

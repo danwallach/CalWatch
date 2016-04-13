@@ -16,7 +16,9 @@ import android.support.v4.content.ContextCompat
 import org.jetbrains.anko.*
 
 /**
- * Deal with all the Marshmallow permission machinery.
+ * Deal with all the Marshmallow permission machinery. Note that we're dead in the weater without the
+ * calendar permission, but we can run just fine without BODY_SENSORS, which it's unclear we even
+ * need in the first place, to read the step counter.
  */
 object CalendarPermission: AnkoLogger {
     private const val INTERNAL_PERM_REQUEST_CODE = 31337
@@ -38,6 +40,10 @@ object CalendarPermission: AnkoLogger {
         val result = ContextCompat.checkSelfPermission(context, Manifest.permission.READ_CALENDAR)
         verbose { "calendar permissions check: $result (granted = ${PackageManager.PERMISSION_GRANTED})" }
 
+
+        val result2 = ContextCompat.checkSelfPermission(context, Manifest.permission.BODY_SENSORS)
+        verbose { "body sensor permissions check: $result2 (granted = ${PackageManager.PERMISSION_GRANTED})" }
+
         return result == PackageManager.PERMISSION_GRANTED
     }
 
@@ -46,7 +52,7 @@ object CalendarPermission: AnkoLogger {
      */
     fun checkAlreadyAsked(activity: Activity): Boolean {
         val result = ActivityCompat.shouldShowRequestPermissionRationale(activity, Manifest.permission.READ_CALENDAR)
-        verbose { "previous checks performed#$numRequests, shouldShowRationale=$result" }
+        verbose { "previous calendar checks performed#$numRequests, shouldShowRationale=$result" }
         return result
     }
 
@@ -66,7 +72,7 @@ object CalendarPermission: AnkoLogger {
             numRequests++
             verbose { "this will be check #$numRequests" }
             ActivityCompat.requestPermissions(activity,
-                    arrayOf(Manifest.permission.READ_CALENDAR),
+                    arrayOf(Manifest.permission.READ_CALENDAR, Manifest.permission.BODY_SENSORS),
                     INTERNAL_PERM_REQUEST_CODE)
 
             //

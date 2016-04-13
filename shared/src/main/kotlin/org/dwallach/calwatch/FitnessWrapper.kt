@@ -24,6 +24,8 @@ object FitnessWrapper: AnkoLogger {
     private var failedResults = 0
     private var inProgressCounter = 0
     private var noGoogleApiCounter = 0
+    private var noGoogleApiCounterConnecting = 0
+    private var noGoogleApiCounterConnected = 0
 
     fun getStepCount(): Int {
         loadStepCount() // start possible asynchronous load
@@ -31,7 +33,9 @@ object FitnessWrapper: AnkoLogger {
     }
 
     fun report() {
-        info { "steps: ${stepCount}, prior cached: ${cachedResultCounter}, successful: ${successfulResults}, noGoogleApi: ${noGoogleApiCounter}, failed: ${failedResults}, in-progress: ${inProgressCounter}" }
+        info { "steps: ${stepCount}, prior cached: ${cachedResultCounter}, successful: ${successfulResults}," +
+                " noGoogleApi: ${noGoogleApiCounter}/${noGoogleApiCounterConnecting}/${noGoogleApiCounterConnected}," +
+                " failed: ${failedResults}, in-progress: ${inProgressCounter}" }
     }
 
     private fun loadStepCount() {
@@ -43,6 +47,14 @@ object FitnessWrapper: AnkoLogger {
         val client = GoogleApi.client
         if(client == null)  {
             noGoogleApiCounter++
+            return // nothing to do!
+        }
+        if(client.isConnecting) {
+            noGoogleApiCounterConnecting++
+            return // nothing to do!
+        }
+        if(!client.isConnected) {
+            noGoogleApiCounterConnected++
             return // nothing to do!
         }
 
