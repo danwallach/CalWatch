@@ -135,7 +135,7 @@ class CalWatchFaceService : CanvasWatchFaceService(), AnkoLogger {
 
             XWatchfaceReceiver.pingExternalStopwatches(this@CalWatchFaceService)
             BatteryWrapper.init(this@CalWatchFaceService)
-            GoogleApiWrapper.startConnection(this@CalWatchFaceService.getBaseContext()) { verbose { "GoogleApi ready" } }
+            GoogleApiWrapper.startConnection(this@CalWatchFaceService.getBaseContext(), true) { verbose { "GoogleApi ready" } }
 
             val resources = this@CalWatchFaceService.resources
 
@@ -143,7 +143,7 @@ class CalWatchFaceService : CanvasWatchFaceService(), AnkoLogger {
                 error("no resources? not good")
             }
 
-            clockFace = ClockFace()
+            clockFace = ClockFace(true)
             clockFace.setMissingCalendarBitmap(
                     BitmapFactory.decodeResource(resources, R.drawable.empty_calendar))
 

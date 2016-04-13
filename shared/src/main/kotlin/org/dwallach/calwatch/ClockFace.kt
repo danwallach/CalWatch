@@ -21,7 +21,7 @@ import java.util.Observer
  * nothing about Android widgets, views, or activities. That stuff is handled in MyViewAnim/PhoneActivity
  * (on the phone) and CalWatchFaceService (on the watch).
  */
-class ClockFace : Observer, AnkoLogger {
+class ClockFace(val wear: Boolean = false) : Observer, AnkoLogger {
     private val instanceID: Int
 
     // initial values to get the ball rolling (avoids a div by zero problem in computeFlatBottomCorners)
@@ -158,7 +158,9 @@ class ClockFace : Observer, AnkoLogger {
         // Next up, the step counter and battery meter
         // (but disable the battery meter when we're in ambientMode with burnInProtection)
         if (drawStyle != PaintCan.styleAntiBurnIn) drawBattery(canvas)
-        drawStepCount(canvas)
+
+        // We're only going to draw this on the watch, not on the phone, because phones suck.
+        if (wear) drawStepCount(canvas)
 
         // Kludge for peek card until we come up with something better:
         // if there's a peek card *and* we're in ambient mode, *then* draw

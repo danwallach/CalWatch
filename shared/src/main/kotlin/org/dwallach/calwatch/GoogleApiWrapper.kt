@@ -31,7 +31,7 @@ object GoogleApiWrapper : GoogleApiClient.ConnectionCallbacks, GoogleApiClient.O
      * for success and failure, providing callbacks if you want to do something when those events
      * occur. The resulting GoogleApiClient value can be found in the [client] field.
      */
-    fun startConnection(context: Context, success: ()->Unit = {}, failure: ()->Unit = {}) {
+    fun startConnection(context: Context, wear: Boolean = false, success: ()->Unit = {}, failure: ()->Unit = {}) {
         info { "startConnection" }
         if (client == null) {
             info { "Trying to connect" }
@@ -40,9 +40,17 @@ object GoogleApiWrapper : GoogleApiClient.ConnectionCallbacks, GoogleApiClient.O
                     .addConnectionCallbacks(this)
                     .addOnConnectionFailedListener(this)
                     .addApi(Wearable.API)
-                    .addApi(Fitness.HISTORY_API)
-                    .addApi(Fitness.RECORDING_API)
-                    .useDefaultAccount()
+                    .apply {
+                        //
+                        // Fun fact: you can get at these APIs without any permission or login
+                        // on wear, but that's not true for mobile. Consequently, we're now
+                        // dealing with two versions of everything.
+                        //
+                        if(wear)
+                            addApi(Fitness.HISTORY_API)
+                                    .addApi(Fitness.RECORDING_API)
+                                    .useDefaultAccount()
+                    }
                     .build()
             lClient.connect() // starts asynchronous connection
 
