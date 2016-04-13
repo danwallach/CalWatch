@@ -787,7 +787,7 @@ class ClockFace : Observer, AnkoLogger {
         // the battery ends at radius 0.06f and the hands start there; we're going to draw this arc
         // where the battery will eventually overlap with it but the hands never will. We'll draw this
         // after the battery so it overlays the battery indicator.
-        stepCountPath = drawRadialArc(canvas, stepCountPath, 0.0, seconds, 0.055f, 0.60f, paint, outlinePaint, false)
+        stepCountPath = drawRadialArc(canvas, stepCountPath, 0.0, seconds, 0.055f, 0.060f, paint, outlinePaint, false)
     }
 
     fun drawTimers(canvas: Canvas) {
