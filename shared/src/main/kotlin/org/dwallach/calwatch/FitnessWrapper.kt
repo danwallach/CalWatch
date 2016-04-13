@@ -49,7 +49,7 @@ object FitnessWrapper: AnkoLogger {
         }
 
         if(!initialized) {
-            failedResults++
+            noGoogleApiCounter++
             error { "GoogleApi not initialized" }
             return
         }
