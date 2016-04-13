@@ -62,7 +62,7 @@ object GoogleApi: GoogleApiClient.ConnectionCallbacks, GoogleApiClient.OnConnect
     fun close() {
         // we're going to eat any errors that happen here -- clients don't need to know or care
         try {
-            verbose("cleaning up Google API")
+            verbose("disconnecting")
             val lClient = client
             if (lClient != null && lClient.isConnected) {
                 lClient.disconnect()
@@ -75,7 +75,7 @@ object GoogleApi: GoogleApiClient.ConnectionCallbacks, GoogleApiClient.OnConnect
 
     override fun onConnected(connectionHint: Bundle?) {
         // Apparently unrelated to connections with the phone.
-        verbose("Connected to Google Api Service!")
+        verbose("Connected!")
         successFunc()
     }
 
@@ -86,7 +86,7 @@ object GoogleApi: GoogleApiClient.ConnectionCallbacks, GoogleApiClient.OnConnect
 
         // Apparently unrelated to connections with the phone.
 
-        verbose("suspended connection!")
+        verbose("suspended!")
         close()
         failureFunc()
     }

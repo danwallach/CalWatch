@@ -135,7 +135,7 @@ class CalWatchFaceService : CanvasWatchFaceService(), AnkoLogger {
 
             XWatchfaceReceiver.pingExternalStopwatches(this@CalWatchFaceService)
             BatteryWrapper.init(this@CalWatchFaceService)
-            FitnessWrapper.init(this@CalWatchFaceService)
+            GoogleApi.connect(this@CalWatchFaceService) { verbose { "GoogleApi ready" } }
 
             val resources = this@CalWatchFaceService.resources
 
@@ -281,6 +281,7 @@ class CalWatchFaceService : CanvasWatchFaceService(), AnkoLogger {
         override fun onDestroy() {
             verbose("onDestroy")
 
+            GoogleApi.close()
             ClockState.deleteObserver(this)
             calendarFetcher?.kill()
             clockFace.kill()

@@ -18,8 +18,9 @@ import java.util.Observable
 import java.util.Observer
 
 import kotlinx.android.synthetic.main.activity_phone.*
+import org.jetbrains.anko.*
 
-class PhoneActivity : Activity(), Observer {
+class PhoneActivity : Activity(), Observer, AnkoLogger {
     private var disableUICallbacks = false
 
     //
@@ -115,7 +116,7 @@ class PhoneActivity : Activity(), Observer {
         WatchCalendarService.kickStart(this)  // bring it up, if it's not already up
         PreferencesHelper.loadPreferences(this)
         CalendarPermission.init(this)
-        FitnessWrapper.init(this)
+        GoogleApi.connect(this) { verbose { "GoogleApi ready" } }
 
         surfaceView.init(this)
         surfaceView.initCalendarFetcher(this)
@@ -128,6 +129,7 @@ class PhoneActivity : Activity(), Observer {
         super.onResume()
         Log.v(TAG, "Resume!")
 
+        GoogleApi.connect(this) { verbose { "GoogleApi ready" } }
         ClockState.addObserver(this)
         surfaceView.resume(this)
         surfaceView.invalidate()

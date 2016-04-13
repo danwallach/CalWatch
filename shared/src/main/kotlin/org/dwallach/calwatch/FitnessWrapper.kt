@@ -19,19 +19,11 @@ object FitnessWrapper: AnkoLogger {
 
     private var lastSampleTime = 0L
     private var inProgress = false
-    private var initialized = false
     private var cachedResultCounter = 0
     private var successfulResults = 0
     private var failedResults = 0
     private var inProgressCounter = 0
     private var noGoogleApiCounter = 0
-
-    fun init(context: Context) {
-        GoogleApi.connect(context) { info { "GoogleApi ready" } }
-        initialized = true
-
-        info { "Initialized GoogleApi" }
-    }
 
     fun getStepCount(): Int {
         loadStepCount() // start possible asynchronous load
@@ -45,12 +37,6 @@ object FitnessWrapper: AnkoLogger {
     private fun loadStepCount() {
         if(inProgress) {
             inProgressCounter++
-            return
-        }
-
-        if(!initialized) {
-            noGoogleApiCounter++
-            error { "GoogleApi not initialized" }
             return
         }
 
