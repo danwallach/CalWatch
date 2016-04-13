@@ -60,7 +60,7 @@ object GoogleApiWrapper : GoogleApiClient.ConnectionCallbacks, GoogleApiClient.O
             failureFunc = failure
         } else {
             info { "Already connected (or in progress)" }
-            successFunc()
+            success()
         }
     }
 
