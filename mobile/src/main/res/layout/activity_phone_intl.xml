@@ -41,45 +41,69 @@
                 android:layout_marginBottom="10dp"
                 android:layout_gravity="center_horizontal" />
 
+            <ImageButton
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:id="@+id/stepCountImageButton"
+                android:layout_row="2"
+                android:layout_column="3"
+                android:src="@drawable/ic_step_counter"
+                android:cropToPadding="true"
+                android:clickable="true"
+                style="?android:attr/borderlessButtonStyle"
+                android:padding="0dp" />
+
             <Switch
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:id="@+id/showSeconds"
-                android:layout_row="2"
+                android:layout_row="3"
                 android:layout_column="1"
-                android:layout_gravity="left|top"
                 android:checked="true"
                 android:clickable="true"
                 android:enabled="true"
                 android:layout_columnSpan="1"
-                android:button="@drawable/ic_second_hand_button"
-                android:contextClickable="false" />
+                android:contextClickable="false"
+                android:layout_gravity="center_horizontal" />
 
             <Switch
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:id="@+id/showDayDate"
-                android:layout_row="2"
+                android:layout_row="3"
                 android:layout_column="2"
-                android:layout_gravity="left|top"
                 android:checked="true"
                 android:clickable="true"
                 android:enabled="true"
                 android:layout_columnSpan="1"
-                android:text="Mon DD\nDayofweek"
-                android:contextClickable="true" />
+                android:contextClickable="true"
+                android:layout_gravity="center_horizontal" />
 
-            <Switch
+            <ImageButton
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:id="@+id/showStepCounter"
-                android:checked="true"
-                android:clickable="true"
-                android:layout_column="3"
+                android:id="@+id/secondsImageButton"
                 android:layout_row="2"
-                android:layout_columnSpan="1"
-                android:button="@drawable/ic_step_counter"
-                android:layout_gravity="top|left" />
+                android:layout_column="1"
+                android:src="@drawable/ic_second_hand_button"
+                android:cropToPadding="true"
+                android:clickable="true"
+                style="?android:attr/borderlessButtonStyle"
+                android:padding="0dp" />
+
+            <Button
+                style="?android:attr/buttonStyleSmall"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Mon DD\nDayofweek"
+                android:textAllCaps="false"
+                android:id="@+id/dayDateButton"
+                android:layout_row="2"
+                android:layout_column="2"
+                android:enabled="true"
+                android:clickable="true"
+                android:layout_gravity="center"
+                android:gravity="left" />
 
             <RadioGroup
                 android:layout_width="fill_parent"
@@ -127,6 +151,16 @@
                     android:height="100dp"
                     android:button="@drawable/radio_tool_selector" />
             </RadioGroup>
+
+            <Switch
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:id="@+id/showStepCounter"
+                android:checked="true"
+                android:clickable="true"
+                android:layout_column="3"
+                android:layout_row="3"
+                android:layout_gravity="center_horizontal" />
 
         </GridLayout>
     </ScrollView>
