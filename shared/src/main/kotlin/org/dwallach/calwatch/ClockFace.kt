@@ -770,6 +770,8 @@ class ClockFace(val wear: Boolean = false) : Observer, AnkoLogger {
     private fun drawStepCount(canvas: Canvas) {
         val stepCount = FitnessWrapper.getStepCount()
 
+        if(stepCount == 0) return // nothing to do!
+
         if(oldStepCount != stepCount) {
             oldStepCount = stepCount
             stepCountPath = null // force the path to be recomputed
@@ -782,8 +784,6 @@ class ClockFace(val wear: Boolean = false) : Observer, AnkoLogger {
 
         val paint = PaintCan[drawStyle, PaintCan.colorStepCount]
         val outlinePaint = PaintCan[drawStyle, PaintCan.colorStepCount]
-
-        if(stepCount == 0) return // nothing to do!
 
         val seconds: Double = if(stepCount > 12000) { 60.0 } else { stepCount / 200.0 }
 

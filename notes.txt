@@ -78,15 +78,14 @@ TODO update the slides
     adding Kotlin material.
 
 
-TODO SVG for main CalWatch icon?
-
-TODO SVG new empty-calendar icon : verify?
-
 Overhaul preferences pane on mobile
     Broad goal: zero text, all icons, no more need for i18n
 
-    Draw icons in Illustrator:
-        TODO show seconds or not (three hands, arrow pointing at the second hand)
-        TODO show day/date or not (render as text in the current locale)
-        TODO show step count ("running man" icon with green ring around him?)
-        TODO face styles (two or three hands, with or without rendered day/date, but no animations)
+    TODO create vertical layout, not just horizontal
+    TODO PhoneActivity: manage the new imageButtons. When buttons are clicked, flip the switches.
+        TODO make sure this changes the state!
+    TODO PhoneActivity: put localized day/date into the button
+    TODO RPC: add transmission / reception of stepCounter
+    TODO ClockState: storage of stepCounter state
+    TODO ClockFace: read stepCounter state from ClockState
+    TODO verify appearance on multiple phones / watches
