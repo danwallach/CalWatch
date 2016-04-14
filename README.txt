@@ -48,3 +48,6 @@ Credit where credit is due:
 
     "Unavailable calendar" icon by Björn Andersson
     https://thenounproject.com/term/calendar/139505/
+
+    "Walking" icon by Google
+    http://www.flaticon.com/authors/google
