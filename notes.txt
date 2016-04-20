@@ -89,3 +89,6 @@ Overhaul preferences pane on mobile
     TODO ClockState: storage of stepCounter state
     TODO ClockFace: read stepCounter state from ClockState
     TODO verify appearance on multiple phones / watches
+
+TODO replace BIND_LISTENER with new alternative structure
+    http://android-developers.blogspot.com/2016/04/deprecation-of-bindlistener.html
