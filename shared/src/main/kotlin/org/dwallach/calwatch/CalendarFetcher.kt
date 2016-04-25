@@ -133,7 +133,7 @@ class CalendarFetcher(initialContext: Context, val contentUri: Uri, val authorit
         TimeWrapper.update()
         val time = TimeWrapper.gmtTime
         val queryStartMillis = TimeWrapper.localFloorHour - TimeWrapper.gmtOffset
-        val queryEndMillis = queryStartMillis + 86400000 // 24 hours later
+        val queryEndMillis = queryStartMillis + TimeWrapper.hours(24)
 
         try {
             verbose { "loadContent: Query times... Now: %s, QueryStart: %s, QueryEnd: %s"

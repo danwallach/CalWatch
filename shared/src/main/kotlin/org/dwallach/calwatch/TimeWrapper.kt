@@ -18,8 +18,16 @@ import java.util.TimeZone
  * to fix the problem.
  */
 object TimeWrapper: AnkoLogger {
+
+    /**
+     * Offset from GMT time to local time (including daylight savings correction, if necessary), in milliseconds.
+     */
     var gmtOffset: Int = 0
         private set
+
+    /**
+     * Current time, GMT, in milliseconds.
+     */
     var gmtTime: Long = 0
         private set
 
@@ -27,17 +35,52 @@ object TimeWrapper: AnkoLogger {
     //   private static final long magicOffset = 25 * 60 * 1000       // 25 minutes later, for debugging
     private val magicOffset: Long = 0                      // for production use
 
+    /**
+     * Helper function: convert from seconds to our internal time units (milliseconds).
+     */
+    fun seconds(x: Double): Long = (x *    1000.0).toLong()
+
+    /**
+     * Helper function: convert from minutes to our internal time units (milliseconds).
+     */
+
+    fun minutes(x: Double): Long = (x *   60000.0).toLong()
+
+    /**
+     * Helper function: convert from hours to our internal time units (milliseconds).
+     */
+    fun hours(x: Double): Long =   (x * 3600000.0).toLong()
+
+    /**
+     * Helper function: convert from seconds to our internal time units (milliseconds).
+     */
+    fun seconds(x: Long): Long =   (x *    1000L)
+
+    /**
+     * Helper function: convert from minutes to our internal time units (milliseconds).
+     */
+    fun minutes(x: Long): Long =   (x *   60000L)
+
+    /**
+     * Helper function: convert from hours to our internal time units (milliseconds).
+     */
+    fun hours(x: Long): Long =     (x * 3600000L)
+
     fun update() {
         gmtTime = System.currentTimeMillis() + magicOffset
         val tz = TimeZone.getDefault()
         gmtOffset = tz.getOffset(gmtTime) // includes DST correction
     }
 
+    /**
+     * Helper function: returns the local time (including daylight savings correction, if necessary) in milliseconds.
+     */
     val localTime: Long
         get() = gmtTime + gmtOffset
 
-    // 1000 * 60 * 60 = 3600000 -- the number of msec in an hour
-    // if it's currently 12:32pm, this value returned will be 12:00pm
+    /**
+     * If it's currently 12:32pm, this value returned will be 12:00pm.
+     */
     val localFloorHour: Long
         get() = (Math.floor(localTime / 3600000.0) * 3600000.0).toLong()
 
@@ -56,7 +99,7 @@ object TimeWrapper: AnkoLogger {
     }
 
     /**
-     * Fetches something along the lines of "May 5", but in the current locale
+     * Fetches something along the lines of "May 5", but in the current locale.
      */
     fun localMonthDay(): String {
         updateMonthDayCache()
@@ -64,7 +107,7 @@ object TimeWrapper: AnkoLogger {
     }
 
     /**
-     * Fetches something along the lines of "Monday", but in the current locale
+     * Fetches something along the lines of "Monday", but in the current locale.
      */
     fun localDayOfWeek(): String {
         updateMonthDayCache()
@@ -87,7 +130,7 @@ object TimeWrapper: AnkoLogger {
     private var zombieFrames = 0
 
     /**
-     * for performance monitoring: start the counters over again from scratch
+     * For performance monitoring: start the counters over again from scratch.
      */
     fun frameReset() {
         samples = 0
@@ -100,14 +143,20 @@ object TimeWrapper: AnkoLogger {
     }
 
     /**
-     * for performance monitoring: report the FPS counters and reset them immediately
+     * For performance monitoring: report the FPS counters and reset them immediately.
      */
     fun frameReport() {
+        //
+        // Note that the externally visible TimeWrapper APIs report the current time at a resolution
+        // of milliseconds, while our internal framerate measurement and reporting are using the
+        // nanosecond-accurate system clock counter. Thus, for the frame* functions, you'll see
+        // different correction factors.
+        //
         frameReport(SystemClock.elapsedRealtimeNanos())
     }
 
     /**
-     * Internal version, avoids multiple calls to get the system clock
+     * Internal version, avoids multiple calls to get the system clock.
      * @param currentTime
      */
     private fun frameReport(currentTime: Long) {
@@ -135,14 +184,14 @@ object TimeWrapper: AnkoLogger {
     }
 
     /**
-     * for performance monitoring: call this at the beginning of every screen refresh
+     * For performance monitoring: call this at the beginning of every screen refresh.
      */
     fun frameStart() {
         frameStartTime = SystemClock.elapsedRealtimeNanos()
     }
 
     /**
-     * for performance monitoring: call this at the end of every screen refresh
+     * For performance monitoring: call this at the end of every screen refresh.
      */
     fun frameEnd() {
         val frameEndTime = SystemClock.elapsedRealtimeNanos()

@@ -556,7 +556,7 @@ class ClockFace(val wear: Boolean = false) : Observer, AnkoLogger {
     private fun drawHands(canvas: Canvas) {
         val time = TimeWrapper.localTime
 
-        val seconds = time / 1000.0
+        val seconds = time / (TimeWrapper.seconds(1).toDouble())
         val minutes = seconds / 60.0
         val hours = minutes / 12.0  // because drawRadialLine is scaled to a 60-unit circle
 
@@ -615,8 +615,16 @@ class ClockFace(val wear: Boolean = false) : Observer, AnkoLogger {
             val startTime = e.startTime
             val endTime = e.endTime
 
-            val arcStart: Double = startTime / 720000.0
-            val arcEnd: Double = endTime / 720000.0
+            //
+            // Our drawing routines take angles that go from 0-60. By dividing by 12 minutes,
+            // that ensures that 12 hours will go all the way around. Why? Because:
+            //
+            // 60 * 12 minutes = 12 hours
+            //
+            val twelveMinutes = TimeWrapper.minutes(12).toDouble()
+
+            val arcStart: Double = startTime / twelveMinutes
+            val arcEnd: Double = endTime / twelveMinutes
 
             // path caching happens inside drawRadialArc
 
@@ -635,7 +643,7 @@ class ClockFace(val wear: Boolean = false) : Observer, AnkoLogger {
 
         // integer division gets us the exact hour, then multiply by 5 to scale to our
         // 60-second circle
-        var stippleTime = time / (1000 * 60 * 60)
+        var stippleTime = time / TimeWrapper.hours(1)
         stippleTime *= 5
 
         // we might want to rejigger this to be paranoid about concurrency smashing stipplePathCache,
@@ -723,7 +731,7 @@ class ClockFace(val wear: Boolean = false) : Observer, AnkoLogger {
         val time = TimeWrapper.gmtTime
 
         // we don't want to poll *too* often; the code below translates to about once per five minute
-        if (batteryPathCache == null || time - batteryCacheTime > 300000) {
+        if (batteryPathCache == null || time - batteryCacheTime > TimeWrapper.minutes(5)) {
             verbose("fetching new battery status")
             BatteryWrapper.fetchStatus()
             val batteryPct = BatteryWrapper.batteryPct
@@ -835,13 +843,13 @@ class ClockFace(val wear: Boolean = false) : Observer, AnkoLogger {
                 stopwatchRenderTime = currentTime - XWatchfaceReceiver.stopwatchStart + XWatchfaceReceiver.stopwatchBase
             }
 
-            val seconds = stopwatchRenderTime / 1000.0f
+            val seconds = stopwatchRenderTime / TimeWrapper.seconds(1).toDouble()
 
             // rather than computing minutes directly (i.e., stopWatchRenderTime / 60000), we're instead going
             // to compute the integer number of hours (using Math.floor) and subtract that, giving us a resulting
             // number that ranges from [0-60).
-            val hours = Math.floor(stopwatchRenderTime / 3600000.0).toFloat()
-            val minutes = stopwatchRenderTime / 60000.0f - hours * 60f
+            val hours = Math.floor(stopwatchRenderTime / TimeWrapper.hours(1).toDouble()).toFloat()
+            val minutes = stopwatchRenderTime / TimeWrapper.minutes(1).toFloat() - hours * 60f
 
             val stopWatchR1 = 0.90f
             val stopWatchR2 = if (XWatchfaceReceiver.timerIsReset || timerRemaining == 0L) 0.995f else 0.945f

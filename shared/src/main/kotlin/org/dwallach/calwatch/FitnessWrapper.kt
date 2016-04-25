@@ -37,6 +37,17 @@ object FitnessWrapper: AnkoLogger {
 
     private fun loadStepCount() {
         if(inProgress) {
+            //
+            // A word about atomicity:
+            //
+            // In a traditional multithreaded world, we wouldn't just have a boolean to track
+            // that we're in progress. We'd have a mutex and/other atomicity goodies. In the
+            // Android universe, we're only ever going to hit this function as part of the
+            // screen-redrawing process, so we'll *always be on the UI thread*. Consequently,
+            // a simple boolean does the job for us. We do use a worker thread as part of the
+            // actual asynchronous query to the HistoryApi (see below), which will delay resetting
+            // the inProgress boolean until it's finished and is back running on the UI thread.
+            //
             inProgressCounter++
             return
         }
@@ -71,7 +82,7 @@ object FitnessWrapper: AnkoLogger {
         // mode, but since we're not even vaguely trying to be precise, it doesn't really matter.
         //
         val currentTime = TimeWrapper.gmtTime
-        if(currentTime - lastSampleTime < 30000) {
+        if(currentTime - lastSampleTime < TimeWrapper.seconds(30)) {
             cachedResultCounter++
             return
         }
