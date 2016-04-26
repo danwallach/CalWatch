@@ -62,8 +62,8 @@ android {
 
     defaultConfig {
         applicationId "org.dwallach.calwatch"
-        minSdkVersion 22      // Android 5.1, Lollipop, for the watches that haven't been updated to 6.0 yet
         targetSdkVersion 23   // Android 6.0, Marshmallow, with the shiny new permission system
+        minSdkVersion 23      // we can now require this as well
         versionCode getVersionCode()
         versionName getVersionName()
     }
