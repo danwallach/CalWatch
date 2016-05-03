@@ -50,9 +50,9 @@ object ClockState : Observable(), AnkoLogger {
     /**
      * Helper function to determine if we need subsecond refresh intervals.
      */
-    fun subSecondRefreshNeeded(face: ClockFace) =
+    fun subSecondRefreshNeeded(face: ClockFace?) =
         // if the second-hand is supposed to be rendered and we're not in ambient mode
-        showSeconds && !face.getAmbientMode()
+        if (face == null) false else showSeconds && !face.getAmbientMode()
 
     /**
      * Load the eventlist. This is meant to consume the output of the calendarFetcher,
@@ -126,7 +126,7 @@ object ClockState : Observable(), AnkoLogger {
         }
 
         // now, we run off and do screen layout
-        var lMaxLevel: Int
+        val lMaxLevel: Int
 
         if (clippedEvents.isNotEmpty()) {
             // first, try the fancy constraint solver

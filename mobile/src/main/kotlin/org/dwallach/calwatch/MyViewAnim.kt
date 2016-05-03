@@ -27,7 +27,7 @@ class MyViewAnim(context: Context, attrs: AttributeSet) : View(context, attrs), 
         setWillNotDraw(false)
     }
 
-    private lateinit var clockFace: ClockFace
+    private var clockFace: ClockFace? = null
     private var visible = false
     private var calendarFetcher: CalendarFetcher? = null
 
@@ -107,7 +107,7 @@ class MyViewAnim(context: Context, attrs: AttributeSet) : View(context, attrs), 
         zeroSizedScreen = (width == 0 || height == 0)
 
         verbose { "onWindowFocusChanged: $width, $height" }
-        clockFace.setSize(width, height)
+        clockFace?.setSize(width, height)
     }
 
     /**
@@ -118,7 +118,7 @@ class MyViewAnim(context: Context, attrs: AttributeSet) : View(context, attrs), 
 
         ClockState.deleteObserver(this)
         calendarFetcher?.kill()
-        clockFace.kill()
+        clockFace?.kill()
     }
 
     /**
@@ -132,9 +132,9 @@ class MyViewAnim(context: Context, attrs: AttributeSet) : View(context, attrs), 
         if(context.resources == null) {
             error("no resources? not good")
         } else {
-            clockFace.setMissingCalendarDrawable(context.getDrawable(R.drawable.ic_empty_calendar));
+            clockFace?.setMissingCalendarDrawable(context.getDrawable(R.drawable.ic_empty_calendar));
         }
-        clockFace.setSize(width, height)
+        clockFace?.setSize(width, height)
 
         ClockState.addObserver(this)
         initCalendarFetcher(requireNotNull(this.toActivity(), { "no activity available for resuming calendar?!" }))
@@ -147,7 +147,7 @@ class MyViewAnim(context: Context, attrs: AttributeSet) : View(context, attrs), 
         zeroSizedScreen = (w == 0 || h == 0)
 
         verbose { "onSizeChanged: $w, $h" }
-        clockFace.setSize(w, h)
+        clockFace?.setSize(w, h)
     }
 
     // Keeping track of whether we have a width and height yet.
@@ -169,7 +169,7 @@ class MyViewAnim(context: Context, attrs: AttributeSet) : View(context, attrs), 
             canvas.drawColor(Color.TRANSPARENT, PorterDuff.Mode.CLEAR)
 
             TimeWrapper.update() // fetch the time
-            clockFace.drawEverything(canvas)
+            clockFace?.drawEverything(canvas)
 
             if (ClockState.subSecondRefreshNeeded(clockFace))
                 invalidate()
