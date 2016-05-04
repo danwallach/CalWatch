@@ -31,7 +31,6 @@ Miscellaneous updates
     TODO better no-calendar icon
 
     Other stuff, while we're overhauling things:
-    TODO Change phone config panel to show three simultaneous watchfaces with picker rather than three text names
 
     TODO Adopt Wear Compatibility Library
     https://github.com/googlesamples/android-WearCompanionLibrary
@@ -80,14 +79,6 @@ TODO update the slides
 
 Overhaul preferences pane on mobile
     Broad goal: zero text, all icons, no more need for i18n
-
-    TODO create vertical layout, not just horizontal
-    TODO PhoneActivity: manage the new imageButtons. When buttons are clicked, flip the switches.
-        TODO make sure this changes the state!
-    TODO PhoneActivity: put localized day/date into the button
-    TODO RPC: add transmission / reception of stepCounter
-    TODO ClockState: storage of stepCounter state
-    TODO ClockFace: read stepCounter state from ClockState
     TODO verify appearance on multiple phones / watches
 
 TODO replace BIND_LISTENER with new alternative structure

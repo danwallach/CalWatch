@@ -812,7 +812,7 @@ class ClockFace(val wear: Boolean = false) : Observer, AnkoLogger {
         if(drawStyle == PaintCan.styleNormal && BatteryWrapper.batteryPct > 0.5) {
             // we're rounding to the nearest thousand, i.e.,  1499 -> 1, 1500 -> 2, etc.
             val stepCountDigits = Math.floor((stepCount + 500.0) / 1000.0)
-            val stepCountString = if(stepCountDigits > 99) "++" else stepCountDigits.toString()
+            val stepCountString = if(stepCountDigits > 99) "++" else stepCountDigits.toInt().toString()
 
             val textPaint = PaintCan[drawStyle, PaintCan.colorCenterText]
 
@@ -820,7 +820,7 @@ class ClockFace(val wear: Boolean = false) : Observer, AnkoLogger {
 
             val metrics = paint.fontMetrics
             // note: metrics.ascent is a *negative* number while metrics.descent is a *positive* number
-            val dy = -(-metrics.ascent - metrics.descent)/2f
+            val dy = metrics.ascent/2f
 
             drawShadowText(canvas, stepCountString, cx.toFloat(), cy.toFloat() + dy, textPaint, null)
         }
