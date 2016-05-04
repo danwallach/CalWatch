@@ -105,7 +105,7 @@ object PaintCan: AnkoLogger {
     const val colorMinuteHand = 5
     const val colorHourHand = 6
     const val colorArcShadow = 7
-    const val colorCenterText = 8
+    const val colorStepCountText = 8
     const val colorSmallTextAndLines = 9
     const val colorBigTextAndLines = 10
     const val colorBlackFill = 11
@@ -151,7 +151,7 @@ object PaintCan: AnkoLogger {
             palette[style][colorMinuteHand] = watchfacePaint(Color.WHITE, style, textSize, lineWidth)
             palette[style][colorHourHand] = watchfacePaint(Color.WHITE, style, textSize, lineWidth * 1.5f)
             palette[style][colorArcShadow] = watchfacePaint(Color.BLACK, style, smTextSize, lineWidth / 6f)
-            palette[style][colorCenterText] = watchfacePaint(Color.WHITE, style, smTextSize, lineWidth / 4f)
+            palette[style][colorStepCountText] = watchfacePaint(Color.GREEN, style, smTextSize, lineWidth / 8f)
             palette[style][colorSmallTextAndLines] = watchfacePaint(Color.WHITE, style, smTextSize, lineWidth / 3f)
             palette[style][colorBigTextAndLines] = watchfacePaint(Color.WHITE, style, textSize, lineWidth)
             palette[style][colorBigShadow] = watchfacePaint(Color.BLACK, style, textSize, lineWidth / 2f)
@@ -180,7 +180,7 @@ object PaintCan: AnkoLogger {
 
             // by default, text is centered, but some styles want it on the left
             // (these are the places where we'll eventually have to do more work for RTL languages)
-            palette[style][colorCenterText]?.textAlign = Paint.Align.CENTER
+            palette[style][colorStepCountText]?.textAlign = Paint.Align.CENTER
             palette[style][colorSmallTextAndLines]?.textAlign = Paint.Align.LEFT
             palette[style][colorSmallShadow]?.textAlign = Paint.Align.LEFT
         }

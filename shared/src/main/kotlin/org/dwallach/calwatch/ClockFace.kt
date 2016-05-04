@@ -814,13 +814,14 @@ class ClockFace(val wear: Boolean = false) : Observer, AnkoLogger {
             val stepCountDigits = Math.floor((stepCount + 500.0) / 1000.0)
             val stepCountString = if(stepCountDigits > 99) "++" else stepCountDigits.toInt().toString()
 
-            val textPaint = PaintCan[drawStyle, PaintCan.colorCenterText]
+            val textPaint = PaintCan[drawStyle, PaintCan.colorStepCountText]
 
             // AA note: we only draw the month box when in normal mode, not ambient, so no AA gymnastics here
 
-            val metrics = paint.fontMetrics
-            // note: metrics.ascent is a *negative* number while metrics.descent is a *positive* number
-            val dy = metrics.ascent/2f
+            val metrics = textPaint.fontMetrics
+            // note: metrics.ascent is a *negative* number while metrics.descent is a *positive* number;
+            // we're trying to vertically center the text around the watch origin, so we need a correction here
+            val dy = (-metrics.ascent - metrics.descent)/2f
 
             drawShadowText(canvas, stepCountString, cx.toFloat(), cy.toFloat() + dy, textPaint, null)
         }
