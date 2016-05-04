@@ -105,20 +105,21 @@ object PaintCan: AnkoLogger {
     const val colorMinuteHand = 5
     const val colorHourHand = 6
     const val colorArcShadow = 7
-    const val colorSmallTextAndLines = 8
-    const val colorBigTextAndLines = 9
-    const val colorBlackFill = 10
-    const val colorLowBitCalendarFill = 11
-    const val colorSmallShadow = 12
-    const val colorBigShadow = 13
-    const val colorStopwatchStroke = 14
-    const val colorStopwatchFill = 15
-    const val colorStopwatchSeconds = 16
-    const val colorTimerStroke = 17
-    const val colorTimerFill = 18
-    const val colorStepCount = 19
-    const val colorStepCountShadow = 20
-    const val colorMax = 20
+    const val colorCenterText = 8
+    const val colorSmallTextAndLines = 9
+    const val colorBigTextAndLines = 10
+    const val colorBlackFill = 11
+    const val colorLowBitCalendarFill = 12
+    const val colorSmallShadow = 13
+    const val colorBigShadow = 14
+    const val colorStopwatchStroke = 15
+    const val colorStopwatchFill = 16
+    const val colorStopwatchSeconds = 17
+    const val colorTimerStroke = 18
+    const val colorTimerFill = 19
+    const val colorStepCount = 20
+    const val colorStepCountShadow = 21
+    const val colorMax = 21
 
 
     /**
@@ -150,6 +151,7 @@ object PaintCan: AnkoLogger {
             palette[style][colorMinuteHand] = watchfacePaint(Color.WHITE, style, textSize, lineWidth)
             palette[style][colorHourHand] = watchfacePaint(Color.WHITE, style, textSize, lineWidth * 1.5f)
             palette[style][colorArcShadow] = watchfacePaint(Color.BLACK, style, smTextSize, lineWidth / 6f)
+            palette[style][colorCenterText] = watchfacePaint(Color.WHITE, style, smTextSize, lineWidth / 4f)
             palette[style][colorSmallTextAndLines] = watchfacePaint(Color.WHITE, style, smTextSize, lineWidth / 3f)
             palette[style][colorBigTextAndLines] = watchfacePaint(Color.WHITE, style, textSize, lineWidth)
             palette[style][colorBigShadow] = watchfacePaint(Color.BLACK, style, textSize, lineWidth / 2f)
@@ -178,6 +180,7 @@ object PaintCan: AnkoLogger {
 
             // by default, text is centered, but some styles want it on the left
             // (these are the places where we'll eventually have to do more work for RTL languages)
+            palette[style][colorCenterText]?.textAlign = Paint.Align.CENTER
             palette[style][colorSmallTextAndLines]?.textAlign = Paint.Align.LEFT
             palette[style][colorSmallShadow]?.textAlign = Paint.Align.LEFT
         }

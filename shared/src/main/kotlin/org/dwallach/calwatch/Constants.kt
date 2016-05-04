@@ -13,4 +13,5 @@ object Constants {
     const val DefaultWatchFace = ClockState.FACE_TOOL
     const val DefaultShowSeconds = true
     const val DefaultShowDayDate = true
+    const val DefaultShowStepCounter = false
 }

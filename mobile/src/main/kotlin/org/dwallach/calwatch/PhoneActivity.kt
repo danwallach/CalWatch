@@ -17,7 +17,7 @@ import android.view.View
 import java.util.Observable
 import java.util.Observer
 
-import kotlinx.android.synthetic.main.activity_phone.*
+import kotlinx.android.synthetic.main.activity_phone_intl.*
 import org.jetbrains.anko.*
 
 class PhoneActivity : Activity(), Observer, AnkoLogger {
@@ -27,7 +27,7 @@ class PhoneActivity : Activity(), Observer, AnkoLogger {
     // this will be called, eventually, from whatever feature is responsible for
     // restoring saved user preferences
     //
-    private fun setFaceModeUI(mode: Int, showSecondsP: Boolean, showDayDateP: Boolean) {
+    private fun setFaceModeUI(mode: Int, showSecondsP: Boolean, showDayDateP: Boolean, showStepCounterP: Boolean) {
         Log.v(TAG, "setFaceModeUI")
         if (!uiButtonsReady()) {
             Log.v(TAG, "trying to set UI mode without buttons active yet")
@@ -46,6 +46,13 @@ class PhoneActivity : Activity(), Observer, AnkoLogger {
 
             showSeconds.isChecked = showSecondsP
             showDayDate.isChecked = showDayDateP
+            showStepCounter.isChecked = showStepCounterP
+
+            // while we're here, we'll also put the proper day/date into the relevant button
+            val dayOfWeek = TimeWrapper.localDayOfWeek()
+            val monthDay = TimeWrapper.localMonthDay()
+            dayDateButton.text = "${monthDay}\n${dayOfWeek}"
+
         } catch (throwable: Throwable) {
             // probably a called-from-wrong-thread-exception, we'll just ignore it
             Log.v(TAG, "ignoring exception while updating button state")
@@ -77,6 +84,7 @@ class PhoneActivity : Activity(), Observer, AnkoLogger {
 
         ClockState.showSeconds = showSeconds.isChecked
         ClockState.showDayDate = showDayDate.isChecked
+        ClockState.showStepCounter = showStepCounter.isChecked
 
         ClockState.pingObservers() // we only need to do this once
     }
@@ -85,7 +93,7 @@ class PhoneActivity : Activity(), Observer, AnkoLogger {
         super.onCreate(savedInstanceState)
         Log.v(TAG, "Create!")
 
-        setContentView(R.layout.activity_phone)
+        setContentView(R.layout.activity_phone_intl)
     }
 
     override fun onPause() {
@@ -112,6 +120,23 @@ class PhoneActivity : Activity(), Observer, AnkoLogger {
         numbersButton.setOnClickListener(myListener)
         showSeconds.setOnClickListener(myListener)
         showDayDate.setOnClickListener(myListener)
+        showStepCounter.setOnClickListener(myListener)
+
+        // Each of these handles the big image buttons that we want to also cause
+        // their switches to toggle. The toggling will (hopefully) cause the myListener
+        // callback (above) to then fire, which will have the desired side-effects.
+
+        secondsImageButton.setOnClickListener {
+            showSeconds.toggle()
+        }
+
+        dayDateButton.setOnClickListener {
+            showDayDate.toggle()
+        }
+
+        stepCountImageButton.setOnClickListener {
+            showStepCounter.toggle()
+        }
 
         WatchCalendarService.kickStart(this)  // bring it up, if it's not already up
         PreferencesHelper.loadPreferences(this)
@@ -152,7 +177,7 @@ class PhoneActivity : Activity(), Observer, AnkoLogger {
         // somebody changed *something* in the ClockState, causing us to get called
         Log.v(TAG, "Noticed a change in the clock state; saving preferences")
 
-        setFaceModeUI(ClockState.faceMode, ClockState.showSeconds, ClockState.showDayDate)
+        setFaceModeUI(ClockState.faceMode, ClockState.showSeconds, ClockState.showDayDate, ClockState.showStepCounter)
         PreferencesHelper.savePreferences(this)
     }
 

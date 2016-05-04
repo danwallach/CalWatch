@@ -31,8 +31,9 @@ class ClockFace(val wear: Boolean = false) : Observer, AnkoLogger {
     private var oldCy = -1
     private var radius = defaultRadius
 
-    private var showSeconds = true
-    private var showDayDate = true
+    private var showSeconds = Constants.DefaultShowSeconds
+    private var showDayDate = Constants.DefaultShowDayDate
+    private var showStepCounter = Constants.DefaultShowStepCounter
     private var ambientLowBit = forceAmbientLowBit
     private var burnInProtection = forceBurnInProtection
 
@@ -410,8 +411,9 @@ class ClockFace(val wear: Boolean = false) : Observer, AnkoLogger {
         drawShadowText(canvas, m, x1, y1 + dytop, paint, shadow)
     }
 
-    private fun drawShadowText(canvas: Canvas, text: String, x: Float, y: Float, paint: Paint, shadowPaint: Paint) {
-        canvas.drawText(text, x, y, shadowPaint)
+    private fun drawShadowText(canvas: Canvas, text: String, x: Float, y: Float, paint: Paint, shadowPaint: Paint?) {
+        if(shadowPaint != null)
+            canvas.drawText(text, x, y, shadowPaint)
         canvas.drawText(text, x, y, paint)
     }
 
@@ -776,6 +778,8 @@ class ClockFace(val wear: Boolean = false) : Observer, AnkoLogger {
     private var oldStepCount = 0
 
     private fun drawStepCount(canvas: Canvas) {
+        if(!showStepCounter) return
+
         val stepCount = FitnessWrapper.getStepCount()
 
         if(stepCount == 0) return // nothing to do!
@@ -799,6 +803,26 @@ class ClockFace(val wear: Boolean = false) : Observer, AnkoLogger {
         // in between
 
         stepCountPath = drawRadialArc(canvas, stepCountPath, 0.0, seconds, 0.065f, 0.090f, paint, outlinePaint, false)
+
+        // next, we're going to put the thousands-digit of the step counter in the dead center, but
+        // only when we're in "normal" mode (i.e., we're not in one of the ambient modes). Also, once
+        // the battery gets below 50%, we're going to switch over to showing the battery life dot,
+        // so we'll be killing off the counter.
+
+        if(drawStyle == PaintCan.styleNormal && BatteryWrapper.batteryPct > 0.5) {
+            // we're rounding to the nearest thousand, i.e.,  1499 -> 1, 1500 -> 2, etc.
+            val stepCountDigits = Math.floor((stepCount / 1000.0) + 500.0)
+            val stepCountString = if(stepCountDigits > 99) "++" else stepCountDigits.toString()
+
+            val textPaint = PaintCan[drawStyle, PaintCan.colorCenterText]
+
+            // AA note: we only draw the month box when in normal mode, not ambient, so no AA gymnastics here
+
+            val metrics = paint.fontMetrics
+            val dy = -(metrics.ascent - metrics.descent)/2f
+
+            drawShadowText(canvas, stepCountString, cx.toFloat(), cy.toFloat() + dy, textPaint, null)
+        }
     }
 
     fun drawTimers(canvas: Canvas) {
@@ -1050,6 +1074,7 @@ class ClockFace(val wear: Boolean = false) : Observer, AnkoLogger {
         this.faceMode = ClockState.faceMode
         this.showDayDate = ClockState.showDayDate
         this.showSeconds = ClockState.showSeconds
+        this.showStepCounter = ClockState.showStepCounter
 
         verbose("update - end")
     }

@@ -16,12 +16,13 @@ import org.jetbrains.anko.*
  * go a step further and replace this with distinct entries in the DataMap, but we might want
  * to add more things later on, so it's easiest to just keep this around.
  */
-data class WireUpdate(val faceMode: Int, val showSecondHand: Boolean, val showDayDate: Boolean) {
+data class WireUpdate(val faceMode: Int, val showSecondHand: Boolean, val showDayDate: Boolean, val showStepCounter: Boolean) {
 
-    fun toByteArray() = "$HEADER;$faceMode;$showSecondHand;$showDayDate;$TRAILER".toByteArray()
+    fun toByteArray() = "$HEADER3;$faceMode;$showSecondHand;$showDayDate;$showStepCounter;$TRAILER".toByteArray()
 
     companion object: AnkoLogger {
-        private const val HEADER = "CWDATA2"
+        private const val HEADER2 = "CWDATA2"
+        private const val HEADER3 = "CWDATA3"
         private const val TRAILER = "$"
 
         fun parseFrom(input: ByteArray): WireUpdate {
@@ -32,8 +33,12 @@ data class WireUpdate(val faceMode: Int, val showSecondHand: Boolean, val showDa
                     .dropLastWhile { it.isEmpty() }
                     .toTypedArray()
 
-            if (inputs.size == 5 && inputs[0] == HEADER && inputs[4] == TRAILER) {
-                val result = WireUpdate(inputs[1].toInt(), inputs[2].toBoolean(), inputs[3].toBoolean())
+            if (inputs.size == 5 && inputs[0] == HEADER2 && inputs[4] == TRAILER) {
+                val result = WireUpdate(inputs[1].toInt(), inputs[2].toBoolean(), inputs[3].toBoolean(), Constants.DefaultShowStepCounter)
+                verbose { "parsed: ${result.toString()}" }
+                return result
+            } else if (inputs.size == 6 && inputs[0] == HEADER3 && inputs[5] == TRAILER) {
+                val result = WireUpdate(inputs[1].toInt(), inputs[2].toBoolean(), inputs[3].toBoolean(), inputs[4].toBoolean())
                 verbose { "parsed: ${result.toString()}" }
                 return result
             } else {

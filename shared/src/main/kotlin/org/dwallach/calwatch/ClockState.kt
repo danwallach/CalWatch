@@ -29,6 +29,7 @@ object ClockState : Observable(), AnkoLogger {
     var faceMode: Int = Constants.DefaultWatchFace
     var showSeconds: Boolean = Constants.DefaultShowSeconds
     var showDayDate: Boolean = Constants.DefaultShowDayDate
+    var showStepCounter: Boolean = Constants.DefaultShowStepCounter
 
     private var eventList: List<WireEvent> = emptyList()
     private var visibleEventList: List<EventWrapper> = emptyList()
@@ -165,7 +166,7 @@ object ClockState : Observable(), AnkoLogger {
      * phone to watch, but now it's just a simple string. Keeping the "protobuf"
      * nomenclature around in case we decide to go back to that at some later point.)
      */
-    fun getProtobuf() = WireUpdate(faceMode, showSeconds, showDayDate).toByteArray()
+    fun getProtobuf() = WireUpdate(faceMode, showSeconds, showDayDate, showStepCounter).toByteArray()
 
     /**
      * Load the ClockState with a protobuf containing a complete update
@@ -192,6 +193,7 @@ object ClockState : Observable(), AnkoLogger {
         faceMode = wireUpdate.faceMode
         showSeconds = wireUpdate.showSecondHand
         showDayDate = wireUpdate.showDayDate
+        showStepCounter = wireUpdate.showStepCounter
 
         pingObservers()
 
