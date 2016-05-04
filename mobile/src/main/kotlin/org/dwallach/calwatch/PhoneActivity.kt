@@ -123,19 +123,24 @@ class PhoneActivity : Activity(), Observer, AnkoLogger {
         showStepCounter.setOnClickListener(myListener)
 
         // Each of these handles the big image buttons that we want to also cause
-        // their switches to toggle. The toggling will (hopefully) cause the myListener
-        // callback (above) to then fire, which will have the desired side-effects.
+        // their switches to toggle.
 
         secondsImageButton.setOnClickListener {
             showSeconds.toggle()
+            getFaceModeFromUI()
+            surfaceView.invalidate()
         }
 
         dayDateButton.setOnClickListener {
             showDayDate.toggle()
+            getFaceModeFromUI()
+            surfaceView.invalidate()
         }
 
         stepCountImageButton.setOnClickListener {
             showStepCounter.toggle()
+            getFaceModeFromUI()
+            surfaceView.invalidate()
         }
 
         WatchCalendarService.kickStart(this)  // bring it up, if it's not already up
