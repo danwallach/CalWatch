@@ -1,6 +1,6 @@
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
-    android:orientation="vertical"
+    android:orientation="horizontal"
     android:id="@+id/container"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
@@ -25,39 +25,42 @@
 
 
         <View
-            android:layout_width="160dp"
-            android:layout_height="1dp"
-            android:layout_row="1"
-            android:layout_column="1"
-            android:layout_columnSpan="3"
+            android:layout_width="1dp"
+            android:layout_height="160dp"
+            android:layout_row="0"
+            android:layout_column="2"
             android:background="#404040"
-            android:layout_marginTop="10dp"
-            android:layout_marginBottom="10dp"
-            android:layout_gravity="center_horizontal" />
+            android:layout_gravity="center_vertical"
+            android:layout_rowSpan="3"
+            android:layout_marginLeft="10dp"
+            android:layout_marginRight="10dp" />
 
         <ImageButton
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:id="@+id/stepCountImageButton"
             android:layout_row="2"
-            android:layout_column="3"
+            android:layout_column="1"
             android:src="@drawable/ic_step_counter"
             android:cropToPadding="true"
             android:clickable="true"
             style="?android:attr/borderlessButtonStyle"
-            android:padding="0dp" />
+            android:padding="0dp"
+            android:layout_marginLeft="10dp" />
 
         <ImageButton
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:id="@+id/secondsImageButton"
-            android:layout_row="2"
+            android:layout_row="0"
             android:layout_column="1"
             android:src="@drawable/ic_second_hand_button"
             android:cropToPadding="true"
             android:clickable="true"
             style="?android:attr/borderlessButtonStyle"
-            android:padding="0dp" />
+            android:padding="0dp"
+            android:layout_marginLeft="10dp"
+            android:layout_marginTop="5dp" />
 
         <Button
             style="?android:attr/buttonStyleSmall"
@@ -66,21 +69,24 @@
             android:text="Mon DD\nDayofweek"
             android:textAllCaps="false"
             android:id="@+id/dayDateButton"
-            android:layout_row="2"
-            android:layout_column="2"
+            android:layout_row="1"
+            android:layout_column="1"
             android:enabled="true"
             android:clickable="true"
             android:layout_gravity="center"
-            android:gravity="left" />
+            android:gravity="left"
+            android:layout_marginTop="25dp"
+            android:layout_marginBottom="25dp" />
 
         <RadioGroup
             android:layout_width="fill_parent"
             android:layout_height="wrap_content"
             android:layout_row="0"
-            android:layout_column="1"
-            android:orientation="horizontal"
-            android:layout_columnSpan="3"
-            android:measureWithLargestChild="false">
+            android:layout_column="3"
+            android:orientation="vertical"
+            android:layout_rowSpan="3"
+            android:layout_marginRight="5dp"
+            android:layout_marginTop="5dp">
 
             <RadioButton
                 android:layout_width="wrap_content"
@@ -100,9 +106,9 @@
                 android:checked="false"
                 android:enabled="true"
                 android:clickable="true"
-                android:layout_marginLeft="20dp"
-                android:layout_marginRight="20dp"
-                android:button="@drawable/radio_numbers_selector" />
+                android:button="@drawable/radio_numbers_selector"
+                android:layout_marginTop="5dp"
+                android:layout_marginBottom="5dp" />
 
             <RadioButton
                 android:layout_width="wrap_content"
@@ -112,7 +118,8 @@
                 android:checked="true"
                 android:clickable="true"
                 android:enabled="true"
-                android:button="@drawable/radio_tool_selector" />
+                android:button="@drawable/radio_tool_selector"
+                android:gravity="bottom" />
         </RadioGroup>
 
         <Switch
@@ -121,7 +128,7 @@
             android:id="@+id/showStepCounter"
             android:checked="true"
             android:clickable="true"
-            android:layout_column="3"
+            android:layout_column="1"
             android:layout_row="2"
             android:layout_gravity="top|right" />
 
@@ -129,7 +136,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:id="@+id/showSeconds"
-            android:layout_row="2"
+            android:layout_row="0"
             android:layout_column="1"
             android:checked="true"
             android:clickable="true"
@@ -141,8 +148,8 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:id="@+id/showDayDate"
-            android:layout_row="2"
-            android:layout_column="2"
+            android:layout_row="1"
+            android:layout_column="1"
             android:checked="true"
             android:clickable="true"
             android:enabled="true"
