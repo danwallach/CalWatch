@@ -140,7 +140,7 @@ object PaintCan: AnkoLogger {
 
         for (style in 0..styleMax) {
             // Quoth the Google: "You can use color elements for up to 5 percent of total pixels." We're going to
-            // do this exclusively for the remaining battery indicator, which is well under the required 5%.
+            // do this for the remaining battery indicator and step counter, which are well under the required 5%.
             // http://developer.android.com/design/wear/watchfaces.html
             palette[style][colorBatteryLow] = watchfacePaint(Color.YELLOW, style, smTextSize, lineWidth / 3f, true)
             palette[style][colorBatteryCritical] = watchfacePaint(Color.RED, style, smTextSize, lineWidth / 3f, true)
