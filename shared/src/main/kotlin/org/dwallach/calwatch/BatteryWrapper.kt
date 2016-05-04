@@ -27,11 +27,7 @@ object BatteryWrapper: AnkoLogger {
         private set
 
     fun fetchStatus(): Unit {
-        val context = contextRef.get()
-        if(context == null) {
-            // no context, can't do anything
-            return
-        }
+        val context = contextRef.get() ?: return // no context, can't do anything
 
         // and now, some code for battery measurement, largely stolen from the
         // official docs.

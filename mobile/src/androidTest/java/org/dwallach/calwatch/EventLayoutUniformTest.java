@@ -56,7 +56,7 @@ public class EventLayoutUniformTest extends TestCase {
         List<EventWrapper> output;
 
         public Builder() {
-            output = new LinkedList<EventWrapper>();
+            output = new LinkedList<>();
         }
 
         public Builder add(EventWrapper e) {

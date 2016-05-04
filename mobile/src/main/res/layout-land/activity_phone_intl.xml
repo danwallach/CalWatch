@@ -20,7 +20,6 @@
         android:layout_gravity="center_horizontal"
         android:layout_margin="5dp"
         android:clickable="true"
-        android:contextClickable="true"
         android:orientation="vertical">
 
 
@@ -141,7 +140,6 @@
             android:checked="true"
             android:clickable="true"
             android:enabled="true"
-            android:contextClickable="false"
             android:layout_gravity="top|left|right" />
 
         <Switch
@@ -153,7 +151,6 @@
             android:checked="true"
             android:clickable="true"
             android:enabled="true"
-            android:contextClickable="true"
             android:layout_gravity="top|center_horizontal" />
 
     </GridLayout>

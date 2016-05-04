@@ -26,7 +26,6 @@
 
 package org.dwallach.calwatch
 
-import android.graphics.BitmapFactory
 import android.graphics.Canvas
 import android.graphics.Color
 import android.graphics.PorterDuff
@@ -135,7 +134,7 @@ class CalWatchFaceService : CanvasWatchFaceService(), AnkoLogger {
 
             XWatchfaceReceiver.pingExternalStopwatches(this@CalWatchFaceService)
             BatteryWrapper.init(this@CalWatchFaceService)
-            GoogleApiWrapper.startConnection(this@CalWatchFaceService.getBaseContext(), true) { verbose { "GoogleApi ready" } }
+            GoogleApiWrapper.startConnection(this@CalWatchFaceService.baseContext, true) { verbose { "GoogleApi ready" } }
 
             val resources = this@CalWatchFaceService.resources
 

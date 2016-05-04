@@ -34,7 +34,7 @@ public class EventLayoutTest extends TestCase {
     class Builder {
         List<EventWrapper> output;
 
-        public Builder() { output = new LinkedList<EventWrapper>(); }
+        public Builder() { output = new LinkedList<>(); }
         public Builder add(EventWrapper e) { output.add(e); return this; }
         public Builder add(WireEvent e) { return add(new EventWrapper(e)); }
         public List<EventWrapper> get() { return output; }

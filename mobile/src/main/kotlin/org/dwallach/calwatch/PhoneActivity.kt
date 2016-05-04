@@ -51,7 +51,7 @@ class PhoneActivity : Activity(), Observer, AnkoLogger {
             // while we're here, we'll also put the proper day/date into the relevant button
             val dayOfWeek = TimeWrapper.localDayOfWeek()
             val monthDay = TimeWrapper.localMonthDay()
-            dayDateButton.text = "${monthDay}\n${dayOfWeek}"
+            dayDateButton.text = "$monthDay\n$dayOfWeek"
 
         } catch (throwable: Throwable) {
             // probably a called-from-wrong-thread-exception, we'll just ignore it

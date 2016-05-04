@@ -94,7 +94,7 @@ object GoogleApiWrapper : GoogleApiClient.ConnectionCallbacks, GoogleApiClient.O
 
         // Apparently unrelated to connections with the phone.
 
-        info { "suspended! cause: ${cause}" }
+        info { "suspended! cause: $cause" }
 //        close()
         failureFunc()
     }

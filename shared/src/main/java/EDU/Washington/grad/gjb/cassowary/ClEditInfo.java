@@ -12,8 +12,6 @@
 
 package EDU.Washington.grad.gjb.cassowary;
 
-import java.util.*;
-
 // ClEditInfo is a privately-used class
 // that just wraps a constraint, its positive and negative
 // error variables, and its prior edit constant.

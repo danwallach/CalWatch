@@ -30,9 +30,7 @@ object FitnessWrapper: AnkoLogger {
     }
 
     fun report() {
-        info { "steps: ${stepCount}, prior cached: ${cachedResultCounter}, successful: ${successfulResults}," +
-                " noGoogleApi: ${noGoogleApiCounterNull}/${noGoogleApiCounterConnecting}/${noGoogleApiCounterConnected}," +
-                " failed: ${failedResults}, in-progress: ${inProgressCounter}" }
+        info { "steps: $stepCount, prior cached: $cachedResultCounter, successful: $successfulResults, noGoogleApi: $noGoogleApiCounterNull/$noGoogleApiCounterConnecting/$noGoogleApiCounterConnected, failed: $failedResults, in-progress: $inProgressCounter" }
     }
 
     private fun loadStepCount() {
@@ -109,7 +107,7 @@ object FitnessWrapper: AnkoLogger {
                 if (totalSet != null) {
                     newStepCount = if (totalSet.isEmpty) 0 else totalSet.dataPoints[0].getValue(Field.FIELD_STEPS).asInt()
                     successfulResults++
-                    verbose { "Step Count: ${stepCount}" }
+                    verbose { "Step Count: $stepCount" }
                 } else {
                     failedResults++
                     debug { "No total set; no step count" }

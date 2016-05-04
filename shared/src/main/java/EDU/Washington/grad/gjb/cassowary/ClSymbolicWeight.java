@@ -11,9 +11,7 @@
 
 package EDU.Washington.grad.gjb.cassowary;
 
-import java.util.*;
-
-public class ClSymbolicWeight 
+public class ClSymbolicWeight
 {
 
   public ClSymbolicWeight(int cLevels)
@@ -37,9 +35,7 @@ public class ClSymbolicWeight
     { 
       final int cLevels = weights.length;
       _values = new double[cLevels];
-      for (int i = 0; i < cLevels; i++) {
-	_values[i] = weights[i];
-      }
+      System.arraycopy(weights, 0, _values, 0, cLevels);
     }
 
   public static final ClSymbolicWeight clsZero = new ClSymbolicWeight(0.0, 0.0, 0.0);
@@ -155,7 +151,7 @@ public class ClSymbolicWeight
   
   public String toString()
     { 
-      StringBuffer bstr = new StringBuffer("[");
+      StringBuilder bstr = new StringBuilder("[");
       for (int i = 0; i < _values.length-1; i++) {
 	bstr.append(_values[i]);
 	bstr.append(",");

@@ -504,7 +504,7 @@ public class ClTests extends CL {
       // throw new Exception("Out of random numbers");
       return -1;
     }
-    double f =  ((Double)vRandom.elementAt(iRandom++)).doubleValue();
+    double f =  (vRandom.elementAt(iRandom++)).doubleValue();
     //    System.out.println("returning value = " + f);
     return f;
   }

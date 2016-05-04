@@ -166,7 +166,7 @@ public class ClSimplexSolver extends ClTableau
   public final ClSimplexSolver removeEditVar(ClVariable v)
           throws ExCLInternalError, ExCLConstraintNotFound
   {
-    ClEditInfo cei = (ClEditInfo) _editVarMap.get(v);
+    ClEditInfo cei = _editVarMap.get(v);
     ClConstraint cn = cei.Constraint();
     removeConstraint(cn);
     return this;
@@ -193,7 +193,7 @@ public class ClSimplexSolver extends ClTableau
     CLassert(_editVarMap.size() > 0,"_editVarMap.size() > 0");
     resolve();
     _stkCedcns.pop();
-    int n = ((Integer)_stkCedcns.peek()).intValue();
+    int n = (_stkCedcns.peek()).intValue();
     removeEditVarsTo(n);
     // may later want to do more in here
     return this;
@@ -241,7 +241,7 @@ public class ClSimplexSolver extends ClTableau
     double weight = 1.0;
     final double multiplier = 2.0;
     for (int i = 0; i < listOfPoints.size(); i++) {
-      addPointStay((ClPoint) listOfPoints.elementAt(i),weight);
+      addPointStay(listOfPoints.elementAt(i),weight);
       weight *= multiplier;
     }
     return this;
@@ -345,7 +345,7 @@ public class ClSimplexSolver extends ClTableau
       }
     }
 
-    ClAbstractVariable marker = (ClAbstractVariable) _markerVars.remove(cn);
+    ClAbstractVariable marker = _markerVars.remove(cn);
     if (marker == null) {
       throw new ExCLConstraintNotFound();
     }
@@ -450,7 +450,7 @@ public class ClSimplexSolver extends ClTableau
       CLassert(eVars != null,"eVars != null");
       ClEditConstraint cnEdit = (ClEditConstraint) cn;
       ClVariable clv = cnEdit.variable();
-      ClEditInfo cei = (ClEditInfo) _editVarMap.get(clv);
+      ClEditInfo cei = _editVarMap.get(clv);
       ClSlackVariable clvEditMinus = cei.ClvEditMinus();
       //      ClSlackVariable clvEditPlus = cei.ClvEditPlus();
       // the clvEditPlus is a marker variable that is removed elsewhere
@@ -541,7 +541,7 @@ public class ClSimplexSolver extends ClTableau
           throws ExCLError
   {
     if (fTraceOn) fnenterprint("suggestValue(" + v + ", " + x + ")");
-    ClEditInfo cei = (ClEditInfo) _editVarMap.get(v);
+    ClEditInfo cei = _editVarMap.get(v);
     if (cei == null) {
       System.err.println("suggestValue for variable " + v + ", but var is not an edit variable\n");
       throw new ExCLError();
@@ -1116,9 +1116,9 @@ public class ClSimplexSolver extends ClTableau
 
     for (int i = 0; i < _stayPlusErrorVars.size(); i++) {
       ClLinearExpression expr =
-              rowExpression((ClAbstractVariable) _stayPlusErrorVars.elementAt(i) );
+              rowExpression(_stayPlusErrorVars.elementAt(i) );
       if (expr == null )
-        expr = rowExpression((ClAbstractVariable) _stayMinusErrorVars.elementAt(i));
+        expr = rowExpression(_stayMinusErrorVars.elementAt(i));
       if (expr != null)
         expr.set_constant(0.0);
     }

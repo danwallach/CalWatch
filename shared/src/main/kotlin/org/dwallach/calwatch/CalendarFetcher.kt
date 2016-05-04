@@ -217,8 +217,8 @@ class CalendarFetcher(initialContext: Context, val contentUri: Uri, val authorit
      * Asynchronous loader handling via Kotlin's Anko.
      */
     fun runAsyncLoader() {
-        val context: Context? = getContext()
-        if(context == null) return // nothing to do without a context, so give up, surrender!
+        val context = getContext() ?: return
+        // nothing to do without a context, so give up, surrender!
 
         //
         // Why a wake-lock? In part, because the Google sample code does it this way, and in part
