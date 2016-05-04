@@ -28,9 +28,9 @@ class PhoneActivity : Activity(), Observer, AnkoLogger {
     // restoring saved user preferences
     //
     private fun setFaceModeUI(mode: Int, showSecondsP: Boolean, showDayDateP: Boolean, showStepCounterP: Boolean) {
-        Log.v(TAG, "setFaceModeUI")
+        verbose("setFaceModeUI")
         if (!uiButtonsReady()) {
-            Log.v(TAG, "trying to set UI mode without buttons active yet")
+            verbose("trying to set UI mode without buttons active yet")
             return
         }
 
@@ -41,7 +41,7 @@ class PhoneActivity : Activity(), Observer, AnkoLogger {
                 ClockState.FACE_TOOL -> toolButton.performClick()
                 ClockState.FACE_NUMBERS -> numbersButton.performClick()
                 ClockState.FACE_LITE -> liteButton.performClick()
-                else -> Log.v(TAG, "bogus face mode: $mode")
+                else -> verbose("bogus face mode: $mode")
             }
 
             showSeconds.isChecked = showSecondsP
@@ -55,7 +55,7 @@ class PhoneActivity : Activity(), Observer, AnkoLogger {
 
         } catch (throwable: Throwable) {
             // probably a called-from-wrong-thread-exception, we'll just ignore it
-            Log.v(TAG, "ignoring exception while updating button state")
+            verbose("ignoring exception while updating button state")
         }
 
         disableUICallbacks = false
@@ -65,10 +65,10 @@ class PhoneActivity : Activity(), Observer, AnkoLogger {
             toolButton != null && numbersButton != null && liteButton != null && showSeconds != null && showDayDate != null
 
     private fun getFaceModeFromUI() {
-        Log.v(TAG, "getFaceModeFromUI")
+        verbose("getFaceModeFromUI")
 
         if (!uiButtonsReady()) {
-            Log.v(TAG, "trying to get UI mode without buttons active yet")
+            verbose("trying to get UI mode without buttons active yet")
             return
         }
 
@@ -77,7 +77,7 @@ class PhoneActivity : Activity(), Observer, AnkoLogger {
             numbersButton.isChecked -> ClockState.FACE_NUMBERS
             liteButton.isChecked -> ClockState.FACE_LITE
             else -> {
-                Log.e(TAG, "no buttons are selected? weird.")
+                error("no buttons are selected? weird.")
                 ClockState.faceMode // we'll go with whatever's already there, nothing better to choose
             }
         }
@@ -86,19 +86,21 @@ class PhoneActivity : Activity(), Observer, AnkoLogger {
         ClockState.showDayDate = showDayDate.isChecked
         ClockState.showStepCounter = showStepCounter.isChecked
 
+        verbose { "new state -- showSeconds: ${ClockState.showSeconds}, showDayDate: ${ClockState.showDayDate}, showStepCounter: ${ClockState.showStepCounter}" }
+
         ClockState.pingObservers() // we only need to do this once
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        Log.v(TAG, "Create!")
+        verbose("Create!")
 
         setContentView(R.layout.activity_phone_intl)
     }
 
     override fun onPause() {
         super.onPause()
-        Log.v(TAG, "Pause!")
+        verbose("Pause!")
 
         surfaceView.pause(this)
 
@@ -107,7 +109,7 @@ class PhoneActivity : Activity(), Observer, AnkoLogger {
 
     override fun onStart() {
         super.onStart()
-        Log.v(TAG, "Start!")
+        verbose("Start!")
 
         val myListener = View.OnClickListener {
             if (!disableUICallbacks)
@@ -152,12 +154,12 @@ class PhoneActivity : Activity(), Observer, AnkoLogger {
         surfaceView.initCalendarFetcher(this)
 
         onResume()
-        Log.v(TAG, "activity setup complete")
+        verbose("activity setup complete")
     }
 
     override fun onResume() {
         super.onResume()
-        Log.v(TAG, "Resume!")
+        verbose("Resume!")
 
         GoogleApiWrapper.startConnection(this) { verbose { "GoogleApi ready" } }
         ClockState.addObserver(this)
@@ -180,40 +182,38 @@ class PhoneActivity : Activity(), Observer, AnkoLogger {
 
     override fun update(observable: Observable?, data: Any?) {
         // somebody changed *something* in the ClockState, causing us to get called
-        Log.v(TAG, "Noticed a change in the clock state; saving preferences")
+        verbose("Noticed a change in the clock state; saving preferences")
 
         setFaceModeUI(ClockState.faceMode, ClockState.showSeconds, ClockState.showDayDate, ClockState.showStepCounter)
         PreferencesHelper.savePreferences(this)
     }
 
     override fun onRequestPermissionsResult(requestCode: Int, permissions: Array<String>, grantResults: IntArray) {
-        Log.v(TAG, "onRequestPermissionsResult")
+        verbose("onRequestPermissionsResult")
 
         CalendarPermission.handleResult(requestCode, permissions, grantResults)
         surfaceView.initCalendarFetcher(this)
 
-        Log.v(TAG, "finishing PermissionActivity")
+        verbose("finishing PermissionActivity")
     }
 
-    companion object {
-        private const val TAG = "PhoneActivity"
-
+    companion object: AnkoLogger {
         /**
          * This will be called when the user clicks on the watchface, presumably because they want
          * us to request calendar permissions.
          */
         fun watchfaceClick(view: MyViewAnim) {
-            Log.v(TAG, "Watchface clicked!")
+            verbose("Watchface clicked!")
 
             // can't do anything without an activity
             val activity = view.toActivity() ?: return
 
             if (!ClockState.calendarPermission) {
-                Log.v(TAG, "Requesting permissions")
+                verbose("Requesting permissions")
                 CalendarPermission.request(activity)
                 view.initCalendarFetcher(activity)
             } else {
-                Log.v(TAG, "Permissions already granted.")
+                verbose("Permissions already granted.")
             }
         }
     }
