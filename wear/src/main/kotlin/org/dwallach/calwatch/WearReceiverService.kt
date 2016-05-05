@@ -20,18 +20,11 @@ import fr.nicolaspomepuy.androidwearcrashreport.wear.CrashReporter
 import org.jetbrains.anko.*
 
 /**
- * This class pairs up with WearSender
- * Created by dwallach on 8/25/14.
+ * This class pairs up with WearSender.
  */
 class WearReceiverService : WearableListenerService(), AnkoLogger {
     init {
         verbose("starting listening service")
-    }
-
-    private fun newEventBytes(eventBytes: ByteArray) {
-        verbose { "newEventBytes: ${eventBytes.size}" }
-
-        ClockState.setProtobuf(eventBytes)
     }
 
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
@@ -73,8 +66,8 @@ class WearReceiverService : WearableListenerService(), AnkoLogger {
                         debug { "----> it's an event for us, nbytes: ${eventbuf.size}" }
 
                         if(eventbuf != null) {
-                            newEventBytes(eventbuf)
-                            savePreferences(eventbuf) // save this for subsequent restarts
+                            ClockState.setProtobuf(eventbuf)
+                            PreferencesHelper.savePreferences(this)
                         }
                     }
                 }
@@ -88,42 +81,21 @@ class WearReceiverService : WearableListenerService(), AnkoLogger {
     }
 
     /**
-     * Take a serialized state update and commit it to stable storage.
-     * @param eventBytes protobuf-serialed WireUpdate (typically received from the phone)
-     */
-    fun savePreferences(eventBytes: ByteArray?) {
-        // if there's not enough state there to be real, then don't save it
-        if (eventBytes == null || eventBytes.size < 1)
-            return
-
-        verbose("savePreferences: ${eventBytes.size} bytes")
-        getSharedPreferences(Constants.PrefsKey, Context.MODE_PRIVATE).edit().apply {
-            // TODO there's no reason to save state like this any more; maybe we could merge with mobile/PreferencesHelper
-
-            // Kinda sad that we need to base64-encode our state before we save it, but the SharedPreferences
-            // interface doesn't allow for arbitrary arrays of bytes. So yeah, base64-encoded,
-            // protobuf-encoded, WireUpdate structure, which itself has a handful of ints and a
-            // variable-length array of WireEvents, which are themselves just a bunch of long's.
-            putString("savedState", Base64.encodeToString(eventBytes, Base64.DEFAULT))
-
-            if (!commit())
-                warn("savePreferences commit failed ?!")
-        }
-    }
-
-    /**
      * load saved state, if it's present, and use it to initialize the watchface.
      */
     fun loadPreferences() {
         verbose("loadPreferences")
 
-        val savedState = getSharedPreferences(Constants.PrefsKey, Context.MODE_PRIVATE).getString("savedState", "")
+        if (PreferencesHelper.loadPreferences(this) == 0) {
+            // the code below is for backward compatibility with our earlier messaging / preferences system
+            val savedState = getSharedPreferences(Constants.PrefsKey, Context.MODE_PRIVATE).getString("savedState", "")
 
-        if (savedState.length > 0) {
-            try {
-                newEventBytes(Base64.decode(savedState, Base64.DEFAULT))
-            } catch (e: IllegalArgumentException) {
-                error("failed to decode base64 saved state", e)
+            if (savedState.length > 0) {
+                try {
+                    ClockState.setProtobuf(Base64.decode(savedState, Base64.DEFAULT))
+                } catch (e: IllegalArgumentException) {
+                    error("failed to decode base64 saved state", e)
+                }
             }
         }
     }

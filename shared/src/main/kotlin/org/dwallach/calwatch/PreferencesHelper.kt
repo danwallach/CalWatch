@@ -17,27 +17,41 @@ object PreferencesHelper: AnkoLogger {
             putInt("faceMode", ClockState.faceMode)
             putBoolean("showSeconds", ClockState.showSeconds)
             putBoolean("showDayDate", ClockState.showDayDate)
+            putBoolean("showStepCounter", ClockState.showStepCounter)
+            putInt("preferencesVersion", 3)
 
             if (!commit())
                 error("savePreferences commit failed ?!")
         }
     }
 
-    fun loadPreferences(context: Context) {
+    /**
+     * Updates the preferences in ClockState, returns an integer version number. So far,
+     * the choices are "0", meaning it didn't find a version number in placed, and "3",
+     * which is the newest version. This will help with legacy migration. (If the version
+     * is zero, then some of the values in ClockState will have been set from the defaults.)
+     */
+    fun loadPreferences(context: Context) : Int {
         verbose("loadPreferences")
 
+        var preferencesVersion: Int  = 0
+
         context.getSharedPreferences(Constants.PrefsKey, Context.MODE_PRIVATE).apply {
-            val faceMode = getInt("faceMode", Constants.DefaultWatchFace) // ClockState.FACE_TOOL
+            val faceMode = getInt("faceMode", Constants.DefaultWatchFace)
             val showSeconds = getBoolean("showSeconds", Constants.DefaultShowSeconds)
             val showDayDate = getBoolean("showDayDate", Constants.DefaultShowDayDate)
+            val showStepCounter = getBoolean("showStepCounter", Constants.DefaultShowStepCounter)
+            preferencesVersion = getInt("preferencesVersion", 0)
 
-            verbose { "faceMode: $faceMode, showSeconds: $showSeconds, showDayDate: $showDayDate" }
+            verbose { "faceMode: $faceMode, showSeconds: $showSeconds, showDayDate: $showDayDate, showStepCounter: $showStepCounter" }
 
             ClockState.faceMode = faceMode
             ClockState.showSeconds = showSeconds
             ClockState.showDayDate = showDayDate
+            ClockState.showStepCounter = showStepCounter
         }
 
         ClockState.pingObservers() // we only need to do this once, versus multiple times when done internally
+        return preferencesVersion
     }
 }
