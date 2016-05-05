@@ -21,7 +21,6 @@ import java.util.Observable
 import java.util.Observer
 
 class MyViewAnim(context: Context, attrs: AttributeSet) : View(context, attrs), Observer, AnkoLogger {
-
     init {
         setWillNotDraw(false)
     }
@@ -33,9 +32,9 @@ class MyViewAnim(context: Context, attrs: AttributeSet) : View(context, attrs), 
     override fun onVisibilityChanged(changedView: View?, visibility: Int) {
         visible = visibility == View.VISIBLE
 
-        if (!visible)
+        if (!visible) {
             TimeWrapper.frameReport()
-        else {
+        } else {
             TimeWrapper.frameReset()
             invalidate()
         }
@@ -83,7 +82,9 @@ class MyViewAnim(context: Context, attrs: AttributeSet) : View(context, attrs), 
         }
 
         calendarFetcher?.kill() // kill if it's already there
-        calendarFetcher = CalendarFetcher(activity, CalendarContract.Instances.CONTENT_URI, CalendarContract.AUTHORITY)
+        calendarFetcher = CalendarFetcher(activity,
+                CalendarContract.Instances.CONTENT_URI,
+                CalendarContract.AUTHORITY)
     }
 
 
@@ -136,7 +137,10 @@ class MyViewAnim(context: Context, attrs: AttributeSet) : View(context, attrs), 
         clockFace?.setSize(width, height)
 
         ClockState.addObserver(this)
-        initCalendarFetcher(requireNotNull(this.toActivity(), { "no activity available for resuming calendar?!" }))
+        initCalendarFetcher(
+                requireNotNull(this.toActivity()) {
+                    "no activity available for resuming calendar?!"
+                })
     }
 
 
