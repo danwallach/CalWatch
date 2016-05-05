@@ -91,7 +91,9 @@ class CalendarFetcher(initialContext: Context, val contentUri: Uri, val authorit
         }
 
         isReceiverRegistered = false
-        scanInProgress = false
+        // we used to set scanInProgress to false, but we had multiple calendar fetchers running at once,
+        // and it seems the culprit is the complex way we set things up. Best to
+//        scanInProgress = false -- don't want this, because we seem to set things up multiple times in teh
     }
 
     /**
