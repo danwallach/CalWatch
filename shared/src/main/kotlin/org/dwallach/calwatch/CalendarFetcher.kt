@@ -91,9 +91,12 @@ class CalendarFetcher(initialContext: Context, val contentUri: Uri, val authorit
         }
 
         isReceiverRegistered = false
-        // we used to set scanInProgress to false, but we had multiple calendar fetchers running at once,
-        // and it seems the culprit is the complex way we set things up. Best to
-//        scanInProgress = false -- don't want this, because we seem to set things up multiple times in teh
+
+        // We formerly here set scanInProgress to false, but we had multiple calendar fetchers running at once,
+        // and it seems the culprit is the complex way we set things up at the start of times. We'd have
+        // two separate instances of MyViewAnim. No idea why, but there's no point in that causing multiple
+        // concurrent scans of the calendar. The latter CalendarFetcher will cause the former to be "killed",
+        // but if it's still scanning, then so be it.
     }
 
     /**

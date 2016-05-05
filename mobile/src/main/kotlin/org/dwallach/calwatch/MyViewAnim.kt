@@ -137,10 +137,7 @@ class MyViewAnim(context: Context, attrs: AttributeSet) : View(context, attrs), 
         clockFace?.setSize(width, height)
 
         ClockState.addObserver(this)
-        initCalendarFetcher(
-                requireNotNull(this.toActivity()) {
-                    "no activity available for resuming calendar?!"
-                })
+        initCalendarFetcher(requireNotNull(this.toActivity()) { "no activity available for resuming calendar?!" })
     }
 
 
@@ -171,7 +168,7 @@ class MyViewAnim(context: Context, attrs: AttributeSet) : View(context, attrs), 
         try {
             canvas.drawColor(Color.TRANSPARENT, PorterDuff.Mode.CLEAR)
 
-            TimeWrapper.update() // fetch the time
+            TimeWrapper.update() // fetch the time once; it's then used extensively inside drawEverything()
             clockFace?.drawEverything(canvas)
 
             if (ClockState.subSecondRefreshNeeded(clockFace))

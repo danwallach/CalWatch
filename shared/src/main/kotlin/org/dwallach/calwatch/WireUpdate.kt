@@ -21,8 +21,8 @@ data class WireUpdate(val faceMode: Int, val showSecondHand: Boolean, val showDa
     fun toByteArray() = "$HEADER3;$faceMode;$showSecondHand;$showDayDate;$showStepCounter;$TRAILER".toByteArray()
 
     companion object: AnkoLogger {
-        private const val HEADER2 = "CWDATA2"
-        private const val HEADER3 = "CWDATA3"
+        private const val HEADER2 = "CWDATA2" // corresponding to CalWatch release3-4xxx
+        private const val HEADER3 = "CWDATA3" // corresponding to CalWatch release5xxx
         private const val TRAILER = "$"
 
         fun parseFrom(input: ByteArray): WireUpdate {
