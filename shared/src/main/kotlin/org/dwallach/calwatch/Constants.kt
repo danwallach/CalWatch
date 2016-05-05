@@ -14,4 +14,6 @@ object Constants {
     const val DefaultShowSeconds = true
     const val DefaultShowDayDate = true
     const val DefaultShowStepCounter = false
+    const val PowerWarningLevel = 0.33f
+    const val PowerCriticalLevel = 0.1f
 }

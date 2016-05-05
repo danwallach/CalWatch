@@ -66,9 +66,10 @@ class ClockFace(val wear: Boolean = false) : Observer, AnkoLogger {
     }
 
     /**
-     * Tell the clock face if we're in "mute" mode. Unclear we want to actually do anything different.
+     * Tell the clock face if we're in "mute" mode. For now, we don't care.
      */
     fun setMuteMode(muteMode: Boolean) {
+        verbose { "setMuteMode: $muteMode" }
     }
 
     /**
@@ -309,6 +310,10 @@ class ClockFace(val wear: Boolean = false) : Observer, AnkoLogger {
      */
     private fun drawRadialArcFlatBottom(canvas: Canvas, seconds: Float, startRadiusRatio: Float, endRadiusRatio: Float, paint: Paint, outlinePaint: Paint?) {
         // TODO: should we cache this result like we do with the calendar arcs?
+        // For now, the answer is no, since the arc is different every time, while the timer/stopwatch is in motion.
+        // It's only static if the user pauses. It's unclear whether it's worth the bother to cache the drawing
+        // path under only that circumstance.
+
         var startRadius = startRadiusRatio
         var endRadius = endRadiusRatio
         //        flatCounter++
@@ -736,7 +741,7 @@ class ClockFace(val wear: Boolean = false) : Observer, AnkoLogger {
         if (batteryPathCache == null || time - batteryCacheTime > TimeWrapper.minutes(5)) {
             verbose("fetching new battery status")
             BatteryWrapper.fetchStatus()
-            val batteryPct = BatteryWrapper.batteryPct
+            val batteryPct: Float = BatteryWrapper.batteryPct
             batteryCacheTime = time
             val lBatteryPathCache = Path()
 
@@ -746,20 +751,18 @@ class ClockFace(val wear: Boolean = false) : Observer, AnkoLogger {
             //
 
             verbose { "battery at $batteryPct" }
-            if (batteryPct > 0.5f) {
+            if (batteryPct > Constants.PowerWarningLevel) {
                 // batteryPathCache = null
             } else {
                 val minRadius = 0.01f
                 val maxRadius = 0.06f
-                val dotRadius: Float
-                if (batteryPct < 0.1)
-                    dotRadius = maxRadius
-                else
-                    dotRadius = maxRadius - (maxRadius - minRadius) * (batteryPct - 0.1f) / 0.4f
+                batteryCritical = batteryPct <= Constants.PowerCriticalLevel
+
+                val dotRadius = maxRadius - if (batteryCritical) 0f else
+                    (maxRadius - minRadius) * (batteryPct - Constants.PowerCriticalLevel) / (Constants.PowerWarningLevel - Constants.PowerCriticalLevel)
 
                 lBatteryPathCache.addCircle(cx.toFloat(), cy.toFloat(), radius * dotRadius, Path.Direction.CCW) // direction shouldn't matter
 
-                batteryCritical = batteryPct <= 0.1f
                 verbose { "--> dot radius: $dotRadius, critical: $batteryCritical" }
             }
 
@@ -778,7 +781,16 @@ class ClockFace(val wear: Boolean = false) : Observer, AnkoLogger {
     private var oldStepCount = 0
 
     private fun drawStepCount(canvas: Canvas) {
-        if(!showStepCounter) return
+        // There's a battery strategy going on in here that's a bit complex. We have three battery
+        // ranges to worry about: full, warning, and critical (defined in Constants). When we're
+        // full (or at least, above the warning level), then we'll draw everything. Once we hit
+        // the warning level, we'll kill off the digits because drawBattery() will start rendering
+        // its power warning data. Once we hit the critical level, we're going to kill off the
+        // step counter in its entirety because the user really needs to get their phone back
+        // on the charger, and because the step counter seems to have a non-zero impact on battery
+        // life, so we'll try to save a bit on power usage.
+
+        if(!showStepCounter || BatteryWrapper.batteryPct < Constants.PowerCriticalLevel) return
 
         val stepCount = FitnessWrapper.getStepCount()
 
@@ -791,7 +803,9 @@ class ClockFace(val wear: Boolean = false) : Observer, AnkoLogger {
 
         // We're going to draw an arc from 12 o'clock, going clockwise, where an arc, all the way
         // around represents 12000 steps. That's an arbitrary constant, but it fits nicely with
-        // the 12 hours in the dial.
+        // the 12 hours in the dial. We'll also be showing a digit (code below) which will help
+        // train the user.
+
         // TODO find easy API access to user's daily step count goal, modify arc to go from 0% to 100%
 
         val paint = PaintCan[drawStyle, PaintCan.colorStepCount]
@@ -805,11 +819,9 @@ class ClockFace(val wear: Boolean = false) : Observer, AnkoLogger {
         stepCountPath = drawRadialArc(canvas, stepCountPath, 0.0, seconds, 0.065f, 0.090f, paint, outlinePaint, false)
 
         // next, we're going to put the thousands-digit of the step counter in the dead center, but
-        // only when we're in "normal" mode (i.e., we're not in one of the ambient modes). Also, once
-        // the battery gets below 50%, we're going to switch over to showing the battery life dot,
-        // so we'll be killing off the counter.
+        // only when we're in "normal" mode (i.e., we're not in one of the ambient modes).
 
-        if(drawStyle == PaintCan.styleNormal && BatteryWrapper.batteryPct > 0.5) {
+        if(drawStyle == PaintCan.styleNormal && BatteryWrapper.batteryPct > Constants.PowerWarningLevel) {
             // we're rounding to the nearest thousand, i.e.,  1499 -> 1, 1500 -> 2, etc.
             val stepCountDigits = Math.floor((stepCount + 500.0) / 1000.0)
             val stepCountString = if(stepCountDigits > 99) "++" else stepCountDigits.toInt().toString()
@@ -1007,7 +1019,7 @@ class ClockFace(val wear: Boolean = false) : Observer, AnkoLogger {
     }
 
     private fun flatBottomY(time: Float, radius: Float): Float {
-        // old, incorrect approach: linear interplation between the sides
+        // old, incorrect approach: linear interpolation between the sides
         //        float y1 = interpolate(flatBottomCornerY1_R80, 0.8f, flatBottomCornerY1_R100, 1f, radius)
         //        float y2 = interpolate(flatBottomCornerY2_R80, 0.8f, flatBottomCornerY2_R100, 1f, radius)
         //        return interpolate(y1, flatBottomCornerTime, y2, 60 - flatBottomCornerTime, time)
@@ -1101,6 +1113,7 @@ class ClockFace(val wear: Boolean = false) : Observer, AnkoLogger {
      * Let us know if we're on a square or round watchface. (We don't really care. For now.)
      */
     fun setRound(round: Boolean) {
+        verbose { "setRound: $round" }
     }
 
     companion object {
