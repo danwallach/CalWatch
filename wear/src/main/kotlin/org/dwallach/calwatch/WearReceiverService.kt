@@ -41,7 +41,18 @@ class WearReceiverService : WearableListenerService(), AnkoLogger {
         // and loading of preferences in this file, so we'll be consistent. It
         // just updates state in ClockState, which is global, so it does't especially
         // matter when we do it.
-        loadPreferences()
+        if (PreferencesHelper.loadPreferences(this) == 0) {
+            // the code below is for backward compatibility with our earlier messaging / preferences system
+            val savedState = getSharedPreferences(Constants.PrefsKey, Context.MODE_PRIVATE).getString("savedState", "")
+
+            if (savedState.length > 0) {
+                try {
+                    ClockState.setProtobuf(Base64.decode(savedState, Base64.DEFAULT))
+                } catch (e: IllegalArgumentException) {
+                    error("failed to decode base64 saved state", e)
+                }
+            }
+        }
 
         // We want this service to continue running until it is explicitly
         // stopped, so return sticky.
@@ -78,26 +89,6 @@ class WearReceiverService : WearableListenerService(), AnkoLogger {
 
         verbose("onCreate!")
         GoogleApiWrapper.startConnection(this, true) { verbose { "GoogleApi ready" } }
-    }
-
-    /**
-     * load saved state, if it's present, and use it to initialize the watchface.
-     */
-    fun loadPreferences() {
-        verbose("loadPreferences")
-
-        if (PreferencesHelper.loadPreferences(this) == 0) {
-            // the code below is for backward compatibility with our earlier messaging / preferences system
-            val savedState = getSharedPreferences(Constants.PrefsKey, Context.MODE_PRIVATE).getString("savedState", "")
-
-            if (savedState.length > 0) {
-                try {
-                    ClockState.setProtobuf(Base64.decode(savedState, Base64.DEFAULT))
-                } catch (e: IllegalArgumentException) {
-                    error("failed to decode base64 saved state", e)
-                }
-            }
-        }
     }
 
     companion object: AnkoLogger {

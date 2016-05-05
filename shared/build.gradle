@@ -42,6 +42,20 @@ def getVersionName = { ->
     return versionName
 }
 
+buildscript {
+    ext.kotlin_version = '1.0.2-eap-74'
+    repositories {
+        mavenCentral()
+        maven {
+            url 'https://dl.bintray.com/kotlin/kotlin-eap/'
+        }
+    }
+    dependencies {
+        classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlin_version"
+        classpath "org.jetbrains.kotlin:kotlin-android-extensions:$kotlin_version"
+    }
+}
+
 
 android {
     compileSdkVersion 23
@@ -53,11 +67,6 @@ android {
         targetSdkVersion 23   // Android 6.0, Marshmallow, with the shiny new permission model
         versionCode getVersionCode()
         versionName getVersionName()
-    }
-
-    compileOptions {
-        sourceCompatibility JavaVersion.VERSION_1_7
-        targetCompatibility JavaVersion.VERSION_1_7
     }
 
     sourceSets {
@@ -84,19 +93,6 @@ dependencies {
     compile "org.jetbrains.anko:anko-sdk15:0.8.2rc3"
 }
 
-buildscript {
-    ext.kotlin_version = '1.0.2-eap-74'
-    repositories {
-        mavenCentral()
-        maven {
-            url 'https://dl.bintray.com/kotlin/kotlin-eap/'
-        }
-    }
-    dependencies {
-        classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlin_version"
-        classpath "org.jetbrains.kotlin:kotlin-android-extensions:$kotlin_version"
-    }
-}
 repositories {
     mavenCentral()
     maven {
