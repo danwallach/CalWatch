@@ -151,7 +151,7 @@ object PaintCan: AnkoLogger {
             palette[style][colorMinuteHand] = watchfacePaint(Color.WHITE, style, textSize, lineWidth)
             palette[style][colorHourHand] = watchfacePaint(Color.WHITE, style, textSize, lineWidth * 1.5f)
             palette[style][colorArcShadow] = watchfacePaint(Color.BLACK, style, smTextSize, lineWidth / 6f)
-            palette[style][colorStepCountText] = watchfacePaint(Color.GREEN, style, smTextSize * 0.8f, lineWidth / 6f)
+            palette[style][colorStepCountText] = watchfacePaint(Color.GREEN, style, smTextSize * 0.6f, lineWidth / 6f)
             palette[style][colorSmallTextAndLines] = watchfacePaint(Color.WHITE, style, smTextSize, lineWidth / 3f)
             palette[style][colorBigTextAndLines] = watchfacePaint(Color.WHITE, style, textSize, lineWidth)
             palette[style][colorBigShadow] = watchfacePaint(Color.BLACK, style, textSize, lineWidth / 2f)

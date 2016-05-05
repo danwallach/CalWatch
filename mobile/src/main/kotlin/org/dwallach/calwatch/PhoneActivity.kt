@@ -27,7 +27,7 @@ class PhoneActivity : Activity(), Observer, AnkoLogger {
     // restoring saved user preferences
     //
     private fun setFaceModeUI(mode: Int, showSecondsP: Boolean, showDayDateP: Boolean, showStepCounterP: Boolean) {
-        verbose("setFaceModeUI")
+        verbose { "setFaceModeUI: mode($mode), showSecondsP($showSecondsP), showDayDateP($showDayDateP), showStepCounterP($showStepCounterP)" }
         if (!uiButtonsReady()) {
             verbose("trying to set UI mode without buttons active yet")
             return
@@ -85,7 +85,7 @@ class PhoneActivity : Activity(), Observer, AnkoLogger {
         ClockState.showDayDate = showDayDate.isChecked
         ClockState.showStepCounter = showStepCounter.isChecked
 
-        verbose { "new state -- showSeconds: ${ClockState.showSeconds}, showDayDate: ${ClockState.showDayDate}, showStepCounter: ${ClockState.showStepCounter}" }
+        verbose { "new state -- showSeconds(${ClockState.showSeconds}), showDayDate(${ClockState.showDayDate}), showStepCounter(${ClockState.showStepCounter})" }
 
         ClockState.pingObservers() // we only need to do this once
     }
@@ -111,6 +111,7 @@ class PhoneActivity : Activity(), Observer, AnkoLogger {
         verbose("Start!")
 
         val myListener = View.OnClickListener {
+            verbose("click!")
             if (!disableUICallbacks)
                 getFaceModeFromUI()
             surfaceView.invalidate()
@@ -127,18 +128,21 @@ class PhoneActivity : Activity(), Observer, AnkoLogger {
         // their switches to toggle.
 
         secondsImageButton.setOnClickListener {
+            verbose("seconds toggle")
             showSeconds.toggle()
             getFaceModeFromUI()
             surfaceView.invalidate()
         }
 
         dayDateButton.setOnClickListener {
+            verbose("dayDate toggle")
             showDayDate.toggle()
             getFaceModeFromUI()
             surfaceView.invalidate()
         }
 
         stepCountImageButton.setOnClickListener {
+            verbose("stepCount toggle")
             showStepCounter.toggle()
             getFaceModeFromUI()
             surfaceView.invalidate()

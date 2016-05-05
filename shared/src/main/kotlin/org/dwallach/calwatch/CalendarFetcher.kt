@@ -94,7 +94,6 @@ class CalendarFetcher(initialContext: Context, val contentUri: Uri, val authorit
         scanInProgress = false
     }
 
-    private var scanInProgress: Boolean = false
     /**
      * This will start asynchronously loading the calendar. The results will eventually arrive
      * in ClockState, and any Observers of ClockState will be notified.
@@ -220,6 +219,9 @@ class CalendarFetcher(initialContext: Context, val contentUri: Uri, val authorit
         val context = getContext() ?: return
         // nothing to do without a context, so give up, surrender!
 
+        if(this != singletonFetcher)
+            warn("not using the singleton fetcher!")
+
         //
         // Why a wake-lock? In part, because the Google sample code does it this way, and in part
         // because it makes sense. We want this task to finish quickly. In practice, the "total
@@ -289,6 +291,7 @@ class CalendarFetcher(initialContext: Context, val contentUri: Uri, val authorit
 
     companion object {
         private var singletonFetcher: CalendarFetcher? = null
+        private var scanInProgress: Boolean = false
 
         fun requestRescan() {
             singletonFetcher?.rescan()
