@@ -14,12 +14,8 @@ object VersionWrapper: AnkoLogger {
     fun logVersion(activity: Context) {
         try {
             val pinfo = activity.packageManager.getPackageInfo(activity.packageName, 0)
-            val versionNumber = pinfo.versionCode
-            val versionName = pinfo.versionName
+            info { "Version: ${pinfo.versionName} (${pinfo.versionCode})" }
 
-            val versionString = "Version: $versionName ($versionNumber)"
-
-            info(versionString)
         } catch (e: PackageManager.NameNotFoundException) {
             error("failed to get package manager!", e)
         }
