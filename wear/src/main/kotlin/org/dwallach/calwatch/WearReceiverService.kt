@@ -36,12 +36,12 @@ class WearReceiverService : WearableListenerService(), AnkoLogger {
         // going kaboom all the way out to the Play Store for us. Let's see if it works.
         CrashReporter.getInstance(this).start()
 
-        // load any saved data while we're waiting on the phone to give us fresh data
-        if (ClockState.wireInitialized) {
-            verbose("clock state already initialized, no need to go to saved prefs")
-        } else {
-            loadPreferences()
-        }
+        // Perhaps we'd do better to load the preferences in CalWatchFaceService
+        // rather than here, but then we're dealing with the rest of the saving
+        // and loading of preferences in this file, so we'll be consistent. It
+        // just updates state in ClockState, which is global, so it does't especially
+        // matter when we do it.
+        loadPreferences()
 
         // We want this service to continue running until it is explicitly
         // stopped, so return sticky.

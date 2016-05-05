@@ -44,8 +44,6 @@ object ClockState : Observable(), AnkoLogger {
      * this getter might return false even when the data structure is loaded with events.
      * @return if a wire message has successfully initialized the clock state
      */
-    var wireInitialized = false
-        private set
     var calendarPermission = false
 
     /**
@@ -161,16 +159,16 @@ object ClockState : Observable(), AnkoLogger {
     }
 
     /**
-     * Marshals into a protobuf for transmission elsewhere. (Well, it used to be
+     * Marshals into a protobuf for transmission elsewhere. (Well, it *used* to be
      * a protobuf, in ancient days, when we had to ship the entire calendar from
-     * phone to watch, but now it's just a simple string. Keeping the "protobuf"
+     * phone to watch, but now it's just a simple string. We're keeping the "protobuf"
      * nomenclature around in case we decide to go back to that at some later point.)
      */
     fun getProtobuf() = WireUpdate(faceMode, showSeconds, showDayDate, showStepCounter).toByteArray()
 
     /**
      * Load the ClockState with a protobuf containing a complete update
-     * @param eventBytes a marshalled protobuf of type WireUpdate
+     * @param eventBytes a marshaled protobuf of type WireUpdate
      */
     fun setProtobuf(eventBytes: ByteArray) {
         info { "setting protobuf: ${eventBytes.size} bytes" }
@@ -178,7 +176,6 @@ object ClockState : Observable(), AnkoLogger {
 
         try {
             wireUpdate = WireUpdate.parseFrom(eventBytes)
-            wireInitialized = true
         } catch (ioe: IOException) {
             error("parse failure on protobuf", ioe)
             return
