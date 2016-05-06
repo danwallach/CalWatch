@@ -124,9 +124,10 @@ class ClockFace(val wear: Boolean = false) : Observer, AnkoLogger {
         val x = clockX(15.0, 0.2f).toInt()
         val y = (clockY(0.0, 0f) - height / 2).toInt()
 
-        lMissingCalendarDrawable.setBounds(x, y, width, height)
+        // setBounds arguments: (int left, int top, int right, int bottom)
+        lMissingCalendarDrawable.setBounds(x, y, x+width, y+height)
 
-        verbose { "missing calendar drawable size: (%d,%d), coordinates: (%.1f,%.1f),  (cy: %d, radius: %d)"
+        verbose { "missing calendar drawable size: (%d,%d), coordinates: (%d,%d),  (cy: %d, radius: %d)"
                 .format(width, height, x, y, cy, radius) }
     }
 

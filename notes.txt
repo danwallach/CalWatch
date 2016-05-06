@@ -21,6 +21,14 @@ Port to Android Wear
 -- How to get a dump from the watch into a file and see it while it's going
     adb -s localhost:4444 logcat -v time | & tee logdumps/whatever.txt
 
+-- How to enable verbose logging from the command-line
+
+    adb -d shell setprop log.tag.ClockFace VERBOSE
+    adb -d shell setprop log.tag.ClockState VERBOSE
+    adb -d shell setprop log.tag.MyViewAnim VERBOSE
+    adb -d shell setprop log.tag.PhoneActivity VERBOSE
+    adb -d shell setprop log.tag.CalendarFetcher VERBOSE
+    adb -d shell setprop log.tag.CalendarPermission VERBOSE
 
 Daydream?
     http://www.hascode.com/2013/01/using-the-android-daydream-api/
