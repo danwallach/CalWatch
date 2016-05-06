@@ -82,9 +82,7 @@ class MyViewAnim(context: Context, attrs: AttributeSet) : View(context, attrs), 
         }
 
         calendarFetcher?.kill() // kill if it's already there
-        calendarFetcher = CalendarFetcher(activity,
-                CalendarContract.Instances.CONTENT_URI,
-                CalendarContract.AUTHORITY)
+        calendarFetcher = CalendarFetcher(activity, CalendarContract.Instances.CONTENT_URI, CalendarContract.AUTHORITY)
     }
 
 
