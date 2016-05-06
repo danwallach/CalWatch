@@ -124,7 +124,7 @@ class CalWatchFaceService : CanvasWatchFaceService(), AnkoLogger {
                     .setShowSystemUiTime(false)
                     .setStatusBarGravity(Gravity.CENTER)
                     .setHotwordIndicatorGravity(Gravity.CENTER_HORIZONTAL) // not particularly precise, but seems reasonable
-                    .setViewProtectionMode(WatchFaceStyle.PROTECT_HOTWORD_INDICATOR or WatchFaceStyle.PROTECT_STATUS_BAR)
+                    .setViewProtectionMode(WatchFaceStyle.PROTECT_WHOLE_SCREEN)
 
                     // the features below were added in Wear 5.1 (maybe 5.0?) and seem worth tweaking
                     .setPeekOpacityMode(WatchFaceStyle.PEEK_OPACITY_MODE_TRANSLUCENT)

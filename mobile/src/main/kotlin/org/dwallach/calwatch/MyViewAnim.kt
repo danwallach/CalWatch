@@ -128,13 +128,13 @@ class MyViewAnim(context: Context, attrs: AttributeSet) : View(context, attrs), 
         verbose("resume")
 
         clockFace = ClockFace()
+        clockFace?.setSize(width, height)
 
         if(context.resources == null) {
             error("no resources? not good")
         } else {
             clockFace?.setMissingCalendarDrawable(context.getDrawable(R.drawable.ic_empty_calendar));
         }
-        clockFace?.setSize(width, height)
 
         ClockState.addObserver(this)
         initCalendarFetcher(requireNotNull(this.toActivity()) { "no activity available for resuming calendar?!" })

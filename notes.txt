@@ -30,16 +30,13 @@ Port to Android Wear
     adb -d shell setprop log.tag.CalendarFetcher VERBOSE
     adb -d shell setprop log.tag.CalendarPermission VERBOSE
 
+
 Daydream?
     http://www.hascode.com/2013/01/using-the-android-daydream-api/
     http://developer.android.com/reference/android/service/dreams/DreamService.html
     -- looks almost exactly the same as implementing an activity, or the watchface API
 
 Miscellaneous updates
-    TODO better no-calendar icon
-
-    Other stuff, while we're overhauling things:
-
     TODO Adopt Wear Compatibility Library
     https://github.com/googlesamples/android-WearCompanionLibrary
     https://github.com/googlesamples/android-WclDemoSample
@@ -56,12 +53,8 @@ Refactoring / reengineering
     (I tried putting it just in settings.gradle or the top-level build.gradle and this didn't work)
 
     TODO Rip out Observer/Listener logic (getting untenable) and redo with functional-reactive style
-    - Changes would be localized to CalendarFetcher, which is now working in a vaguely functional style,
-      in that the background task has no side-effects whatsoever, and the ultimate assignment that sticks
-      around happens on the UI thread. Another big change with release4 was that the CalendarFetcher doesn't
-      run at all when the watch is asleep. The background service is gone. This leads to the first-thing-
-      in-the-morning behavior where you pull the watch off the charger, you briefly see a partial calendar,
-      or none at all, but it's quickly replaced with your proper calendar.
+    - CalendarFetcher now works in a vaguely functional style, but we'd want to get rid of the observers
+      on ClockState
 
     TODO too much .toFloat() and .toDouble() in ClockFace -- cleanup?!
     - We could try to standardize everything with Float, but many of the trig function in Math require Double
@@ -72,9 +65,6 @@ Refactoring / reengineering
 Right-to-left support
     TODO detect when we're in RTL mode
     TODO swap day/date block from 9 o'clock to 3 o'clock or leave alone?
-
-Add internationalization strings
-    Currently have localized strings for Spanish, Dutch, Turkish, German; need more
 
 Deal with multiday events that aren't "all day" events
     TODO idea: resurrect all-day events by rendering them (and long events) as thin rings, perhaps separate from the main time wedges
@@ -87,7 +77,5 @@ TODO update the slides
 
 Overhaul preferences pane on mobile
     Broad goal: zero text, all icons, no more need for i18n
+      -- basically done!
     TODO verify appearance on multiple phones / watches
-
-TODO replace BIND_LISTENER with new alternative structure
-    http://android-developers.blogspot.com/2016/04/deprecation-of-bindlistener.html
