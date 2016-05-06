@@ -41,7 +41,7 @@ class CalendarFetcher(initialContext: Context, val contentUri: Uri, val authorit
     // task to do all the dirty work and eventually update ClockState
     private val contextRef = WeakReference(initialContext)
     private var isReceiverRegistered: Boolean = false
-    private val counter = fetcherNumber++
+    private val instanceID = instanceCounter++
 
     private val broadcastReceiver = object : BroadcastReceiver() {
         override fun onReceive(context: Context, intent: Intent) {
@@ -63,7 +63,7 @@ class CalendarFetcher(initialContext: Context, val contentUri: Uri, val authorit
     }
 
     init {
-        verbose { "here begins CalendarFetcher #$counter" }
+        verbose { "here begins CalendarFetcher #$instanceID" }
         singletonFetcher?.kill() // clear out the old singleton fetcher, if it's there
         singletonFetcher = this // and now the newbie becomes the singleton
 
@@ -90,7 +90,7 @@ class CalendarFetcher(initialContext: Context, val contentUri: Uri, val authorit
      * cannot be used any more. Make a new one if you want to restart things later.
      */
     fun kill() {
-        verbose { "killing CalendarFetcher #$counter" }
+        verbose { "killing CalendarFetcher #$instanceID" }
 
         val context: Context? = getContext()
 
@@ -116,13 +116,13 @@ class CalendarFetcher(initialContext: Context, val contentUri: Uri, val authorit
             // this means that we're reusing a `killed` CalendarFetcher, which is bad, because it
             // won't be listening to the broadcasts any more. Log so we can discover it, but otherwise
             // continue running. At least it will update once an hour...
-            error { "no receiver registered! (CalendarFetcher #$counter)" }
+            error { "no receiver registered! (CalendarFetcher #$instanceID)" }
         }
 
         if(scanInProgress) {
             return
         } else {
-            verbose { "rescan starting asynchronously (CalendarFetcher #$counter)" }
+            verbose { "rescan starting asynchronously (CalendarFetcher #$instanceID)" }
             scanInProgress = true
             runAsyncLoader()
         }
@@ -140,7 +140,7 @@ class CalendarFetcher(initialContext: Context, val contentUri: Uri, val authorit
         var cr = emptyList<WireEvent>()
 
         // first, get the list of calendars
-        verbose { "loadContent: starting to load content (CalendarFetcher #$counter)" }
+        verbose { "loadContent: starting to load content (CalendarFetcher #$instanceID)" }
 
         TimeWrapper.update()
         val time = TimeWrapper.gmtTime
@@ -233,7 +233,7 @@ class CalendarFetcher(initialContext: Context, val contentUri: Uri, val authorit
         // nothing to do without a context, so give up, surrender!
 
         if(this != singletonFetcher)
-            warn { "not using the singleton fetcher! (CalendarFetcher me #$counter), singleton #${singletonFetcher?.counter})" }
+            warn { "not using the singleton fetcher! (CalendarFetcher me #$instanceID), singleton #${singletonFetcher?.instanceID})" }
 
         //
         // Why a wake-lock? In part, because the Google sample code does it this way, and in part
@@ -244,7 +244,7 @@ class CalendarFetcher(initialContext: Context, val contentUri: Uri, val authorit
         val wakeLock = context.powerManager.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, "CalWatchWakeLock")
         wakeLock.acquire()
 
-        verbose { "async: wake lock acquired (CalendarFetcher #$counter)" }
+        verbose { "async: wake lock acquired (CalendarFetcher #$instanceID)" }
 
         //
         // This is the Anko library being awesome. Rather than using AsyncTask, which can get
@@ -291,13 +291,13 @@ class CalendarFetcher(initialContext: Context, val contentUri: Uri, val authorit
                 val (wireEventList, e) = result
 
                 if (e != null) {
-                    verbose( { "uiThread: failure in async computation (CalendarFetcher #$counter)" }, e)
+                    verbose( { "uiThread: failure in async computation (CalendarFetcher #$instanceID)" }, e)
                 } else {
                     ClockState.setWireEventList(wireEventList)
                     ClockState.pingObservers()
                 }
 
-                verbose { "uiThread: complete (CalendarFetcher #$counter)" }
+                verbose { "uiThread: complete (CalendarFetcher #$instanceID)" }
             }
         }
     }
@@ -305,7 +305,7 @@ class CalendarFetcher(initialContext: Context, val contentUri: Uri, val authorit
     companion object {
         private var singletonFetcher: CalendarFetcher? = null
         private var scanInProgress: Boolean = false
-        private var fetcherNumber: Int = 0 // ID numbers for tracking / better logging
+        private var instanceCounter: Int = 0 // ID numbers for tracking / better logging
 
         fun requestRescan() {
             singletonFetcher?.rescan()
