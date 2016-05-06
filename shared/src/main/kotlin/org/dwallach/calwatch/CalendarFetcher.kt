@@ -30,6 +30,11 @@ import org.jetbrains.anko.*
  * to specify what database Uri we're querying and what "authority" we're using to set up the IntentFilter.
  * These are different on wear vs. mobile, so are specified in those subdirectories. Everything else
  * is portable.
+ *
+ * Internally, this class registers a BroadcastReceiver such that it will detect and deal with updates
+ * to the calendar itself. External users can call CalendarFetcher.requestRescan(), which will cause
+ * the most recently created CalendarFetcher to do the work. This is something worth doing at the top
+ * of the hour, when it's time to update the calendar.
  */
 class CalendarFetcher(initialContext: Context, val contentUri: Uri, val authority: String): AnkoLogger {
     // this will fire when it's time to (re)load the calendar, launching an asynchronous
@@ -72,7 +77,7 @@ class CalendarFetcher(initialContext: Context, val contentUri: Uri, val authorit
         rescan()
     }
 
-    fun getContext(): Context? {
+    private fun getContext(): Context? {
         return contextRef.get()
     }
 
@@ -103,7 +108,7 @@ class CalendarFetcher(initialContext: Context, val contentUri: Uri, val authorit
      * This will start asynchronously loading the calendar. The results will eventually arrive
      * in ClockState, and any Observers of ClockState will be notified.
      */
-    fun rescan() {
+    private fun rescan() {
         if(!isReceiverRegistered) {
             // this means that we're reusing a `killed` CalendarFetcher, which is bad, because it
             // won't be listening to the broadcasts any more. Log so we can discover it, but otherwise
@@ -174,7 +179,7 @@ class CalendarFetcher(initialContext: Context, val contentUri: Uri, val authorit
 
                         val startTime = iCursor.getLong(i++)
                         val endTime = iCursor.getLong(i++)
-                        i++ // long eventID = iCursor.getLong(i++)
+                        i++ // val eventID = iCursor.getLong(i++)
                         val displayColor = iCursor.getInt(i++)
                         val allDay = iCursor.getInt(i++) != 0
                         val visible = iCursor.getInt(i) != 0
@@ -218,9 +223,9 @@ class CalendarFetcher(initialContext: Context, val contentUri: Uri, val authorit
     }
 
     /**
-     * Asynchronous loader handling via Kotlin's Anko.
+     * Starts an asynchronous task to load the calendar
      */
-    fun runAsyncLoader() {
+    private fun runAsyncLoader() {
         val context = getContext() ?: return
         // nothing to do without a context, so give up, surrender!
 
