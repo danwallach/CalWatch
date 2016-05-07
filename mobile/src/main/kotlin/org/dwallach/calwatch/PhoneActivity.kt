@@ -208,8 +208,7 @@ class PhoneActivity : Activity(), Observer, AnkoLogger {
         fun watchfaceClick(view: MyViewAnim) {
             verbose("Watchface clicked!")
 
-            // can't do anything without an activity
-            val activity = view.toActivity() ?: return
+            val activity = view.toActivity()
 
             if (!ClockState.calendarPermission) {
                 verbose("Requesting permissions")
@@ -225,7 +224,7 @@ class PhoneActivity : Activity(), Observer, AnkoLogger {
 /**
  * Helper extension function to convert from a view to its surrounding activity, if that activity exists.
  */
-fun View.toActivity(): Activity? {
+fun View.toActivity(): Activity {
     // See: http://stackoverflow.com/questions/8276634/android-get-hosting-activity-from-a-view
     var context = this.context
     while(context is ContextWrapper) {
@@ -235,5 +234,5 @@ fun View.toActivity(): Activity? {
             context = context.baseContext
         }
     }
-    return null
+    throw NoSuchFieldError("no activity found for this view") // shouldn't ever happen
 }

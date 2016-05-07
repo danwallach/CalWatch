@@ -125,7 +125,8 @@ class MyViewAnim(context: Context, attrs: AttributeSet) : View(context, attrs), 
     fun resume(context: Context) {
         verbose("resume")
 
-        clockFace = ClockFace()
+        clockFace?.kill() // kill the old clockface, if it's still around for some reason
+        clockFace = ClockFace() // because we're making a new one, presumably with our new context
         clockFace?.setSize(width, height)
 
         if(context.resources == null) {
@@ -135,7 +136,7 @@ class MyViewAnim(context: Context, attrs: AttributeSet) : View(context, attrs), 
         }
 
         ClockState.addObserver(this)
-        initCalendarFetcher(requireNotNull(this.toActivity()) { "no activity available for resuming calendar?!" })
+        initCalendarFetcher(toActivity())
     }
 
 
