@@ -52,7 +52,7 @@
             android:id="@+id/secondsImageButton"
             android:layout_row="2"
             android:layout_column="1"
-            android:src="@drawable/ic_second_hand_button"
+            android:src="@drawable/second_hand_anim"
             android:cropToPadding="true"
             android:clickable="true"
             style="?android:attr/borderlessButtonStyle"

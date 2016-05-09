@@ -1,0 +1,5 @@
+<animation-list xmlns:android="http://schemas.android.com/apk/res/android"
+    android:oneshot="false">
+    <item android:drawable="@drawable/ic_second_hand_button_with" android:duration="700" />
+    <item android:drawable="@drawable/ic_second_hand_button_without" android:duration="300" />
+</animation-list>

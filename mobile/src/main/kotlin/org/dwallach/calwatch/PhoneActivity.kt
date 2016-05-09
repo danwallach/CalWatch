@@ -8,6 +8,7 @@ package org.dwallach.calwatch
 
 import android.app.Activity
 import android.content.ContextWrapper
+import android.graphics.drawable.AnimationDrawable
 import android.os.Bundle
 import android.view.Menu
 import android.view.MenuItem
@@ -95,6 +96,22 @@ class PhoneActivity : Activity(), Observer, AnkoLogger {
         verbose("Create!")
 
         setContentView(R.layout.activity_phone_intl)
+    }
+
+    override fun onWindowFocusChanged(hasFocus: Boolean) {
+        //
+        // We're using an animated button for letting the user select the seconds hand; the blurb
+        // below is necessary to start the animation.
+        //
+        // http://developer.android.com/guide/topics/graphics/drawable-animation.html
+        //
+
+        val secondsAnim = secondsImageButton.drawable as AnimationDrawable
+
+        if(hasFocus)
+            secondsAnim.start()
+        else
+            secondsAnim.stop()
     }
 
     override fun onPause() {
