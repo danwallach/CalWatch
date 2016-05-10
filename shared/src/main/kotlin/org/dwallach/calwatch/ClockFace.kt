@@ -22,6 +22,8 @@ import java.util.Observer
  * (on the phone) and CalWatchFaceService (on the watch).
  */
 class ClockFace(val wear: Boolean = false) : Observer, AnkoLogger {
+    // an instance of the ClockFace class is created anew alongside the rest of the UI; this number
+    // helps us keep track of which instance is which
     private val instanceID: Int
 
     // initial values to get the ball rolling (avoids a div by zero problem in computeFlatBottomCorners)
@@ -793,7 +795,10 @@ class ClockFace(val wear: Boolean = false) : Observer, AnkoLogger {
 
         if(!showStepCounter || BatteryWrapper.batteryPct < Constants.PowerCriticalLevel) return
 
-        val stepCount = FitnessWrapper.getStepCount()
+        val rawStepCount = FitnessWrapper.getStepCount()
+
+        // special case if we're on mobile (setup UI), so the user sees *something*
+        val stepCount = if(rawStepCount == 0 && !wear) 6000 else rawStepCount
 
         if(stepCount == 0) return // nothing to do!
 
@@ -806,8 +811,6 @@ class ClockFace(val wear: Boolean = false) : Observer, AnkoLogger {
         // around represents 12000 steps. That's an arbitrary constant, but it fits nicely with
         // the 12 hours in the dial. We'll also be showing a digit (code below) which will help
         // train the user.
-
-        // TODO find easy API access to user's daily step count goal, modify arc to go from 0% to 100%
 
         val paint = PaintCan[drawStyle, PaintCan.colorStepCount]
         val outlinePaint = PaintCan[drawStyle, PaintCan.colorStepCount]
@@ -824,8 +827,13 @@ class ClockFace(val wear: Boolean = false) : Observer, AnkoLogger {
 
         if(drawStyle == PaintCan.styleNormal && BatteryWrapper.batteryPct > Constants.PowerWarningLevel) {
             // we're rounding to the nearest thousand, i.e.,  1499 -> 1, 1500 -> 2, etc.
-            val stepCountDigits = Math.floor((stepCount + 500.0) / 1000.0)
-            val stepCountString = if(stepCountDigits > 99) "++" else stepCountDigits.toInt().toString()
+            val stepCountString =
+                    if (rawStepCount == 0 && !wear)
+                        "?"
+                    else {
+                        val stepCountDigits = Math.floor((stepCount + 500.0) / 1000.0)
+                        if (stepCountDigits > 99) "++" else stepCountDigits.toInt().toString()
+                    }
 
             val textPaint = PaintCan[drawStyle, PaintCan.colorStepCountText]
 
