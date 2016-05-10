@@ -44,43 +44,41 @@ import org.jetbrains.anko.*
  *           </receiver>
  */
 class XWatchfaceReceiver : BroadcastReceiver(), AnkoLogger {
-
     override fun onReceive(context: Context, intent: Intent) {
-        val action = intent.action
-        verbose { "got intent: $action" }
+        verbose { "got intent: ${intent.action}" }
 
-        if (action == stopwatchUpdateIntent) {
-            // TODO: fix the IntelliJ warnings about version numbers below (which seem fine in the docs)
-            with (intent.extras) {
-                stopwatchStart = getLong(prefStopwatchStartTime)
-                stopwatchBase = getLong(prefStopwatchBaseTime)
-                stopwatchIsRunning = getBoolean(prefStopwatchRunning)
-                stopwatchIsReset = getBoolean(prefStopwatchReset)
-                stopwatchUpdateTimestamp = getLong(prefStopwatchUpdateTimestamp)
+        with (intent.extras) {
+            when (intent.action) {
+                stopwatchUpdateIntent -> {
+                    // TODO: fix the IntelliJ warnings about version numbers below (which seem fine in the docs)
+                    stopwatchStart = getLong(prefStopwatchStartTime)
+                    stopwatchBase = getLong(prefStopwatchBaseTime)
+                    stopwatchIsRunning = getBoolean(prefStopwatchRunning)
+                    stopwatchIsReset = getBoolean(prefStopwatchReset)
+                    stopwatchUpdateTimestamp = getLong(prefStopwatchUpdateTimestamp)
+
+                    verbose { "stopwatch update:: start($stopwatchStart), base($stopwatchBase), isRunning($stopwatchIsRunning), isReset($stopwatchIsReset), updateTimestamp($stopwatchUpdateTimestamp)" }
+                }
+
+                timerUpdateIntent -> {
+                    timerStart = getLong(prefTimerStartTime)
+                    timerPauseElapsed = getLong(prefTimerPauseElapsed)
+                    timerDuration = getLong(prefTimerDuration)
+                    timerIsRunning = getBoolean(prefTimerRunning)
+                    timerIsReset = getBoolean(prefTimerReset)
+                    timerUpdateTimestamp = getLong(prefTimerUpdateTimestamp)
+
+                    // sanity checking: if we're coming back from whatever and a formerly running
+                    // timer has gotten way past the deadline, then just reset things.
+                    val currentTime = System.currentTimeMillis()
+                    if (timerIsRunning && timerStart + timerDuration < currentTime) {
+                        timerIsReset = true
+                        timerIsRunning = false
+                    }
+
+                    verbose { "timer update:: start($timerStart), elapsed($timerPauseElapsed), duration($timerDuration), isRunning($timerIsRunning), isReset($timerIsReset), updateTimestamp($timerUpdateTimestamp)" }
+                }
             }
-
-            verbose { "stopwatch update:: start($stopwatchStart), base($stopwatchBase), isRunning($stopwatchIsRunning), isReset($stopwatchIsReset), updateTimestamp($stopwatchUpdateTimestamp)" }
-
-        } else if (action == timerUpdateIntent) {
-            with (intent.extras) {
-                timerStart = getLong(prefTimerStartTime)
-                timerPauseElapsed = getLong(prefTimerPauseElapsed)
-                timerDuration = getLong(prefTimerDuration)
-                timerIsRunning = getBoolean(prefTimerRunning)
-                timerIsReset = getBoolean(prefTimerReset)
-                timerUpdateTimestamp = getLong(prefTimerUpdateTimestamp)
-            }
-
-            // sanity checking: if we're coming back from whatever and a formerly running
-            // timer has gotten way past the deadline, then just reset things.
-            val currentTime = System.currentTimeMillis()
-            if (timerIsRunning && timerStart + timerDuration < currentTime) {
-                timerIsReset = true
-                timerIsRunning = false
-            }
-
-
-            verbose { "timer update:: start($timerStart), elapsed($timerPauseElapsed), duration($timerDuration), isRunning($timerIsRunning), isReset($timerIsReset), updateTimestamp($timerUpdateTimestamp)" }
         }
     }
 
