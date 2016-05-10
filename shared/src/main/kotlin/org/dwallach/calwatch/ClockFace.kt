@@ -829,7 +829,7 @@ class ClockFace(val wear: Boolean = false) : Observer, AnkoLogger {
             // we're rounding to the nearest thousand, i.e.,  1499 -> 1, 1500 -> 2, etc.
             val stepCountString =
                     if (rawStepCount == 0 && !wear)
-                        "?"
+                        "?" // make it clear that we're faking it on mobile
                     else {
                         val stepCountDigits = Math.floor((stepCount + 500.0) / 1000.0)
                         if (stepCountDigits > 99) "++" else stepCountDigits.toInt().toString()
