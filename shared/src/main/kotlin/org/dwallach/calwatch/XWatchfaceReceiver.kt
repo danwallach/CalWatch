@@ -80,7 +80,7 @@ class XWatchfaceReceiver : BroadcastReceiver(), AnkoLogger {
             }
 
 
-            verbose { "timer udpate:: start($timerStart), elapsed($timerPauseElapsed), duration($timerDuration), isRunning($timerIsRunning), isReset($timerIsReset), updateTimestamp($timerUpdateTimestamp)" }
+            verbose { "timer update:: start($timerStart), elapsed($timerPauseElapsed), duration($timerDuration), isRunning($timerIsRunning), isReset($timerIsReset), updateTimestamp($timerUpdateTimestamp)" }
         }
     }
 
