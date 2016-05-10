@@ -161,12 +161,12 @@ class ClockFace(val wear: Boolean = false) : Observer, AnkoLogger {
         // that will let the watchface tick marks show through, except they're opaque in low-bit mode
         drawTimers(canvas)
 
-        // Next up, the step counter and battery meter
-        // (but disable the battery meter when we're in ambientMode with burnInProtection)
+        // Next up, the step counter and battery meter.
+        //
+        // We disable the battery meter when we're in ambientMode with burnInProtection.
+        // The step counter knows how to draw itself differently in different modes.
         if (drawStyle != PaintCan.styleAntiBurnIn) drawBattery(canvas)
-
-        // We're only going to draw this on the watch, not on the phone, because phones suck.
-        if (wear) drawStepCount(canvas)
+        drawStepCount(canvas)
 
         // Kludge for peek card until we come up with something better:
         // if there's a peek card *and* we're in ambient mode, *then* draw
