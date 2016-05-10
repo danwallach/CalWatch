@@ -78,7 +78,7 @@ object CalendarPermission: AnkoLogger {
             // but we really want to remember how many requests we've made, so we're dumping this out immediately. This
             // number will be restored on startup by the usual preferences restoration in the two classes above. (Hopefuly.)
             //
-            activity.getSharedPreferences("org.dwallach.calwatch.prefs", Activity.MODE_PRIVATE).edit().apply {
+            with (activity.getSharedPreferences("org.dwallach.calwatch.prefs", Activity.MODE_PRIVATE).edit()) {
                 putInt("permissionRequests", numRequests)
 
                 if (!commit())

@@ -35,7 +35,7 @@ object BatteryWrapper: AnkoLogger {
 
         try {
             val ifilter = IntentFilter(Intent.ACTION_BATTERY_CHANGED)
-            context.registerReceiver(null, ifilter).apply {
+            with (context.registerReceiver(null, ifilter)) {
                 // Are we charging / charged?
                 isCharging = when(getIntExtra(BatteryManager.EXTRA_STATUS, -1)) {
                     BatteryManager.BATTERY_STATUS_CHARGING, BatteryManager.BATTERY_STATUS_FULL -> true

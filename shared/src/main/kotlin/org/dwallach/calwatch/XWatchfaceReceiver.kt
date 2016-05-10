@@ -51,8 +51,7 @@ class XWatchfaceReceiver : BroadcastReceiver(), AnkoLogger {
 
         if (action == stopwatchUpdateIntent) {
             // TODO: fix the IntelliJ warnings about version numbers below (which seem fine in the docs)
-            // TODO: use the sugared getter form (i.e., foo = intent.extras["foo"])
-            intent.extras.apply {
+            with (intent.extras) {
                 stopwatchStart = getLong(prefStopwatchStartTime)
                 stopwatchBase = getLong(prefStopwatchBaseTime)
                 stopwatchIsRunning = getBoolean(prefStopwatchRunning)
@@ -63,7 +62,7 @@ class XWatchfaceReceiver : BroadcastReceiver(), AnkoLogger {
             verbose { "stopwatch update:: start($stopwatchStart), base($stopwatchBase), isRunning($stopwatchIsRunning), isReset($stopwatchIsReset), updateTimestamp($stopwatchUpdateTimestamp)" }
 
         } else if (action == timerUpdateIntent) {
-            intent.extras.apply {
+            with (intent.extras) {
                 timerStart = getLong(prefTimerStartTime)
                 timerPauseElapsed = getLong(prefTimerPauseElapsed)
                 timerDuration = getLong(prefTimerDuration)

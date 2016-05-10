@@ -163,7 +163,7 @@ class CalWatchFaceService : CanvasWatchFaceService(), AnkoLogger {
                 return
             }
 
-            properties.apply {
+            with (properties) {
                 val lowBitAmbientMode = getBoolean(WatchFaceService.PROPERTY_LOW_BIT_AMBIENT, false)
                 val burnInProtection = getBoolean(WatchFaceService.PROPERTY_BURN_IN_PROTECTION, false)
                 clockFace.setAmbientLowBit(lowBitAmbientMode)

@@ -90,7 +90,7 @@ dependencies {
     compile 'com.google.android.gms:play-services-wearable:8.4.0'
     compile "com.android.support:support-v4:23.3.0"
     compile "org.jetbrains.kotlin:kotlin-stdlib:$kotlin_version"
-    compile "org.jetbrains.anko:anko-sdk15:0.8.2rc3"
+    compile "org.jetbrains.anko:anko-sdk15:0.8.3"
 }
 
 repositories {

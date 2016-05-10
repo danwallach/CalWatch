@@ -13,7 +13,7 @@ object PreferencesHelper: AnkoLogger {
     fun savePreferences(context: Context) {
         verbose("savePreferences")
 
-        context.getSharedPreferences(Constants.PrefsKey, Context.MODE_PRIVATE).edit().apply {
+        with (context.getSharedPreferences(Constants.PrefsKey, Context.MODE_PRIVATE).edit()) {
             putInt("faceMode", ClockState.faceMode)
             putBoolean("showSeconds", ClockState.showSeconds)
             putBoolean("showDayDate", ClockState.showDayDate)
@@ -34,21 +34,21 @@ object PreferencesHelper: AnkoLogger {
     fun loadPreferences(context: Context) : Int {
         verbose("loadPreferences")
 
-        var preferencesVersion: Int  = 0
-
-        context.getSharedPreferences(Constants.PrefsKey, Context.MODE_PRIVATE).apply {
+        val preferencesVersion = with (context.getSharedPreferences(Constants.PrefsKey, Context.MODE_PRIVATE)) {
             val faceMode = getInt("faceMode", Constants.DefaultWatchFace)
             val showSeconds = getBoolean("showSeconds", Constants.DefaultShowSeconds)
             val showDayDate = getBoolean("showDayDate", Constants.DefaultShowDayDate)
             val showStepCounter = getBoolean("showStepCounter", Constants.DefaultShowStepCounter)
-            preferencesVersion = getInt("preferencesVersion", 0)
+            val version = getInt("preferencesVersion", 0)
 
-            verbose { "faceMode: $faceMode, showSeconds: $showSeconds, showDayDate: $showDayDate, showStepCounter: $showStepCounter" }
+            verbose { "faceMode: $faceMode, showSeconds: $showSeconds, showDayDate: $showDayDate, showStepCounter: $showStepCounter, preferencesVersion: $version" }
 
             ClockState.faceMode = faceMode
             ClockState.showSeconds = showSeconds
             ClockState.showDayDate = showDayDate
             ClockState.showStepCounter = showStepCounter
+
+            version
         }
 
         ClockState.pingObservers() // we only need to do this once, versus multiple times when done internally
