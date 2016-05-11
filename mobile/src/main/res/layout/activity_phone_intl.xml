@@ -5,7 +5,8 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     tools:context=".PhoneActivity"
-    tools:ignore="MergeRootFrame">
+    tools:ignore="MergeRootFrame"
+    android:gravity="center_vertical">
 
     <org.dwallach.calwatch.MyViewAnim
         android:layout_width="match_parent"
@@ -13,139 +14,60 @@
         android:layout_weight="3"
         android:id="@+id/surfaceView" />
 
-    <GridLayout
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        style="@style/AppTheme"
-        android:layout_gravity="center_horizontal"
-        android:layout_margin="5dp"
-        android:clickable="true"
-        android:orientation="vertical">
 
-
-        <View
-            android:layout_width="160dp"
-            android:layout_height="1dp"
-            android:layout_row="1"
-            android:layout_column="1"
-            android:layout_columnSpan="3"
-            android:background="#404040"
-            android:layout_marginTop="10dp"
-            android:layout_marginBottom="10dp"
-            android:layout_gravity="center_horizontal" />
-
-        <ImageButton
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:id="@+id/stepCountImageButton"
-            android:layout_row="2"
-            android:layout_column="3"
-            android:src="@drawable/ic_step_counter"
-            android:cropToPadding="true"
-            android:clickable="true"
-            style="?android:attr/borderlessButtonStyle"
-            android:padding="0dp" />
-
+            <LinearLayout
+                android:orientation="horizontal"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center_horizontal">
+            <ImageButton
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:id="@+id/liteButton"
+                android:src="@drawable/ic_lite_button"
+                android:clickable="true"/>
+            <ImageButton
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:id="@+id/numbersButton"
+                android:clickable="true"
+                android:src="@drawable/ic_numbers_button" />
+            <ImageButton
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:id="@+id/toolButton"
+                android:src="@drawable/ic_tool_button"
+                android:clickable="true"/>
+            </LinearLayout>
+            <LinearLayout
+                android:orientation="horizontal"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center_horizontal">
         <ImageButton
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:id="@+id/secondsImageButton"
-            android:layout_row="2"
-            android:layout_column="1"
             android:src="@drawable/second_hand_anim"
             android:cropToPadding="true"
-            android:clickable="true"
-            style="?android:attr/borderlessButtonStyle"
-            android:padding="0dp" />
-
+            android:clickable="true" />
         <Button
             style="?android:attr/buttonStyleSmall"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
+            android:layout_width="104dp"
+            android:layout_height="match_parent"
             android:text="Mon DD\nDayofweek"
             android:textAllCaps="false"
             android:id="@+id/dayDateButton"
-            android:layout_row="2"
-            android:layout_column="2"
             android:enabled="true"
             android:clickable="true"
-            android:layout_gravity="center"
-            android:gravity="left" />
-
-        <RadioGroup
-            android:layout_width="fill_parent"
-            android:layout_height="wrap_content"
-            android:layout_row="0"
-            android:layout_column="1"
-            android:orientation="horizontal"
-            android:layout_columnSpan="3"
-            android:measureWithLargestChild="false">
-
-            <RadioButton
+            android:gravity="left|fill_vertical" />
+        <ImageButton
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:id="@+id/liteButton"
-                android:layout_gravity="left"
-                android:checked="false"
-                android:enabled="true"
-                android:clickable="true"
-                android:button="@drawable/radio_lite_selector" />
-
-            <RadioButton
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:id="@+id/numbersButton"
-                android:layout_gravity="center"
-                android:checked="false"
-                android:enabled="true"
-                android:clickable="true"
-                android:layout_marginLeft="20dp"
-                android:layout_marginRight="20dp"
-                android:button="@drawable/radio_numbers_selector" />
-
-            <RadioButton
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:id="@+id/toolButton"
-                android:layout_gravity="right"
-                android:checked="true"
-                android:clickable="true"
-                android:enabled="true"
-                android:button="@drawable/radio_tool_selector" />
-        </RadioGroup>
-
-        <Switch
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:id="@+id/showStepCounter"
-            android:checked="true"
-            android:clickable="true"
-            android:layout_column="3"
-            android:layout_row="2"
-            android:layout_gravity="top|right" />
-
-        <Switch
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:id="@+id/showSeconds"
-            android:layout_row="2"
-            android:layout_column="1"
-            android:checked="true"
-            android:clickable="true"
-            android:enabled="true"
-            android:layout_gravity="top|left|right" />
-
-        <Switch
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:id="@+id/showDayDate"
-            android:layout_row="2"
-            android:layout_column="2"
-            android:checked="true"
-            android:clickable="true"
-            android:enabled="true"
-            android:layout_gravity="top|center_horizontal" />
-
-    </GridLayout>
+                android:id="@+id/stepCountImageButton"
+                android:src="@drawable/ic_walking"
+                android:cropToPadding="true"
+                android:clickable="true" />
+            </LinearLayout>
 
 </LinearLayout>

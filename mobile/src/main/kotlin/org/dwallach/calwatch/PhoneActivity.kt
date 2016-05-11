@@ -23,6 +23,9 @@ import org.jetbrains.anko.*
 class PhoneActivity : Activity(), Observer, AnkoLogger {
     private var disableUICallbacks = false
 
+    private val selectedBackgroundColor = 0x424242
+    private val unselectedBackgroundColor = 0x686868
+
     //
     // this will be called, eventually, from whatever feature is responsible for
     // restoring saved user preferences
@@ -37,21 +40,32 @@ class PhoneActivity : Activity(), Observer, AnkoLogger {
         disableUICallbacks = true
 
         try {
-            when (mode) {
-                ClockState.FACE_TOOL -> toolButton.performClick()
-                ClockState.FACE_NUMBERS -> numbersButton.performClick()
-                ClockState.FACE_LITE -> liteButton.performClick()
-                else -> verbose("bogus face mode: $mode")
-            }
-
-            showSeconds.isChecked = showSecondsP
-            showDayDate.isChecked = showDayDateP
-            showStepCounter.isChecked = showStepCounterP
-
             // while we're here, we'll also put the proper day/date into the relevant button
             val dayOfWeek = TimeWrapper.localDayOfWeek()
             val monthDay = TimeWrapper.localMonthDay()
             dayDateButton.text = "$monthDay\n$dayOfWeek"
+
+            when(ClockState.faceMode) {
+                ClockState.FACE_NUMBERS -> {
+                    toolButton.backgroundColor = unselectedBackgroundColor
+                    numbersButton.backgroundColor = selectedBackgroundColor
+                    liteButton.backgroundColor = unselectedBackgroundColor
+                }
+                ClockState.FACE_LITE -> {
+                    toolButton.backgroundColor = unselectedBackgroundColor
+                    numbersButton.backgroundColor = unselectedBackgroundColor
+                    liteButton.backgroundColor = selectedBackgroundColor
+                }
+                ClockState.FACE_TOOL -> {
+                    toolButton.backgroundColor = selectedBackgroundColor
+                    numbersButton.backgroundColor = unselectedBackgroundColor
+                    liteButton.backgroundColor = unselectedBackgroundColor
+                }
+            }
+
+            secondsImageButton.backgroundColor = if (ClockState.showSeconds) selectedBackgroundColor else unselectedBackgroundColor
+            dayDateButton.backgroundColor = if (ClockState.showDayDate) selectedBackgroundColor else unselectedBackgroundColor
+            stepCountImageButton.backgroundColor = if (ClockState.showStepCounter) selectedBackgroundColor else unselectedBackgroundColor
 
         } catch (throwable: Throwable) {
             // probably a called-from-wrong-thread-exception, we'll just ignore it
@@ -62,34 +76,8 @@ class PhoneActivity : Activity(), Observer, AnkoLogger {
     }
 
     private fun uiButtonsReady() :Boolean =
-            toolButton != null && numbersButton != null && liteButton != null && showSeconds != null && showDayDate != null
+            toolButton != null && numbersButton != null && liteButton != null
 
-    private fun getFaceModeFromUI() {
-        verbose("getFaceModeFromUI")
-
-        if (!uiButtonsReady()) {
-            verbose("trying to get UI mode without buttons active yet")
-            return
-        }
-
-        ClockState.faceMode = when {
-            toolButton.isChecked -> ClockState.FACE_TOOL
-            numbersButton.isChecked -> ClockState.FACE_NUMBERS
-            liteButton.isChecked -> ClockState.FACE_LITE
-            else -> {
-                error("no buttons are selected? weird.")
-                ClockState.faceMode // we'll go with whatever's already there, nothing better to choose
-            }
-        }
-
-        ClockState.showSeconds = showSeconds.isChecked
-        ClockState.showDayDate = showDayDate.isChecked
-        ClockState.showStepCounter = showStepCounter.isChecked
-
-        verbose { "new state -- showSeconds(${ClockState.showSeconds}), showDayDate(${ClockState.showDayDate}), showStepCounter(${ClockState.showStepCounter})" }
-
-        ClockState.pingObservers() // we only need to do this once
-    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -123,46 +111,52 @@ class PhoneActivity : Activity(), Observer, AnkoLogger {
         ClockState.deleteObserver(this)
     }
 
+    private fun postClick() {
+        ClockState.pingObservers() // side-effect: will call back to PhoneActivity to update the UI and save state
+        surfaceView.invalidate() // redraws the clock
+    }
+
     override fun onStart() {
         super.onStart()
         verbose("Start!")
 
-        val myListener = View.OnClickListener {
-            verbose("click!")
-            if (!disableUICallbacks)
-                getFaceModeFromUI()
-            surfaceView.invalidate()
+        liteButton.setOnClickListener {
+            verbose("lite-mode selected")
+            ClockState.faceMode = ClockState.FACE_LITE
+            postClick()
         }
 
-        liteButton.setOnClickListener(myListener)
-        toolButton.setOnClickListener(myListener)
-        numbersButton.setOnClickListener(myListener)
-        showSeconds.setOnClickListener(myListener)
-        showDayDate.setOnClickListener(myListener)
-        showStepCounter.setOnClickListener(myListener)
+        toolButton.setOnClickListener {
+            verbose("tool-mode selected")
+            ClockState.faceMode = ClockState.FACE_TOOL
+            postClick()
+        }
+
+        numbersButton.setOnClickListener {
+            verbose("numbers-mode selected")
+            ClockState.faceMode = ClockState.FACE_NUMBERS
+            postClick()
+        }
 
         // Each of these handles the big image buttons that we want to also cause
         // their switches to toggle.
 
         secondsImageButton.setOnClickListener {
             verbose("seconds toggle")
-            showSeconds.toggle()
-            getFaceModeFromUI()
-            surfaceView.invalidate()
+            ClockState.showSeconds = !ClockState.showSeconds
+            postClick()
         }
 
         dayDateButton.setOnClickListener {
             verbose("dayDate toggle")
-            showDayDate.toggle()
-            getFaceModeFromUI()
-            surfaceView.invalidate()
+            ClockState.showDayDate = !ClockState.showDayDate
+            postClick()
         }
 
         stepCountImageButton.setOnClickListener {
             verbose("stepCount toggle")
-            showStepCounter.toggle()
-            getFaceModeFromUI()
-            surfaceView.invalidate()
+            ClockState.showStepCounter = !ClockState.showStepCounter
+            postClick()
         }
 
         WatchCalendarService.kickStart(this)  // bring it up, if it's not already up

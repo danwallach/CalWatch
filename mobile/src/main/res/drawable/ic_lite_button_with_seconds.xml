@@ -4,4 +4,5 @@
     <path android:fillColor="#FFFFFF" android:pathData="M211,267h65v6h-65z"/>
     <path android:fillColor="#FFFFFF" android:pathData="M238.65,132.31l3,5.2l-56.29,32.51l-3,-5.2z"/>
     <path android:fillColor="#FFFFFF" android:pathData="M140.15,32.35l5.2,3l-32.5,56.29l-5.2,-3z"/>
+    <path android:fillColor="#FF0000" android:pathData="M34.63,245.94l-3.62,-4.78l167.93,-127.3l3.62,4.78z"/>
 </vector>
