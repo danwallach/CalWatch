@@ -76,6 +76,15 @@ TODO update the slides
 
 
 Overhaul preferences pane on mobile
-    Broad goal: zero text, all icons, no more need for i18n
-      -- basically done!
     TODO verify appearance on multiple phones / watches
+
+    Material Design all the things!
+        TODO make images transparent so we can change imagebutton backgrounds at runtime (tinting!)
+        TODO replace overlaid switches with checkbox icon, tinting, etc.
+          see Photos app multi-select for inspiration
+        TODO replace overlaid radio icons -- use tinting / z-value / ?
+          see Photos app multi-select for inspiration
+        Layout
+          TODO consistent spacing between watchface preview and buttons
+          TODO consistent spacing between buttons
+          TODO day/date textbox should be same size as other buttons
