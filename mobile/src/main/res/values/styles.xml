@@ -5,6 +5,7 @@
 <color name="calWatchDark">#1a2373</color> <!-- indigo 900 -->
 <color name="calWatchLessDark">#283593</color> <!-- indigo 800 -->
 <color name="calWatchAccent">#558b2f</color> <!-- light green 800 -->
+<color name="calWatchOverlay">#30ffff</color> <!-- multiply by this to dim the blues, leave the rest alone -->
 
 <!-- Base application theme. -->
 <style name="Theme.MyTheme" parent="Theme.AppCompat">

@@ -9,11 +9,15 @@ package org.dwallach.calwatch
 import android.app.Activity
 import android.content.ContextWrapper
 import android.graphics.Color
+import android.graphics.ColorFilter
+import android.graphics.PorterDuff
+import android.graphics.PorterDuffColorFilter
 import android.graphics.drawable.AnimationDrawable
 import android.os.Bundle
 import android.view.Menu
 import android.view.MenuItem
 import android.view.View
+import android.widget.ImageButton
 
 import java.util.Observable
 import java.util.Observer
@@ -24,8 +28,9 @@ import org.jetbrains.anko.*
 class PhoneActivity : Activity(), Observer, AnkoLogger {
     private var disableUICallbacks = false
 
-    private val selectedBackgroundColor = Color.GREEN // 0x424242
-    private val unselectedBackgroundColor = Color.BLUE //0x686868
+    private val selectedFilter = PorterDuffColorFilter(R.color.calWatchOverlay, PorterDuff.Mode.MULTIPLY)
+
+    private fun select(button: ImageButton, selected: Boolean) = button.setColorFilter(if(selected)selectedFilter else null)
 
     /**
      * This method loads the UI state with the given mode (ClockState.FACE_NUMBERS, etc.) and other
@@ -46,29 +51,27 @@ class PhoneActivity : Activity(), Observer, AnkoLogger {
             val monthDay = TimeWrapper.localMonthDay()
             dayDateButton.text = "$monthDay\n$dayOfWeek"
 
-            /*
             when(ClockState.faceMode) {
                 ClockState.FACE_NUMBERS -> {
-                    toolCard.setCardBackgroundColor(unselectedBackgroundColor)
-                    numbersCard.setCardBackgroundColor(selectedBackgroundColor)
-                    liteCard.setCardBackgroundColor(unselectedBackgroundColor)
+                    select(toolButton, false)
+                    select(numbersButton, true)
+                    select(liteButton, false)
                 }
                 ClockState.FACE_LITE -> {
-                    toolCard.setCardBackgroundColor(unselectedBackgroundColor)
-                    numbersCard.setCardBackgroundColor(unselectedBackgroundColor)
-                    liteCard.setCardBackgroundColor(selectedBackgroundColor)
+                    select(toolButton, false)
+                    select(numbersButton, false)
+                    select(liteButton, true)
                 }
                 ClockState.FACE_TOOL -> {
-                    toolCard.setCardBackgroundColor(selectedBackgroundColor)
-                    numbersCard.setCardBackgroundColor(unselectedBackgroundColor)
-                    liteCard.setCardBackgroundColor(unselectedBackgroundColor)
+                    select(toolButton, true)
+                    select(numbersButton, false)
+                    select(liteButton, false)
                 }
             }
 
-            secondsImageCard.setCardBackgroundColor(if (ClockState.showSeconds) selectedBackgroundColor else unselectedBackgroundColor)
-            dayDateCard.setCardBackgroundColor(if (ClockState.showDayDate) selectedBackgroundColor else unselectedBackgroundColor)
-            stepCountImageCard.setCardBackgroundColor(if (ClockState.showStepCounter) selectedBackgroundColor else unselectedBackgroundColor)
-            */
+            select(secondsImageButton, ClockState.showSeconds)
+            select(stepCountImageButton, ClockState.showStepCounter)
+//            dayDateCard.setCardBackgroundColor(if (ClockState.showDayDate) selectedBackgroundColor else unselectedBackgroundColor)
 
         } catch (throwable: Throwable) {
             // probably a called-from-wrong-thread-exception, we'll just ignore it
