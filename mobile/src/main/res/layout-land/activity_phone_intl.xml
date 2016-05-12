@@ -24,7 +24,8 @@
         android:id="@+id/liteCard"
         android:layout_toLeftOf="@+id/secondsImageCard"
         android:layout_width="wrap_content"
-        android:layout_height="wrap_content">
+        android:layout_height="wrap_content"
+        android:layout_above="@+id/numbersCard">
 
         <ImageButton
             android:layout_width="wrap_content"
@@ -41,8 +42,7 @@
         android:layout_toRightOf="@+id/surfaceView"
         android:layout_centerVertical="true"
         android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_below="@+id/liteCard">
+        android:layout_height="wrap_content">
 
         <ImageButton
             android:layout_width="wrap_content"

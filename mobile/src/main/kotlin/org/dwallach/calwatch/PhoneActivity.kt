@@ -46,6 +46,7 @@ class PhoneActivity : Activity(), Observer, AnkoLogger {
             val monthDay = TimeWrapper.localMonthDay()
             dayDateButton.text = "$monthDay\n$dayOfWeek"
 
+            /*
             when(ClockState.faceMode) {
                 ClockState.FACE_NUMBERS -> {
                     toolCard.setCardBackgroundColor(unselectedBackgroundColor)
@@ -67,6 +68,7 @@ class PhoneActivity : Activity(), Observer, AnkoLogger {
             secondsImageCard.setCardBackgroundColor(if (ClockState.showSeconds) selectedBackgroundColor else unselectedBackgroundColor)
             dayDateCard.setCardBackgroundColor(if (ClockState.showDayDate) selectedBackgroundColor else unselectedBackgroundColor)
             stepCountImageCard.setCardBackgroundColor(if (ClockState.showStepCounter) selectedBackgroundColor else unselectedBackgroundColor)
+            */
 
         } catch (throwable: Throwable) {
             // probably a called-from-wrong-thread-exception, we'll just ignore it
