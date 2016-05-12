@@ -27,7 +27,7 @@
         app:cardBackgroundColor="@color/calWatchLessDark"
         app:cardPreventCornerOverlap="false"
         app:cardCornerRadius="0dp"
-        android:layout_marginLeft="@dimen/double_margin"
+        android:layout_marginLeft="@dimen/top_margin"
         android:layout_marginRight="@dimen/standard_margin"
         android:layout_toLeftOf="@+id/secondsImageCard"
         android:layout_width="wrap_content"
@@ -50,7 +50,7 @@
         app:cardBackgroundColor="@color/calWatchLessDark"
         app:cardPreventCornerOverlap="false"
         app:cardCornerRadius="0dp"
-        android:layout_marginLeft="@dimen/double_margin"
+        android:layout_marginLeft="@dimen/top_margin"
         android:layout_marginRight="@dimen/standard_margin"
         android:layout_toRightOf="@+id/surfaceView"
         android:layout_centerVertical="true"
@@ -72,7 +72,7 @@
         app:cardBackgroundColor="@color/calWatchLessDark"
         app:cardPreventCornerOverlap="false"
         app:cardCornerRadius="0dp"
-        android:layout_marginLeft="@dimen/double_margin"
+        android:layout_marginLeft="@dimen/top_margin"
         android:layout_marginRight="@dimen/standard_margin"
         android:layout_toRightOf="@+id/surfaceView"
         android:layout_width="wrap_content"
@@ -96,7 +96,7 @@
         app:cardPreventCornerOverlap="false"
         app:cardCornerRadius="0dp"
         android:layout_marginLeft="@dimen/standard_margin"
-        android:layout_marginRight="@dimen/double_margin"
+        android:layout_marginRight="@dimen/top_margin"
         android:layout_above="@+id/dayDateCard"
         android:layout_alignParentRight="true"
         android:layout_width="wrap_content"
@@ -124,7 +124,7 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_alignLeft="@+id/secondsImageCard"
-        android:layout_marginRight="@dimen/double_margin">
+        android:layout_marginRight="@dimen/top_margin">
 
         <Button
             style="?android:attr/buttonStyleSmall"
@@ -146,7 +146,7 @@
         app:cardPreventCornerOverlap="false"
         app:cardCornerRadius="0dp"
         android:layout_marginLeft="@dimen/standard_margin"
-        android:layout_marginRight="@dimen/double_margin"
+        android:layout_marginRight="@dimen/top_margin"
         android:layout_below="@+id/dayDateCard"
         android:layout_alignParentRight="true"
         android:layout_width="wrap_content"
