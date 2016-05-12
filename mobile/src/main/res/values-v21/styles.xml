@@ -1,6 +1,0 @@
-<!-- details: https://developer.android.com/training/material/theme.html -->
-<resources>
-    <!-- inherit from the material theme -->
-    <style name="AppTheme" parent="android:Theme.Material">
-    </style>
-</resources>
