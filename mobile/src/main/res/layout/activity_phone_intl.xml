@@ -81,30 +81,30 @@
     </android.support.v7.widget.CardView>
 
     <android.support.v7.widget.CardView
-	android:id="@+id/dayDateCard"
-	android:layout_alignBaseline="@+id/secondsImageCard"
-	android:layout_alignParentBottom="true"
-	android:layout_centerHorizontal="true" 
+        android:id="@+id/dayDateCard"
+        android:layout_alignBaseline="@+id/secondsImageCard"
+        android:layout_alignParentBottom="true"
+        android:layout_centerHorizontal="true"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content">
 
-	<Button
-	    style="?android:attr/buttonStyleSmall"
-	    android:layout_width="104dp"
-	    android:layout_height="92dp"
-	    android:text="Mon DD\nDayofweek"
-	    android:textAllCaps="false"
-	    android:id="@+id/dayDateButton"
-	    android:enabled="true"
-	    android:clickable="true"
-	    android:gravity="left|fill_vertical" />
+        <Button
+            style="?android:attr/buttonStyleSmall"
+            android:layout_width="104dp"
+            android:layout_height="92dp"
+            android:text="Mon DD\nDayofweek"
+            android:textAllCaps="false"
+            android:id="@+id/dayDateButton"
+            android:enabled="true"
+            android:clickable="true"
+            android:gravity="left|fill_vertical" />
     </android.support.v7.widget.CardView>
 
     <android.support.v7.widget.CardView
-	android:id="@+id/stepCountImageCard"
-	android:layout_toRightOf="@+id/dayDateButton"
-	android:layout_alignBaseline="@+id/secondsImageButton"
-	android:layout_alignParentBottom="true" 
+        android:id="@+id/stepCountImageCard"
+        android:layout_toRightOf="@+id/dayDateCard"
+        android:layout_alignBaseline="@+id/secondsImageCard"
+        android:layout_alignParentBottom="true"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content">
 

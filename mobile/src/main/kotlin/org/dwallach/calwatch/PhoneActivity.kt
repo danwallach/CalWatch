@@ -47,25 +47,25 @@ class PhoneActivity : Activity(), Observer, AnkoLogger {
 
             when(ClockState.faceMode) {
                 ClockState.FACE_NUMBERS -> {
-                    toolButton.backgroundColor = unselectedBackgroundColor
-                    numbersButton.backgroundColor = selectedBackgroundColor
-                    liteButton.backgroundColor = unselectedBackgroundColor
+                    toolCard.backgroundColor = unselectedBackgroundColor
+                    numbersCard.backgroundColor = selectedBackgroundColor
+                    liteCard.backgroundColor = unselectedBackgroundColor
                 }
                 ClockState.FACE_LITE -> {
-                    toolButton.backgroundColor = unselectedBackgroundColor
-                    numbersButton.backgroundColor = unselectedBackgroundColor
-                    liteButton.backgroundColor = selectedBackgroundColor
+                    toolCard.backgroundColor = unselectedBackgroundColor
+                    numbersCard.backgroundColor = unselectedBackgroundColor
+                    liteCard.backgroundColor = selectedBackgroundColor
                 }
                 ClockState.FACE_TOOL -> {
-                    toolButton.backgroundColor = selectedBackgroundColor
-                    numbersButton.backgroundColor = unselectedBackgroundColor
-                    liteButton.backgroundColor = unselectedBackgroundColor
+                    toolCard.backgroundColor = selectedBackgroundColor
+                    numbersCard.backgroundColor = unselectedBackgroundColor
+                    liteCard.backgroundColor = unselectedBackgroundColor
                 }
             }
 
-            secondsImageButton.backgroundColor = if (ClockState.showSeconds) selectedBackgroundColor else unselectedBackgroundColor
-            dayDateButton.backgroundColor = if (ClockState.showDayDate) selectedBackgroundColor else unselectedBackgroundColor
-            stepCountImageButton.backgroundColor = if (ClockState.showStepCounter) selectedBackgroundColor else unselectedBackgroundColor
+            secondsImageCard.backgroundColor = if (ClockState.showSeconds) selectedBackgroundColor else unselectedBackgroundColor
+            dayDateCard.backgroundColor = if (ClockState.showDayDate) selectedBackgroundColor else unselectedBackgroundColor
+            stepCountImageCard.backgroundColor = if (ClockState.showStepCounter) selectedBackgroundColor else unselectedBackgroundColor
 
         } catch (throwable: Throwable) {
             // probably a called-from-wrong-thread-exception, we'll just ignore it
