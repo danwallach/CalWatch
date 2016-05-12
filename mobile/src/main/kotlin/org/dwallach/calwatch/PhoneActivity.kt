@@ -8,6 +8,7 @@ package org.dwallach.calwatch
 
 import android.app.Activity
 import android.content.ContextWrapper
+import android.graphics.Color
 import android.graphics.drawable.AnimationDrawable
 import android.os.Bundle
 import android.view.Menu
@@ -23,8 +24,8 @@ import org.jetbrains.anko.*
 class PhoneActivity : Activity(), Observer, AnkoLogger {
     private var disableUICallbacks = false
 
-    private val selectedBackgroundColor = 0x424242
-    private val unselectedBackgroundColor = 0x686868
+    private val selectedBackgroundColor = Color.GREEN // 0x424242
+    private val unselectedBackgroundColor = Color.BLUE //0x686868
 
     /**
      * This method loads the UI state with the given mode (ClockState.FACE_NUMBERS, etc.) and other
@@ -47,25 +48,25 @@ class PhoneActivity : Activity(), Observer, AnkoLogger {
 
             when(ClockState.faceMode) {
                 ClockState.FACE_NUMBERS -> {
-                    toolCard.backgroundColor = unselectedBackgroundColor
-                    numbersCard.backgroundColor = selectedBackgroundColor
-                    liteCard.backgroundColor = unselectedBackgroundColor
+                    toolCard.setCardBackgroundColor(unselectedBackgroundColor)
+                    numbersCard.setCardBackgroundColor(selectedBackgroundColor)
+                    liteCard.setCardBackgroundColor(unselectedBackgroundColor)
                 }
                 ClockState.FACE_LITE -> {
-                    toolCard.backgroundColor = unselectedBackgroundColor
-                    numbersCard.backgroundColor = unselectedBackgroundColor
-                    liteCard.backgroundColor = selectedBackgroundColor
+                    toolCard.setCardBackgroundColor(unselectedBackgroundColor)
+                    numbersCard.setCardBackgroundColor(unselectedBackgroundColor)
+                    liteCard.setCardBackgroundColor(selectedBackgroundColor)
                 }
                 ClockState.FACE_TOOL -> {
-                    toolCard.backgroundColor = selectedBackgroundColor
-                    numbersCard.backgroundColor = unselectedBackgroundColor
-                    liteCard.backgroundColor = unselectedBackgroundColor
+                    toolCard.setCardBackgroundColor(selectedBackgroundColor)
+                    numbersCard.setCardBackgroundColor(unselectedBackgroundColor)
+                    liteCard.setCardBackgroundColor(unselectedBackgroundColor)
                 }
             }
 
-            secondsImageCard.backgroundColor = if (ClockState.showSeconds) selectedBackgroundColor else unselectedBackgroundColor
-            dayDateCard.backgroundColor = if (ClockState.showDayDate) selectedBackgroundColor else unselectedBackgroundColor
-            stepCountImageCard.backgroundColor = if (ClockState.showStepCounter) selectedBackgroundColor else unselectedBackgroundColor
+            secondsImageCard.setCardBackgroundColor(if (ClockState.showSeconds) selectedBackgroundColor else unselectedBackgroundColor)
+            dayDateCard.setCardBackgroundColor(if (ClockState.showDayDate) selectedBackgroundColor else unselectedBackgroundColor)
+            stepCountImageCard.setCardBackgroundColor(if (ClockState.showStepCounter) selectedBackgroundColor else unselectedBackgroundColor)
 
         } catch (throwable: Throwable) {
             // probably a called-from-wrong-thread-exception, we'll just ignore it

@@ -91,7 +91,7 @@
         <Button
             style="?android:attr/buttonStyleSmall"
             android:layout_width="104dp"
-            android:layout_height="92dp"
+            android:layout_height="93dp"
             android:text="Mon DD\nDayofweek"
             android:textAllCaps="false"
             android:id="@+id/dayDateButton"
