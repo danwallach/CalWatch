@@ -1,21 +1,24 @@
-<resources xmlns:tools="http://schemas.android.com/tools">
+<resources>
+    <!-- Base application theme. -->
+    <style name="Theme.MyTheme" parent="Theme.AppCompat">
+        <!-- <item name="android:actionBarStyle" tools:targetApi="lollipop">@android:style/Widget.Material.ActionBar.Solid</item> -->
+        <item name="colorPrimary">@color/calWatchPrimary</item>
+        <item name="colorPrimaryDark">@color/calWatchLessDark</item>
+        <item name="colorAccent">@color/calWatchAccent</item>
 
-<!-- indigo colors with green accent  -->
-<color name="calWatchPrimary">#3f51b5</color> <!-- indigo 400 -->
-<color name="calWatchDark">#1a2373</color> <!-- indigo 900 -->
-<color name="calWatchLessDark">#283593</color> <!-- indigo 800 -->
-<color name="calWatchAccent">#558b2f</color> <!-- light green 800 -->
-<color name="calWatchOverlay">#30ffff</color> <!-- multiply by this to dim the blues, leave the rest alone -->
+        <item name="android:windowBackground">@color/calWatchLessDark</item>
+        <item name="android:colorBackground">@color/calWatchLessDark</item>
+    </style>
 
-<!-- Base application theme. -->
-<style name="Theme.MyTheme" parent="Theme.AppCompat">
-    <!-- <item name="android:actionBarStyle" tools:targetApi="lollipop">@android:style/Widget.Material.ActionBar.Solid</item> -->
-    <item name="colorPrimary">@color/calWatchPrimary</item>
-    <item name="colorPrimaryDark">@color/calWatchDark</item>
-    <item name="colorAccent">@color/calWatchAccent</item>
-
-    <item name="android:windowBackground">@color/calWatchDark</item>
-    <item name="android:colorBackground">@color/calWatchDark</item>
-</style>
-
+    <style name="MyCardView" parent="CardView">
+        <!-- Card background color -->
+        <item name="cardBackgroundColor">@color/calWatchDark</item>
+        <!-- Ripple for API 21 of android, and regular selector on older -->
+        <item name="android:foreground">?android:selectableItemBackground</item>
+        <!-- Resting Elevation from Material guidelines -->
+        <item name="cardElevation">2dp</item>
+        <!-- Add corner Radius -->
+        <item name="cardCornerRadius">0dp</item>
+        <item name="android:clickable">true</item>
+    </style>
 </resources>

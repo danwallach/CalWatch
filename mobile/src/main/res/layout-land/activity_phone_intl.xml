@@ -35,10 +35,7 @@
         android:layout_above="@+id/numbersCard">
 
         <ImageButton
-            android:paddingLeft="@dimen/double_padding"
-            android:paddingTop="@dimen/standard_padding"
-            android:paddingRight="@dimen/standard_padding"
-            android:paddingBottom="@dimen/standard_padding"
+            android:padding="@dimen/standard_padding"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:background="?attr/selectableItemBackground"
@@ -61,10 +58,7 @@
         android:layout_height="wrap_content">
 
         <ImageButton
-            android:paddingLeft="@dimen/double_padding"
-            android:paddingTop="@dimen/standard_padding"
-            android:paddingRight="@dimen/standard_padding"
-            android:paddingBottom="@dimen/standard_padding"
+            android:padding="@dimen/standard_padding"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:background="?attr/selectableItemBackground"
@@ -86,10 +80,7 @@
         android:layout_below="@id/numbersCard">
 
         <ImageButton
-            android:paddingLeft="@dimen/double_padding"
-            android:paddingTop="@dimen/standard_padding"
-            android:paddingRight="@dimen/standard_padding"
-            android:paddingBottom="@dimen/standard_padding"
+            android:padding="@dimen/standard_padding"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_below="@+id/numbersCard"
@@ -112,10 +103,7 @@
         android:layout_height="wrap_content">
 
         <ImageButton
-            android:paddingLeft="@dimen/standard_padding"
-            android:paddingTop="@dimen/standard_padding"
-            android:paddingRight="@dimen/double_padding"
-            android:paddingBottom="@dimen/standard_padding"
+            android:padding="@dimen/standard_padding"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:background="?attr/selectableItemBackground"
@@ -140,10 +128,7 @@
 
         <Button
             style="?android:attr/buttonStyleSmall"
-            android:paddingLeft="@dimen/standard_padding"
-            android:paddingTop="@dimen/standard_padding"
-            android:paddingRight="@dimen/double_padding"
-            android:paddingBottom="@dimen/standard_padding"
+            android:padding="@dimen/standard_padding"
             android:layout_height="match_parent"
             android:layout_width="match_parent"
             android:background="?attr/selectableItemBackground"
@@ -168,10 +153,7 @@
         android:layout_height="wrap_content">
 
         <ImageButton
-            android:paddingLeft="@dimen/standard_padding"
-            android:paddingTop="@dimen/standard_padding"
-            android:paddingRight="@dimen/double_padding"
-            android:paddingBottom="@dimen/standard_padding"
+            android:padding="@dimen/standard_padding"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:background="?attr/selectableItemBackground"
