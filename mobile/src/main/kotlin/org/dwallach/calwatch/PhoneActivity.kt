@@ -112,7 +112,7 @@ class PhoneActivity : Activity(), Observer, AnkoLogger {
         ClockState.deleteObserver(this)
     }
 
-    private fun listenHelper(clickMe: View?, logMe: String, callMe: () -> Unit) {
+    private fun setupClickListener(clickMe: View?, logMe: String, callMe: () -> Unit) {
         clickMe?.setOnClickListener {
             verbose(logMe)
             callMe()
@@ -129,30 +129,30 @@ class PhoneActivity : Activity(), Observer, AnkoLogger {
         if(!uiButtonsReady()) {
             error("UI buttons aren't ready yet")
         } else {
-            listenHelper(liteButton, "lite-mode selected") {
+            setupClickListener(liteButton, "lite-mode selected") {
                 ClockState.faceMode = ClockState.FACE_LITE
             }
 
-            listenHelper(toolButton, "tool-mode selected") {
+            setupClickListener(toolButton, "tool-mode selected") {
                 ClockState.faceMode = ClockState.FACE_TOOL
             }
 
-            listenHelper(numbersButton, "numbers-mode selected") {
+            setupClickListener(numbersButton, "numbers-mode selected") {
                 ClockState.faceMode = ClockState.FACE_NUMBERS
             }
 
             // Each of these handles the big image buttons that we want to also cause
             // their switches to toggle.
 
-            listenHelper(secondsImageButton, "seconds toggle") {
+            setupClickListener(secondsImageButton, "seconds toggle") {
                 ClockState.showSeconds = !ClockState.showSeconds
             }
 
-            listenHelper(dayDateButton, "dayDate toggle") {
+            setupClickListener(dayDateButton, "dayDate toggle") {
                 ClockState.showDayDate = !ClockState.showDayDate
             }
 
-            listenHelper(stepCountImageButton, "stepCount toggle") {
+            setupClickListener(stepCountImageButton, "stepCount toggle") {
                 ClockState.showStepCounter = !ClockState.showStepCounter
             }
         }
