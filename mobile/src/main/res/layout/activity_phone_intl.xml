@@ -26,14 +26,20 @@
         app:cardBackgroundColor="@color/calWatchLessDark"
         app:cardPreventCornerOverlap="false"
         app:cardCornerRadius="0dp"
+        android:layout_marginTop="@dimen/double_margin"
+        android:layout_marginBottom="@dimen/standard_margin"
         android:layout_above="@+id/secondsImageCard"
         android:layout_toLeftOf="@+id/numbersCard"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content">
         <ImageButton
+            android:paddingTop="@dimen/double_padding"
+            android:paddingLeft="@dimen/standard_padding"
+            android:paddingRight="@dimen/standard_padding"
+            android:paddingBottom="@dimen/standard_padding"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:background="@drawable/leftround"
+            android:background="?attr/selectableItemBackground"
             android:id="@+id/liteButton"
             android:src="@drawable/ic_lite_button"
             android:clickable="true"/>
@@ -44,16 +50,23 @@
         app:cardBackgroundColor="@color/calWatchLessDark"
         app:cardPreventCornerOverlap="false"
         app:cardCornerRadius="0dp"
+        android:layout_marginTop="@dimen/double_margin"
+        android:layout_marginBottom="@dimen/standard_margin"
         android:layout_below="@+id/surfaceView"
         android:layout_centerHorizontal="true"
         android:layout_alignParentLeft="false"
         android:layout_alignBaseline="@+id/liteCard"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content">
+
         <ImageButton
+            android:paddingTop="@dimen/double_padding"
+            android:paddingLeft="@dimen/standard_padding"
+            android:paddingRight="@dimen/standard_padding"
+            android:paddingBottom="@dimen/standard_padding"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:background="@drawable/square"
+            android:background="?attr/selectableItemBackground"
             android:id="@+id/numbersButton"
             android:clickable="true"
             android:src="@drawable/ic_numbers_button" />
@@ -64,6 +77,9 @@
         app:cardBackgroundColor="@color/calWatchLessDark"
         app:cardPreventCornerOverlap="false"
         app:cardCornerRadius="0dp"
+        android:layout_marginTop="@dimen/double_margin"
+        android:layout_marginRight="@dimen/standard_margin"
+        android:layout_marginBottom="@dimen/standard_margin"
         android:layout_toRightOf="@+id/numbersCard"
         android:layout_alignBaseline="@+id/liteCard"
         android:layout_below="@+id/surfaceView"
@@ -71,9 +87,13 @@
         android:layout_height="wrap_content">
 
         <ImageButton
+            android:paddingTop="@dimen/double_padding"
+            android:paddingLeft="@dimen/standard_padding"
+            android:paddingRight="@dimen/standard_padding"
+            android:paddingBottom="@dimen/standard_padding"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:background="@drawable/rightround"
+            android:background="?attr/selectableItemBackground"
             android:id="@+id/toolButton"
             android:src="@drawable/ic_tool_button"
             android:clickable="true" />
@@ -84,15 +104,22 @@
         app:cardBackgroundColor="@color/calWatchLessDark"
         app:cardPreventCornerOverlap="false"
         app:cardCornerRadius="0dp"
+        android:layout_marginTop="@dimen/standard_margin"
+        android:layout_marginBottom="@dimen/double_margin"
         android:layout_alignParentBottom="true"
-        android:layout_toLeftOf="@+id/dayDateCard"
         android:layout_width="wrap_content"
-        android:layout_height="wrap_content">
+        android:layout_height="wrap_content"
+        android:layout_alignLeft="@+id/liteCard"
+        android:layout_alignRight="@+id/liteCard">
 
         <ImageButton
+            android:paddingTop="@dimen/standard_padding"
+            android:paddingLeft="@dimen/standard_padding"
+            android:paddingRight="@dimen/standard_padding"
+            android:paddingBottom="@dimen/double_padding"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:background="@drawable/leftround"
+            android:background="?attr/selectableItemBackground"
             android:id="@+id/secondsImageButton"
             android:src="@drawable/second_hand_anim"
             android:clickable="true" />
@@ -103,6 +130,7 @@
         app:cardBackgroundColor="@color/calWatchLessDark"
         app:cardPreventCornerOverlap="false"
         app:cardCornerRadius="0dp"
+        android:layout_marginBottom="@dimen/double_margin"
         android:layout_alignTop="@id/secondsImageCard"
         android:layout_alignParentBottom="true"
         android:layout_centerHorizontal="true"
@@ -113,9 +141,13 @@
 
         <Button
             style="?android:attr/buttonStyleSmall"
-            android:layout_width="104dp"
+            android:paddingTop="@dimen/standard_padding"
+            android:paddingLeft="@dimen/standard_padding"
+            android:paddingRight="@dimen/standard_padding"
+            android:paddingBottom="@dimen/double_padding"
+            android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:background="@drawable/square"
+            android:background="?attr/selectableItemBackground"
             android:text="Mon DD\nDayofweek"
             android:textAllCaps="false"
             android:id="@+id/dayDateButton"
@@ -129,16 +161,23 @@
         app:cardBackgroundColor="@color/calWatchLessDark"
         app:cardPreventCornerOverlap="false"
         app:cardCornerRadius="0dp"
-        android:layout_toRightOf="@+id/dayDateCard"
+        android:layout_marginTop="@dimen/standard_margin"
+        android:layout_marginBottom="@dimen/double_margin"
         android:layout_alignBaseline="@+id/secondsImageCard"
         android:layout_alignParentBottom="true"
         android:layout_width="wrap_content"
-        android:layout_height="wrap_content">
+        android:layout_height="wrap_content"
+        android:layout_alignLeft="@+id/toolCard"
+        android:layout_alignRight="@+id/toolCard">
 
 	<ImageButton
+        android:paddingTop="@dimen/standard_padding"
+        android:paddingLeft="@dimen/standard_padding"
+        android:paddingRight="@dimen/standard_padding"
+        android:paddingBottom="@dimen/double_padding"
 	    android:layout_width="wrap_content"
 	    android:layout_height="wrap_content"
-        android:background="@drawable/rightround"
+        android:background="?attr/selectableItemBackground"
 	    android:id="@+id/stepCountImageButton"
 	    android:src="@drawable/ic_walking"
 	    android:clickable="true" />
