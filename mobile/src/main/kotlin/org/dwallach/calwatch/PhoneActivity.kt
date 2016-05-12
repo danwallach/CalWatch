@@ -26,10 +26,10 @@ class PhoneActivity : Activity(), Observer, AnkoLogger {
     private val selectedBackgroundColor = 0x424242
     private val unselectedBackgroundColor = 0x686868
 
-    //
-    // this will be called, eventually, from whatever feature is responsible for
-    // restoring saved user preferences
-    //
+    /**
+     * This method loads the UI state with the given mode (ClockState.FACE_NUMBERS, etc.) and other
+     * features. Call this whenever necessary.
+     */
     private fun setFaceModeUI(mode: Int, showSecondsP: Boolean, showDayDateP: Boolean, showStepCounterP: Boolean) {
         verbose { "setFaceModeUI: mode($mode), showSecondsP($showSecondsP), showDayDateP($showDayDateP), showStepCounterP($showStepCounterP)" }
         if (!uiButtonsReady()) {
@@ -111,52 +111,49 @@ class PhoneActivity : Activity(), Observer, AnkoLogger {
         ClockState.deleteObserver(this)
     }
 
-    private fun postClick() {
-        ClockState.pingObservers() // side-effect: will call back to PhoneActivity to update the UI and save state
-        surfaceView.invalidate() // redraws the clock
+    private fun listenHelper(clickMe: View?, logMe: String, callMe: () -> Unit) {
+        clickMe?.setOnClickListener {
+            verbose(logMe)
+            callMe()
+
+            ClockState.pingObservers() // side-effect: will call back to PhoneActivity to update the UI and save state
+            surfaceView.invalidate() // redraws the clock
+        }
     }
 
     override fun onStart() {
         super.onStart()
         verbose("Start!")
 
-        liteButton.setOnClickListener {
-            verbose("lite-mode selected")
-            ClockState.faceMode = ClockState.FACE_LITE
-            postClick()
-        }
+        if(!uiButtonsReady()) {
+            error("UI buttons aren't ready yet")
+        } else {
+            listenHelper(liteButton, "lite-mode selected") {
+                ClockState.faceMode = ClockState.FACE_LITE
+            }
 
-        toolButton.setOnClickListener {
-            verbose("tool-mode selected")
-            ClockState.faceMode = ClockState.FACE_TOOL
-            postClick()
-        }
+            listenHelper(toolButton, "tool-mode selected") {
+                ClockState.faceMode = ClockState.FACE_TOOL
+            }
 
-        numbersButton.setOnClickListener {
-            verbose("numbers-mode selected")
-            ClockState.faceMode = ClockState.FACE_NUMBERS
-            postClick()
-        }
+            listenHelper(numbersButton, "numbers-mode selected") {
+                ClockState.faceMode = ClockState.FACE_NUMBERS
+            }
 
-        // Each of these handles the big image buttons that we want to also cause
-        // their switches to toggle.
+            // Each of these handles the big image buttons that we want to also cause
+            // their switches to toggle.
 
-        secondsImageButton.setOnClickListener {
-            verbose("seconds toggle")
-            ClockState.showSeconds = !ClockState.showSeconds
-            postClick()
-        }
+            listenHelper(secondsImageButton, "seconds toggle") {
+                ClockState.showSeconds = !ClockState.showSeconds
+            }
 
-        dayDateButton.setOnClickListener {
-            verbose("dayDate toggle")
-            ClockState.showDayDate = !ClockState.showDayDate
-            postClick()
-        }
+            listenHelper(dayDateButton, "dayDate toggle") {
+                ClockState.showDayDate = !ClockState.showDayDate
+            }
 
-        stepCountImageButton.setOnClickListener {
-            verbose("stepCount toggle")
-            ClockState.showStepCounter = !ClockState.showStepCounter
-            postClick()
+            listenHelper(stepCountImageButton, "stepCount toggle") {
+                ClockState.showStepCounter = !ClockState.showStepCounter
+            }
         }
 
         WatchCalendarService.kickStart(this)  // bring it up, if it's not already up
@@ -195,7 +192,6 @@ class PhoneActivity : Activity(), Observer, AnkoLogger {
     }
 
     override fun update(observable: Observable?, data: Any?) {
-        // somebody changed *something* in the ClockState, causing us to get called
         verbose("Noticed a change in the clock state; saving preferences")
 
         setFaceModeUI(ClockState.faceMode, ClockState.showSeconds, ClockState.showDayDate, ClockState.showStepCounter)

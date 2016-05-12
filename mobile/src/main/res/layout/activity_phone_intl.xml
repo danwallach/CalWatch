@@ -1,73 +1,118 @@
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
-    android:orientation="vertical"
     android:id="@+id/container"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     tools:context=".PhoneActivity"
     tools:ignore="MergeRootFrame"
-    android:gravity="center_vertical">
+    android:gravity="center">
 
     <org.dwallach.calwatch.MyViewAnim
+        android:layout_alignParentTop="true"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_weight="3"
-        android:id="@+id/surfaceView" />
+        android:id="@+id/surfaceView"
+        android:layout_centerHorizontal="true"
+        android:clickable="true"
+        android:layout_alignParentLeft="true"
+        android:layout_alignParentRight="true"
+        android:layout_above="@+id/liteCard" />
 
 
-            <LinearLayout
-                android:orientation="horizontal"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_gravity="center_horizontal">
-            <ImageButton
-                android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                android:id="@+id/liteButton"
-                android:src="@drawable/ic_lite_button"
-                android:clickable="true"/>
-            <ImageButton
-                android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                android:id="@+id/numbersButton"
-                android:clickable="true"
-                android:src="@drawable/ic_numbers_button" />
-            <ImageButton
-                android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                android:id="@+id/toolButton"
-                android:src="@drawable/ic_tool_button"
-                android:clickable="true"/>
-            </LinearLayout>
-            <LinearLayout
-                android:orientation="horizontal"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_gravity="center_horizontal">
+    <android.support.v7.widget.CardView
+        android:id="@+id/liteCard"
+        android:layout_above="@+id/secondsImageCard"
+        android:layout_toLeftOf="@+id/numbersCard"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content">
+        <ImageButton
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:id="@+id/liteButton"
+            android:src="@drawable/ic_lite_button"
+            android:clickable="true"/>
+    </android.support.v7.widget.CardView>
+
+    <android.support.v7.widget.CardView
+        android:id="@+id/numbersCard"
+        android:layout_below="@+id/surfaceView"
+        android:layout_centerHorizontal="true"
+        android:layout_alignParentLeft="false"
+        android:layout_alignBaseline="@+id/liteCard"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content">
+        <ImageButton
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:id="@+id/numbersButton"
+            android:clickable="true"
+            android:src="@drawable/ic_numbers_button" />
+    </android.support.v7.widget.CardView>
+
+    <android.support.v7.widget.CardView
+        android:id="@+id/toolCard"
+        android:layout_toRightOf="@+id/numbersCard"
+        android:layout_alignBaseline="@+id/liteCard"
+        android:layout_below="@+id/surfaceView"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content">
+
+        <ImageButton
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:id="@+id/toolButton"
+            android:src="@drawable/ic_tool_button"
+            android:clickable="true" />
+    </android.support.v7.widget.CardView>
+
+    <android.support.v7.widget.CardView
+        android:id="@+id/secondsImageCard"
+        android:layout_alignParentBottom="true"
+        android:layout_toLeftOf="@+id/dayDateCard"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content">
+
         <ImageButton
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:id="@+id/secondsImageButton"
             android:src="@drawable/second_hand_anim"
-            android:cropToPadding="true"
             android:clickable="true" />
-        <Button
-            style="?android:attr/buttonStyleSmall"
-            android:layout_width="104dp"
-            android:layout_height="match_parent"
-            android:text="Mon DD\nDayofweek"
-            android:textAllCaps="false"
-            android:id="@+id/dayDateButton"
-            android:enabled="true"
-            android:clickable="true"
-            android:gravity="left|fill_vertical" />
-        <ImageButton
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:id="@+id/stepCountImageButton"
-                android:src="@drawable/ic_walking"
-                android:cropToPadding="true"
-                android:clickable="true" />
-            </LinearLayout>
+    </android.support.v7.widget.CardView>
 
-</LinearLayout>
+    <android.support.v7.widget.CardView
+	android:id="@+id/dayDateCard"
+	android:layout_alignBaseline="@+id/secondsImageCard"
+	android:layout_alignParentBottom="true"
+	android:layout_centerHorizontal="true" 
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content">
+
+	<Button
+	    style="?android:attr/buttonStyleSmall"
+	    android:layout_width="104dp"
+	    android:layout_height="92dp"
+	    android:text="Mon DD\nDayofweek"
+	    android:textAllCaps="false"
+	    android:id="@+id/dayDateButton"
+	    android:enabled="true"
+	    android:clickable="true"
+	    android:gravity="left|fill_vertical" />
+    </android.support.v7.widget.CardView>
+
+    <android.support.v7.widget.CardView
+	android:id="@+id/stepCountImageCard"
+	android:layout_toRightOf="@+id/dayDateButton"
+	android:layout_alignBaseline="@+id/secondsImageButton"
+	android:layout_alignParentBottom="true" 
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content">
+
+	<ImageButton
+	    android:layout_width="wrap_content"
+	    android:layout_height="wrap_content"
+	    android:id="@+id/stepCountImageButton"
+	    android:src="@drawable/ic_walking"
+	    android:clickable="true" />
+    </android.support.v7.widget.CardView>
+</RelativeLayout>
