@@ -43,7 +43,8 @@ def getVersionName = { ->
 }
 
 buildscript {
-    ext.kotlin_version = '1.0.2-eap-74'
+    ext.kotlin_version = '1.0.2'
+    ext.anko_version = '0.8.3'
     repositories {
         mavenCentral()
         maven {
@@ -55,7 +56,6 @@ buildscript {
         classpath "org.jetbrains.kotlin:kotlin-android-extensions:$kotlin_version"
     }
 }
-
 
 android {
     compileSdkVersion 23
@@ -90,7 +90,7 @@ dependencies {
     compile 'com.google.android.gms:play-services-wearable:8.4.0'
     compile "com.android.support:support-v4:23.4.0"
     compile "org.jetbrains.kotlin:kotlin-stdlib:$kotlin_version"
-    compile "org.jetbrains.anko:anko-sdk15:0.8.3"
+    compile "org.jetbrains.anko:anko-sdk15:$anko_version"
 }
 
 repositories {

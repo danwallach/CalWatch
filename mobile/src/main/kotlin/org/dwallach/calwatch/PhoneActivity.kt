@@ -35,7 +35,7 @@ class PhoneActivity : Activity(), Observer, AnkoLogger {
         } else {
             // On Android 4.4, setting the Card background color does nothing, and there's no paint filling either,
             // so we'll fall back to monkeying around with the button itself
-            button.setBackgroundColor(bgColor)
+            button.backgroundColor = bgColor
         }
     }
 

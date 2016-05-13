@@ -43,7 +43,8 @@ def getVersionName = { ->
 }
 
 buildscript {
-    ext.kotlin_version = '1.0.2-eap-74'
+    ext.kotlin_version = '1.0.2'
+    ext.anko_version = '0.8.3'
     repositories {
         mavenCentral()
         maven {
@@ -67,6 +68,7 @@ android {
         versionCode getVersionCode()
         versionName getVersionName()
     }
+
     sourceSets {
         main.java.srcDirs += 'src/main/kotlin'
     }
@@ -98,7 +100,7 @@ dependencies {
     compile 'com.google.android.support:wearable:1.4.0'
     compile 'fr.nicolaspomepuy.androidwearcrashreport:crashreport-wear:0.6@aar'
     compile "org.jetbrains.kotlin:kotlin-stdlib:$kotlin_version"
-    compile "org.jetbrains.anko:anko-sdk15:0.8.3"
+    compile "org.jetbrains.anko:anko-sdk15:$anko_version"
 }
 
 repositories {
