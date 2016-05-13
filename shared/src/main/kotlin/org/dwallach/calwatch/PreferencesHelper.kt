@@ -34,7 +34,7 @@ object PreferencesHelper: AnkoLogger {
     fun loadPreferences(context: Context) : Int {
         verbose("loadPreferences")
 
-        val preferencesVersion = with (context.getSharedPreferences(Constants.PREFS_KEY, Context.MODE_PRIVATE)) {
+        with (context.getSharedPreferences(Constants.PREFS_KEY, Context.MODE_PRIVATE)) {
             val faceMode = getInt("faceMode", Constants.DEFAULT_WATCHFACE)
             val showSeconds = getBoolean("showSeconds", Constants.DEFAULT_SHOW_SECONDS)
             val showDayDate = getBoolean("showDayDate", Constants.DEFAULT_SHOW_DAY_DATE)
@@ -48,10 +48,9 @@ object PreferencesHelper: AnkoLogger {
             ClockState.showDayDate = showDayDate
             ClockState.showStepCounter = showStepCounter
 
-            version
-        }
+            ClockState.pingObservers() // we only need to do this once, versus multiple times when done internally
 
-        ClockState.pingObservers() // we only need to do this once, versus multiple times when done internally
-        return preferencesVersion
+            return version
+        }
     }
 }
