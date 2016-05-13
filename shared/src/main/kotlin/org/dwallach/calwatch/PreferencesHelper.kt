@@ -13,7 +13,7 @@ object PreferencesHelper: AnkoLogger {
     fun savePreferences(context: Context) {
         verbose("savePreferences")
 
-        with (context.getSharedPreferences(Constants.PrefsKey, Context.MODE_PRIVATE).edit()) {
+        with (context.getSharedPreferences(Constants.PREFS_KEY, Context.MODE_PRIVATE).edit()) {
             putInt("faceMode", ClockState.faceMode)
             putBoolean("showSeconds", ClockState.showSeconds)
             putBoolean("showDayDate", ClockState.showDayDate)
@@ -34,11 +34,11 @@ object PreferencesHelper: AnkoLogger {
     fun loadPreferences(context: Context) : Int {
         verbose("loadPreferences")
 
-        val preferencesVersion = with (context.getSharedPreferences(Constants.PrefsKey, Context.MODE_PRIVATE)) {
-            val faceMode = getInt("faceMode", Constants.DefaultWatchFace)
-            val showSeconds = getBoolean("showSeconds", Constants.DefaultShowSeconds)
-            val showDayDate = getBoolean("showDayDate", Constants.DefaultShowDayDate)
-            val showStepCounter = getBoolean("showStepCounter", Constants.DefaultShowStepCounter)
+        val preferencesVersion = with (context.getSharedPreferences(Constants.PREFS_KEY, Context.MODE_PRIVATE)) {
+            val faceMode = getInt("faceMode", Constants.DEFAULT_WATCHFACE)
+            val showSeconds = getBoolean("showSeconds", Constants.DEFAULT_SHOW_SECONDS)
+            val showDayDate = getBoolean("showDayDate", Constants.DEFAULT_SHOW_DAY_DATE)
+            val showStepCounter = getBoolean("showStepCounter", Constants.DEFAULT_SHOW_STEP_COUNTER)
             val version = getInt("preferencesVersion", 0)
 
             verbose { "faceMode: $faceMode, showSeconds: $showSeconds, showDayDate: $showDayDate, showStepCounter: $showStepCounter, preferencesVersion: $version" }

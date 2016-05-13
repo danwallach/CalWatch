@@ -27,17 +27,17 @@ class ClockFace(val wear: Boolean = false) : Observer, AnkoLogger {
     private val instanceID: Int
 
     // initial values to get the ball rolling (avoids a div by zero problem in computeFlatBottomCorners)
-    private var cx = defaultCx
+    private var cx = DEFAULT_CX
     private var oldCx = -1
-    private var cy = defaultCy
+    private var cy = DEFAULT_CY
     private var oldCy = -1
-    private var radius = defaultRadius
+    private var radius = DEFAULT_RADIUS
 
-    private var showSeconds = Constants.DefaultShowSeconds
-    private var showDayDate = Constants.DefaultShowDayDate
-    private var showStepCounter = Constants.DefaultShowStepCounter
-    private var ambientLowBit = forceAmbientLowBit
-    private var burnInProtection = forceBurnInProtection
+    private var showSeconds = Constants.DEFAULT_SHOW_SECONDS
+    private var showDayDate = Constants.DEFAULT_SHOW_DAY_DATE
+    private var showStepCounter = Constants.DEFAULT_SHOW_STEP_COUNTER
+    private var ambientLowBit = FORCE_AMBIENT_LOW_BIT
+    private var burnInProtection = FORCE_BURNIN_PROTECTION
 
     private var missingBottomPixels = 0 // Moto 360 hack; set to non-zero number to pull up the indicia
     private var flatBottomCornerTime = 30f // Moto 360 hack: set to < 30.0 seconds for where the flat bottom starts
@@ -55,11 +55,11 @@ class ClockFace(val wear: Boolean = false) : Observer, AnkoLogger {
     private var faceMode = 0
     private var ambientMode = false
 
-    private var drawStyle = PaintCan.styleNormal // see setDrawStyle
+    private var drawStyle = PaintCan.STYLE_NORMAL // see setDrawStyle
 
     // dealing with the "flat tire" a.k.a. "chin" of Moto 360 and any other watches that pull the same trick
     fun setMissingBottomPixels(missingBottomPixels: Int) {
-        if (forceMotoFlatBottom)
+        if (FORCE_MOTO_FLAT_BOTTOM)
             this.missingBottomPixels = 30
         else
             this.missingBottomPixels = missingBottomPixels
@@ -79,17 +79,17 @@ class ClockFace(val wear: Boolean = false) : Observer, AnkoLogger {
      */
     fun setAmbientLowBit(ambientLowBit: Boolean) {
         verbose { "ambient low bit: $ambientLowBit" }
-        this.ambientLowBit = ambientLowBit || forceAmbientLowBit
+        this.ambientLowBit = ambientLowBit || FORCE_AMBIENT_LOW_BIT
 
         setDrawStyle()
     }
 
     private fun setDrawStyle() {
         drawStyle = when {
-            ambientMode && ambientLowBit && burnInProtection -> PaintCan.styleAntiBurnIn
-            ambientMode && ambientLowBit -> PaintCan.styleLowBit
-            ambientMode -> PaintCan.styleAmbient
-            else -> PaintCan.styleNormal
+            ambientMode && ambientLowBit && burnInProtection -> PaintCan.STYLE_ANTI_BURNIN
+            ambientMode && ambientLowBit -> PaintCan.STYLE_LOWBIT
+            ambientMode -> PaintCan.STYLE_AMBIENT
+            else -> PaintCan.STYLE_NORMAL
         }
     }
 
@@ -152,7 +152,7 @@ class ClockFace(val wear: Boolean = false) : Observer, AnkoLogger {
         // "For OLED screens, you must use a black background. Non-background pixels must be less than 10
         // percent of total pixels. You can use low-bit color for up to 5 percent of pixels on screens that support it."
         // -- http://developer.android.com/design/wear/watchfaces.html
-        if(drawStyle == PaintCan.styleNormal || drawStyle == PaintCan.styleAmbient) drawCalendar(canvas)
+        if(drawStyle == PaintCan.STYLE_NORMAL || drawStyle == PaintCan.STYLE_AMBIENT) drawCalendar(canvas)
 
         // next, we draw the indices or numbers of the watchface
         drawFace(canvas)
@@ -165,7 +165,7 @@ class ClockFace(val wear: Boolean = false) : Observer, AnkoLogger {
         //
         // We disable the battery meter when we're in ambientMode with burnInProtection.
         // The step counter knows how to draw itself differently in different modes.
-        if (drawStyle != PaintCan.styleAntiBurnIn) drawBattery(canvas)
+        if (drawStyle != PaintCan.STYLE_ANTI_BURNIN) drawBattery(canvas)
         drawStepCount(canvas)
 
         // Kludge for peek card until we come up with something better:
@@ -174,14 +174,14 @@ class ClockFace(val wear: Boolean = false) : Observer, AnkoLogger {
         // Note that we're doing this *before* drawing the hands but *after* drawing
         // everything else. I want the hands to not be chopped off, even though everything
         // else will be.
-        if (peekCardRect != null && drawStyle != PaintCan.styleNormal)
-            canvas.drawRect(peekCardRect, PaintCan[drawStyle, PaintCan.colorBlackFill])
+        if (peekCardRect != null && drawStyle != PaintCan.STYLE_NORMAL)
+            canvas.drawRect(peekCardRect, PaintCan[drawStyle, PaintCan.COLOR_BLACK_FILL])
 
         drawHands(canvas)
 
         // something a real watch can't do: float the text over the hands
         // (but disable when we're in ambientMode with burnInProtection)
-        if (drawStyle != PaintCan.styleAntiBurnIn && showDayDate) drawMonthBox(canvas)
+        if (drawStyle != PaintCan.STYLE_ANTI_BURNIN && showDayDate) drawMonthBox(canvas)
 
         TimeWrapper.frameEnd()
     }
@@ -209,7 +209,7 @@ class ClockFace(val wear: Boolean = false) : Observer, AnkoLogger {
             }
         }
 
-        if (drawStyle == PaintCan.styleAntiBurnIn) {
+        if (drawStyle == PaintCan.STYLE_ANTI_BURNIN) {
             // scale down everything to leave a 10 pixel margin
 
             val ratio = (radius - 10f) / radius
@@ -264,7 +264,7 @@ class ClockFace(val wear: Boolean = false) : Observer, AnkoLogger {
             errorLogAndThrow("arc too big! radius(%.2f -> %.2f), seconds(%.2f -> %.2f)".format(startRadius, endRadius, secondsStart, secondsEnd))
         }
 
-        if (drawStyle == PaintCan.styleAntiBurnIn) {
+        if (drawStyle == PaintCan.STYLE_ANTI_BURNIN) {
             // scale down everything to leave a 10 pixel margin
 
             val ratio = (radius - 10f) / radius
@@ -282,7 +282,7 @@ class ClockFace(val wear: Boolean = false) : Observer, AnkoLogger {
             val midOvalDelta = getRectRadius((startRadius + endRadius) / 2f - 0.025f)
             val startOval = getRectRadius(startRadius)
             val endOval = getRectRadius(endRadius)
-            if (drawStyle == PaintCan.styleAntiBurnIn && lowBitSquish) {
+            if (drawStyle == PaintCan.STYLE_ANTI_BURNIN && lowBitSquish) {
                 // In ambient low-bit mode, we originally drew some slender arcs of fixed width at roughly the center of the big
                 // colored pie wedge which we normally show when we're not in ambient mode. Currently this is dead code because
                 // drawCalendar() becomes a no-op in ambientLowBit when burn-in protection is on.
@@ -331,7 +331,7 @@ class ClockFace(val wear: Boolean = false) : Observer, AnkoLogger {
             return
         }
 
-        if (drawStyle == PaintCan.styleAntiBurnIn) {
+        if (drawStyle == PaintCan.STYLE_ANTI_BURNIN) {
             // scale down everything to leave a 10 pixel margin
             val ratio = (radius - 10f) / radius
 
@@ -406,8 +406,8 @@ class ClockFace(val wear: Boolean = false) : Observer, AnkoLogger {
         val x1 = clockX(45.0, .85f)
         val y1 = clockY(45.0, .85f)
 
-        val paint = PaintCan[drawStyle, PaintCan.colorSmallTextAndLines]
-        val shadow = PaintCan[drawStyle, PaintCan.colorSmallShadow]
+        val paint = PaintCan[drawStyle, PaintCan.COLOR_SMALL_TEXT_AND_LINES]
+        val shadow = PaintCan[drawStyle, PaintCan.COLOR_SMALL_SHADOW]
 
         // AA note: we only draw the month box when in normal mode, not ambient, so no AA gymnastics here
 
@@ -431,12 +431,12 @@ class ClockFace(val wear: Boolean = false) : Observer, AnkoLogger {
         val bottomHack = missingBottomPixels > 0
 
         // force "lite" mode when in burn-in protection mode
-        val lFaceMode = if(drawStyle == PaintCan.styleAntiBurnIn) ClockState.FACE_LITE else faceMode
+        val lFaceMode = if(drawStyle == PaintCan.STYLE_ANTI_BURNIN) ClockState.FACE_LITE else faceMode
 
-        val colorTickShadow = PaintCan[drawStyle, PaintCan.colorTickShadow]
-        val colorSmall = PaintCan[drawStyle, PaintCan.colorSmallTextAndLines]
-        val colorBig = PaintCan[drawStyle, PaintCan.colorBigTextAndLines]
-        val colorTextShadow = PaintCan[drawStyle, PaintCan.colorBigShadow]
+        val colorTickShadow = PaintCan[drawStyle, PaintCan.COLOR_TICK_SHADOW]
+        val colorSmall = PaintCan[drawStyle, PaintCan.COLOR_SMALL_TEXT_AND_LINES]
+        val colorBig = PaintCan[drawStyle, PaintCan.COLOR_BIG_TEXT_AND_LINES]
+        val colorTextShadow = PaintCan[drawStyle, PaintCan.COLOR_BIG_SHADOW]
 
         // check if we've already rendered the face
         if (lFaceMode != facePathCacheMode || lFacePathCache == null) {
@@ -465,7 +465,7 @@ class ClockFace(val wear: Boolean = false) : Observer, AnkoLogger {
                         drawRadialLine(lFacePathCache, strokeWidth, -0.4, .75f, 1.0f, true, false)
                         drawRadialLine(lFacePathCache, strokeWidth, 0.4, .75f, 1.0f, true, false)
                     }
-                } else if (i == 45 && drawStyle != PaintCan.styleAntiBurnIn && showDayDate) {
+                } else if (i == 45 && drawStyle != PaintCan.STYLE_ANTI_BURNIN && showDayDate) {
                     // 9 o'clock, don't extend into the inside, where we'd overlap with the DayDate display
                     // except, of course, when we're not showing the DayDate display, which might happen
                     // via user preference or because we're in burnInProtection ambient mode
@@ -571,15 +571,15 @@ class ClockFace(val wear: Boolean = false) : Observer, AnkoLogger {
         val hours = minutes / 12.0  // because drawRadialLine is scaled to a 60-unit circle
 
 
-        val shadowColor = PaintCan[drawStyle, PaintCan.colorHandShadow]
-        val hourColor = PaintCan[drawStyle, PaintCan.colorHourHand]
-        val minuteColor = PaintCan[drawStyle, PaintCan.colorMinuteHand]
+        val shadowColor = PaintCan[drawStyle, PaintCan.COLOR_HAND_SHADOW]
+        val hourColor = PaintCan[drawStyle, PaintCan.COLOR_HOUR_HAND]
+        val minuteColor = PaintCan[drawStyle, PaintCan.COLOR_MINUTE_HAND]
 
         drawRadialLine(canvas, hours, 0.1f, 0.6f, hourColor, shadowColor)
         drawRadialLine(canvas, minutes, 0.1f, 0.9f, minuteColor, shadowColor)
 
-        if (drawStyle == PaintCan.styleNormal && showSeconds) {
-            val secondsColor = PaintCan[PaintCan.styleNormal, PaintCan.colorSecondHand]
+        if (drawStyle == PaintCan.STYLE_NORMAL && showSeconds) {
+            val secondsColor = PaintCan[PaintCan.STYLE_NORMAL, PaintCan.COLOR_SECOND_HAND]
             // ugly details: we might run 10% or more away from our targets at 4Hz, making the second
             // hand miss the indices. Ugly. Thus, some hackery.
             drawRadialLine(canvas, nonLinearSeconds(seconds), 0.1f, 0.95f, secondsColor, shadowColor)
@@ -610,7 +610,7 @@ class ClockFace(val wear: Boolean = false) : Observer, AnkoLogger {
 
         // if we don't have permission to see the calendar, then we'll let the user know, but we won't
         // bug them in any of the ambient modes.
-        if (!ClockState.calendarPermission && drawStyle == PaintCan.styleNormal) {
+        if (!ClockState.calendarPermission && drawStyle == PaintCan.STYLE_NORMAL) {
             missingCalendarDrawable?.draw(canvas)
             return
         }
@@ -639,11 +639,11 @@ class ClockFace(val wear: Boolean = false) : Observer, AnkoLogger {
             // path caching happens inside drawRadialArc
 
             val arcColor = it.getPaint(drawStyle)
-            val arcShadow = PaintCan[drawStyle, PaintCan.colorArcShadow]
+            val arcShadow = PaintCan[drawStyle, PaintCan.COLOR_ARC_SHADOW]
 
             it.path = drawRadialArc(canvas, it.path, arcStart, arcEnd,
-                    calendarRingMaxRadius - evMinLevel * calendarRingWidth / (maxLevel + 1),
-                    calendarRingMaxRadius - (evMaxLevel + 1) * calendarRingWidth / (maxLevel + 1),
+                    CALENDAR_RING_MAX_RADIUS - evMinLevel * CALENDAR_RING_WIDTH / (maxLevel + 1),
+                    CALENDAR_RING_MAX_RADIUS - (evMaxLevel + 1) * CALENDAR_RING_WIDTH / (maxLevel + 1),
                     arcColor, arcShadow)
         }
 
@@ -675,29 +675,29 @@ class ClockFace(val wear: Boolean = false) : Observer, AnkoLogger {
 
             val stippleWidth = 0.3f
             val stippleSteps = 8
-            val rDelta = calendarRingWidth / stippleSteps.toFloat()
+            val rDelta = CALENDAR_RING_WIDTH / stippleSteps.toFloat()
 
-            var x1: Float = clockX(stippleTime.toDouble(), calendarRingMaxRadius)
-            var y1: Float = clockY(stippleTime.toDouble(), calendarRingMaxRadius)
-            var x2: Float = clockX(stippleTime.toDouble(), calendarRingMaxRadius - rDelta)
-            var y2: Float = clockY(stippleTime.toDouble(), calendarRingMaxRadius - rDelta)
+            var x1: Float = clockX(stippleTime.toDouble(), CALENDAR_RING_MAX_RADIUS)
+            var y1: Float = clockY(stippleTime.toDouble(), CALENDAR_RING_MAX_RADIUS)
+            var x2: Float = clockX(stippleTime.toDouble(), CALENDAR_RING_MAX_RADIUS - rDelta)
+            var y2: Float = clockY(stippleTime.toDouble(), CALENDAR_RING_MAX_RADIUS - rDelta)
             var xmid: Float = (x1 + x2) / 2f
             var ymid: Float = (y1 + y2) / 2f
-            var xlow: Float = clockX((stippleTime - stippleWidth).toDouble(), calendarRingMaxRadius - rDelta / 2)
-            var ylow: Float = clockY((stippleTime - stippleWidth).toDouble(), calendarRingMaxRadius - rDelta / 2)
-            var xhigh: Float = clockX((stippleTime + stippleWidth).toDouble(), calendarRingMaxRadius - rDelta / 2)
-            var yhigh: Float = clockY((stippleTime + stippleWidth).toDouble(), calendarRingMaxRadius - rDelta / 2)
+            var xlow: Float = clockX((stippleTime - stippleWidth).toDouble(), CALENDAR_RING_MAX_RADIUS - rDelta / 2)
+            var ylow: Float = clockY((stippleTime - stippleWidth).toDouble(), CALENDAR_RING_MAX_RADIUS - rDelta / 2)
+            var xhigh: Float = clockX((stippleTime + stippleWidth).toDouble(), CALENDAR_RING_MAX_RADIUS - rDelta / 2)
+            var yhigh: Float = clockY((stippleTime + stippleWidth).toDouble(), CALENDAR_RING_MAX_RADIUS - rDelta / 2)
             val dxlow: Float = xmid - xlow
             val dylow: Float = ymid - ylow
             val dxhigh: Float = xmid - xhigh
             val dyhigh: Float = ymid - yhigh
 
-            r1 = calendarRingMinRadius
+            r1 = CALENDAR_RING_MIN_RADIUS
             x1 = clockX(stippleTime.toDouble(), r1)
             y1 = clockY(stippleTime.toDouble(), r1)
 
             for(i in 0..7) {
-                r2 = r1 + calendarRingWidth / 8f
+                r2 = r1 + CALENDAR_RING_WIDTH / 8f
                 x2 = clockX(stippleTime.toDouble(), r2)
                 y2 = clockY(stippleTime.toDouble(), r2)
 
@@ -730,7 +730,7 @@ class ClockFace(val wear: Boolean = false) : Observer, AnkoLogger {
 
             stipplePathCache = lStipplePathCache
         }
-        canvas.drawPath(stipplePathCache, PaintCan[drawStyle, PaintCan.colorBlackFill])
+        canvas.drawPath(stipplePathCache, PaintCan[drawStyle, PaintCan.COLOR_BLACK_FILL])
     }
 
     private var batteryPathCache: Path? = null
@@ -754,15 +754,15 @@ class ClockFace(val wear: Boolean = false) : Observer, AnkoLogger {
             //
 
             verbose { "battery at $batteryPct" }
-            if (batteryPct > Constants.PowerWarningLevel) {
+            if (batteryPct > Constants.POWER_WARN_LOW_LEVEL) {
                 // batteryPathCache = null
             } else {
                 val minRadius = 0.01f
                 val maxRadius = 0.06f
-                batteryCritical = batteryPct <= Constants.PowerCriticalLevel
+                batteryCritical = batteryPct <= Constants.POWER_WARN_CRITICAL_LEVEL
 
                 val dotRadius = maxRadius - if (batteryCritical) 0f else
-                    (maxRadius - minRadius) * (batteryPct - Constants.PowerCriticalLevel) / (Constants.PowerWarningLevel - Constants.PowerCriticalLevel)
+                    (maxRadius - minRadius) * (batteryPct - Constants.POWER_WARN_CRITICAL_LEVEL) / (Constants.POWER_WARN_LOW_LEVEL - Constants.POWER_WARN_CRITICAL_LEVEL)
 
                 lBatteryPathCache.addCircle(cx.toFloat(), cy.toFloat(), radius * dotRadius, Path.Direction.CCW) // direction shouldn't matter
 
@@ -775,7 +775,7 @@ class ClockFace(val wear: Boolean = false) : Observer, AnkoLogger {
         // note that we'll flip the color from white to red once the battery gets below 10%
         // (in ambient mode, we can't show it at all because of burn-in issues)
         if (batteryPathCache != null) {
-            val paint = PaintCan[drawStyle, if (batteryCritical) PaintCan.colorBatteryCritical else PaintCan.colorBatteryLow]
+            val paint = PaintCan[drawStyle, if (batteryCritical) PaintCan.COLOR_BATTERY_CRITICAL else PaintCan.COLOR_BATTERY_LOW]
             canvas.drawPath(batteryPathCache, paint)
         }
     }
@@ -793,7 +793,7 @@ class ClockFace(val wear: Boolean = false) : Observer, AnkoLogger {
         // on the charger, and because the step counter seems to have a non-zero impact on battery
         // life, so we'll try to save a bit on power usage.
 
-        if(!showStepCounter || BatteryWrapper.batteryPct < Constants.PowerCriticalLevel) return
+        if(!showStepCounter || BatteryWrapper.batteryPct < Constants.POWER_WARN_CRITICAL_LEVEL) return
 
         val rawStepCount = FitnessWrapper.getStepCount()
 
@@ -812,8 +812,8 @@ class ClockFace(val wear: Boolean = false) : Observer, AnkoLogger {
         // the 12 hours in the dial. We'll also be showing a digit (code below) which will help
         // train the user.
 
-        val paint = PaintCan[drawStyle, PaintCan.colorStepCount]
-        val outlinePaint = PaintCan[drawStyle, PaintCan.colorStepCount]
+        val paint = PaintCan[drawStyle, PaintCan.COLOR_STEP_COUNT]
+        val outlinePaint = PaintCan[drawStyle, PaintCan.COLOR_STEP_COUNT]
 
         val seconds: Double = if(stepCount > 12000) { 60.0 } else { stepCount / 200.0 }
 
@@ -825,7 +825,7 @@ class ClockFace(val wear: Boolean = false) : Observer, AnkoLogger {
         // next, we're going to put the thousands-digit of the step counter in the dead center, but
         // only when we're in "normal" mode (i.e., we're not in one of the ambient modes).
 
-        if(drawStyle == PaintCan.styleNormal && BatteryWrapper.batteryPct > Constants.PowerWarningLevel) {
+        if(drawStyle == PaintCan.STYLE_NORMAL && BatteryWrapper.batteryPct > Constants.POWER_WARN_LOW_LEVEL) {
             // we're rounding to the nearest thousand, i.e.,  1499 -> 1, 1500 -> 2, etc.
             val stepCountString =
                     if (rawStepCount == 0 && !wear)
@@ -835,7 +835,7 @@ class ClockFace(val wear: Boolean = false) : Observer, AnkoLogger {
                         if (stepCountDigits > 99) "++" else stepCountDigits.toInt().toString()
                     }
 
-            val textPaint = PaintCan[drawStyle, PaintCan.colorStepCountText]
+            val textPaint = PaintCan[drawStyle, PaintCan.COLOR_STEP_COUNT_TEXT]
 
             // AA note: we only draw the month box when in normal mode, not ambient, so no AA gymnastics here
 
@@ -851,11 +851,11 @@ class ClockFace(val wear: Boolean = false) : Observer, AnkoLogger {
     fun drawTimers(canvas: Canvas) {
         val currentTime = TimeWrapper.gmtTime // note that we're *not* using local time here
 
-        val colorStopwatchSeconds = PaintCan[drawStyle, PaintCan.colorStopwatchSeconds]
-        val colorStopwatchStroke = PaintCan[drawStyle, PaintCan.colorStopwatchStroke]
-        val colorStopwatchFill = PaintCan[drawStyle, PaintCan.colorStopwatchFill]
-        val colorTimerStroke = PaintCan[drawStyle, PaintCan.colorTimerStroke]
-        val colorTimerFill = PaintCan[drawStyle, PaintCan.colorTimerFill]
+        val colorStopwatchSeconds = PaintCan[drawStyle, PaintCan.COLOR_STOPWATCH_SECONDS]
+        val colorStopwatchStroke = PaintCan[drawStyle, PaintCan.COLOR_STOPWATCH_STROKE]
+        val colorStopwatchFill = PaintCan[drawStyle, PaintCan.COLOR_STOPWATCH_FILL]
+        val colorTimerStroke = PaintCan[drawStyle, PaintCan.COLOR_TIMER_STROKE]
+        val colorTimerFill = PaintCan[drawStyle, PaintCan.COLOR_TIMER_FILL]
 
         // Radius 0.9 is the start of the tick marks and the end of the normal minute hand. The normal
         // second hand goes to 0.95. If there's a stopwatch but no timer, then the stopwatch second and minute
@@ -902,7 +902,7 @@ class ClockFace(val wear: Boolean = false) : Observer, AnkoLogger {
             val stopWatchR2 = if (XWatchfaceReceiver.timerIsReset || timerRemaining == 0L) 0.995f else 0.945f
 
             // Stopwatch second hand only drawn if we're not in ambient mode.
-            if (drawStyle == PaintCan.styleNormal)
+            if (drawStyle == PaintCan.STYLE_NORMAL)
                 drawRadialLine(canvas, seconds.toDouble(), 0.1f, 0.945f, colorStopwatchSeconds, null)
 
             // Stopwatch minute hand. Same thin gauge as second hand, but will be attached to the arc,
@@ -1113,7 +1113,7 @@ class ClockFace(val wear: Boolean = false) : Observer, AnkoLogger {
     }
 
     fun setBurnInProtection(burnInProtection: Boolean) {
-        this.burnInProtection = burnInProtection || forceBurnInProtection
+        this.burnInProtection = burnInProtection || FORCE_BURNIN_PROTECTION
 
         setDrawStyle()
     }
@@ -1127,9 +1127,9 @@ class ClockFace(val wear: Boolean = false) : Observer, AnkoLogger {
 
     companion object {
         // for testing purposes, turn these things on; disable for production
-        private const val forceAmbientLowBit = false
-        private const val forceBurnInProtection = false
-        private const val forceMotoFlatBottom = false
+        private const val FORCE_AMBIENT_LOW_BIT = false
+        private const val FORCE_BURNIN_PROTECTION = false
+        private const val FORCE_MOTO_FLAT_BOTTOM = false
 
         // for testing: sometimes it seems we have multiple instances of ClockFace, which is bad; let's
         // try to track them
@@ -1138,13 +1138,13 @@ class ClockFace(val wear: Boolean = false) : Observer, AnkoLogger {
 
         // Android Wear eventually tells us these numbers, but best to start off with something in
         // the meanwhile.
-        private const val defaultCx = 140
-        private const val defaultCy = 140
-        private const val defaultRadius = 140
+        private const val DEFAULT_CX = 140
+        private const val DEFAULT_CY = 140
+        private const val DEFAULT_RADIUS = 140
 
-        private const val calendarRingMinRadius = 0.2f
-        private const val calendarRingMaxRadius = 0.9f
-        private const val calendarRingWidth = calendarRingMaxRadius - calendarRingMinRadius
+        private const val CALENDAR_RING_MIN_RADIUS = 0.2f
+        private const val CALENDAR_RING_MAX_RADIUS = 0.9f
+        private const val CALENDAR_RING_WIDTH = CALENDAR_RING_MAX_RADIUS - CALENDAR_RING_MIN_RADIUS
 
         private var debugMetricsPrinted = false
 

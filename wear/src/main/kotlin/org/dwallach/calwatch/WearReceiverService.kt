@@ -43,7 +43,7 @@ class WearReceiverService : WearableListenerService(), AnkoLogger {
         // matter when we do it.
         if (PreferencesHelper.loadPreferences(this) == 0) {
             // the code below is for backward compatibility with our earlier messaging / preferences system
-            val savedState = getSharedPreferences(Constants.PrefsKey, Context.MODE_PRIVATE).getString("savedState", "")
+            val savedState = getSharedPreferences(Constants.PREFS_KEY, Context.MODE_PRIVATE).getString("savedState", "")
 
             if (savedState.length > 0) {
                 try {
@@ -71,9 +71,9 @@ class WearReceiverService : WearableListenerService(), AnkoLogger {
                 .map { it.dataItem }
                 .forEach {
                     debug { "--> item found: ${it.toString()}" }
-                    if (it.uri.path.compareTo(Constants.SettingsPath) == 0) {
+                    if (it.uri.path.compareTo(Constants.SETTINGS_PATH) == 0) {
                         val dataMap = DataMapItem.fromDataItem(it).dataMap
-                        val eventbuf = dataMap.getByteArray(Constants.DataKey)
+                        val eventbuf = dataMap.getByteArray(Constants.DATA_KEY)
                         debug { "----> it's an event for us, nbytes: ${eventbuf.size}" }
 
                         if(eventbuf != null) {

@@ -26,10 +26,10 @@ object ClockState : Observable(), AnkoLogger {
     const val FACE_NUMBERS = 1
     const val FACE_LITE = 2
 
-    var faceMode: Int = Constants.DefaultWatchFace
-    var showSeconds: Boolean = Constants.DefaultShowSeconds
-    var showDayDate: Boolean = Constants.DefaultShowDayDate
-    var showStepCounter: Boolean = Constants.DefaultShowStepCounter
+    var faceMode: Int = Constants.DEFAULT_WATCHFACE
+    var showSeconds: Boolean = Constants.DEFAULT_SHOW_SECONDS
+    var showDayDate: Boolean = Constants.DEFAULT_SHOW_DAY_DATE
+    var showStepCounter: Boolean = Constants.DEFAULT_SHOW_STEP_COUNTER
 
     private var eventList: List<WireEvent> = emptyList()
     private var visibleEventList: List<EventWrapper> = emptyList()

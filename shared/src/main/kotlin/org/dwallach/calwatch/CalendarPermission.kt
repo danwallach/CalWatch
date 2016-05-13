@@ -28,7 +28,7 @@ object CalendarPermission: AnkoLogger {
         private set
 
     fun init(context: Context) {
-        numRequests = context.getSharedPreferences(Constants.PrefsKey, Context.MODE_PRIVATE).getInt("permissionRequests", 0)
+        numRequests = context.getSharedPreferences(Constants.PREFS_KEY, Context.MODE_PRIVATE).getInt("permissionRequests", 0)
     }
 
     /**

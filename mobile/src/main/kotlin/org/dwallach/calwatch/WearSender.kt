@@ -26,8 +26,8 @@ class WearSender(context: Context): AnkoLogger {
             val lClient = GoogleApiWrapper.client
 
             if (lClient != null && lClient.isConnected) {
-                val putDataMapReq = PutDataMapRequest.create(Constants.SettingsPath)
-                putDataMapReq.dataMap.putByteArray(Constants.DataKey, wireBytesToSend)
+                val putDataMapReq = PutDataMapRequest.create(Constants.SETTINGS_PATH)
+                putDataMapReq.dataMap.putByteArray(Constants.DATA_KEY, wireBytesToSend)
                 val putDataReq = putDataMapReq.asPutDataRequest()
                 putDataReq.setUrgent() // because we want this stuff to propagate quickly -- new feature along with Android M
                 val pendingResult = Wearable.DataApi.putDataItem(lClient, putDataReq)

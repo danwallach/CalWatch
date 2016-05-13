@@ -34,7 +34,7 @@ data class WireUpdate(val faceMode: Int, val showSecondHand: Boolean, val showDa
                     .toTypedArray()
 
             if (inputs.size == 5 && inputs[0] == HEADER2 && inputs[4] == TRAILER) {
-                val result = WireUpdate(inputs[1].toInt(), inputs[2].toBoolean(), inputs[3].toBoolean(), Constants.DefaultShowStepCounter)
+                val result = WireUpdate(inputs[1].toInt(), inputs[2].toBoolean(), inputs[3].toBoolean(), Constants.DEFAULT_SHOW_STEP_COUNTER)
                 verbose { "parsed: ${result.toString()}" }
                 return result
             } else if (inputs.size == 6 && inputs[0] == HEADER3 && inputs[5] == TRAILER) {

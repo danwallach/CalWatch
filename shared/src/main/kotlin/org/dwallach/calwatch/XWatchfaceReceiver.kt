@@ -49,24 +49,24 @@ class XWatchfaceReceiver : BroadcastReceiver(), AnkoLogger {
 
         with (intent.extras) {
             when (intent.action) {
-                stopwatchUpdateIntent -> {
+                STOPWATCH_UPDATE_INTENT -> {
                     // TODO: fix the IntelliJ warnings about version numbers below (which seem fine in the docs)
-                    stopwatchStart = getLong(prefStopwatchStartTime)
-                    stopwatchBase = getLong(prefStopwatchBaseTime)
-                    stopwatchIsRunning = getBoolean(prefStopwatchRunning)
-                    stopwatchIsReset = getBoolean(prefStopwatchReset)
-                    stopwatchUpdateTimestamp = getLong(prefStopwatchUpdateTimestamp)
+                    stopwatchStart = getLong(PREF_STOPWATCH_START_TIME)
+                    stopwatchBase = getLong(PREF_STOPWATCH_BASE_TIME)
+                    stopwatchIsRunning = getBoolean(PREF_STOPWATCH_RUNNING)
+                    stopwatchIsReset = getBoolean(PREF_STOPWATCH_RESET)
+                    stopwatchUpdateTimestamp = getLong(PREF_STOPWATCH_UPDATE_TIMESTAMP)
 
                     verbose { "stopwatch update:: start($stopwatchStart), base($stopwatchBase), isRunning($stopwatchIsRunning), isReset($stopwatchIsReset), updateTimestamp($stopwatchUpdateTimestamp)" }
                 }
 
-                timerUpdateIntent -> {
-                    timerStart = getLong(prefTimerStartTime)
-                    timerPauseElapsed = getLong(prefTimerPauseElapsed)
-                    timerDuration = getLong(prefTimerDuration)
-                    timerIsRunning = getBoolean(prefTimerRunning)
-                    timerIsReset = getBoolean(prefTimerReset)
-                    timerUpdateTimestamp = getLong(prefTimerUpdateTimestamp)
+                TIMER_UPDATE_INTENT -> {
+                    timerStart = getLong(PREF_TIMER_START_TIME)
+                    timerPauseElapsed = getLong(PREF_TIMER_PAUSE_ELAPSED)
+                    timerDuration = getLong(PREF_TIMER_DURATION)
+                    timerIsRunning = getBoolean(PREF_TIMER_RUNNING)
+                    timerIsReset = getBoolean(PREF_TIMER_RESET)
+                    timerUpdateTimestamp = getLong(PREF_TIMER_UPDATE_TIMESTAMP)
 
                     // sanity checking: if we're coming back from whatever and a formerly running
                     // timer has gotten way past the deadline, then just reset things.
@@ -83,24 +83,24 @@ class XWatchfaceReceiver : BroadcastReceiver(), AnkoLogger {
     }
 
     companion object: AnkoLogger {
-        const val prefStopwatchRunning = "running"
-        const val prefStopwatchReset = "reset"
-        const val prefStopwatchStartTime = "start"
-        const val prefStopwatchBaseTime = "base"
-        const val prefStopwatchUpdateTimestamp = "updateTimestamp"
+        const val PREF_STOPWATCH_RUNNING = "running"
+        const val PREF_STOPWATCH_RESET = "reset"
+        const val PREF_STOPWATCH_START_TIME = "start"
+        const val PREF_STOPWATCH_BASE_TIME = "base"
+        const val PREF_STOPWATCH_UPDATE_TIMESTAMP = "updateTimestamp"
 
-        const val prefTimerRunning = "running"
-        const val prefTimerReset = "reset"
-        const val prefTimerStartTime = "start"
-        const val prefTimerPauseElapsed = "elapsed"
-        const val prefTimerDuration = "duration"
-        const val prefTimerUpdateTimestamp = "updateTimestamp"
+        const val PREF_TIMER_RUNNING = "running"
+        const val PREF_TIMER_RESET = "reset"
+        const val PREF_TIMER_START_TIME = "start"
+        const val PREF_TIMER_PAUSE_ELAPSED = "elapsed"
+        const val PREF_TIMER_DURATION = "duration"
+        const val PREF_TIMER_UPDATE_TIMESTAMP = "updateTimestamp"
 
-        const val stopwatchUpdateIntent = "org.dwallach.x.stopwatch.update"
-        const val stopwatchQueryIntent = "org.dwallach.x.stopwatch.query"
+        const val STOPWATCH_UPDATE_INTENT = "org.dwallach.x.stopwatch.update"
+        const val STOPWATCH_QUERY_INTENT = "org.dwallach.x.stopwatch.query"
 
-        const val timerUpdateIntent = "org.dwallach.x.timer.update"
-        const val timerQueryIntent = "org.dwallach.x.timer.query"
+        const val TIMER_UPDATE_INTENT = "org.dwallach.x.timer.update"
+        const val TIMER_QUERY_INTENT = "org.dwallach.x.timer.query"
 
         /**
          * the time (GMT) when the user clicked "start" on the stopwatch
@@ -190,11 +190,11 @@ class XWatchfaceReceiver : BroadcastReceiver(), AnkoLogger {
         fun pingExternalStopwatches(context: Context) {
             if (stopwatchUpdateTimestamp == 0L) {
                 verbose("sending broadcast query for external stopwatches")
-                context.sendBroadcast(Intent(stopwatchQueryIntent))
+                context.sendBroadcast(Intent(STOPWATCH_QUERY_INTENT))
             }
             if (timerUpdateTimestamp == 0L) {
                 verbose("sending broadcast query for external timers")
-                context.sendBroadcast(Intent(timerQueryIntent))
+                context.sendBroadcast(Intent(TIMER_QUERY_INTENT))
             }
         }
     }

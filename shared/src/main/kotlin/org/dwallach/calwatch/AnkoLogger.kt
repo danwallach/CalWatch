@@ -15,3 +15,4 @@ fun AnkoLogger.errorLogAndThrow(message: Any, thr: Throwable? = null): Nothing {
     error(message, thr) // AnkoLogger
     kotlin.error(message)
 }
+

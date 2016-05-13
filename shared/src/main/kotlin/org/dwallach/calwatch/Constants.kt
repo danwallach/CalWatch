@@ -7,13 +7,13 @@
 package org.dwallach.calwatch
 
 object Constants {
-    const val PrefsKey = "org.dwallach.calwatch.prefs"
-    const val DataKey = "org.dwallach.calwatch.data"
-    const val SettingsPath = "/settings"
-    const val DefaultWatchFace = ClockState.FACE_TOOL
-    const val DefaultShowSeconds = true
-    const val DefaultShowDayDate = true
-    const val DefaultShowStepCounter = false
-    const val PowerWarningLevel = 0.33f
-    const val PowerCriticalLevel = 0.1f
+    const val PREFS_KEY = "org.dwallach.calwatch.prefs"
+    const val DATA_KEY = "org.dwallach.calwatch.data"
+    const val SETTINGS_PATH = "/settings"
+    const val DEFAULT_WATCHFACE = ClockState.FACE_TOOL
+    const val DEFAULT_SHOW_SECONDS = true
+    const val DEFAULT_SHOW_DAY_DATE = true
+    const val DEFAULT_SHOW_STEP_COUNTER = false
+    const val POWER_WARN_LOW_LEVEL = 0.33f
+    const val POWER_WARN_CRITICAL_LEVEL = 0.1f
 }
