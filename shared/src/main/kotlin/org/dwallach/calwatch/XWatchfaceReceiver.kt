@@ -26,7 +26,7 @@ import org.jetbrains.anko.*
 
 /**
  * Simple code to watch for updates (via broadcast intents) to the shared x.stopwatch and
- * x.timer state, transmitted by any compliant stopwatch or coundown timer apps.
+ * x.timer state, transmitted by any compliant stopwatch or countdown timer apps.
 
  * Note that this just dumps out its state into a series of public static variables,
  * which you should feel free to read (and re-read) in your watchface's onDraw() handler.
