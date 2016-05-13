@@ -52,5 +52,12 @@ object PreferencesHelper: AnkoLogger {
 
             return version
         }
+
+        // Kotlin engineering note: return inside of a lambda will return from the nearest enclosing `fun`,
+        // so the above code has the desired effect.
+        // https://www.reddit.com/r/Kotlin/comments/3yybyf/returning_from_lambda_functions/?
+
+        // Curiously, this only really works because `with` is an inline function
+        // https://kotlinlang.org/docs/reference/inline-functions.html#non-local-returns
     }
 }

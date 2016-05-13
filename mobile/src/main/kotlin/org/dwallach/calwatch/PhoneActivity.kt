@@ -30,7 +30,7 @@ class PhoneActivity : Activity(), Observer, AnkoLogger {
         val bgColor = ContextCompat.getColor(this, if (selected) R.color.calWatchDark else R.color.calWatchPrimary)
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
-            // TODO: do something useful with the button, not just the card -- tinting? -- but in a portable way?
+            // TODO: do something useful with the button, not just the card -- tinting?
             card.setCardBackgroundColor(bgColor)
         } else {
             // On Android 4.4, setting the Card background color does nothing, and there's no paint filling either,
