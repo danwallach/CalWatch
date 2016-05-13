@@ -12,6 +12,7 @@ import android.graphics.Canvas
 import android.graphics.Color
 import android.graphics.PorterDuff
 import android.provider.CalendarContract
+import android.support.v4.content.ContextCompat
 import android.util.AttributeSet
 import android.view.MotionEvent
 import android.view.View
@@ -129,10 +130,12 @@ class MyViewAnim(context: Context, attrs: AttributeSet) : View(context, attrs), 
         clockFace = ClockFace() // because we're making a new one, presumably with our new context
         clockFace?.setSize(width, height)
 
-        if(context.resources == null) {
-            error("no resources? not good")
-        } else {
-            clockFace?.setMissingCalendarDrawable(context.getDrawable(R.drawable.ic_empty_calendar));
+        // What's with this ContextCompat thing?
+        // http://stackoverflow.com/questions/29041027/android-getresources-getdrawable-deprecated-api-22/29041466#29041466
+        when {
+            context.resources == null -> error("No context resources, can't get missing-calendar drawable")
+            clockFace == null -> error("No ClockFace instances, nowhere to put missing-calendar drawable")
+            else -> clockFace?.setMissingCalendarDrawable(ContextCompat.getDrawable(context, R.drawable.ic_empty_calendar));
         }
 
         ClockState.addObserver(this)

@@ -30,7 +30,7 @@
                 <category android:name="android.intent.category.DEFAULT" />
             </intent-filter>
 
-            <!-- uncomment for testing
+            <!-- uncomment for debugging, so activity can be launched into emulator, etc.
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.LAUNCHER" />

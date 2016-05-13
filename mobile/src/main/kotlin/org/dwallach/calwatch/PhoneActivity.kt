@@ -9,7 +9,9 @@ package org.dwallach.calwatch
 import android.app.Activity
 import android.content.ContextWrapper
 import android.graphics.drawable.AnimationDrawable
+import android.os.Build
 import android.os.Bundle
+import android.support.v4.content.ContextCompat
 import android.support.v7.widget.CardView
 import android.view.Menu
 import android.view.MenuItem
@@ -25,8 +27,16 @@ class PhoneActivity : Activity(), Observer, AnkoLogger {
     private var disableUICallbacks = false
 
     private fun select(card: CardView, button: View, selected: Boolean) {
-        card.setCardBackgroundColor(if (selected) getColor(R.color.calWatchDark) else getColor(R.color.calWatchPrimary))
-        // TODO: do something useful with the button, not just the card -- tinting? -- but in a portable way?
+        val bgColor = ContextCompat.getColor(this, if (selected) R.color.calWatchDark else R.color.calWatchPrimary)
+
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+            // TODO: do something useful with the button, not just the card -- tinting? -- but in a portable way?
+            card.setCardBackgroundColor(bgColor)
+        } else {
+            // On Android 4.4, setting the Card background color does nothing, and there's no paint filling either,
+            // so we'll fall back to monkeying around with the button itself
+            button.setBackgroundColor(bgColor)
+        }
     }
 
     /**
