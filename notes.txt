@@ -11,7 +11,8 @@ progress.
 
 ==================================================================================================
 
-Port to Android Wear
+Android Wear command-line things I can never remember:
+
 -- How to set up the emulator: http://www.tech-recipes.com/rx/49586/how-do-i-connect-an-android-wear-emulator-to-a-real-phone/
    adb -d forward tcp:5601 tcp:5601
 
@@ -31,13 +32,13 @@ Port to Android Wear
     adb -d shell setprop log.tag.CalendarPermission VERBOSE
 
 
-Daydream?
+TODO Daydream?
     http://www.hascode.com/2013/01/using-the-android-daydream-api/
     http://developer.android.com/reference/android/service/dreams/DreamService.html
     -- looks almost exactly the same as implementing an activity, or the watchface API
 
 Miscellaneous updates
-    TODO Adopt Wear Compatibility Library
+    TODO Adopt Wear Compatibility Library?
     https://github.com/googlesamples/android-WearCompanionLibrary
     https://github.com/googlesamples/android-WclDemoSample
     - Unclear if there's any real benefit for CalWatch in these libraries
@@ -79,12 +80,5 @@ Overhaul preferences pane on mobile
     TODO verify appearance on multiple phones / watches
 
     Material Design all the things!
-        TODO make images transparent so we can change imagebutton backgrounds at runtime (tinting!)
-        TODO replace overlaid switches with checkbox icon, tinting, etc.
+        TODO better indication when a box is selected
           see Photos app multi-select for inspiration
-        TODO replace overlaid radio icons -- use tinting / z-value / ?
-          see Photos app multi-select for inspiration
-        Layout
-          TODO consistent spacing between watchface preview and buttons
-          TODO consistent spacing between buttons
-          TODO day/date textbox should be same size as other buttons
