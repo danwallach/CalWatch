@@ -1,6 +1,6 @@
 /*
  * CalWatch
- * Copyright (C) 2014 by Dan Wallach
+ * Copyright (C) 2014-2016 by Dan Wallach
  * Home page: http://www.cs.rice.edu/~dwallach/calwatch/
  * Licensing: http://www.cs.rice.edu/~dwallach/calwatch/licensing.html
  */
@@ -51,3 +51,6 @@ Credit where credit is due:
 
     "Walking" icon by Google
     http://www.flaticon.com/authors/google
+
+    AndroidWearCrashReport by Nicolas Pomepuy
+    https://github.com/PomepuyN/AndroidWearCrashReport/

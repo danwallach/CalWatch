@@ -55,9 +55,9 @@ class WatchCalendarService : Service(), Observer {
         // Nicholas Pomepuy's crash reporting library will collect exceptions on the watch,
         // pass them along via the Data API, and they'll end up here, where we will then
         // pass them along to the Google Play Store. Seems to work.
-        CrashReport.getInstance(this).setOnCrashListener { crashInfo ->
+        CrashReport.getInstance(this).setOnCrashListener {
             // Manage the crash
-            error("wear-side crash detected!", crashInfo.throwable)
+            error("wear-side crash detected!", it.throwable)
             CrashReport.getInstance(this@WatchCalendarService).reportToPlayStore(this@WatchCalendarService)
         }
     }

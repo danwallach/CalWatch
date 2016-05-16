@@ -44,6 +44,7 @@ Miscellaneous updates
     - Unclear if there's any real benefit for CalWatch in these libraries
 
     TODO Validate that CrashReporter still works
+    Oops, it doesn't work. Local copy of CrashReporter for now.
 
 Refactoring / reengineering
     TODO significant code overlap between mobile/MyViewAnim and wear/CalWatchFaceService
