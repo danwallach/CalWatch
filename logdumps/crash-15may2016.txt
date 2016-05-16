@@ -1,6 +1,8 @@
-This came in at 12:24pm, at least, that's when I saw the dialog box on my phone. What's weird
-is that CalLoaderTask is something I got rid of ages ago as part of the migration to Kotlin and
-Anko. It's like a phantom ancient version of CalWatch is still running.
+This came in at 12:24pm "yesterday" (May 14?), at least, that's when I saw the dialog box on my phone.
+What's weird is that CalLoaderTask is something I got rid of ages ago as part of the migration to Kotlin and
+Anko. It's like a phantom ancient version of CalWatch is still running. The logs unfortunately don't
+reach back far enough to give us any insight into what happened, although we at least discovered that
+Pomepuy's crash reporter isn't working properly. Sigh.
 
 For now, I'm forcibly uninstalling CalWatch and reinstalling it.
 
