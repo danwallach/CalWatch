@@ -52,9 +52,6 @@ public class CrashReporter {
                 dis = new DataInputStream(new FileInputStream(file));
                 dis.readFully(fileData);
                 dis.close();
-            } catch (FileNotFoundException e) {
-                e.printStackTrace();
-                file.delete();
             } catch (IOException e) {
                 e.printStackTrace();
                 file.delete();

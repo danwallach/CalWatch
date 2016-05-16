@@ -23,9 +23,8 @@ public class Utils {
             out.close();
 
             // Get the bytes of the serialized object
-            byte[] buf = bos.toByteArray();
+            return bos.toByteArray();
 
-            return buf;
         } catch(IOException ioe) {
             Log.e("serializeObject", "error", ioe);
 

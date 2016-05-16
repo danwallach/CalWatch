@@ -1,11 +1,9 @@
 package fr.nicolaspomepuy.androidwearcrashreport.mobile;
 
-import android.annotation.TargetApi;
 import android.app.Activity;
 import android.app.ApplicationErrorReport;
 import android.content.Context;
 import android.content.Intent;
-import android.os.Build;
 import android.os.Bundle;
 
 import com.google.android.gms.common.ConnectionResult;
@@ -108,7 +106,7 @@ public class CrashReport implements DataApi.DataListener, GoogleApiClient.Connec
         }
     }
 
-    @TargetApi(Build.VERSION_CODES.ICE_CREAM_SANDWICH)
+//    @TargetApi(Build.VERSION_CODES.ICE_CREAM_SANDWICH)
     public void reportToPlayStore(Context c) {
         if (currentCrashInfo == null || currentException == null) {
             return;
