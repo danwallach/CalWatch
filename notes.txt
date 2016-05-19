@@ -36,6 +36,7 @@ TODO Daydream?
     http://www.hascode.com/2013/01/using-the-android-daydream-api/
     http://developer.android.com/reference/android/service/dreams/DreamService.html
     -- looks almost exactly the same as implementing an activity, or the watchface API
+    -- so the new virtual reality stuff is also called Daydream. Hmmm.
 
 Miscellaneous updates
     TODO Adopt Wear Compatibility Library?
@@ -43,17 +44,7 @@ Miscellaneous updates
     https://github.com/googlesamples/android-WclDemoSample
     - Unclear if there's any real benefit for CalWatch in these libraries
 
-    TODO Validate that CrashReporter still works
-    Oops, it doesn't work. Local copy of CrashReporter for now.
-
 Refactoring / reengineering
-    TODO significant code overlap between mobile/MyViewAnim and wear/CalWatchFaceService
-    - but differences are significant enough that it's not going to be very easy to move to /shared
-    - factoring out the GoogleAPI stuff wasn't too bad, probably straightforward to refactor other stuff the same way
-
-    TODO fix Gradle, presently requiring me to have the git version code in three places to work right
-    (I tried putting it just in settings.gradle or the top-level build.gradle and this didn't work)
-
     TODO Rip out Observer/Listener logic (getting untenable) and redo with functional-reactive style
     - CalendarFetcher now works in a vaguely functional style, but we'd want to get rid of the observers
       on ClockState
@@ -63,10 +54,6 @@ Refactoring / reengineering
     - Twice I've tried standardizing on Float and things break: loss of the second-hand (!), and misalignment of the stipple pattern,
       so the thing to try next is standardizing on Double.
     - There's something really subtle and weird about how Kotlin does floating point that I'm clearly missing.
-
-Right-to-left support
-    TODO detect when we're in RTL mode
-    TODO swap day/date block from 9 o'clock to 3 o'clock or leave alone?
 
 Deal with multiday events that aren't "all day" events
     TODO idea: resurrect all-day events by rendering them (and long events) as thin rings, perhaps separate from the main time wedges
@@ -83,3 +70,40 @@ Overhaul preferences pane on mobile
     Material Design all the things!
         TODO better indication when a box is selected
           see Photos app multi-select for inspiration
+
+
+ANDROID N / WEAR 2.0 OVERHAUL
+    TODO kill off the fitness code altogether (obsoleted by complications)
+    TODO kill off the day/date segment (maybe?!)
+    TODO interaction of numbers-mode and complications -- do we hide the digits?
+
+    TODO general-purpose watchface library for rendering / managing complications
+        TODO "cat's eye iris" effect for enabling / hiding complications
+        TODO configurable transparency for show-through background
+        TODO button UI events with internal callbacks for the watchface
+
+    TODO center-button for internal handling
+        TODO if no calendar permission, display a button with the calendar icon
+        TODO otherwise, transparent button that toggles the complications on and off
+
+    New complications that we need
+        TODO two-line textual day/date (replacing the current hard-wired complication)
+
+    Stopwatch / timer
+        TODO one complication or two?
+        TODO single button complication launch to notification with menus?
+        TODO range displays: matched colors of outer rings and inner buttons
+
+    TODO pre-load complications? Day-Date left, stopwatch right, timer top?
+
+    TODO kill phone-side configuration panel altogether
+    TODO build wear-side configuration panel
+        TODO: four entry "Style" vertical menu with icons for three face styles + seconds-hand-or-not
+        TODO: four entry "Complications" vertical menu: left/right/top/bottom
+
+    TODO code refactoring
+        TODO kill "mobile" and move "shared" to "wear" (no more companion app!)
+        TODO simplify / kill WireEvent and WireUpdate
+        TODO simplify / kill PreferencesHelper
+        TODO remove EventLayout, keep EventLayoutUniform (has the solver ever failed?)
+        TODO kill XWatchfaceReceiver
