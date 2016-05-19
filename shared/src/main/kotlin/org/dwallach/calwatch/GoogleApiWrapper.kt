@@ -46,10 +46,11 @@ object GoogleApiWrapper : GoogleApiClient.ConnectionCallbacks, GoogleApiClient.O
                         // on wear, but that's not true for mobile. Consequently, we're now
                         // dealing with two versions of everything.
                         //
-                        if(wear)
+                        if(wear) {
                             addApi(Fitness.HISTORY_API)
-                                    .addApi(Fitness.RECORDING_API)
-                                    .useDefaultAccount()
+                            addApi(Fitness.RECORDING_API)
+                            useDefaultAccount()
+                        }
                     }
                     .build()
             lClient.connect() // starts asynchronous connection

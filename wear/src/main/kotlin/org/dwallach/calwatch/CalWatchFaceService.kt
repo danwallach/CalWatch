@@ -134,7 +134,11 @@ class CalWatchFaceService : CanvasWatchFaceService(), AnkoLogger {
 
             XWatchfaceReceiver.pingExternalStopwatches(this@CalWatchFaceService)
             BatteryWrapper.init(this@CalWatchFaceService)
-            GoogleApiWrapper.startConnection(this@CalWatchFaceService.baseContext, true) { verbose { "GoogleApi ready" } }
+
+            GoogleApiWrapper.startConnection(this@CalWatchFaceService.baseContext, true) {
+                verbose { "GoogleApi ready" }
+                FitnessWrapper.subscribe()
+            }
 
             val resources = this@CalWatchFaceService.resources
 

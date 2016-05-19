@@ -1,8 +1,11 @@
 package org.dwallach.calwatch
 
+import com.google.android.gms.common.api.GoogleApiClient
 import com.google.android.gms.fitness.Fitness
+import com.google.android.gms.fitness.FitnessStatusCodes
 import com.google.android.gms.fitness.data.DataType
 import com.google.android.gms.fitness.data.Field
+import com.google.android.gms.fitness.result.DailyTotalResult
 import org.jetbrains.anko.*
 import java.util.concurrent.TimeUnit
 
@@ -24,6 +27,8 @@ object FitnessWrapper: AnkoLogger {
     private var noGoogleApiCounterConnecting = 0
     private var noGoogleApiCounterConnected = 0
 
+    private var subscribed = false
+
     fun getStepCount(): Int {
         loadStepCount() // start possible asynchronous load
         return stepCount // return older result
@@ -31,6 +36,55 @@ object FitnessWrapper: AnkoLogger {
 
     fun report() {
         info { "steps: $stepCount, prior cached: $cachedResultCounter, successful: $successfulResults, noGoogleApi: $noGoogleApiCounterNull/$noGoogleApiCounterConnecting/$noGoogleApiCounterConnected, failed: $failedResults, in-progress: $inProgressCounter" }
+    }
+    /**
+     * Gets the GoogleApiClient, if it exists, and if it fails, increments the various
+     * counters we use to track these failures without yelling about them in the logs.
+     */
+    private fun getGoogleApi(): GoogleApiClient? {
+        val client = GoogleApiWrapper.client
+
+        if(client == null)  {
+            noGoogleApiCounterNull++
+            return null // nothing to do!
+        }
+        if(client.isConnecting) {
+            noGoogleApiCounterConnecting++
+            return null // nothing to do!
+        }
+        if(!client.isConnected) {
+            noGoogleApiCounterConnected++
+            return null // nothing to do!
+        }
+
+        return client
+    }
+
+    /**
+     * Connects a subscription to the step counter. Not strictly necessary, but appears to save power.
+     */
+    fun subscribe() {
+        // Kotlin translation of subscribeToSteps() as shown here
+        // https://github.com/googlesamples/android-WatchFace/blob/master/Wearable/src/main/java/com/example/android/wearable/watchface/FitStepsWatchFaceService.java
+
+        if(subscribed) return
+
+        val client = getGoogleApi() ?: return
+
+        Fitness.RecordingApi
+                .subscribe(client, DataType.TYPE_STEP_COUNT_DELTA)
+                .setResultCallback {
+                    if(it.isSuccess) {
+                        if(it.getStatusCode() == FitnessStatusCodes.SUCCESS_ALREADY_SUBSCRIBED) {
+                            info { "Existing subscription for fitness activity detected." }
+                        } else {
+                            info { "Fitness subscription successful." }
+                            subscribed = true
+                        }
+                    } else {
+                       error { "failed to get fitness subscription: ${it.statusMessage}" }
+                    }
+                }
     }
 
     private fun loadStepCount() {
@@ -50,20 +104,9 @@ object FitnessWrapper: AnkoLogger {
             return
         }
 
-        val client = GoogleApiWrapper.client
+        subscribe() // will be a no-op, if we're already subscribed
 
-        if(client == null)  {
-            noGoogleApiCounterNull++
-            return // nothing to do!
-        }
-        if(client.isConnecting) {
-            noGoogleApiCounterConnecting++
-            return // nothing to do!
-        }
-        if(!client.isConnected) {
-            noGoogleApiCounterConnected++
-            return // nothing to do!
-        }
+        val client = getGoogleApi() ?: return
 
         //
         // We'll only resample the step counter if our data is old. How old? Quoth Google:
@@ -86,41 +129,26 @@ object FitnessWrapper: AnkoLogger {
         }
         lastSampleTime = currentTime
 
-        //
-        // Example code, via StackOverflow
-        // http://stackoverflow.com/questions/35695336/google-fit-history-api-readdailytotal-non-static-method-in-static-context/
-
-        // Converting this to Kotlin, the callback never actually happened, so we switched to a translation
-        // of the official code from Google which uses await, except we do it on an async thread. Because Kotlin.
-        // https://developers.google.com/android/reference/com/google/android/gms/fitness/HistoryApi
-        //
         inProgress = true
-        report()
 
-        async() {
-            var newStepCount: Int = stepCount
-
-            val result = Fitness.HistoryApi.readDailyTotal(client, DataType.TYPE_STEP_COUNT_DELTA).await(10, TimeUnit.SECONDS)
-
-            if (result.status.isSuccess) {
-                val totalSet = result.total
-                if (totalSet != null) {
-                    newStepCount = if (totalSet.isEmpty) 0 else totalSet.dataPoints[0].getValue(Field.FIELD_STEPS).asInt()
-                    successfulResults++
-                    verbose { "Step Count: $stepCount" }
-                } else {
-                    failedResults++
-                    debug { "No total set; no step count" }
+        Fitness.HistoryApi
+                .readDailyTotal(client, DataType.TYPE_STEP_COUNT_DELTA)
+                .setResultCallback {
+                    if (it.status.isSuccess) {
+                        val totalSet = it.total
+                        if (totalSet != null) {
+                            stepCount = if (totalSet.isEmpty) 0 else totalSet.dataPoints[0].getValue(Field.FIELD_STEPS).asInt()
+                            successfulResults++
+                            verbose { "Step Count: $stepCount" }
+                        } else {
+                            failedResults++
+                            debug { "No total set; no step count" }
+                        }
+                    } else {
+                        failedResults++
+                        debug { "Failed callback: ${it.status.toString()}" }
+                    }
+                    inProgress = false
                 }
-            } else {
-                failedResults++
-                debug { "Failed callback: ${result.status.toString()}" }
-            }
-
-            uiThread {
-                stepCount = newStepCount
-                inProgress = false
-            }
-        }
     }
 }
