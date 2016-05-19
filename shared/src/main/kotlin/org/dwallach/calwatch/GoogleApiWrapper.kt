@@ -21,6 +21,9 @@ import org.jetbrains.anko.*
  */
 
 object GoogleApiWrapper : GoogleApiClient.ConnectionCallbacks, GoogleApiClient.OnConnectionFailedListener, AnkoLogger {
+    /**
+     * The GoogleApiClient instance. Call [startConnection] to get it initialized.
+     */
     var client: GoogleApiClient? = null
       private set
     private var successFunc: ()->Unit = {}
