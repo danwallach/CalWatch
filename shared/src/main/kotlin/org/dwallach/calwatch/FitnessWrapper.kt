@@ -5,9 +5,7 @@ import com.google.android.gms.fitness.Fitness
 import com.google.android.gms.fitness.FitnessStatusCodes
 import com.google.android.gms.fitness.data.DataType
 import com.google.android.gms.fitness.data.Field
-import com.google.android.gms.fitness.result.DailyTotalResult
 import org.jetbrains.anko.*
-import java.util.concurrent.TimeUnit
 
 /**
  * This class wraps the Android Fit API and provides a daily step count value, which we
@@ -16,6 +14,12 @@ import java.util.concurrent.TimeUnit
 
 object FitnessWrapper: AnkoLogger {
     private var stepCount: Int = 0
+
+    /**
+     * If true, then FitnessWrapper just returns 0. If false, then it actually fetches
+     * the daily step counter.
+     */
+    var fakeResults: Boolean = false
 
     private var lastSampleTime = 0L
     private var inProgress = false
@@ -30,6 +34,9 @@ object FitnessWrapper: AnkoLogger {
     private var subscribed = false
 
     fun getStepCount(): Int {
+        if(fakeResults)
+            return 0
+
         loadStepCount() // start possible asynchronous load
         return stepCount // return older result
     }
@@ -64,6 +71,8 @@ object FitnessWrapper: AnkoLogger {
      * Connects a subscription to the step counter. Not strictly necessary, but appears to save power.
      */
     fun subscribe() {
+        if(fakeResults) return
+
         // Kotlin translation of subscribeToSteps() as shown here
         // https://github.com/googlesamples/android-WatchFace/blob/master/Wearable/src/main/java/com/example/android/wearable/watchface/FitStepsWatchFaceService.java
 
