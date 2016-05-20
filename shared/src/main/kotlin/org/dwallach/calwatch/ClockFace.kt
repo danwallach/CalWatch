@@ -33,9 +33,6 @@ class ClockFace(val wear: Boolean = false) : Observer, AnkoLogger {
     private var oldCy = -1
     private var radius = DEFAULT_RADIUS
 
-    private var showSeconds = Constants.DEFAULT_SHOW_SECONDS
-    private var showDayDate = Constants.DEFAULT_SHOW_DAY_DATE
-    private var showStepCounter = Constants.DEFAULT_SHOW_STEP_COUNTER
     private var ambientLowBit = FORCE_AMBIENT_LOW_BIT
     private var burnInProtection = FORCE_BURNIN_PROTECTION
 
@@ -52,7 +49,6 @@ class ClockFace(val wear: Boolean = false) : Observer, AnkoLogger {
     private var facePathCache: Path? = null
     private var facePathCacheMode = -1
 
-    private var faceMode = 0
     private var ambientMode = false
 
     private var drawStyle = PaintCan.STYLE_NORMAL // see setDrawStyle
@@ -181,7 +177,7 @@ class ClockFace(val wear: Boolean = false) : Observer, AnkoLogger {
 
         // something a real watch can't do: float the text over the hands
         // (but disable when we're in ambientMode with burnInProtection)
-        if (drawStyle != PaintCan.STYLE_ANTI_BURNIN && showDayDate) drawMonthBox(canvas)
+        if (drawStyle != PaintCan.STYLE_ANTI_BURNIN && ClockState.showDayDate) drawMonthBox(canvas)
 
         TimeWrapper.frameEnd()
     }
@@ -431,7 +427,7 @@ class ClockFace(val wear: Boolean = false) : Observer, AnkoLogger {
         val bottomHack = missingBottomPixels > 0
 
         // force "lite" mode when in burn-in protection mode
-        val lFaceMode = if(drawStyle == PaintCan.STYLE_ANTI_BURNIN) ClockState.FACE_LITE else faceMode
+        val lFaceMode = if(drawStyle == PaintCan.STYLE_ANTI_BURNIN) ClockState.FACE_LITE else ClockState.faceMode
 
         val colorTickShadow = PaintCan[drawStyle, PaintCan.COLOR_TICK_SHADOW]
         val colorSmall = PaintCan[drawStyle, PaintCan.COLOR_SMALL_TEXT_AND_LINES]
@@ -465,7 +461,7 @@ class ClockFace(val wear: Boolean = false) : Observer, AnkoLogger {
                         drawRadialLine(lFacePathCache, strokeWidth, -0.4, .75f, 1.0f, true, false)
                         drawRadialLine(lFacePathCache, strokeWidth, 0.4, .75f, 1.0f, true, false)
                     }
-                } else if (i == 45 && drawStyle != PaintCan.STYLE_ANTI_BURNIN && showDayDate) {
+                } else if (i == 45 && drawStyle != PaintCan.STYLE_ANTI_BURNIN && ClockState.showDayDate) {
                     // 9 o'clock, don't extend into the inside, where we'd overlap with the DayDate display
                     // except, of course, when we're not showing the DayDate display, which might happen
                     // via user preference or because we're in burnInProtection ambient mode
@@ -549,7 +545,7 @@ class ClockFace(val wear: Boolean = false) : Observer, AnkoLogger {
             // 9 o'clock
             //
 
-            if (!showDayDate) {
+            if (!ClockState.showDayDate) {
                 r = 0.9f
                 val nineWidth = colorBig.measureText("9")
 
@@ -578,7 +574,7 @@ class ClockFace(val wear: Boolean = false) : Observer, AnkoLogger {
         drawRadialLine(canvas, hours, 0.1f, 0.6f, hourColor, shadowColor)
         drawRadialLine(canvas, minutes, 0.1f, 0.9f, minuteColor, shadowColor)
 
-        if (drawStyle == PaintCan.STYLE_NORMAL && showSeconds) {
+        if (drawStyle == PaintCan.STYLE_NORMAL && ClockState.showSeconds) {
             val secondsColor = PaintCan[PaintCan.STYLE_NORMAL, PaintCan.COLOR_SECOND_HAND]
             // ugly details: we might run 10% or more away from our targets at 4Hz, making the second
             // hand miss the indices. Ugly. Thus, some hackery.
@@ -793,7 +789,7 @@ class ClockFace(val wear: Boolean = false) : Observer, AnkoLogger {
         // on the charger, and because the step counter seems to have a non-zero impact on battery
         // life, so we'll try to save a bit on power usage.
 
-        if(!showStepCounter || BatteryWrapper.batteryPct < Constants.POWER_WARN_CRITICAL_LEVEL) return
+        if(!ClockState.showStepCounter || BatteryWrapper.batteryPct < Constants.POWER_WARN_CRITICAL_LEVEL) return
 
         val rawStepCount = FitnessWrapper.getStepCount()
 
@@ -1091,15 +1087,9 @@ class ClockFace(val wear: Boolean = false) : Observer, AnkoLogger {
 
     // this gets called when the ClockState updates itself
     override fun update(observable: Observable?, data: Any?) {
-        verbose { "update - start, instance($instanceID)" }
+        verbose { "update - instance($instanceID)" }
         wipeCaches() // nuke saved Paths and such, because all sorts of state may have just changed
-
-        this.faceMode = ClockState.faceMode
-        this.showDayDate = ClockState.showDayDate
-        this.showSeconds = ClockState.showSeconds
-        this.showStepCounter = ClockState.showStepCounter
-
-        verbose("update - end")
+        verbose { "caches wiped ($instanceID)" }
     }
 
     private fun updateEventList() {
