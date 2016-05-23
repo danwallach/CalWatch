@@ -173,6 +173,7 @@ class PhoneActivity : Activity(), Observer, AnkoLogger {
         PreferencesHelper.loadPreferences(this)
         CalendarPermission.init(this)
         GoogleApiWrapper.startConnection(this) { verbose { "GoogleApi ready" } }
+        FitnessWrapper.fakeResults = true
 
         surfaceView.init(this)
         surfaceView.initCalendarFetcher(this)
