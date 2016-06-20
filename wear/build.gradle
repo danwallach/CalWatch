@@ -42,21 +42,6 @@ def getVersionName = { ->
     return versionName
 }
 
-buildscript {
-    ext.kotlin_version = '1.0.2'
-    ext.anko_version = '0.8.3'
-    repositories {
-        mavenCentral()
-        maven {
-            url 'https://dl.bintray.com/kotlin/kotlin-eap/'
-        }
-    }
-    dependencies {
-        classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlin_version"
-        classpath "org.jetbrains.kotlin:kotlin-android-extensions:$kotlin_version"
-    }
-}
-
 android {
     compileSdkVersion 23
     buildToolsVersion "23.0.3"
