@@ -24,6 +24,7 @@ import kotlin.comparisons.thenBy
 import kotlin.comparisons.thenByDescending
 
 import org.jetbrains.anko.*
+import org.jetbrains.anko.custom.async
 
 /**
  * This class handles all the dirty work of asynchronously loading calendar data from the calendar provider
@@ -270,7 +271,7 @@ class CalendarFetcher(initialContext: Context, val contentUri: Uri, val authorit
         // didn't match up quite right.
         //
         var result: Pair<List<WireEvent>, Throwable?>
-        async {
+        doAsync {
             try {
                 val startTime = SystemClock.elapsedRealtimeNanos()
                 result = loadContent(context)
