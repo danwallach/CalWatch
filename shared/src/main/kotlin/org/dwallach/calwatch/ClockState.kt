@@ -180,7 +180,7 @@ object ClockState : Observable(), AnkoLogger {
             error("parse failure on protobuf", ioe)
             return
         } catch (e: Exception) {
-            if (eventBytes.size == 0)
+            if (eventBytes.isEmpty())
                 error("zero-length message received!")
             else
                 error({ "some other weird failure on protobuf: nbytes(${eventBytes.size})" }, e)

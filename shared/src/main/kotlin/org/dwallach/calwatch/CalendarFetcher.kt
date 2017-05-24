@@ -12,6 +12,7 @@ import android.content.ContentUris
 import android.content.Context
 import android.content.Intent
 import android.content.IntentFilter
+import android.graphics.Color
 import android.net.Uri
 import android.os.*
 import android.provider.CalendarContract
@@ -45,7 +46,7 @@ class CalendarFetcher(initialContext: Context, val contentUri: Uri, val authorit
 
     private val broadcastReceiver = object : BroadcastReceiver() {
         override fun onReceive(context: Context, intent: Intent) {
-            verbose { "receiver: got intent message.  action(${intent.action}), data(${intent.data}), toString(${intent.toString()})" }
+            verbose { "receiver: got intent message.  action(${intent.action}), data(${intent.data}), toString($intent)" }
             if (Intent.ACTION_PROVIDER_CHANGED == intent.action) {
 
                 // Google's reference code also checks that the Uri matches intent.getData(), but the URI we're getting back via intent.getData() is:
@@ -162,9 +163,13 @@ class CalendarFetcher(initialContext: Context, val contentUri: Uri, val authorit
                 CalendarContract.Instances.BEGIN,
                 CalendarContract.Instances.END,
                 CalendarContract.Instances.EVENT_ID,
-                CalendarContract.Instances.DISPLAY_COLOR,
+                CalendarContract.Instances.CALENDAR_COLOR,
+                CalendarContract.Instances.EVENT_COLOR,
                 CalendarContract.Instances.ALL_DAY,
                 CalendarContract.Instances.VISIBLE)
+
+        // Note: we used to use DISPLAY_COLOR, but that's now deprecated on Wear 2.0 because reasons.
+        // https://issuetracker.google.com/issues/38476499
 
         // now, get the list of events
         try {
@@ -183,7 +188,7 @@ class CalendarFetcher(initialContext: Context, val contentUri: Uri, val authorit
                         val startTime = iCursor.getLong(i++)
                         val endTime = iCursor.getLong(i++)
                         i++ // val eventID = iCursor.getLong(i++)
-                        val displayColor = iCursor.getInt(i++)
+                        val displayColor = calendarColorFix(iCursor.getInt(i++), iCursor.getInt(i++))
                         val allDay = iCursor.getInt(i++) != 0
                         val visible = iCursor.getInt(i) != 0
 
@@ -242,7 +247,7 @@ class CalendarFetcher(initialContext: Context, val contentUri: Uri, val authorit
         // once an hour -- so we're not killing the battery in any case.
         //
         val wakeLock = context.powerManager.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, "CalWatchWakeLock")
-        wakeLock.acquire()
+        wakeLock.acquire(10000) // 10 seconds is more than we'll ever need
 
         verbose { "async: wake lock acquired (CalendarFetcher #$instanceID)" }
 
@@ -265,7 +270,7 @@ class CalendarFetcher(initialContext: Context, val contentUri: Uri, val authorit
         // didn't match up quite right.
         //
         var result: Pair<List<WireEvent>, Throwable?>
-        async() {
+        async {
             try {
                 val startTime = SystemClock.elapsedRealtimeNanos()
                 result = loadContent(context)
@@ -310,5 +315,12 @@ class CalendarFetcher(initialContext: Context, val contentUri: Uri, val authorit
         fun requestRescan() {
             singletonFetcher?.rescan()
         }
+
+        private fun calendarColorFix(calendarColor: Int, eventColor: Int) =
+                if (eventColor != 0) eventColor
+                else if (calendarColor != 0) calendarColor
+                else Color.DKGRAY
     }
 }
+
+

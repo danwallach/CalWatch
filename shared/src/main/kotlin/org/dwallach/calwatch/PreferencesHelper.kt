@@ -6,10 +6,12 @@
  */
 package org.dwallach.calwatch
 
+import android.annotation.SuppressLint
 import android.content.Context
 import org.jetbrains.anko.*
 
 object PreferencesHelper: AnkoLogger {
+    @SuppressLint("CommitPrefEdits")
     fun savePreferences(context: Context) {
         with (context.getSharedPreferences(Constants.PREFS_KEY, Context.MODE_PRIVATE).edit()) {
             putInt("faceMode", ClockState.faceMode)

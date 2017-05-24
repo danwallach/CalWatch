@@ -45,7 +45,7 @@ class WearReceiverService : WearableListenerService(), AnkoLogger {
             // the code below is for backward compatibility with our earlier messaging / preferences system
             val savedState = getSharedPreferences(Constants.PREFS_KEY, Context.MODE_PRIVATE).getString("savedState", "")
 
-            if (savedState.length > 0) {
+            if (savedState.isNotEmpty()) {
                 try {
                     ClockState.setProtobuf(Base64.decode(savedState, Base64.DEFAULT))
                 } catch (e: IllegalArgumentException) {
@@ -70,7 +70,7 @@ class WearReceiverService : WearableListenerService(), AnkoLogger {
                 .filter { it.type == DataEvent.TYPE_CHANGED }
                 .map { it.dataItem }
                 .forEach {
-                    debug { "--> item found: ${it.toString()}" }
+                    debug { "--> item found: $it" }
                     if (it.uri.path.compareTo(Constants.SETTINGS_PATH) == 0) {
                         val dataMap = DataMapItem.fromDataItem(it).dataMap
                         val eventbuf = dataMap.getByteArray(Constants.DATA_KEY)

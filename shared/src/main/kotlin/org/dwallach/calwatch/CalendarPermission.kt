@@ -8,6 +8,7 @@
 package org.dwallach.calwatch
 
 import android.Manifest
+import android.annotation.SuppressLint
 import android.app.Activity
 import android.content.Context
 import android.content.pm.PackageManager
@@ -65,6 +66,7 @@ object CalendarPermission: AnkoLogger {
     /**
      * Request permission to access the calendar.
      */
+    @SuppressLint("CommitPrefEdits")
     fun request(activity: Activity) {
         if (!check(activity)) {
             numRequests++

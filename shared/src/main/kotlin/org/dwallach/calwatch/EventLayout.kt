@@ -41,10 +41,9 @@ object EventLayout: AnkoLogger {
 
         // (In degenerate cases, this could actually get to O(n^3). Highly unlikely.)
 
-        val nEvents: Int
+        val nEvents: Int = events.size
         var maxLevelAnywhere = 0
 
-        nEvents = events.size
         if (nEvents == 0) return 0    // another degnerate case
 
         var e = events[0] // first event
@@ -150,14 +149,10 @@ object EventLayout: AnkoLogger {
         return maxLevelAnywhere
     }
 
-    fun sanityTest(events: List<EventWrapper>, maxLevel: Int, blurb: String) {
-        val nEvents = events.size
-
-        for (i in 0..nEvents - 1) {
-            val e = events[i]
-            if (e.minLevel < 0 || e.maxLevel > maxLevel) {
-                error { "malformed eventwrapper ($blurb): ${e.toString()}" }
+    fun sanityTest(events: List<EventWrapper>, maxLevel: Int, blurb: String) =
+        events.forEach {
+            if (it.minLevel < 0 || it.maxLevel > maxLevel) {
+                error { "malformed eventwrapper ($blurb): $it" }
             }
         }
-    }
 }

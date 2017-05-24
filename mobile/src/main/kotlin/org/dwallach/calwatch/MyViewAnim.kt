@@ -135,7 +135,7 @@ class MyViewAnim(context: Context, attrs: AttributeSet) : View(context, attrs), 
         when {
             context.resources == null -> error("No context resources, can't get missing-calendar drawable")
             clockFace == null -> error("No ClockFace instances, nowhere to put missing-calendar drawable")
-            else -> clockFace?.setMissingCalendarDrawable(ContextCompat.getDrawable(context, R.drawable.ic_empty_calendar));
+            else -> clockFace?.setMissingCalendarDrawable(ContextCompat.getDrawable(context, R.drawable.ic_empty_calendar))
         }
 
         ClockState.addObserver(this)

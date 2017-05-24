@@ -15,7 +15,7 @@ class WearSender(context: Context): AnkoLogger {
     fun sendAllToWatch() {
         try {
             val wireBytesToSend = ClockState.getProtobuf()
-            if (wireBytesToSend.size == 0) return
+            if (wireBytesToSend.isEmpty()) return
 
             verbose { "preparing event list for transmission, length(${wireBytesToSend.size} bytes)" }
 
@@ -38,7 +38,7 @@ class WearSender(context: Context): AnkoLogger {
                     if (it.status.isSuccess) {
                         info { "Data item set: ${it.dataItem.uri}" }
                     } else {
-                        error { "Data item failed? ${it.status.toString()}" }
+                        error { "Data item failed? ${it.status}" }
                     }
                 }
             }

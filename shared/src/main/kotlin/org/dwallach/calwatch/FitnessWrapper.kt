@@ -84,7 +84,7 @@ object FitnessWrapper: AnkoLogger {
                 .subscribe(client, DataType.TYPE_STEP_COUNT_DELTA)
                 .setResultCallback {
                     if(it.isSuccess) {
-                        if(it.getStatusCode() == FitnessStatusCodes.SUCCESS_ALREADY_SUBSCRIBED) {
+                        if(it.statusCode == FitnessStatusCodes.SUCCESS_ALREADY_SUBSCRIBED) {
                             info { "Existing subscription for fitness activity detected." }
                         } else {
                             info { "Fitness subscription successful." }
@@ -155,7 +155,7 @@ object FitnessWrapper: AnkoLogger {
                         }
                     } else {
                         failedResults++
-                        debug { "Failed callback: ${it.status.toString()}" }
+                        debug { "Failed callback: ${it.status}" }
                     }
                     inProgress = false
                 }

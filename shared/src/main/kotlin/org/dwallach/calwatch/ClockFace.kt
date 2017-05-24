@@ -904,7 +904,7 @@ class ClockFace(val wear: Boolean = false) : Observer, AnkoLogger {
 
             // Stopwatch second hand only drawn if we're not in ambient mode.
             if (drawStyle == PaintCan.STYLE_NORMAL)
-                drawRadialLine(canvas, seconds.toDouble(), 0.1f, 0.945f, colorStopwatchSeconds, null)
+                drawRadialLine(canvas, seconds, 0.1f, 0.945f, colorStopwatchSeconds, null)
 
             // Stopwatch minute hand. Same thin gauge as second hand, but will be attached to the arc,
             // and thus look super cool.
