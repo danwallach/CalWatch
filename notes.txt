@@ -82,32 +82,25 @@ Overhaul preferences pane on mobile
 
 ANDROID N / WEAR 2.0 OVERHAUL
     TODO kill off the fitness code altogether (obsoleted by complications)
-    TODO kill off the day/date segment (maybe?!)
+    TODO kill off the day/date segment
     TODO interaction of numbers-mode and complications -- do we hide the digits?
+        (probably just draw the complications over the digits and let them be cropped)
 
-    TODO general-purpose watchface library for rendering / managing complications
-        TODO "cat's eye iris" effect for enabling / hiding complications
-        TODO configurable transparency for show-through background
-        TODO button UI events with internal callbacks for the watchface
+    TODO integration of the general-purpose complication rendering library
+        TODO rendering order: do we draw the hands on top of the complications or not?
 
-    TODO center-button for internal handling
+    TODO handling of no-calendar-permission
         TODO if no calendar permission, display a button with the calendar icon
-        TODO otherwise, transparent button that toggles the complications on and off
+            TODO if clicked, launch the permission thing (focus on center, vs. complications elsewhere)
+        TODO otherwise, the usual battery meter?
 
-    New complications that we need
-        TODO two-line textual day/date (replacing the current hard-wired complication)
-
-    Stopwatch / timer
-        TODO one complication or two?
-        TODO single button complication launch to notification with menus?
-        TODO range displays: matched colors of outer rings and inner buttons
-
-    TODO pre-load complications? Day-Date left, stopwatch right, timer top?
+    TODO pre-load complications? Day-Date left
+        TODO awareness of stopwatch/timer complications? probably not.
 
     TODO kill phone-side configuration panel altogether
     TODO build wear-side configuration panel
         TODO: four entry "Style" vertical menu with icons for three face styles + seconds-hand-or-not
-        TODO: four entry "Complications" vertical menu: left/right/top/bottom
+        TODO: integrate library complication selection
 
     TODO code refactoring
         TODO kill "mobile" and move "shared" to "wear" (no more companion app!)
@@ -115,3 +108,7 @@ ANDROID N / WEAR 2.0 OVERHAUL
         TODO simplify / kill PreferencesHelper
         TODO remove EventLayout, keep EventLayoutUniform (has the solver ever failed?)
         TODO kill XWatchfaceReceiver
+
+
+    New Complication library:
+
