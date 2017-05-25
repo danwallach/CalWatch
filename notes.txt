@@ -31,6 +31,14 @@ Android Wear command-line things I can never remember:
     adb -d shell setprop log.tag.CalendarFetcher VERBOSE
     adb -d shell setprop log.tag.CalendarPermission VERBOSE
 
+    (or, once a shell is running)
+    setprop log.tag.ClockFace VERBOSE
+    setprop log.tag.ClockState VERBOSE
+    setprop log.tag.MyViewAnim VERBOSE
+    setprop log.tag.PhoneActivity VERBOSE
+    setprop log.tag.CalendarFetcher VERBOSE
+    setprop log.tag.CalendarPermission VERBOSE
+
 
 TODO Daydream?
     http://www.hascode.com/2013/01/using-the-android-daydream-api/
