@@ -99,7 +99,7 @@ class CalWatchFaceService : CanvasWatchFaceService(), AnkoLogger {
             }
 
             calendarFetcher?.kill()
-            calendarFetcher = CalendarFetcher(this@CalWatchFaceService, WearableCalendarContract.Instances.CONTENT_URI, WearableCalendarContract.AUTHORITY)
+            calendarFetcher = CalendarFetcher(this@CalWatchFaceService)
         }
 
         /**
@@ -117,17 +117,14 @@ class CalWatchFaceService : CanvasWatchFaceService(), AnkoLogger {
             // announce our version number to the logs
             VersionWrapper.logVersion(this@CalWatchFaceService)
 
+            // load any saved preferences
+            PreferencesHelper.loadPreferences(this@CalWatchFaceService)
+
+            // TODO: add Wear2 features here
             setWatchFaceStyle(
                     WatchFaceStyle.Builder(this@CalWatchFaceService)
-                    .setCardPeekMode(WatchFaceStyle.PEEK_MODE_SHORT)
-                    .setBackgroundVisibility(WatchFaceStyle.BACKGROUND_VISIBILITY_INTERRUPTIVE)
-                    .setShowSystemUiTime(false)
                     .setStatusBarGravity(Gravity.CENTER)
-                    .setHotwordIndicatorGravity(Gravity.CENTER_HORIZONTAL) // not particularly precise, but seems reasonable
                     .setViewProtectionMode(WatchFaceStyle.PROTECT_WHOLE_SCREEN)
-
-                    // the features below were added in Wear 5.1 (maybe 5.0?) and seem worth tweaking
-                    .setPeekOpacityMode(WatchFaceStyle.PEEK_OPACITY_MODE_TRANSLUCENT)
                     .setShowUnreadCountIndicator(true)
                     .setAcceptsTapEvents(true)// we need tap events for permission requests
                     .build())
@@ -288,19 +285,6 @@ class CalWatchFaceService : CanvasWatchFaceService(), AnkoLogger {
             clockFace.kill()
 
             super.onDestroy()
-        }
-
-        override fun onPeekCardPositionUpdate(bounds: Rect?) {
-            super.onPeekCardPositionUpdate(bounds)
-            if(bounds == null) {
-                debug { "onPeekcardPositionUpdate: null bounds?!" }
-            } else {
-                info { "onPeekCardPositionUpdate: $bounds (${bounds.width()}, ${bounds.height()})" }
-            }
-
-            clockFace.peekCardRect = bounds
-
-            invalidate()
         }
 
         override fun onApplyWindowInsets(insets: WindowInsets) {

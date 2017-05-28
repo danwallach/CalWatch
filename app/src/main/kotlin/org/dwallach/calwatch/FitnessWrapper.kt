@@ -132,7 +132,7 @@ object FitnessWrapper: AnkoLogger {
         // mode, but since we're not even vaguely trying to be precise, it doesn't really matter.
         //
         val currentTime = TimeWrapper.gmtTime
-        if(currentTime - lastSampleTime < TimeWrapper.seconds(30)) {
+        if(currentTime - lastSampleTime < 30.seconds) {
             cachedResultCounter++
             return
         }

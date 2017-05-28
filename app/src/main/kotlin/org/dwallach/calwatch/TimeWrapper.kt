@@ -35,37 +35,6 @@ object TimeWrapper: AnkoLogger {
     //   private static final long magicOffset = 25 * 60 * 1000       // 25 minutes later, for debugging
     private val magicOffset: Long = 0                      // for production use
 
-    /**
-     * Helper function: convert from seconds to our internal time units (milliseconds).
-     */
-    fun seconds(x: Double): Long = (x *    1000.0).toLong()
-
-    /**
-     * Helper function: convert from minutes to our internal time units (milliseconds).
-     */
-
-    fun minutes(x: Double): Long = (x *   60000.0).toLong()
-
-    /**
-     * Helper function: convert from hours to our internal time units (milliseconds).
-     */
-    fun hours(x: Double): Long =   (x * 3600000.0).toLong()
-
-    /**
-     * Helper function: convert from seconds to our internal time units (milliseconds).
-     */
-    fun seconds(x: Long): Long =   (x *    1000L)
-
-    /**
-     * Helper function: convert from minutes to our internal time units (milliseconds).
-     */
-    fun minutes(x: Long): Long =   (x *   60000L)
-
-    /**
-     * Helper function: convert from hours to our internal time units (milliseconds).
-     */
-    fun hours(x: Long): Long =     (x * 3600000L)
-
     fun update() {
         gmtTime = System.currentTimeMillis() + magicOffset
         val tz = TimeZone.getDefault()
@@ -232,3 +201,50 @@ object TimeWrapper: AnkoLogger {
         update()
     }
 }
+
+/**
+ * Helper function: convert from seconds to our internal time units (milliseconds).
+ */
+val Double.seconds: Long get() = (this *    1000.0).toLong()
+
+/**
+ * Helper function: convert from minutes to our internal time units (milliseconds).
+ */
+
+val Double.minutes: Long get() = (this *   60000.0).toLong()
+
+/**
+ * Helper function: convert from hours to our internal time units (milliseconds).
+ */
+val Double.hours: Long get() =   (this * 3600000.0).toLong()
+
+/**
+ * Helper function: convert from seconds to our internal time units (milliseconds).
+ */
+val Long.seconds: Long get() =   (this *    1000L)
+
+/**
+ * Helper function: convert from minutes to our internal time units (milliseconds).
+ */
+val Long.minutes: Long get() =   (this *   60000L)
+
+/**
+ * Helper function: convert from hours to our internal time units (milliseconds).
+ */
+val Long.hours: Long   get() =   (this * 3600000L)
+
+/**
+ * Helper function: convert from seconds to our internal time units (milliseconds).
+ */
+val Int.seconds: Long get() =   (this *    1000L)
+
+/**
+ * Helper function: convert from minutes to our internal time units (milliseconds).
+ */
+val Int.minutes: Long get() =   (this *   60000L)
+
+/**
+ * Helper function: convert from hours to our internal time units (milliseconds).
+ */
+val Int.hours: Long   get() =   (this * 3600000L)
+

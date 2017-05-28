@@ -158,45 +158,6 @@ object ClockState : Observable(), AnkoLogger {
     }
 
     /**
-     * Marshals into a protobuf for transmission elsewhere. (Well, it *used* to be
-     * a protobuf, in ancient days, when we had to ship the entire calendar from
-     * phone to watch, but now it's just a simple string. We're keeping the "protobuf"
-     * nomenclature around in case we decide to go back to that at some later point.)
-     */
-    fun getProtobuf() = WireUpdate(faceMode, showSeconds, showDayDate, showStepCounter).toByteArray()
-
-    /**
-     * Load the ClockState with a protobuf containing a complete update
-     * @param eventBytes a marshaled protobuf of type WireUpdate
-     */
-    fun setProtobuf(eventBytes: ByteArray) {
-        info { "setting protobuf: ${eventBytes.size} bytes" }
-        val wireUpdate: WireUpdate
-
-        try {
-            wireUpdate = WireUpdate.parseFrom(eventBytes)
-        } catch (ioe: IOException) {
-            error("parse failure on protobuf", ioe)
-            return
-        } catch (e: Exception) {
-            if (eventBytes.isEmpty())
-                error("zero-length message received!")
-            else
-                error({ "some other weird failure on protobuf: nbytes(${eventBytes.size})" }, e)
-            return
-        }
-
-        faceMode = wireUpdate.faceMode
-        showSeconds = wireUpdate.showSecondHand
-        showDayDate = wireUpdate.showDayDate
-        showStepCounter = wireUpdate.showStepCounter
-
-        pingObservers()
-
-        verbose("event update complete")
-    }
-
-    /**
      * Call this for all the ClockState observers to get updated.
      */
     fun pingObservers() {

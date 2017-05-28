@@ -472,7 +472,7 @@ class ClockFace(val wear: Boolean = false) : Observer, AnkoLogger {
     private fun drawHands(canvas: Canvas) {
         val time = TimeWrapper.localTime
 
-        val seconds = time / (TimeWrapper.seconds(1).toDouble())
+        val seconds = time / (1.seconds.toDouble())
         val minutes = seconds / 60.0
         val hours = minutes / 12.0  // because drawRadialLine is scaled to a 60-unit circle
 
@@ -537,7 +537,7 @@ class ClockFace(val wear: Boolean = false) : Observer, AnkoLogger {
             //
             // 60 * 12 minutes = 12 hours
             //
-            val twelveMinutes = TimeWrapper.minutes(12).toDouble()
+            val twelveMinutes = 12.minutes.toDouble()
 
             val arcStart: Double = startTime / twelveMinutes
             val arcEnd: Double = endTime / twelveMinutes
@@ -559,7 +559,7 @@ class ClockFace(val wear: Boolean = false) : Observer, AnkoLogger {
 
         // integer division gets us the exact hour, then multiply by 5 to scale to our
         // 60-second circle
-        var stippleTime = time / TimeWrapper.hours(1)
+        var stippleTime = time / 1.hours
         stippleTime *= 5
 
         // we might want to rejigger this to be paranoid about concurrency smashing stipplePathCache,
@@ -647,7 +647,7 @@ class ClockFace(val wear: Boolean = false) : Observer, AnkoLogger {
         val time = TimeWrapper.gmtTime
 
         // we don't want to poll *too* often; the code below translates to about once per five minute
-        if (batteryPathCache == null || time - batteryCacheTime > TimeWrapper.minutes(5)) {
+        if (batteryPathCache == null || time - batteryCacheTime > 5.minutes) {
             verbose("fetching new battery status")
             BatteryWrapper.fetchStatus()
             val batteryPct: Float = BatteryWrapper.batteryPct

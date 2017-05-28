@@ -16,6 +16,7 @@ import android.graphics.Color
 import android.net.Uri
 import android.os.*
 import android.provider.CalendarContract
+import android.support.wearable.provider.WearableCalendarContract
 import android.text.format.DateUtils
 
 import java.lang.ref.WeakReference
@@ -24,7 +25,6 @@ import kotlin.comparisons.thenBy
 import kotlin.comparisons.thenByDescending
 
 import org.jetbrains.anko.*
-import org.jetbrains.anko.custom.async
 
 /**
  * This class handles all the dirty work of asynchronously loading calendar data from the calendar provider
@@ -38,7 +38,9 @@ import org.jetbrains.anko.custom.async
  * the most recently created CalendarFetcher to do the work. This is something worth doing at the top
  * of the hour, when it's time to update the calendar.
  */
-class CalendarFetcher(initialContext: Context, val contentUri: Uri, val authority: String): AnkoLogger {
+class CalendarFetcher(initialContext: Context,
+                      val contentUri: Uri = WearableCalendarContract.Instances.CONTENT_URI,
+                      val authority: String = WearableCalendarContract.AUTHORITY): AnkoLogger {
     // this will fire when it's time to (re)load the calendar, launching an asynchronous
     // task to do all the dirty work and eventually update ClockState
     private val contextRef = WeakReference(initialContext)
@@ -101,12 +103,6 @@ class CalendarFetcher(initialContext: Context, val contentUri: Uri, val authorit
         }
 
         isReceiverRegistered = false
-
-        // We formerly here set scanInProgress to false, but we had multiple calendar fetchers running at once,
-        // and it seems the culprit is the complex way we set things up at the start of times. We'd have
-        // two separate instances of MyViewAnim. No idea why, but there's no point in that causing multiple
-        // concurrent scans of the calendar. The latter CalendarFetcher will cause the former to be "killed",
-        // but if it's still scanning, then so be it.
     }
 
     /**
@@ -147,7 +143,7 @@ class CalendarFetcher(initialContext: Context, val contentUri: Uri, val authorit
         TimeWrapper.update()
         val time = TimeWrapper.gmtTime
         val queryStartMillis = TimeWrapper.localFloorHour - TimeWrapper.gmtOffset
-        val queryEndMillis = queryStartMillis + TimeWrapper.hours(24)
+        val queryEndMillis = queryStartMillis + 24.hours
 
         try {
             verbose { "loadContent: Query times... Now: %s, QueryStart: %s, QueryEnd: %s"
@@ -248,7 +244,7 @@ class CalendarFetcher(initialContext: Context, val contentUri: Uri, val authorit
         // once an hour -- so we're not killing the battery in any case.
         //
         val wakeLock = context.powerManager.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, "CalWatchWakeLock")
-        wakeLock.acquire(10000) // 10 seconds is more than we'll ever need
+        wakeLock.acquire(10.seconds) // 10 seconds is more than we'll ever need
 
         verbose { "async: wake lock acquired (CalendarFetcher #$instanceID)" }
 
