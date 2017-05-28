@@ -18,10 +18,9 @@ import java.util.Observer
 
 /**
  * All of the graphics calls for drawing watchfaces happen here. Note that this class knows
- * nothing about Android widgets, views, or activities. That stuff is handled in MyViewAnim/PhoneActivity
- * (on the phone) and CalWatchFaceService (on the watch).
+ * nothing about Android widgets, views, or activities. That stuff is handled in CalWatchFaceService.
  */
-class ClockFace(val wear: Boolean = false) : Observer, AnkoLogger {
+class ClockFace(val drawComplications: (Canvas) -> Unit) : Observer, AnkoLogger {
     // an instance of the ClockFace class is created anew alongside the rest of the UI; this number
     // helps us keep track of which instance is which
     private val instanceID: Int
@@ -38,8 +37,6 @@ class ClockFace(val wear: Boolean = false) : Observer, AnkoLogger {
 
     private var missingBottomPixels = 0 // Moto 360 hack; set to non-zero number to pull up the indicia
     private var flatBottomCornerTime = 30f // Moto 360 hack: set to < 30.0 seconds for where the flat bottom starts
-
-    var peekCardRect: Rect? = null // updated by CalWatchFaceService if a peek card shows up
 
     private var missingCalendarDrawable: Drawable? = null
 
@@ -162,20 +159,11 @@ class ClockFace(val wear: Boolean = false) : Observer, AnkoLogger {
             if (drawStyle != PaintCan.STYLE_ANTI_BURNIN) drawBattery(canvas)
             drawStepCount(canvas)
 
-            // Kludge for peek card until we come up with something better:
-            // if there's a peek card *and* we're in ambient mode, *then* draw
-            // a solid black box behind the peek card, which would otherwise be transparent.
-            // Note that we're doing this *before* drawing the hands but *after* drawing
-            // everything else. I want the hands to not be chopped off, even though everything
-            // else will be.
-            if (peekCardRect != null && drawStyle != PaintCan.STYLE_NORMAL)
-                canvas.drawRect(peekCardRect, PaintCan[drawStyle, PaintCan.COLOR_BLACK_FILL])
+            // We're drawing the complications *before* the hands, at least for now
+            drawComplications(canvas)
 
             drawHands(canvas)
 
-            // something a real watch can't do: float the text over the hands
-            // (but disable when we're in ambientMode with burnInProtection)
-            if (drawStyle != PaintCan.STYLE_ANTI_BURNIN && ClockState.showDayDate) drawMonthBox(canvas)
         } catch (th: Throwable) {
             error("exception in drawEverything", th)
         } finally {
@@ -303,26 +291,6 @@ class ClockFace(val wear: Boolean = false) : Observer, AnkoLogger {
             canvas.drawPath(p, outlinePaint)
 
         return p
-    }
-
-    private fun drawMonthBox(canvas: Canvas) {
-        // for now, hard-coded to the 9-oclock position
-        val m = TimeWrapper.localMonthDay()
-        val d = TimeWrapper.localDayOfWeek()
-        val x1 = clockX(45.0, .85f)
-        val y1 = clockY(45.0, .85f)
-
-        val paint = PaintCan[drawStyle, PaintCan.COLOR_SMALL_TEXT_AND_LINES]
-        val shadow = PaintCan[drawStyle, PaintCan.COLOR_SMALL_SHADOW]
-
-        // AA note: we only draw the month box when in normal mode, not ambient, so no AA gymnastics here
-
-        val metrics = paint.fontMetrics
-        val dybottom = -metrics.ascent - metrics.leading // smidge it up a bunch
-        val dytop = -metrics.descent // smidge it down a little
-
-        drawShadowText(canvas, d, x1, y1 + dybottom, paint, shadow)
-        drawShadowText(canvas, m, x1, y1 + dytop, paint, shadow)
     }
 
     private fun drawShadowText(canvas: Canvas, text: String, x: Float, y: Float, paint: Paint, shadowPaint: Paint?) {
@@ -701,10 +669,7 @@ class ClockFace(val wear: Boolean = false) : Observer, AnkoLogger {
 
         if(!ClockState.showStepCounter || BatteryWrapper.batteryPct < Constants.POWER_WARN_CRITICAL_LEVEL) return
 
-        val rawStepCount = FitnessWrapper.getStepCount()
-
-        // special case if we're on mobile (setup UI), so the user sees *something*
-        val stepCount = if(rawStepCount == 0 && !wear) 6000 else rawStepCount
+        val stepCount = FitnessWrapper.getStepCount()
 
         if(stepCount == 0) return // nothing to do!
 
@@ -733,13 +698,8 @@ class ClockFace(val wear: Boolean = false) : Observer, AnkoLogger {
 
         if(drawStyle == PaintCan.STYLE_NORMAL && BatteryWrapper.batteryPct > Constants.POWER_WARN_LOW_LEVEL) {
             // we're rounding to the nearest thousand, i.e.,  1499 -> 1, 1500 -> 2, etc.
-            val stepCountString =
-                    if (rawStepCount == 0 && !wear)
-                        "?" // make it clear that we're faking it on mobile
-                    else {
-                        val stepCountDigits = Math.floor((stepCount + 500.0) / 1000.0)
-                        if (stepCountDigits > 99) "++" else stepCountDigits.toInt().toString()
-                    }
+            val stepCountDigits = Math.floor((stepCount + 500.0) / 1000.0)
+            val stepCountString = if (stepCountDigits > 99) "++" else stepCountDigits.toInt().toString()
 
             val textPaint = PaintCan[drawStyle, PaintCan.COLOR_STEP_COUNT_TEXT]
 

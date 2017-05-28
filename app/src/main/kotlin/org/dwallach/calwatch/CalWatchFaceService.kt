@@ -31,7 +31,6 @@ import android.graphics.Color
 import android.graphics.PorterDuff
 import android.graphics.Rect
 import android.os.Bundle
-import android.support.wearable.provider.WearableCalendarContract
 import android.support.wearable.watchface.CanvasWatchFaceService
 import android.support.wearable.watchface.WatchFaceService
 import android.support.wearable.watchface.WatchFaceStyle
@@ -123,11 +122,11 @@ class CalWatchFaceService : CanvasWatchFaceService(), AnkoLogger {
             // TODO: add Wear2 features here
             setWatchFaceStyle(
                     WatchFaceStyle.Builder(this@CalWatchFaceService)
-                    .setStatusBarGravity(Gravity.CENTER)
-                    .setViewProtectionMode(WatchFaceStyle.PROTECT_WHOLE_SCREEN)
-                    .setShowUnreadCountIndicator(true)
-                    .setAcceptsTapEvents(true)// we need tap events for permission requests
-                    .build())
+                            .setStatusBarGravity(Gravity.CENTER)
+                            .setViewProtectionMode(WatchFaceStyle.PROTECT_WHOLE_SCREEN)
+                            .setShowUnreadCountIndicator(true)
+                            .setAcceptsTapEvents(true)// we need tap events for permission requests
+                            .build())
 
             BatteryWrapper.init(this@CalWatchFaceService)
 
@@ -142,22 +141,24 @@ class CalWatchFaceService : CanvasWatchFaceService(), AnkoLogger {
                 error("no resources? not good")
             }
 
-            clockFace = ClockFace(true)
+            clockFace = ClockFace {
+                // TODO: draw complications, "it" is the canvas
+            }.apply {
+                setMissingCalendarDrawable(getDrawable(R.drawable.ic_empty_calendar))
+            }
 
-            clockFace.setMissingCalendarDrawable(getDrawable(R.drawable.ic_empty_calendar))
 
             ClockState.addObserver(this) // callbacks if something changes
 
             CalendarPermission.init(this@CalWatchFaceService)
 
             initCalendarFetcher()
-
         }
 
         override fun onPropertiesChanged(properties: Bundle?) {
             super.onPropertiesChanged(properties)
 
-            if(properties == null) {
+            if (properties == null) {
                 info("onPropertiesChanged: empty properties?!")
                 return
             }
@@ -165,8 +166,10 @@ class CalWatchFaceService : CanvasWatchFaceService(), AnkoLogger {
             with (properties) {
                 val lowBitAmbientMode = getBoolean(WatchFaceService.PROPERTY_LOW_BIT_AMBIENT, false)
                 val burnInProtection = getBoolean(WatchFaceService.PROPERTY_BURN_IN_PROTECTION, false)
-                clockFace.setAmbientLowBit(lowBitAmbientMode)
-                clockFace.setBurnInProtection(burnInProtection)
+                with (clockFace) {
+                    setAmbientLowBit(lowBitAmbientMode)
+                    setBurnInProtection(burnInProtection)
+                }
                 info { "onPropertiesChanged: low-bit ambient = $lowBitAmbientMode, burn-in protection = $burnInProtection" }
             }
         }
@@ -215,7 +218,7 @@ class CalWatchFaceService : CanvasWatchFaceService(), AnkoLogger {
             //                Log.v(TAG, "onDraw")
             drawCounter++
 
-            if(bounds == null || canvas == null) {
+            if (bounds == null || canvas == null) {
                 debug("onDraw: null bounds and/or canvas")
                 return
             }

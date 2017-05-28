@@ -110,14 +110,14 @@ class CalendarFetcher(initialContext: Context,
      * in ClockState, and any Observers of ClockState will be notified.
      */
     private fun rescan() {
-        if(!isReceiverRegistered) {
+        if (!isReceiverRegistered) {
             // this means that we're reusing a `killed` CalendarFetcher, which is bad, because it
             // won't be listening to the broadcasts any more. Log so we can discover it, but otherwise
             // continue running. At least it will update once an hour...
             error { "no receiver registered! (CalendarFetcher #$instanceID)" }
         }
 
-        if(scanInProgress) {
+        if (scanInProgress) {
             return
         } else {
             verbose { "rescan starting asynchronously (CalendarFetcher #$instanceID)" }
@@ -234,7 +234,7 @@ class CalendarFetcher(initialContext: Context,
         val context = getContext() ?: return
         // nothing to do without a context, so give up, surrender!
 
-        if(this != singletonFetcher)
+        if (this != singletonFetcher)
             warn { "not using the singleton fetcher! (CalendarFetcher me #$instanceID), singleton #${singletonFetcher?.instanceID})" }
 
         //
