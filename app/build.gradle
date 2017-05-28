@@ -48,10 +48,11 @@ android {
 
     defaultConfig {
         applicationId "org.dwallach.calwatch"
-        targetSdkVersion 23   // Android 6.0, Marshmallow, with the shiny new permission system
-        minSdkVersion 23      // we can now require this as well
+        targetSdkVersion 25   // Android 7.1, Nugat, corresponding to Wear 2
+        minSdkVersion 25      // we can now require this as well
         versionCode getVersionCode()
         versionName getVersionName()
+	mutiDexEnabled true
     }
 
     sourceSets {
@@ -78,17 +79,19 @@ allprojects {
 
 dependencies {
     compile fileTree(dir: 'libs', include: ['*.jar'])
-    compile project(':shared')
-    compile 'com.google.android.support:wearable:2.0.2'
-    compile 'com.google.android.wearable:wearable:2.0.2'
-//    provided 'com.google.android.wearable:wearable:2.0.2'
-    compile "org.jetbrains.kotlin:kotlin-stdlib:$kotlin_version"
-//    compile 'fr.nicolaspomepuy.androidwearcrashreport:crashreport-wear:0.6@aar' -- using local copy now
-}
 
-repositories {
-    mavenCentral()
-    maven {
-        url 'https://dl.bintray.com/kotlin/kotlin-eap/'
-    }
+    compile 'com.google.android.support:wearable:2.0.2'
+    compile 'com.google.android.gms:play-services-wearable:10.2.6'
+    compile 'com.google.android.gms:play-services-fitness:10.2.6'
+    provided 'com.google.android.wearable:wearable:2.0.2'
+    compile 'com.android.support:palette-v7:25.3.1'
+    compile "com.android.support:cardview-v7:25.3.1"
+    compile "com.android.support:support-v4:25.3.1"
+    compile "com.android.support:appcompat-v7:25.3.1"
+
+    compile "org.jetbrains.kotlin:kotlin-stdlib:$kotlin_version"
+    compile "org.jetbrains.anko:anko-sdk15:$anko_version"
+    compile "org.jetbrains.anko:anko-support-v4:$anko_version"
+    compile "org.jetbrains.anko:anko-appcompat-v7:$anko_version"
+    compile "org.jetbrains.anko:anko-cardview-v7:$anko_version"
 }
