@@ -40,18 +40,6 @@ Android Wear command-line things I can never remember:
     setprop log.tag.CalendarPermission VERBOSE
 
 
-TODO Daydream?
-    http://www.hascode.com/2013/01/using-the-android-daydream-api/
-    http://developer.android.com/reference/android/service/dreams/DreamService.html
-    -- looks almost exactly the same as implementing an activity, or the watchface API
-    -- so the new virtual reality stuff is also called Daydream. Hmmm.
-
-Miscellaneous updates
-    TODO Adopt Wear Compatibility Library?
-    https://github.com/googlesamples/android-WearCompanionLibrary
-    https://github.com/googlesamples/android-WclDemoSample
-    - Unclear if there's any real benefit for CalWatch in these libraries
-
 Refactoring / reengineering
     TODO Rip out Observer/Listener logic (getting untenable) and redo with functional-reactive style
     - CalendarFetcher now works in a vaguely functional style, but we'd want to get rid of the observers
@@ -71,18 +59,7 @@ TODO update the slides
     from an "evolution of CalWatch" into a "how to code for Android" talk? Or not? Also, worth
     adding Kotlin material.
 
-
-Overhaul preferences pane on mobile
-    TODO verify appearance on multiple phones / watches
-
-    Material Design all the things!
-        TODO better indication when a box is selected
-          see Photos app multi-select for inspiration
-
-
 ANDROID N / WEAR 2.0 OVERHAUL
-    TODO kill off the fitness code altogether (obsoleted by complications)
-    TODO kill off the day/date segment
     TODO interaction of numbers-mode and complications -- do we hide the digits?
         (probably just draw the complications over the digits and let them be cropped)
 
@@ -92,23 +69,16 @@ ANDROID N / WEAR 2.0 OVERHAUL
     TODO handling of no-calendar-permission
         TODO if no calendar permission, display a button with the calendar icon
             TODO if clicked, launch the permission thing (focus on center, vs. complications elsewhere)
+        TODO suppress complication rendering unless we have calendar permission?
         TODO otherwise, the usual battery meter?
 
     TODO pre-load complications? Day-Date left
-        TODO awareness of stopwatch/timer complications? probably not.
 
-    TODO kill phone-side configuration panel altogether
     TODO build wear-side configuration panel
-        TODO: four entry "Style" vertical menu with icons for three face styles + seconds-hand-or-not
         TODO: integrate library complication selection
+        TODO: port old phone-side config panel to be a wear scrollable recycler monster
 
     TODO code refactoring
-        TODO kill "mobile" and move "shared" to "wear" (no more companion app!)
         TODO simplify / kill WireEvent and WireUpdate
         TODO simplify / kill PreferencesHelper
-        TODO remove EventLayout, keep EventLayoutUniform (has the solver ever failed?)
-        TODO kill XWatchfaceReceiver
-
-
-    New Complication library:
 
