@@ -155,10 +155,6 @@ class ClockFace(val wear: Boolean = false) : Observer, AnkoLogger {
             // next, we draw the indices or numbers of the watchface
             drawFace(canvas)
 
-            // next, we're drawing the stopwatch and countdown timers next: they've got partial transparency
-            // that will let the watchface tick marks show through, except they're opaque in low-bit mode
-            drawTimers(canvas)
-
             // Next up, the step counter and battery meter.
             //
             // We disable the battery meter when we're in ambientMode with burnInProtection.
@@ -307,97 +303,6 @@ class ClockFace(val wear: Boolean = false) : Observer, AnkoLogger {
             canvas.drawPath(p, outlinePaint)
 
         return p
-    }
-
-    /**
-     * This variant of drawRadialArc is meant for drawing the timer and stopwatch arcs around the edge of the dial.
-     */
-    private fun drawRadialArcFlatBottom(canvas: Canvas, seconds: Float, startRadiusRatio: Float, endRadiusRatio: Float, paint: Paint, outlinePaint: Paint?) {
-        // TODO: should we cache this result like we do with the calendar arcs?
-        // For now, the answer is no, since the arc is different every time, while the timer/stopwatch is in motion.
-        // It's only static if the user pauses. It's unclear whether it's worth the bother to cache the drawing
-        // path under only that circumstance.
-
-        var startRadius = startRadiusRatio
-        var endRadius = endRadiusRatio
-        //        flatCounter++
-
-        if (startRadius < 0 || startRadius > 1 || endRadius < 0 || endRadius > 1) {
-            error { "drawRadialArcFlatBottom: arc too big! radius($startRadius,$endRadius), seconds($seconds)" }
-            return
-        }
-
-        if (seconds < 0 || seconds > 60) {
-            error { "drawRadialArcFlatBottom: seconds out of range: $seconds" }
-            return
-        }
-
-        if (drawStyle == PaintCan.STYLE_ANTI_BURNIN) {
-            // scale down everything to leave a 10 pixel margin
-            val ratio = (radius - 10f) / radius
-
-            startRadius *= ratio
-            endRadius *= ratio
-        }
-
-        if (missingBottomPixels == 0) {
-            // This one always starts at the top and goes clockwise to the time indicated (seconds).
-            // This computation is much easier than doing it for the general case.
-
-            drawRadialArc(canvas, null, 0.0, seconds.toDouble(), startRadius, endRadius, paint, outlinePaint, false)
-        } else {
-            // This one is more work. We need to deal with the flat bottom.
-
-            val p = Path()
-
-            val startOval = getRectRadius(startRadius)
-            val endOval = getRectRadius(endRadius)
-
-            if (seconds < flatBottomCornerTime) {
-                // trivial case: we don't run into the flat tire region
-
-                //                if(flatCounter % 100 == 1) {
-                //                    Log.v(TAG, "flat (case 1): seconds(" + seconds + ") < bottomCornerTime(" + flatBottomCornerTime + ")")
-                //                }
-                p.arcTo(startOval, -90f, seconds * 6f, true)
-                p.arcTo(endOval, seconds * 6f - 90f, -seconds * 6f)
-            } else if (seconds < 60 - flatBottomCornerTime) {
-                // next case: we're inside the flat-bottom region
-
-                //                if(flatCounter % 100 == 1) {
-                //                    Log.v(TAG, "flat (case 2): seconds(" + seconds + ") < bottomCornerTime(" + flatBottomCornerTime + ")")
-                //                }
-
-                p.arcTo(startOval, -90f, flatBottomCornerTime * 6f, true)
-
-                // lines left then down
-                p.lineTo(flatBottomX(seconds, startRadius), flatBottomY(seconds, startRadius)) // sideways
-                p.lineTo(flatBottomX(seconds, endRadius), flatBottomY(seconds, endRadius)) // change levels
-
-                // this will automatically jump us back to the right before going back up again
-                p.arcTo(endOval, flatBottomCornerTime * 6f - 90f, -flatBottomCornerTime * 6f)
-
-            } else {
-                // final case, we're covering the entire initial arc, all the way across the flat bottom
-                // (with a linear discontinuity, but arcTo() will bridge the gap with a lineTo())
-                // then up the other side
-
-                //                if(flatCounter % 100 == 1) {
-                //                    Log.v(TAG, "flat (case 3): seconds(" + seconds + ") < bottomCornerTime(" + flatBottomCornerTime + ")")
-                //                }
-                p.arcTo(startOval, -90f, flatBottomCornerTime * 6f, true)
-                p.arcTo(startOval, -90f + 6f * (60 - flatBottomCornerTime), 6f * (seconds - 60 + flatBottomCornerTime))
-
-                // okay, we're up on the left side, need to work our way back down again
-                p.arcTo(endOval, -90f + 6f * seconds, 6f * (60f - flatBottomCornerTime - seconds))
-                p.arcTo(endOval, -90f + 6f * flatBottomCornerTime, -6f * flatBottomCornerTime)
-            }
-            p.close()
-
-            canvas.drawPath(p, paint)
-            if (outlinePaint != null)
-                canvas.drawPath(p, outlinePaint)
-        }
     }
 
     private fun drawMonthBox(canvas: Canvas) {
@@ -846,88 +751,6 @@ class ClockFace(val wear: Boolean = false) : Observer, AnkoLogger {
             val dy = (-metrics.ascent - metrics.descent)/2f
 
             drawShadowText(canvas, stepCountString, cx.toFloat(), cy.toFloat() + dy, textPaint, null)
-        }
-    }
-
-    fun drawTimers(canvas: Canvas) {
-        val currentTime = TimeWrapper.gmtTime // note that we're *not* using local time here
-
-        val colorStopwatchSeconds = PaintCan[drawStyle, PaintCan.COLOR_STOPWATCH_SECONDS]
-        val colorStopwatchStroke = PaintCan[drawStyle, PaintCan.COLOR_STOPWATCH_STROKE]
-        val colorStopwatchFill = PaintCan[drawStyle, PaintCan.COLOR_STOPWATCH_FILL]
-        val colorTimerStroke = PaintCan[drawStyle, PaintCan.COLOR_TIMER_STROKE]
-        val colorTimerFill = PaintCan[drawStyle, PaintCan.COLOR_TIMER_FILL]
-
-        // Radius 0.9 is the start of the tick marks and the end of the normal minute hand. The normal
-        // second hand goes to 0.95. If there's a stopwatch but no timer, then the stopwatch second and minute
-        // hand will *both* go to 1.0 and the minute arc will be drawn from 0.9 to 1.0.
-
-        // If there's a timer and no stopwatch, then the timer arc will be drawn from 0.9 to 1.0.
-
-        // If there's a timer *and* a stopwatch active, then the timer wins with the outer ring and the
-        // stopwatch has the inner ring. Outer ring is 0.95 to 1.0, inner ring is 0.9 to 0.95.
-
-        // Note: if you see 0.94 or 0.96, that's really 0.95 but leaving buffer room for the overlapping
-        // line widths. Likewise, if you see 0.99 rather than 1.0, same deal. All of these numbers have
-        // been tweaked to try to get pixel-perfect results.
-
-        // First, let's compute some stuff on the timer; if the timer is done but we haven't gotten
-        // any updates from the app, then we should go ahead and treat it as if it's been reset
-        var timerRemaining: Long // should go from 0 to timerDuration, where 0 means we're done
-        if (!XWatchfaceReceiver.timerIsRunning) {
-            timerRemaining = XWatchfaceReceiver.timerDuration - XWatchfaceReceiver.timerPauseElapsed
-        } else {
-            timerRemaining = XWatchfaceReceiver.timerDuration - currentTime + XWatchfaceReceiver.timerStart
-        }
-        if (timerRemaining < 0) timerRemaining = 0
-
-
-        // we don't draw anything if the stopwatch is non-moving and at 00:00.00
-        val stopwatchRenderTime: Long
-        if (!XWatchfaceReceiver.stopwatchIsReset) {
-            if (!XWatchfaceReceiver.stopwatchIsRunning) {
-                stopwatchRenderTime = XWatchfaceReceiver.stopwatchBase
-            } else {
-                stopwatchRenderTime = currentTime - XWatchfaceReceiver.stopwatchStart + XWatchfaceReceiver.stopwatchBase
-            }
-
-            val seconds = stopwatchRenderTime / TimeWrapper.seconds(1).toDouble()
-
-            // rather than computing minutes directly (i.e., stopWatchRenderTime / 60000), we're instead going
-            // to compute the integer number of hours (using Math.floor) and subtract that, giving us a resulting
-            // number that ranges from [0-60).
-            val hours = Math.floor(stopwatchRenderTime / TimeWrapper.hours(1).toDouble()).toFloat()
-            val minutes = stopwatchRenderTime / TimeWrapper.minutes(1).toFloat() - hours * 60f
-
-            val stopWatchR1 = 0.90f
-            val stopWatchR2 = if (XWatchfaceReceiver.timerIsReset || timerRemaining == 0L) 0.995f else 0.945f
-
-            // Stopwatch second hand only drawn if we're not in ambient mode.
-            if (drawStyle == PaintCan.STYLE_NORMAL)
-                drawRadialLine(canvas, seconds, 0.1f, 0.945f, colorStopwatchSeconds, null)
-
-            // Stopwatch minute hand. Same thin gauge as second hand, but will be attached to the arc,
-            // and thus look super cool.
-            drawRadialLine(canvas, minutes.toDouble(), 0.1f, stopWatchR2 - 0.005f, colorStopwatchStroke, null)
-            drawRadialArcFlatBottom(canvas, minutes, stopWatchR1, stopWatchR2, colorStopwatchFill, colorStopwatchStroke)
-        }
-
-        if (!XWatchfaceReceiver.timerIsReset && timerRemaining > 0) {
-            if (!XWatchfaceReceiver.timerIsRunning) {
-                timerRemaining = XWatchfaceReceiver.timerDuration - XWatchfaceReceiver.timerPauseElapsed
-            } else {
-                timerRemaining = XWatchfaceReceiver.timerDuration - currentTime + XWatchfaceReceiver.timerStart
-            }
-            if (timerRemaining < 0) timerRemaining = 0
-
-            // timer hand will sweep counterclockwise from 12 o'clock back to 12 again when it's done
-            val angle = timerRemaining.toFloat() / XWatchfaceReceiver.timerDuration.toFloat() * 60f
-
-            val timerR1 = if (XWatchfaceReceiver.stopwatchIsReset) 0.90f else 0.952f
-            val timerR2 = 0.995f
-
-            drawRadialLine(canvas, angle.toDouble(), 0.1f, timerR2 - 0.005f, colorTimerStroke, null)
-            drawRadialArcFlatBottom(canvas, angle, timerR1, timerR2, colorTimerFill, colorTimerStroke)
         }
     }
 

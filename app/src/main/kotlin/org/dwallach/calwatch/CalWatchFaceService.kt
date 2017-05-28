@@ -132,7 +132,6 @@ class CalWatchFaceService : CanvasWatchFaceService(), AnkoLogger {
                     .setAcceptsTapEvents(true)// we need tap events for permission requests
                     .build())
 
-            XWatchfaceReceiver.pingExternalStopwatches(this@CalWatchFaceService)
             BatteryWrapper.init(this@CalWatchFaceService)
 
             GoogleApiWrapper.startConnection(this@CalWatchFaceService.baseContext, true) {
@@ -152,7 +151,6 @@ class CalWatchFaceService : CanvasWatchFaceService(), AnkoLogger {
 
             ClockState.addObserver(this) // callbacks if something changes
 
-            WearReceiverService.kickStart(this@CalWatchFaceService)
             CalendarPermission.init(this@CalWatchFaceService)
 
             initCalendarFetcher()

@@ -45,22 +45,6 @@
             </intent-filter>
         </service>
 
-        <service android:name=".WearReceiverService">
-            <intent-filter>
-<!--  DEPRECATED              <action android:name="com.google.android.gms.wearable.BIND_LISTENER" /> -->
-                <action android:name="com.google.android.gms.wearable.DATA_CHANGED" />
-                <data android:scheme="wear" android:host="*" android:pathPrefix="/settings" />
-            </intent-filter>
-        </service>
-
-        <receiver android:name=".XWatchfaceReceiver"
-            tools:ignore="ExportedReceiver">
-            <intent-filter>
-                <action android:name="org.dwallach.x.stopwatch.update" />
-                <action android:name="org.dwallach.x.timer.update" />
-            </intent-filter>
-        </receiver>
-
         <activity android:name=".PermissionActivity"
             android:launchMode="singleInstance">
         </activity>

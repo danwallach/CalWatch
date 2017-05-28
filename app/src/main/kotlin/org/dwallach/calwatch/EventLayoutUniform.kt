@@ -123,4 +123,19 @@ object EventLayoutUniform: AnkoLogger {
 
         return true
     }
+
+    /**
+     * Takes a list of calendar events and mutates their minLevel and maxLevel for calendar side-by-side
+     * non-overlapping layout. Note that this class is obsoleted by EventLayoutUniform, which uses a
+     * fancy simplex solver, but which might on rare occasions blow up. This class serves as our fallbaack.
+     *
+     * @param events list of events
+     * @return maximum level of any calendar event
+     */
+    fun sanityTest(events: List<EventWrapper>, maxLevel: Int, blurb: String) =
+            events.forEach {
+                if (it.minLevel < 0 || it.maxLevel > maxLevel) {
+                    error { "malformed eventwrapper ($blurb): $it" }
+                }
+            }
 }

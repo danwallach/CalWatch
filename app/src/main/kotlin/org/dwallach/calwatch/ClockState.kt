@@ -133,12 +133,11 @@ object ClockState : Observable(), AnkoLogger {
                 // yeah, we succeeded
                 lMaxLevel = EventLayoutUniform.MAXLEVEL
             } else {
-                // something blew up with the Simplex solver, fall back to the cheesy, greedy algorithm
-                verbose("falling back to older greedy method")
-                lMaxLevel = EventLayout.go(clippedEvents)
+                error("event layout failed!") // in years of testing, this failure apparently *never* happened
+                return Pair(emptyList(), 0)
             }
 
-            EventLayout.sanityTest(clippedEvents, lMaxLevel, "After new event layout")
+            EventLayoutUniform.sanityTest(clippedEvents, lMaxLevel, "After new event layout")
             verbose { "maxLevel for visible events: $lMaxLevel" }
             verbose { "number of visible events: ${clippedEvents.size}" }
 
