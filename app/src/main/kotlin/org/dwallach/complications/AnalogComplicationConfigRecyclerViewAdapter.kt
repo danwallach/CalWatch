@@ -4,9 +4,6 @@ import android.app.Activity
 import android.content.ComponentName
 import android.content.Context
 import android.content.SharedPreferences
-import android.graphics.Color
-import android.graphics.PorterDuff
-import android.graphics.PorterDuffColorFilter
 import android.graphics.drawable.Drawable
 import android.support.v7.widget.RecyclerView
 import android.support.wearable.complications.ComplicationHelperActivity
@@ -55,7 +52,7 @@ class AnalogComplicationConfigRecyclerViewAdapter(
         private val mSettingsDataSet: ArrayList<AnalogComplicationConfigData.ConfigItemType>) : RecyclerView.Adapter<RecyclerView.ViewHolder>() {
 
     /**
-     * Used by associated watch face ([AnalogComplicationWatchFaceService]) to let this
+     * Used by associated watch face to let this
      * adapter know which complication locations are supported, their ids, and supported
      * complication data types.
      */
@@ -69,7 +66,7 @@ class AnalogComplicationConfigRecyclerViewAdapter(
 
     // ComponentName associated with watch face service (service that renders watch face). Used
     // to retrieve complication information.
-    private val mWatchFaceComponentName: ComponentName
+    private val mWatchFaceComponentName = ComponentName(mContext, watchFaceServiceClass)
 
     internal var mSharedPref: SharedPreferences
 
@@ -87,7 +84,6 @@ class AnalogComplicationConfigRecyclerViewAdapter(
     private var mPreviewAndComplicationsViewHolder: PreviewAndComplicationsViewHolder? = null
 
     init {
-        mWatchFaceComponentName = ComponentName(mContext, watchFaceServiceClass)
 
         // Default value is invalid (only changed when user taps to change complication).
         mSelectedComplicationId = -1
@@ -216,33 +212,20 @@ class AnalogComplicationConfigRecyclerViewAdapter(
      * complication they want to change and preview updates dynamically.
      */
     inner class PreviewAndComplicationsViewHolder(view: View) : RecyclerView.ViewHolder(view), OnClickListener {
+        private val mWatchFaceArmsAndTicksView = view.findViewById(R.id.watch_face_arms_and_ticks)
+        private val mWatchFaceHighlightPreviewView = view.findViewById(R.id.watch_face_highlight)
 
-        private val mWatchFaceArmsAndTicksView: View
-        private val mWatchFaceHighlightPreviewView: View
+        private val mLeftComplicationBackground = view.findViewById(R.id.left_complication_background) as ImageView
+        private val mRightComplicationBackground = view.findViewById(R.id.right_complication_background) as ImageView
 
-        private val mLeftComplicationBackground: ImageView
-        private val mRightComplicationBackground: ImageView
-
-        private val mLeftComplication: ImageButton
-        private val mRightComplication: ImageButton
+        private val mLeftComplication = view.findViewById(R.id.left_complication) as ImageButton
+        private val mRightComplication = view.findViewById(R.id.right_complication) as ImageButton
 
         private var mDefaultComplicationDrawable: Drawable? = null
 
         init {
-
-            mWatchFaceArmsAndTicksView = view.findViewById(R.id.watch_face_arms_and_ticks)
-
-            // In our case, just the second arm.
-            mWatchFaceHighlightPreviewView = view.findViewById(R.id.watch_face_highlight)
-
             // Sets up left complication preview.
-            mLeftComplicationBackground = view.findViewById(R.id.left_complication_background) as ImageView
-            mLeftComplication = view.findViewById(R.id.left_complication) as ImageButton
             mLeftComplication.setOnClickListener(this)
-
-            // Sets up right complication preview.
-            mRightComplicationBackground = view.findViewById(R.id.right_complication_background) as ImageView
-            mRightComplication = view.findViewById(R.id.right_complication) as ImageButton
             mRightComplication.setOnClickListener(this)
         }
 
@@ -350,11 +333,7 @@ class AnalogComplicationConfigRecyclerViewAdapter(
     /** Displays icon to indicate there are more options below the fold.  */
     inner class MoreOptionsViewHolder(view: View) : RecyclerView.ViewHolder(view) {
 
-        private val mMoreOptionsImageView: ImageView
-
-        init {
-            mMoreOptionsImageView = view.findViewById(R.id.more_options_image_view) as ImageView
-        }
+        private val mMoreOptionsImageView = view.findViewById(R.id.more_options_image_view) as ImageView
 
         fun setIcon(resourceId: Int) {
             val context = mMoreOptionsImageView.context

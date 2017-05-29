@@ -10,12 +10,12 @@ import android.support.wearable.complications.ComplicationProviderInfo
 import android.support.wearable.complications.ProviderChooserIntent
 import android.support.wearable.view.WearableRecyclerView
 import android.util.Log
+import org.dwallach.R
 
 
 /**
- * The watch-side config activity for [AnalogComplicationWatchFaceService], which
- * allows for setting the left and right complications of watch face along with the second's marker
- * color, background color, unread notifications toggle, and background complication image.
+ * The watch-side config activity for the watchface, which
+ * allows for setting the left and right complications of watch face along with other goodies.
  */
 class AnalogComplicationConfigActivity : Activity() {
 
@@ -35,13 +35,13 @@ class AnalogComplicationConfigActivity : Activity() {
         mWearableRecyclerView = findViewById(R.id.wearable_recycler_view) as WearableRecyclerView
 
         // Aligns the first and last items on the list vertically centered on the screen.
-        mWearableRecyclerView!!.centerEdgeItems = true
+        mWearableRecyclerView?.centerEdgeItems = true
 
         // Improves performance because we know changes in content do not change the layout size of
         // the RecyclerView.
-        mWearableRecyclerView!!.setHasFixedSize(true)
+        mWearableRecyclerView?.setHasFixedSize(true)
 
-        mWearableRecyclerView!!.adapter = mAdapter
+        mWearableRecyclerView?.adapter = mAdapter
     }
 
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent) {
@@ -54,7 +54,7 @@ class AnalogComplicationConfigActivity : Activity() {
 
             // Updates preview with new complication information for selected complication id.
             // Note: complication id is saved and tracked in the adapter class.
-            mAdapter!!.updateSelectedComplication(complicationProviderInfo)
+            mAdapter?.updateSelectedComplication(complicationProviderInfo)
 
         }
     }

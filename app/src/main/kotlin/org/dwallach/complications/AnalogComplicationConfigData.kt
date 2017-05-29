@@ -18,12 +18,6 @@ object AnalogComplicationConfigData {
     }
 
     /**
-     * Returns Watch Face Service class associated with configuration Activity.
-     */
-    val watchFaceServiceClass: Class<*>
-        get() = ComplicationManager.getWatchFaceService()::class.java
-
-    /**
      * Includes all data to populate each of the 5 different custom
      * [ViewHolder] types in [AnalogComplicationConfigRecyclerViewAdapter].
      */
