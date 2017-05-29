@@ -1,4 +1,13 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="app_name">CalWatch</string>
+
+    <string name="analog_complication_config_name">Configuration</string>
+
+    <string name="analog_complication_preference_file_key">com.example.android.wearable.watchface.ANALOG_COMPLICATION_PREFERENCE_FILE_KEY</string>
+    <string name="saved_unread_notifications_pref">saved_unread_notifications</string>
+
+    <!-- Use of "\n" is to conserve horizontal space in config menu. -->
+    <string name="config_unread_notifications_label">Unread\nNotifications</string>
+    <string name="analog_complication_config">Analog Complication Config</string>
 </resources>

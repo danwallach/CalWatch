@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <color name="config_activity_background">#ffffff</color>
+    <color name="config_activity_header_text_color">#959595</color>
+</resources>

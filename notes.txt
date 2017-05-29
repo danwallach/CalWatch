@@ -63,8 +63,7 @@ ANDROID N / WEAR 2.0 OVERHAUL
     TODO interaction of numbers-mode and complications -- do we hide the digits?
         (probably just draw the complications over the digits and let them be cropped)
 
-    TODO integration of the general-purpose complication rendering library
-        TODO rendering order: do we draw the hands on top of the complications or not?
+    TODO complication rendering order: do we draw the hands on top of the complications or not?
 
     TODO handling of no-calendar-permission
         TODO if no calendar permission, display a button with the calendar icon
@@ -76,9 +75,23 @@ ANDROID N / WEAR 2.0 OVERHAUL
 
     TODO build wear-side configuration panel
         TODO: integrate library complication selection
-        TODO: port old phone-side config panel to be a wear scrollable recycler monster
+        AnalogComplicationConfigActivity -- start here and mutate it to our needs
+        AnalogComplicationConfigData -- something of a builder for setting up the config panel
 
     TODO code refactoring
         TODO simplify / kill WireEvent and WireUpdate
         TODO simplify / kill PreferencesHelper
 
+    https://android-developers.googleblog.com/2017/05/android-wear-new-complications-tools.html
+    https://developer.android.com/reference/android/support/wearable/complications/rendering/ComplicationDrawable.html
+    https://github.com/googlesamples/android-WatchFace/blob/master/Wearable/src/main/java/com/example/android/wearable/watchface/watchface/AnalogComplicationWatchFaceService.java
+    https://events.google.com/io/schedule/?section=may-19&sid=3c8f9b3c-2bdf-4e18-9797-1f087aff9b13
+    TODO ComplicationDrawable for rendering the complications
+        TODO Store ComplicationDrawable in ClockFace rather than pass external lambda?
+        TODO XML setup of ComplicationDrawable with various styles set in the XML?
+
+        This isn't nearly as easy as it sounded from the IO'17 talk!
+
+    TODO WearableRecyclerView for the settings UI
+
+    TODO Merge in Anko synthetic properties and such

@@ -37,12 +37,12 @@ import android.support.wearable.watchface.WatchFaceStyle
 import android.view.Gravity
 import android.view.SurfaceHolder
 import android.view.WindowInsets
+import org.dwallach.R
 import org.jetbrains.anko.*
 
 import java.lang.ref.WeakReference
 import java.util.Observable
 import java.util.Observer
-import android.support.wearable.complications.ComplicationData
 
 
 
