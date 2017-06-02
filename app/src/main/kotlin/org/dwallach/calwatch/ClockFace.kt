@@ -9,9 +9,9 @@ package org.dwallach.calwatch
 import android.graphics.Canvas
 import android.graphics.Paint
 import android.graphics.Path
-import android.graphics.Rect
 import android.graphics.RectF
 import android.graphics.drawable.Drawable
+import org.dwallach.complications.ComplicationWrapper
 import org.jetbrains.anko.*
 import java.util.Observable
 import java.util.Observer
@@ -20,7 +20,7 @@ import java.util.Observer
  * All of the graphics calls for drawing watchfaces happen here. Note that this class knows
  * nothing about Android widgets, views, or activities. That stuff is handled in CalWatchFaceService.
  */
-class ClockFace(val drawComplications: (Canvas) -> Unit) : Observer, AnkoLogger {
+class ClockFace: Observer, AnkoLogger {
     // an instance of the ClockFace class is created anew alongside the rest of the UI; this number
     // helps us keep track of which instance is which
     private val instanceID: Int
@@ -32,13 +32,7 @@ class ClockFace(val drawComplications: (Canvas) -> Unit) : Observer, AnkoLogger 
     private var oldCy = -1
     private var radius = DEFAULT_RADIUS
 
-    private var ambientLowBit = FORCE_AMBIENT_LOW_BIT
-    private var burnInProtection = FORCE_BURNIN_PROTECTION
-
-    private var missingBottomPixels = 0 // Moto 360 hack; set to non-zero number to pull up the indicia
     private var flatBottomCornerTime = 30f // Moto 360 hack: set to < 30.0 seconds for where the flat bottom starts
-
-    private var missingCalendarDrawable: Drawable? = null
 
     private var eventList: List<EventWrapper> = emptyList()
     private var maxLevel: Int = 0
@@ -46,38 +40,43 @@ class ClockFace(val drawComplications: (Canvas) -> Unit) : Observer, AnkoLogger 
     private var facePathCache: Path? = null
     private var facePathCacheMode = -1
 
-    private var ambientMode = false
 
-    private var drawStyle = PaintCan.STYLE_NORMAL // see setDrawStyle
+    private var drawStyle = PaintCan.STYLE_NORMAL // see updateDrawStyle
 
     // dealing with the "flat tire" a.k.a. "chin" of Moto 360 and any other watches that pull the same trick
-    fun setMissingBottomPixels(missingBottomPixels: Int) {
-        if (FORCE_MOTO_FLAT_BOTTOM)
-            this.missingBottomPixels = 30
-        else
-            this.missingBottomPixels = missingBottomPixels
+    var missingBottomPixels = 0
+        get() = field
+        set(newVal) {
+            if (FORCE_MOTO_FLAT_BOTTOM)
+                field = 30
+            else
+                field = missingBottomPixels
 
-        computeFlatBottomCorners()
-    }
+            computeFlatBottomCorners()
+        }
 
     /**
      * Tell the clock face if we're in "mute" mode. For now, we don't care.
      */
-    fun setMuteMode(muteMode: Boolean) {
-        verbose { "setMuteMode: $muteMode" }
-    }
+    var muteMode: Boolean = false
+        get() = field
+        set(newVal) {
+            verbose { "setMuteMode: $newVal" }
+            field = newVal
+        }
 
     /**
      * If true, ambient redrawing will be purely black and white, without any anti-aliasing (default: off).
      */
-    fun setAmbientLowBit(ambientLowBit: Boolean) {
-        verbose { "ambient low bit: $ambientLowBit" }
-        this.ambientLowBit = ambientLowBit || FORCE_AMBIENT_LOW_BIT
+    var ambientLowBit = FORCE_AMBIENT_LOW_BIT
+        get() = field
+        set(newVal) {
+            field = newVal || FORCE_AMBIENT_LOW_BIT
+            verbose { "ambient low bit: $field" }
+            updateDrawStyle()
+        }
 
-        setDrawStyle()
-    }
-
-    private fun setDrawStyle() {
+    private fun updateDrawStyle() {
         drawStyle = when {
             ambientMode && ambientLowBit && burnInProtection -> PaintCan.STYLE_ANTI_BURNIN
             ambientMode && ambientLowBit -> PaintCan.STYLE_LOWBIT
@@ -92,17 +91,18 @@ class ClockFace(val drawComplications: (Canvas) -> Unit) : Observer, AnkoLogger 
 
         ClockState.addObserver(this) // so we get callbacks when the clock state changes
         update(null, null) // and we'll do that callback for the first time, just to initialize things
-        setMissingBottomPixels(0) // just to get things started; flat bottom detection happens later
+        missingBottomPixels = 0 // just to get things started; flat bottom detection happens later
     }
 
     /**
-     * Call this at initialization time to set up the icon for the missing calendar.
+     * Set this at initialization time with the icon for the missing calendar.
      */
-    fun setMissingCalendarDrawable(drawable: Drawable) {
-        missingCalendarDrawable = drawable
-
-        updateMissingCalendarRect()
-    }
+    var missingCalendarDrawable: Drawable? = null
+        get() = field
+        set(drawable) {
+            field = drawable
+            updateMissingCalendarRect()
+        }
 
 
     private fun updateMissingCalendarRect() {
@@ -142,6 +142,10 @@ class ClockFace(val drawComplications: (Canvas) -> Unit) : Observer, AnkoLogger 
             // refresh. If not, it becomes a no-op.)
             updateEventList()
 
+            // First thing, we'll draw any background that the complications might be providing, but only
+            // if we're in "normal" mode.
+            if (drawStyle == PaintCan.STYLE_NORMAL) ComplicationWrapper.drawBackgroundComplication(canvas)
+
             // the calendar goes on the very bottom and everything else stacks above; the code for calendar drawing
             // works great in low-bit mode, leaving big white wedges, but this violates the rules, per Google:
             // "For OLED screens, you must use a black background. Non-background pixels must be less than 10
@@ -160,7 +164,7 @@ class ClockFace(val drawComplications: (Canvas) -> Unit) : Observer, AnkoLogger 
             drawStepCount(canvas)
 
             // We're drawing the complications *before* the hands, at least for now
-            drawComplications(canvas)
+            ComplicationWrapper.drawComplications(canvas)
 
             drawHands(canvas)
 
@@ -857,16 +861,6 @@ class ClockFace(val drawComplications: (Canvas) -> Unit) : Observer, AnkoLogger 
             return 1f
     }
 
-    fun getAmbientMode() = ambientMode
-    fun setAmbientMode(ambientMode: Boolean): Unit {
-        info { "Ambient mode: ${this.ambientMode} -> $ambientMode" }
-        if (ambientMode == this.ambientMode) return // nothing changed, so we're good
-        this.ambientMode = ambientMode
-
-        setDrawStyle()
-        wipeCaches()
-    }
-
     // call this if you want this instance to head to the garbage collector; this disconnects
     // it from paying attention to changes in the ClockState
     fun kill() {
@@ -890,18 +884,40 @@ class ClockFace(val drawComplications: (Canvas) -> Unit) : Observer, AnkoLogger 
         this.eventList = ClockState.getVisibleEventList()
     }
 
-    fun setBurnInProtection(burnInProtection: Boolean) {
-        this.burnInProtection = burnInProtection || FORCE_BURNIN_PROTECTION
+    /**
+     * Tracking whether or not we're in ambient mode.
+     */
+    var ambientMode = false
+        get() = field
+        set(newVal) {
+            info { "Ambient mode: $field -> $newVal" }
+            if (field == newVal) return // nothing changed, so we're good
+            field = newVal
 
-        setDrawStyle()
-    }
+            updateDrawStyle()
+            wipeCaches()
+
+        }
+
+    /**
+     * Tracking whether or not we need to be in burnin-protection mode.
+     */
+    var burnInProtection = FORCE_BURNIN_PROTECTION
+        get() = field
+        set(newVal) {
+            field = newVal || FORCE_BURNIN_PROTECTION
+            updateDrawStyle()
+        }
 
     /**
      * Let us know if we're on a square or round watchface. (We don't really care. For now.)
      */
-    fun setRound(round: Boolean) {
-        verbose { "setRound: $round" }
-    }
+    var round: Boolean = false
+        get() = field
+        set(newVal) {
+            field = newVal
+            verbose { "setRound: $field" }
+        }
 
     companion object {
         // for testing purposes, turn these things on; disable for production

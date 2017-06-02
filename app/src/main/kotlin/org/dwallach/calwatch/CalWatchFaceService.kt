@@ -44,15 +44,14 @@ import org.jetbrains.anko.*
 import java.lang.ref.WeakReference
 import java.util.Observable
 import java.util.Observer
-
-
+import android.support.wearable.complications.ComplicationData
 
 /**
  * Drawn heavily from the Android Wear SweepWatchFaceService example code.
  */
 class CalWatchFaceService : CanvasWatchFaceService(), AnkoLogger {
     override fun onCreateEngine(): Engine {
-        ComplicationWrapper.init(this)
+        ComplicationWrapper.watchFace = this
         val engine = Engine()
         engineRef = WeakReference(engine)
         return engine
@@ -146,11 +145,8 @@ class CalWatchFaceService : CanvasWatchFaceService(), AnkoLogger {
                 error("no resources? not good")
             }
 
-            clockFace = ClockFace {
-                // TODO: draw complications, "it" is the canvas
-            }.apply {
-                setMissingCalendarDrawable(getDrawable(R.drawable.ic_empty_calendar))
-            }
+            clockFace = ClockFace()
+            clockFace.missingCalendarDrawable = getDrawable(R.drawable.ic_empty_calendar)
 
 
             ClockState.addObserver(this) // callbacks if something changes
@@ -169,19 +165,17 @@ class CalWatchFaceService : CanvasWatchFaceService(), AnkoLogger {
             }
 
             with (properties) {
-                val lowBitAmbientMode = getBoolean(WatchFaceService.PROPERTY_LOW_BIT_AMBIENT, false)
-                val burnInProtection = getBoolean(WatchFaceService.PROPERTY_BURN_IN_PROTECTION, false)
                 with (clockFace) {
-                    setAmbientLowBit(lowBitAmbientMode)
-                    setBurnInProtection(burnInProtection)
+                    ambientLowBit = getBoolean(WatchFaceService.PROPERTY_LOW_BIT_AMBIENT, false)
+                    burnInProtection = getBoolean(WatchFaceService.PROPERTY_BURN_IN_PROTECTION, false)
+                    ComplicationWrapper.updateProperties(ambientLowBit, burnInProtection)
+                    info { "onPropertiesChanged: low-bit ambient = $ambientLowBit, burn-in protection = $burnInProtection" }
                 }
-                info { "onPropertiesChanged: low-bit ambient = $lowBitAmbientMode, burn-in protection = $burnInProtection" }
             }
         }
 
         override fun onTimeTick() {
             super.onTimeTick()
-            //            Log.d(TAG, "onTimeTick: ambient = " + isInAmbientMode())
 
             // this happens exactly once per minute; we're redrawing more often than that,
             // regardless, but this also provides a backstop if something is busted or buggy,
@@ -193,7 +187,8 @@ class CalWatchFaceService : CanvasWatchFaceService(), AnkoLogger {
             super.onAmbientModeChanged(inAmbientMode)
 
             info { "onAmbientModeChanged: $inAmbientMode" }
-            clockFace.setAmbientMode(inAmbientMode)
+            clockFace.ambientMode = inAmbientMode
+            ComplicationWrapper.updateAmbientMode(inAmbientMode)
 
             // If we just switched *to* ambient mode, then we've got some FPS data to report
             // to the logs. Otherwise, we're coming *back* from ambient mode, so it's a good
@@ -209,9 +204,21 @@ class CalWatchFaceService : CanvasWatchFaceService(), AnkoLogger {
             invalidate()
         }
 
+        /*
+         * Called when there is updated data for a complication id.
+         */
+        override fun onComplicationDataUpdate(
+                complicationId: Int, complicationData: ComplicationData?) {
+            verbose { "onComplicationDataUpdate() id: " + complicationId }
+
+            ComplicationWrapper.updateComplication(complicationId, complicationData)
+            invalidate()
+        }
+
+
         override fun onInterruptionFilterChanged(interruptionFilter: Int) {
             super.onInterruptionFilterChanged(interruptionFilter)
-            clockFace.setMuteMode(interruptionFilter == WatchFaceService.INTERRUPTION_FILTER_NONE)
+            clockFace.muteMode = (interruptionFilter == WatchFaceService.INTERRUPTION_FILTER_NONE)
             invalidate()
         }
 
@@ -235,6 +242,7 @@ class CalWatchFaceService : CanvasWatchFaceService(), AnkoLogger {
                 oldWidth = _width
                 oldHeight = _height
                 clockFace.setSize(_width, _height)
+                ComplicationWrapper.updateBounds(_width, _height)
             }
 
             try {
@@ -298,13 +306,11 @@ class CalWatchFaceService : CanvasWatchFaceService(), AnkoLogger {
         override fun onApplyWindowInsets(insets: WindowInsets) {
             super.onApplyWindowInsets(insets)
 
-            val isRound = insets.isRound
-            val chinSize = insets.systemWindowInsetBottom
-
-            verbose { "onApplyWindowInsets (round: $isRound), (chinSize: $chinSize)" }
-
-            clockFace.setRound(isRound)
-            clockFace.setMissingBottomPixels(chinSize)
+            with(clockFace) {
+                round = insets.isRound
+                missingBottomPixels = insets.systemWindowInsetBottom
+                verbose { "onApplyWindowInsets (round: $round), (chinSize: $missingBottomPixels)" }
+            }
         }
 
         override fun onVisibilityChanged(visible: Boolean) {
