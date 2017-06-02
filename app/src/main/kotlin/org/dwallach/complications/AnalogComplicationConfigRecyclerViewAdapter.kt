@@ -88,8 +88,8 @@ class AnalogComplicationConfigRecyclerViewAdapter(
         // Default value is invalid (only changed when user taps to change complication).
         mSelectedComplicationId = -1
 
-        mLeftComplicationId = ComplicationManager.getComplicationId(ComplicationLocation.LEFT)
-        mRightComplicationId = ComplicationManager.getComplicationId(ComplicationLocation.RIGHT)
+        mLeftComplicationId = ComplicationWrapper.getComplicationId(ComplicationLocation.LEFT)
+        mRightComplicationId = ComplicationWrapper.getComplicationId(ComplicationLocation.RIGHT)
 
         mSharedPref = mContext.getSharedPreferences(
                 mContext.getString(R.string.analog_complication_preference_file_key),
@@ -249,15 +249,15 @@ class AnalogComplicationConfigRecyclerViewAdapter(
         private fun launchComplicationHelperActivity(
                 currentActivity: Activity, complicationLocation: ComplicationLocation) {
 
-            mSelectedComplicationId = ComplicationManager.getComplicationId(complicationLocation)
+            mSelectedComplicationId = ComplicationWrapper.getComplicationId(complicationLocation)
 
             if (mSelectedComplicationId >= 0) {
 
-                val supportedTypes = ComplicationManager.getSupportedComplicationTypes(
+                val supportedTypes = ComplicationWrapper.getSupportedComplicationTypes(
                         complicationLocation)
 
                 val watchFace = ComponentName(
-                        currentActivity, ComplicationManager.getWatchFaceService()::class.java)
+                        currentActivity, ComplicationWrapper.watchFace::class.java)
 
                 currentActivity.startActivityForResult(
                         ComplicationHelperActivity.createProviderChooserHelperIntent(
@@ -311,7 +311,7 @@ class AnalogComplicationConfigRecyclerViewAdapter(
         }
 
         fun initializesColorsAndComplications() {
-            val complicationIds = ComplicationManager.getComplicationIds()
+            val complicationIds = ComplicationWrapper.getComplicationIds()
 
             mProviderInfoRetriever.retrieveProviderInfo(
                     object : OnProviderInfoReceivedCallback() {

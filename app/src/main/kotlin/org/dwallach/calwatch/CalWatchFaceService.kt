@@ -38,6 +38,7 @@ import android.view.Gravity
 import android.view.SurfaceHolder
 import android.view.WindowInsets
 import org.dwallach.R
+import org.dwallach.complications.ComplicationWrapper
 import org.jetbrains.anko.*
 
 import java.lang.ref.WeakReference
@@ -51,6 +52,7 @@ import java.util.Observer
  */
 class CalWatchFaceService : CanvasWatchFaceService(), AnkoLogger {
     override fun onCreateEngine(): Engine {
+        ComplicationWrapper.init(this)
         val engine = Engine()
         engineRef = WeakReference(engine)
         return engine
