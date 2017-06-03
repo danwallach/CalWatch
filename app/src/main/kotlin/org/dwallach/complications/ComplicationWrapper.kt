@@ -1,6 +1,5 @@
 package org.dwallach.complications
 
-import android.content.Context
 import android.graphics.Canvas
 import android.graphics.Color
 import android.graphics.Rect
@@ -14,6 +13,10 @@ import org.dwallach.complications.AnalogComplicationConfigRecyclerViewAdapter.*
 import org.dwallach.complications.AnalogComplicationConfigRecyclerViewAdapter.ComplicationLocation.*
 import android.support.wearable.complications.rendering.ComplicationDrawable
 import org.jetbrains.anko.verbose
+import android.support.wearable.complications.ComplicationHelperActivity
+import android.content.ComponentName
+import org.jetbrains.anko.warn
+
 
 /**
  * The goal is this is to provide a super minimal interface for two things: feeding in configuration
@@ -54,20 +57,16 @@ object ComplicationWrapper : AnkoLogger {
     /**
      * Call this from your main redraw loop and the complications will be rendered to the given canvas.
      */
-    fun drawComplications(canvas: Canvas, currentTimeMillis: Long) {
+    fun drawComplications(canvas: Canvas, currentTimeMillis: Long) =
         complicationDrawableMap.keys
                 .filter { it != BACKGROUND_COMPLICATION_ID }
-                .forEach {
-                    complicationDrawableMap[it]?.draw(canvas, currentTimeMillis)
-                }
-    }
+                .forEach { complicationDrawableMap[it]?.draw(canvas, currentTimeMillis) }
 
     /**
      * Call this from your main redraw loop specifically to draw the background complication.
      */
-    fun drawBackgroundComplication(canvas: Canvas, currentTimeMillis: Long) {
+    fun drawBackgroundComplication(canvas: Canvas, currentTimeMillis: Long) =
         complicationDrawableMap[BACKGROUND_COMPLICATION_ID]?.draw(canvas, currentTimeMillis)
-    }
 
     // TODO bridges for ambient mode, screen resolution, etc.
 
@@ -99,7 +98,7 @@ object ComplicationWrapper : AnkoLogger {
 
     internal fun getComplicationIds(): IntArray = COMPLICATION_IDS
 
-    internal fun getSupportedComplicationTypes(complicationLocation: ComplicationLocation): IntArray =
+    internal fun getSupportedComplicationTypes(complicationLocation: ComplicationLocation) =
         // Add any other supported locations here.
         when (complicationLocation) {
             BACKGROUND -> COMPLICATION_SUPPORTED_TYPES[0]
@@ -121,9 +120,7 @@ object ComplicationWrapper : AnkoLogger {
      * Call this every time the ambient mode changes.
      */
     fun updateAmbientMode(ambientMode: Boolean) =
-        complicationDrawableMap.values.forEach {
-            it.setInAmbientMode(ambientMode)
-        }
+        complicationDrawableMap.values.forEach { it.setInAmbientMode(ambientMode) }
 
     /**
      * Call this when the size of the screen changes, which is to say, at least once
@@ -136,25 +133,21 @@ object ComplicationWrapper : AnkoLogger {
         val horizontalOffset = (midpointOfScreen - sizeOfComplication) / 2
         val verticalOffset = midpointOfScreen - sizeOfComplication / 2
 
-        val leftBounds =
+        val leftBounds = Rect(
                 // Left, Top, Right, Bottom
-                Rect(
-                        horizontalOffset,
-                        verticalOffset,
-                        horizontalOffset + sizeOfComplication,
-                        verticalOffset + sizeOfComplication)
+                horizontalOffset,
+                verticalOffset,
+                horizontalOffset + sizeOfComplication,
+                verticalOffset + sizeOfComplication)
 
-        val rightBounds =
+        val rightBounds = Rect(
                 // Left, Top, Right, Bottom
-                Rect(
-                        midpointOfScreen + horizontalOffset,
-                        verticalOffset,
-                        midpointOfScreen + horizontalOffset + sizeOfComplication,
-                        verticalOffset + sizeOfComplication)
+                midpointOfScreen + horizontalOffset,
+                verticalOffset,
+                midpointOfScreen + horizontalOffset + sizeOfComplication,
+                verticalOffset + sizeOfComplication)
 
-        val screenForBackgroundBound =
-                // Left, Top, Right, Bottom
-                Rect(0, 0, width, height)
+        val screenForBackgroundBound = Rect(0, 0, width, height)
 
         complicationDrawableMap[LEFT_COMPLICATION_ID]?.setBounds(leftBounds)
         complicationDrawableMap[RIGHT_COMPLICATION_ID]?.setBounds(rightBounds)
@@ -181,7 +174,7 @@ object ComplicationWrapper : AnkoLogger {
     private fun initializeComplicationsAndBackground() {
         verbose("initializeComplications()")
 
-        val context: Context = watchFace // RuntimeException if the watchface was never initialized
+        val context = watchFace // RuntimeException if the watchface was never initialized
 
         // Creates a ComplicationDrawable for each location where the user can render a
         // complication on the watch face. In this watch face, we create one for left, right,
@@ -198,30 +191,58 @@ object ComplicationWrapper : AnkoLogger {
      * Call this in your onCreate() to initialize the complications for the engine.
      */
     fun setActiveComplications(engine: CanvasWatchFaceService.Engine) =
-        // TODO lookup Kotlin magic to pass our existing array into the vararg thing here
-        engine.setActiveComplications(BACKGROUND_COMPLICATION_ID, LEFT_COMPLICATION_ID, RIGHT_COMPLICATION_ID)
+        engine.setActiveComplications(*COMPLICATION_IDS)
 
-    private fun tappableType(type: Int?) = when(type) {
-        null -> false,
-        ComplicationData.TYPE_EMPTY, ComplicationData.TYPE_LARGE_IMAGE, ComplicationData.TYPE_NOT_CONFIGURED -> false
+    /**
+     * Some complications types are "tappable" and others aren't.
+     */
+    private fun isTappableComplicationType(type: Int?) = when (type) {
+        null, TYPE_EMPTY, TYPE_LARGE_IMAGE, TYPE_NOT_CONFIGURED -> false
         else -> true
     }
 
     /**
-     *
-     * Call this if you've got a tap event that might belong to the complication system.
+     * Call this if the watchface complication is of the NO_PERMISSION type, so we need
+     * to request the permission.
+     */
+    private fun launchPermissionForComplication() =
+        // kinda baffling that this is even necessary; why aren't permissions dealt with when you add the complication?
+        watchFace.startActivity(
+                ComplicationHelperActivity.createPermissionRequestHelperIntent(
+                        watchFace, ComponentName(watchFace, watchFace::class.java)))
+
+    /**
+     * Call this if you've got a tap event that might belong to the complication system. As a side
+     * effect, may launch a permission dialog.
      */
     fun handleTap(x: Int, y: Int, currentTime: Long) {
         val tappedComplicationIds = complicationDrawableMap.keys
                 // first, we aren't sending clicks to the background, and we're supposed to ignore anything
-                // that isn't "active" right now
+                // that isn't "active" right now or that isn't "tappable", and of course, whatever it
+                // is, the tap has to actually be inside the bounds of the complication. (so complicated!)
                 .filter { it != BACKGROUND_COMPLICATION_ID
                         && complicationDataMap[it]?.isActive(currentTime) ?: false
-                        && tappableType(complicationDataMap[it]?.type)
-                }
-                .map { complicationDrawableMap[it] }
-                .filterNotNull()
-                .filter { it.bounds.contains(x, y) }
+                        && isTappableComplicationType(complicationDataMap[it]?.type)
+                        && complicationDrawableMap[it]?.bounds?.contains(x, y) ?: false }
+
+        verbose { "Complication tap, hits on complications: " + tappedComplicationIds.joinToString() }
+
+        // we're only going to use the head of the list; it's going to basically never happen
+        // that we have more than one hit here, since we're explicitly ignoring the background
+        // image complication for tap events.
+
+        if (tappedComplicationIds.size > 1)
+            warn { "Shouldn't see more than one complication matching a tap event!" }
+
+        if (tappedComplicationIds.isNotEmpty()) {
+            val complicationData = complicationDataMap[tappedComplicationIds.first()]
+            val tapAction = complicationData?.tapAction
+            when {
+                tapAction != null -> tapAction.send()
+                complicationData?.type == TYPE_NO_PERMISSION -> launchPermissionForComplication()
+                else -> warn { "Tapped complication with no actions to take!" }
+            }
+        }
     }
 }
 
