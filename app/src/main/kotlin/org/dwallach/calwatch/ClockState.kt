@@ -8,7 +8,6 @@ package org.dwallach.calwatch
 
 import org.jetbrains.anko.*
 
-import java.io.IOException
 import java.util.Observable
 
 /**
@@ -51,7 +50,7 @@ object ClockState : Observable(), AnkoLogger {
      */
     fun subSecondRefreshNeeded(face: ClockFace?) =
         // if the second-hand is supposed to be rendered and we're not in ambient mode
-        if (face == null) false else showSeconds && !face.getAmbientMode()
+        if (face == null) false else showSeconds && !face.ambientMode
 
     /**
      * Load the eventlist. This is meant to consume the output of the calendarFetcher,

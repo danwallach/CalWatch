@@ -10,25 +10,28 @@ import android.support.wearable.complications.ComplicationHelperActivity
 import android.support.wearable.complications.ComplicationProviderInfo
 import android.support.wearable.complications.ProviderInfoRetriever
 import android.support.wearable.complications.ProviderInfoRetriever.OnProviderInfoReceivedCallback
-import android.util.Log
+import android.support.wearable.watchface.CanvasWatchFaceService
 import android.view.LayoutInflater
 import android.view.View
 import android.view.View.OnClickListener
 import android.view.ViewGroup
+import android.widget.Button
 import android.widget.ImageButton
 import android.widget.ImageView
-import android.widget.Switch
 
-import java.util.ArrayList
 import java.util.concurrent.Executors
 
 import org.dwallach.R
-
+import org.dwallach.complications.AnalogComplicationConfigData.BackgroundComplicationConfigItem
+import org.dwallach.complications.AnalogComplicationConfigData.ConfigItemType
+import org.dwallach.complications.AnalogComplicationConfigData.MoreOptionsConfigItem
+import org.dwallach.complications.AnalogComplicationConfigData.PreviewAndComplicationsConfigItem
+import org.jetbrains.anko.AnkoLogger
+import org.jetbrains.anko.debug
+import org.jetbrains.anko.verbose
 
 /**
  * Displays different layouts for configuring watch face's complications and appearance settings
- * (highlight color [second arm], unread notifications, etc.).
-
  *
  * All appearance settings are saved via [SharedPreferences].
 
@@ -42,14 +45,11 @@ import org.dwallach.R
  *
  * Simple arrow to indicate there are more options below the fold.
 
- *
- * Toggle for unread notifications.
-
  */
 class AnalogComplicationConfigRecyclerViewAdapter(
         private val mContext: Context,
-        watchFaceServiceClass: Class<*>,
-        private val mSettingsDataSet: ArrayList<AnalogComplicationConfigData.ConfigItemType>) : RecyclerView.Adapter<RecyclerView.ViewHolder>() {
+        watchFaceServiceClass: Class<out CanvasWatchFaceService>,
+        private val mSettingsDataSet: List<ConfigItemType>) : RecyclerView.Adapter<RecyclerView.ViewHolder>(), AnkoLogger {
 
     /**
      * Used by associated watch face to let this
@@ -73,8 +73,9 @@ class AnalogComplicationConfigRecyclerViewAdapter(
     // Selected complication id by user.
     private var mSelectedComplicationId: Int = 0
 
-    private val mLeftComplicationId: Int
-    private val mRightComplicationId: Int
+    private val mLeftComplicationId = ComplicationWrapper.getComplicationId(ComplicationLocation.LEFT)
+    private val mRightComplicationId = ComplicationWrapper.getComplicationId(ComplicationLocation.RIGHT)
+    private val mBackgroundComplicationId = ComplicationWrapper.getComplicationId(ComplicationLocation.BACKGROUND)
 
     // Required to retrieve complication data from watch face for preview.
     private val mProviderInfoRetriever: ProviderInfoRetriever
@@ -88,9 +89,6 @@ class AnalogComplicationConfigRecyclerViewAdapter(
         // Default value is invalid (only changed when user taps to change complication).
         mSelectedComplicationId = -1
 
-        mLeftComplicationId = ComplicationWrapper.getComplicationId(ComplicationLocation.LEFT)
-        mRightComplicationId = ComplicationWrapper.getComplicationId(ComplicationLocation.RIGHT)
-
         mSharedPref = mContext.getSharedPreferences(
                 mContext.getString(R.string.analog_complication_preference_file_key),
                 Context.MODE_PRIVATE)
@@ -101,7 +99,7 @@ class AnalogComplicationConfigRecyclerViewAdapter(
     }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): RecyclerView.ViewHolder {
-        Log.d(TAG, "onCreateViewHolder(): viewType: " + viewType)
+        verbose { "onCreateViewHolder(): viewType: $viewType" }
 
         return when (viewType) {
             TYPE_PREVIEW_AND_COMPLICATIONS_CONFIG -> {
@@ -124,10 +122,10 @@ class AnalogComplicationConfigRecyclerViewAdapter(
                                     parent,
                                     false))
 
-            TYPE_UNREAD_NOTIFICATION_CONFIG -> UnreadNotificationViewHolder(
-                    LayoutInflater.from(parent.context)
+            TYPE_BACKGROUND_COMPLICATION_IMAGE_CONFIG ->
+                    BackgroundComplicationViewHolder(LayoutInflater.from(parent.context)
                             .inflate(
-                                    R.layout.config_list_unread_notif_item,
+                                    R.layout.config_list_background_complication_item,
                                     parent,
                                     false))
 
@@ -136,7 +134,7 @@ class AnalogComplicationConfigRecyclerViewAdapter(
     }
 
     override fun onBindViewHolder(viewHolder: RecyclerView.ViewHolder, position: Int) {
-        Log.d(TAG, "Element $position set.")
+        verbose { "Element $position set." }
 
         // Pulls all data required for creating the UX for the specific setting option.
         val configItemType = mSettingsDataSet[position]
@@ -145,7 +143,7 @@ class AnalogComplicationConfigRecyclerViewAdapter(
             TYPE_PREVIEW_AND_COMPLICATIONS_CONFIG -> {
                 val previewAndComplicationsViewHolder = viewHolder as PreviewAndComplicationsViewHolder
 
-                val previewAndComplicationsConfigItem = configItemType as AnalogComplicationConfigData.PreviewAndComplicationsConfigItem
+                val previewAndComplicationsConfigItem = configItemType as PreviewAndComplicationsConfigItem
 
                 val defaultComplicationResourceId = previewAndComplicationsConfigItem.defaultComplicationResourceId
                 previewAndComplicationsViewHolder.setDefaultComplicationDrawable(
@@ -156,26 +154,21 @@ class AnalogComplicationConfigRecyclerViewAdapter(
 
             TYPE_MORE_OPTIONS -> {
                 val moreOptionsViewHolder = viewHolder as MoreOptionsViewHolder
-                val moreOptionsConfigItem = configItemType as AnalogComplicationConfigData.MoreOptionsConfigItem
+                val moreOptionsConfigItem = configItemType as MoreOptionsConfigItem
 
                 moreOptionsViewHolder.setIcon(moreOptionsConfigItem.iconResourceId)
             }
 
-            TYPE_UNREAD_NOTIFICATION_CONFIG -> {
-                val unreadViewHolder = viewHolder as UnreadNotificationViewHolder
+            TYPE_BACKGROUND_COMPLICATION_IMAGE_CONFIG -> {
+                val backgroundComplicationViewHolder = viewHolder as BackgroundComplicationViewHolder
 
-                val unreadConfigItem = configItemType as AnalogComplicationConfigData.UnreadNotificationConfigItem
+                val backgroundComplicationConfigItem = configItemType as BackgroundComplicationConfigItem
 
-                val unreadEnabledIconResourceId = unreadConfigItem.iconEnabledResourceId
-                val unreadDisabledIconResourceId = unreadConfigItem.iconDisabledResourceId
+                val backgroundIconResourceId = backgroundComplicationConfigItem.iconResourceId
+                val backgroundName = backgroundComplicationConfigItem.name
 
-                val unreadName = unreadConfigItem.name
-                val unreadSharedPrefId = unreadConfigItem.sharedPrefId
-
-                unreadViewHolder.setIcons(
-                        unreadEnabledIconResourceId, unreadDisabledIconResourceId)
-                unreadViewHolder.setName(unreadName)
-                unreadViewHolder.setSharedPrefId(unreadSharedPrefId)
+                backgroundComplicationViewHolder.setIcon(backgroundIconResourceId)
+                backgroundComplicationViewHolder.setName(backgroundName)
             }
         }
     }
@@ -192,7 +185,7 @@ class AnalogComplicationConfigRecyclerViewAdapter(
     /** Updates the selected complication id saved earlier with the new information.  */
     fun updateSelectedComplication(complicationProviderInfo: ComplicationProviderInfo) {
 
-        Log.d(TAG, "updateSelectedComplication: " + mPreviewAndComplicationsViewHolder)
+        verbose { "updateSelectedComplication: $mPreviewAndComplicationsViewHolder" }
 
         // Checks if view is inflated and complication id is valid.
         if (mSelectedComplicationId >= 0) {
@@ -231,13 +224,13 @@ class AnalogComplicationConfigRecyclerViewAdapter(
 
         override fun onClick(view: View) {
             if (view == mLeftComplication) {
-                Log.d(TAG, "Left Complication click()")
+                verbose { "Left Complication click()" }
 
                 val currentActivity = view.context as Activity
                 launchComplicationHelperActivity(currentActivity, ComplicationLocation.LEFT)
 
             } else if (view == mRightComplication) {
-                Log.d(TAG, "Right Complication click()")
+                verbose { "Right Complication click()" }
 
                 val currentActivity = view.context as Activity
                 launchComplicationHelperActivity(currentActivity, ComplicationLocation.RIGHT)
@@ -268,7 +261,7 @@ class AnalogComplicationConfigRecyclerViewAdapter(
                         AnalogComplicationConfigActivity.COMPLICATION_CONFIG_REQUEST_CODE)
 
             } else {
-                Log.d(TAG, "Complication not supported by watch face.")
+                verbose { "Complication not supported by watch face." }
             }
         }
 
@@ -283,10 +276,10 @@ class AnalogComplicationConfigRecyclerViewAdapter(
             mRightComplicationBackground.visibility = View.INVISIBLE
         }
 
-        fun updateComplicationViews(
-                watchFaceComplicationId: Int, complicationProviderInfo: ComplicationProviderInfo?) {
-            Log.d(TAG, "updateComplicationViews(): id: " + watchFaceComplicationId)
-            Log.d(TAG, "\tinfo: " + complicationProviderInfo)
+        fun updateComplicationViews(watchFaceComplicationId: Int,
+                                    complicationProviderInfo: ComplicationProviderInfo?) {
+            verbose { "updateComplicationViews(): id:  $watchFaceComplicationId" }
+            verbose { "\tinfo: $complicationProviderInfo" }
 
             if (watchFaceComplicationId == mLeftComplicationId) {
                 if (complicationProviderInfo != null) {
@@ -319,10 +312,9 @@ class AnalogComplicationConfigRecyclerViewAdapter(
                                 watchFaceComplicationId: Int,
                                 complicationProviderInfo: ComplicationProviderInfo?) {
 
-                            Log.d(TAG, "onProviderInfoReceived: " + complicationProviderInfo)
+                            debug { "onProviderInfoReceived: $complicationProviderInfo" }
 
-                            updateComplicationViews(
-                                    watchFaceComplicationId, complicationProviderInfo)
+                            updateComplicationViews(watchFaceComplicationId, complicationProviderInfo)
                         }
                     },
                     mWatchFaceComponentName,
@@ -341,78 +333,51 @@ class AnalogComplicationConfigRecyclerViewAdapter(
         }
     }
 
-    /**
-     * Displays switch to indicate whether or not icon appears for unread notifications. User can
-     * toggle on/off.
-     */
-    inner class UnreadNotificationViewHolder(view: View) : RecyclerView.ViewHolder(view), OnClickListener {
-
-        private var mUnreadNotificationSwitch = view.findViewById(R.id.unread_notification_switch) as Switch
-
-        private var mEnabledIconResourceId: Int = 0
-        private var mDisabledIconResourceId: Int = 0
-
-        private var mSharedPrefResourceId: Int = 0
+    /** Displays button to trigger background image complication selector.  */
+    inner class BackgroundComplicationViewHolder(view: View) : RecyclerView.ViewHolder(view), OnClickListener {
+        private val mBackgroundComplicationButton = view.findViewById(R.id.background_complication_button) as Button
 
         init {
             view.setOnClickListener(this)
         }
 
         fun setName(name: String) {
-            mUnreadNotificationSwitch.text = name
+            mBackgroundComplicationButton.text = name
         }
 
-        fun setIcons(enabledIconResourceId: Int, disabledIconResourceId: Int) {
-
-            mEnabledIconResourceId = enabledIconResourceId
-            mDisabledIconResourceId = disabledIconResourceId
-
-            val context = mUnreadNotificationSwitch.context
-
-            // Set default to enabled.
-            mUnreadNotificationSwitch.setCompoundDrawablesWithIntrinsicBounds(
-                    context.getDrawable(mEnabledIconResourceId), null, null, null)
-        }
-
-        fun setSharedPrefId(sharedPrefId: Int) {
-            mSharedPrefResourceId = sharedPrefId
-
-            val context = mUnreadNotificationSwitch.context
-            val sharedPreferenceString = context.getString(mSharedPrefResourceId)
-            val currentState = mSharedPref.getBoolean(sharedPreferenceString, true)
-
-            updateIcon(context, currentState)
-        }
-
-        private fun updateIcon(context: Context, currentState: Boolean) {
-            val currentIconResourceId: Int
-
-            if (currentState) {
-                currentIconResourceId = mEnabledIconResourceId
-            } else {
-                currentIconResourceId = mDisabledIconResourceId
-            }
-
-            mUnreadNotificationSwitch.isChecked = currentState
-            mUnreadNotificationSwitch.setCompoundDrawablesWithIntrinsicBounds(
-                    context.getDrawable(currentIconResourceId), null, null, null)
+        fun setIcon(resourceId: Int) {
+            val context = mBackgroundComplicationButton.context
+            mBackgroundComplicationButton.setCompoundDrawablesWithIntrinsicBounds(
+                    context.getDrawable(resourceId), null, null, null)
         }
 
         override fun onClick(view: View) {
             val position = adapterPosition
-            Log.d(TAG, "Complication onClick() position: " + position)
+            debug { "Background Complication onClick() position: $position" }
 
-            val context = view.context
-            val sharedPreferenceString = context.getString(mSharedPrefResourceId)
+            val currentActivity = view.context as Activity
 
-            // Since user clicked on a switch, new state should be opposite of current state.
-            val newState = !mSharedPref.getBoolean(sharedPreferenceString, true)
+            mSelectedComplicationId = ComplicationWrapper.getComplicationId(
+                    ComplicationLocation.BACKGROUND)
 
-            val editor = mSharedPref.edit()
-            editor.putBoolean(sharedPreferenceString, newState)
-            editor.apply()
+            if (mSelectedComplicationId >= 0) {
 
-            updateIcon(context, newState)
+                val supportedTypes = ComplicationWrapper.getSupportedComplicationTypes(
+                        ComplicationLocation.BACKGROUND)
+
+                val watchFace = ComponentName(currentActivity, ComplicationWrapper.watchFace::class.java)
+
+                currentActivity.startActivityForResult(
+                        ComplicationHelperActivity.createProviderChooserHelperIntent(
+                                currentActivity,
+                                watchFace,
+                                mSelectedComplicationId,
+                                *supportedTypes),
+                        AnalogComplicationConfigActivity.COMPLICATION_CONFIG_REQUEST_CODE)
+
+            } else {
+                debug { "Complication not supported by watch face." }
+            }
         }
     }
 
@@ -422,6 +387,6 @@ class AnalogComplicationConfigRecyclerViewAdapter(
 
         val TYPE_PREVIEW_AND_COMPLICATIONS_CONFIG = 0
         val TYPE_MORE_OPTIONS = 1
-        val TYPE_UNREAD_NOTIFICATION_CONFIG = 3
+        val TYPE_BACKGROUND_COMPLICATION_IMAGE_CONFIG = 2
     }
 }

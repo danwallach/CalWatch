@@ -225,14 +225,14 @@ object ComplicationWrapper : AnkoLogger {
                         && isTappableComplicationType(complicationDataMap[it]?.type)
                         && complicationDrawableMap[it]?.bounds?.contains(x, y) ?: false }
 
-        verbose { "Complication tap, hits on complications: " + tappedComplicationIds.joinToString() }
+        verbose { "Complication tap, hits on complication(s): " + tappedComplicationIds.joinToString() }
 
         // we're only going to use the head of the list; it's going to basically never happen
         // that we have more than one hit here, since we're explicitly ignoring the background
         // image complication for tap events.
 
         if (tappedComplicationIds.size > 1)
-            warn { "Shouldn't see more than one complication matching a tap event!" }
+            warn { "Whoa, more than one complication hit: ${tappedComplicationIds.size}" }
 
         if (tappedComplicationIds.isNotEmpty()) {
             val complicationData = complicationDataMap[tappedComplicationIds.first()]

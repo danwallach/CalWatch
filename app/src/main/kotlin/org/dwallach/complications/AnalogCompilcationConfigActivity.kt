@@ -29,7 +29,7 @@ class AnalogComplicationConfigActivity : Activity() {
 
         mAdapter = AnalogComplicationConfigRecyclerViewAdapter(
                 applicationContext,
-                ComplicationWrapper.getWatchFaceService()::class.java,
+                ComplicationWrapper.watchFace::class.java,
                 AnalogComplicationConfigData.getDataToPopulateAdapter(this))
 
         mWearableRecyclerView = findViewById(R.id.wearable_recycler_view) as WearableRecyclerView
