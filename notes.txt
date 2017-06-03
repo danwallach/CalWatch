@@ -86,7 +86,6 @@ ANDROID N / WEAR 2.0 OVERHAUL
     https://github.com/googlesamples/android-WatchFace/blob/master/Wearable/src/main/java/com/example/android/wearable/watchface/watchface/AnalogComplicationWatchFaceService.java
     https://events.google.com/io/schedule/?section=may-19&sid=3c8f9b3c-2bdf-4e18-9797-1f087aff9b13
     TODO ComplicationDrawable for rendering the complications
-        TODO Store ComplicationDrawable in ClockFace rather than pass external lambda?
         TODO XML setup of ComplicationDrawable with various styles set in the XML?
 
         This isn't nearly as easy as it sounded from the IO'17 talk!

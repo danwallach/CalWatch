@@ -134,7 +134,6 @@ class ClockFace: Observer, AnkoLogger {
     fun drawEverything(canvas: Canvas) {
         TimeWrapper.frameStart()
 
-
         try {
             // This will start an asynchronous query to update the calendar state; we're doing this on
             // every screen refresh because it's dirt cheap and we want to be current. (This call eventually
@@ -142,9 +141,14 @@ class ClockFace: Observer, AnkoLogger {
             // refresh. If not, it becomes a no-op.)
             updateEventList()
 
+            val calPermissionGiven = ClockState.calendarPermission
+            val currentTimeMillis = TimeWrapper.gmtTime
+
             // First thing, we'll draw any background that the complications might be providing, but only
-            // if we're in "normal" mode.
-            if (drawStyle == PaintCan.STYLE_NORMAL) ComplicationWrapper.drawBackgroundComplication(canvas)
+            // if we're in "normal" mode. Note that we're not doing complication rendering unless we have
+            // the calendar permission.
+            if (drawStyle == PaintCan.STYLE_NORMAL && calPermissionGiven)
+                ComplicationWrapper.drawBackgroundComplication(canvas, currentTimeMillis)
 
             // the calendar goes on the very bottom and everything else stacks above; the code for calendar drawing
             // works great in low-bit mode, leaving big white wedges, but this violates the rules, per Google:
@@ -157,14 +161,19 @@ class ClockFace: Observer, AnkoLogger {
             drawFace(canvas)
 
             // Next up, the step counter and battery meter.
-            //
-            // We disable the battery meter when we're in ambientMode with burnInProtection.
-            // The step counter knows how to draw itself differently in different modes.
+
+            // We disable the battery meter when we're in ambientMode with burnInProtection, since
+            // we don't want to burn a hole in the very center of the screen.
             if (drawStyle != PaintCan.STYLE_ANTI_BURNIN) drawBattery(canvas)
+
+            // The step counter knows how to draw itself differently in different modes, taking advantage
+            // of the 1-bit color options that are available even in low-bit ambient mode.
             drawStepCount(canvas)
 
-            // We're drawing the complications *before* the hands, at least for now
-            ComplicationWrapper.drawComplications(canvas)
+            // We're drawing the complications *before* the hands, at least for now, and we're only
+            // doing it if we have calendar permissions. Otherwise not.
+            if (calPermissionGiven)
+                ComplicationWrapper.drawComplications(canvas, currentTimeMillis)
 
             drawHands(canvas)
 

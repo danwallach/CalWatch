@@ -5,25 +5,6 @@
  * Licensing: http://www.cs.rice.edu/~dwallach/calwatch/licensing.html
  */
 
-/*
- * Portions of this file derived from Google's example code,
- * subject to the following:
- *
- * Copyright (C) 2014 The Android Open Source Project
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-
 package org.dwallach.calwatch
 
 import android.graphics.Canvas
@@ -47,7 +28,7 @@ import java.util.Observer
 import android.support.wearable.complications.ComplicationData
 
 /**
- * Drawn heavily from the Android Wear SweepWatchFaceService example code.
+ * Drawn heavily from the Android Wear SweepWatchFaceService / AnalogWatchFaceService examples.
  */
 class CalWatchFaceService : CanvasWatchFaceService(), AnkoLogger {
     override fun onCreateEngine(): Engine {
@@ -154,6 +135,8 @@ class CalWatchFaceService : CanvasWatchFaceService(), AnkoLogger {
             CalendarPermission.init(this@CalWatchFaceService)
 
             initCalendarFetcher()
+
+            ComplicationWrapper.setActiveComplications(this)
         }
 
         override fun onPropertiesChanged(properties: Bundle?) {
@@ -226,6 +209,21 @@ class CalWatchFaceService : CanvasWatchFaceService(), AnkoLogger {
         private var oldHeight: Int = 0
         private var oldWidth: Int = 0
 
+        private fun updateBounds(width: Int, height: Int) {
+            if (width != oldWidth || height != oldHeight) {
+                oldWidth = width
+                oldHeight = height
+                clockFace.setSize(width, height)
+                ComplicationWrapper.updateBounds(width, height)
+            }
+        }
+
+        override fun onSurfaceChanged(holder: SurfaceHolder?, format: Int, width: Int, height: Int) {
+            super.onSurfaceChanged(holder, format, width, height)
+
+            updateBounds(width, height)
+        }
+
         override fun onDraw(canvas: Canvas?, bounds: Rect?) {
             //                Log.v(TAG, "onDraw")
             drawCounter++
@@ -235,15 +233,7 @@ class CalWatchFaceService : CanvasWatchFaceService(), AnkoLogger {
                 return
             }
 
-            val _width = bounds.width()
-            val _height = bounds.height()
-
-            if (_width != oldWidth || _height != oldHeight) {
-                oldWidth = _width
-                oldHeight = _height
-                clockFace.setSize(_width, _height)
-                ComplicationWrapper.updateBounds(_width, _height)
-            }
+            updateBounds(bounds.width(), bounds.height())
 
             try {
                 // clear the screen
@@ -266,28 +256,22 @@ class CalWatchFaceService : CanvasWatchFaceService(), AnkoLogger {
             when (tapType) {
                 WatchFaceService.TAP_TYPE_TOUCH -> {
                     // user touched the screen, but we're not allowed to act yet
-
-                    // TODO add some kind of feedback that the user touched the screen and we're planning to launch the calendar permission dialog
-                    // -- animate a color transition? put a circle around it?
-
-                    // for now, this is a no-op
                 }
 
                 WatchFaceService.TAP_TYPE_TOUCH_CANCEL -> {
                     // if we were animating on the "touch" part, this would tell us to give up
-
-                    // for now, this is a no-op
                 }
 
                 WatchFaceService.TAP_TYPE_TAP -> {
                     // user lifted their finger, so now we're allowed to act
 
-                    // TODO be more specific about the x,y coordinates, like check if they're on the right side of the screen (probably needs to play nicely with the touch-down transition)
-
                     // if we don't have calendar permission, then that means we're interpreting
-                    // watchface taps as permission requests.
+                    // watchface taps as permission requests, otherwise, we're delegating to
+                    // the complications library
                     if (!ClockState.calendarPermission)
                         PermissionActivity.kickStart(this@CalWatchFaceService, false)
+                    else
+                        ComplicationWrapper.handleTap(x, y, eventTime)
                 }
             }
         }

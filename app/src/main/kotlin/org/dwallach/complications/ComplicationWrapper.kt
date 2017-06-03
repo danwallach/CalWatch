@@ -54,15 +54,19 @@ object ComplicationWrapper : AnkoLogger {
     /**
      * Call this from your main redraw loop and the complications will be rendered to the given canvas.
      */
-    fun drawComplications(canvas: Canvas) {
-        throw NotImplementedError("not implemented yet")
+    fun drawComplications(canvas: Canvas, currentTimeMillis: Long) {
+        complicationDrawableMap.keys
+                .filter { it != BACKGROUND_COMPLICATION_ID }
+                .forEach {
+                    complicationDrawableMap[it]?.draw(canvas, currentTimeMillis)
+                }
     }
 
     /**
      * Call this from your main redraw loop specifically to draw the background complication.
      */
-    fun drawBackgroundComplication(canvas: Canvas) {
-        throw NotImplementedError("not implemented yet")
+    fun drawBackgroundComplication(canvas: Canvas, currentTimeMillis: Long) {
+        complicationDrawableMap[BACKGROUND_COMPLICATION_ID]?.draw(canvas, currentTimeMillis)
     }
 
     // TODO bridges for ambient mode, screen resolution, etc.
@@ -188,6 +192,36 @@ object ComplicationWrapper : AnkoLogger {
             // custom settings here: black unless an image bitmap makes it otherwise
             setBackgroundColorActive(Color.BLACK)
         }
+    }
+
+    /**
+     * Call this in your onCreate() to initialize the complications for the engine.
+     */
+    fun setActiveComplications(engine: CanvasWatchFaceService.Engine) =
+        // TODO lookup Kotlin magic to pass our existing array into the vararg thing here
+        engine.setActiveComplications(BACKGROUND_COMPLICATION_ID, LEFT_COMPLICATION_ID, RIGHT_COMPLICATION_ID)
+
+    private fun tappableType(type: Int?) = when(type) {
+        null -> false,
+        ComplicationData.TYPE_EMPTY, ComplicationData.TYPE_LARGE_IMAGE, ComplicationData.TYPE_NOT_CONFIGURED -> false
+        else -> true
+    }
+
+    /**
+     *
+     * Call this if you've got a tap event that might belong to the complication system.
+     */
+    fun handleTap(x: Int, y: Int, currentTime: Long) {
+        val tappedComplicationIds = complicationDrawableMap.keys
+                // first, we aren't sending clicks to the background, and we're supposed to ignore anything
+                // that isn't "active" right now
+                .filter { it != BACKGROUND_COMPLICATION_ID
+                        && complicationDataMap[it]?.isActive(currentTime) ?: false
+                        && tappableType(complicationDataMap[it]?.type)
+                }
+                .map { complicationDrawableMap[it] }
+                .filterNotNull()
+                .filter { it.bounds.contains(x, y) }
     }
 }
 
