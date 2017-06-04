@@ -205,14 +205,14 @@ class AnalogComplicationConfigRecyclerViewAdapter(
      * complication they want to change and preview updates dynamically.
      */
     inner class PreviewAndComplicationsViewHolder(view: View) : RecyclerView.ViewHolder(view), OnClickListener {
-        private val mWatchFaceArmsAndTicksView = view.findViewById(R.id.watch_face_arms_and_ticks)
-        private val mWatchFaceHighlightPreviewView = view.findViewById(R.id.watch_face_highlight)
+        private val mWatchFaceArmsAndTicksView = view.findViewById<View>(R.id.watch_face_arms_and_ticks)
+        private val mWatchFaceHighlightPreviewView = view.findViewById<View>(R.id.watch_face_highlight)
 
-        private val mLeftComplicationBackground = view.findViewById(R.id.left_complication_background) as ImageView
-        private val mRightComplicationBackground = view.findViewById(R.id.right_complication_background) as ImageView
+        private val mLeftComplicationBackground = view.findViewById<ImageView>(R.id.left_complication_background)
+        private val mRightComplicationBackground = view.findViewById<ImageView>(R.id.right_complication_background)
 
-        private val mLeftComplication = view.findViewById(R.id.left_complication) as ImageButton
-        private val mRightComplication = view.findViewById(R.id.right_complication) as ImageButton
+        private val mLeftComplication = view.findViewById<ImageButton>(R.id.left_complication)
+        private val mRightComplication = view.findViewById<ImageButton>(R.id.right_complication)
 
         private var mDefaultComplicationDrawable: Drawable? = null
 
@@ -325,7 +325,7 @@ class AnalogComplicationConfigRecyclerViewAdapter(
     /** Displays icon to indicate there are more options below the fold.  */
     inner class MoreOptionsViewHolder(view: View) : RecyclerView.ViewHolder(view) {
 
-        private val mMoreOptionsImageView = view.findViewById(R.id.more_options_image_view) as ImageView
+        private val mMoreOptionsImageView = view.findViewById<ImageView>(R.id.more_options_image_view)
 
         fun setIcon(resourceId: Int) {
             val context = mMoreOptionsImageView.context
@@ -335,7 +335,7 @@ class AnalogComplicationConfigRecyclerViewAdapter(
 
     /** Displays button to trigger background image complication selector.  */
     inner class BackgroundComplicationViewHolder(view: View) : RecyclerView.ViewHolder(view), OnClickListener {
-        private val mBackgroundComplicationButton = view.findViewById(R.id.background_complication_button) as Button
+        private val mBackgroundComplicationButton = view.findViewById<Button>(R.id.background_complication_button)
 
         init {
             view.setOnClickListener(this)
