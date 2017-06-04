@@ -27,7 +27,7 @@ public class ClTests extends CL {
     RND = new Random();
   }
 
-  public final static boolean simple1()
+  public static boolean simple1()
        throws ExCLInternalError, ExCLRequiredFailure
   {
     boolean fOkResult = true;
@@ -47,7 +47,7 @@ public class ClTests extends CL {
     return(fOkResult);
   }
 
-  public final static boolean justStay1()
+  public static boolean justStay1()
        throws ExCLInternalError, ExCLRequiredFailure
   {
     boolean fOkResult = true;
@@ -64,7 +64,7 @@ public class ClTests extends CL {
     return(fOkResult);
   }
   
-  public final static boolean addDelete1()
+  public static boolean addDelete1()
        throws ExCLInternalError, ExCLRequiredFailure, ExCLConstraintNotFound
   {
     boolean fOkResult = true; 
@@ -111,7 +111,7 @@ public class ClTests extends CL {
     return(fOkResult);
   } 
 
-  public final static boolean addDelete2()
+  public static boolean addDelete2()
        throws ExCLInternalError, ExCLRequiredFailure, 
 	 ExCLConstraintNotFound, ExCLNonlinearExpression
   {
@@ -153,7 +153,7 @@ public class ClTests extends CL {
     return(fOkResult);
   } 
 
-  public final static boolean casso1()
+  public static boolean casso1()
        throws ExCLInternalError, ExCLRequiredFailure
   {
     boolean fOkResult = true; 
@@ -176,7 +176,7 @@ public class ClTests extends CL {
     return(fOkResult);
   } 
 
-  public final static boolean inconsistent1()
+  public static boolean inconsistent1()
        throws ExCLInternalError, ExCLRequiredFailure
   {
     try 
@@ -199,7 +199,7 @@ public class ClTests extends CL {
       }
   }
 
-  public final static boolean inconsistent2()
+  public static boolean inconsistent2()
        throws ExCLInternalError, ExCLRequiredFailure
   {
     try 
@@ -222,7 +222,7 @@ public class ClTests extends CL {
       }
   }
 
-  public final static boolean multiedit()
+  public static boolean multiedit()
        throws ExCLInternalError, ExCLRequiredFailure, ExCLError
   {
     try 
@@ -298,7 +298,7 @@ public class ClTests extends CL {
   }
 
 
-  public final static boolean inconsistent3()
+  public static boolean inconsistent3()
        throws ExCLInternalError, ExCLRequiredFailure
   {
     try 
@@ -329,7 +329,7 @@ public class ClTests extends CL {
   }
 
 
-  public final static boolean addDel(int nCns, int nVars, int nResolves)
+  public static boolean addDel(int nCns, int nVars, int nResolves)
        throws ExCLInternalError, ExCLRequiredFailure, 
 	 ExCLNonlinearExpression, ExCLConstraintNotFound
   {
@@ -464,7 +464,7 @@ public class ClTests extends CL {
     return true;
   }
 
-  public final static void InitializeRandomsFromFile() {
+  public static void InitializeRandomsFromFile() {
     try {
       iRandom = 0;
       String s;
@@ -487,29 +487,29 @@ public class ClTests extends CL {
     }
   }
     
-  public final static void InitializeRandoms() {
+  public static void InitializeRandoms() {
     // do nothing
   }
 
 
-  public final static double UniformRandomDiscretized()
+  public static double UniformRandomDiscretized()
   {
     double n = Math.abs(RND.nextInt());
     return (n/Integer.MAX_VALUE);
   }
 
-  public final static double UniformRandomDiscretizedFromFile()
+  public static double UniformRandomDiscretizedFromFile()
   {
     if (iRandom >= cRandom) {
       // throw new Exception("Out of random numbers");
       return -1;
     }
-    double f =  (vRandom.elementAt(iRandom++)).doubleValue();
+    double f = vRandom.elementAt(iRandom++);
     //    System.out.println("returning value = " + f);
     return f;
   }
 
-  public final static double GrainedUniformRandom()
+  public static double GrainedUniformRandom()
   {
     final double grain = 1.0e-4;
     double n = UniformRandomDiscretized();
@@ -517,13 +517,13 @@ public class ClTests extends CL {
     return answer;
   }
 
-  public final static int RandomInRange(int low, int high)
+  public static int RandomInRange(int low, int high)
   {
     return (int) (UniformRandomDiscretized()*(high-low+1))+low;
   }
     
 
-  public final static boolean addDelSolvers(int nCns, int nResolves, int nSolvers, int testNum)
+  public static boolean addDelSolvers(int nCns, int nResolves, int nSolvers, int testNum)
        throws ExCLInternalError, ExCLRequiredFailure, 
 	 ExCLNonlinearExpression, ExCLConstraintNotFound
   {
@@ -705,7 +705,7 @@ public class ClTests extends CL {
 
 
 
-  public final static void main( String[] args )
+  public static void main( String[] args )
        throws ExCLInternalError, ExCLNonlinearExpression,
 	 ExCLRequiredFailure, ExCLConstraintNotFound, ExCLError
   {

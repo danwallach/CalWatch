@@ -15,7 +15,7 @@ import java.lang.*;
 import java.util.Random;
 
 class ClTestColumns extends CL {
-  public final static boolean addDelete1()
+  public static boolean addDelete1()
        throws ExCLInternalError, ExCLRequiredFailure, ExCLConstraintNotFound
   {
     boolean fOkResult = true; 
@@ -64,7 +64,7 @@ class ClTestColumns extends CL {
     return(fOkResult);
   } 
 
-  public final static boolean reqFail1()
+  public static boolean reqFail1()
        throws ExCLInternalError, ExCLRequiredFailure, ExCLConstraintNotFound
   {
     boolean fOkResult = true; 
@@ -87,7 +87,7 @@ class ClTestColumns extends CL {
   } 
 
 
-  public final static void main( String[] args )
+  public static void main( String[] args )
        throws ExCLInternalError, ExCLNonlinearExpression,
 	 ExCLRequiredFailure, ExCLConstraintNotFound
   {

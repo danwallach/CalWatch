@@ -15,6 +15,7 @@ import android.support.wearable.complications.rendering.ComplicationDrawable
 import org.jetbrains.anko.verbose
 import android.support.wearable.complications.ComplicationHelperActivity
 import android.content.ComponentName
+import org.dwallach.calwatch.errorLogAndThrow
 import org.jetbrains.anko.warn
 
 
@@ -38,7 +39,7 @@ object ComplicationWrapper : AnkoLogger {
      * we're not accidentally keeping anything live that really should die at cleanup time.
      */
     var watchFace: CanvasWatchFaceService
-        get() = watchFaceRef?.get() ?: throw RuntimeException("no watchface service found!")
+        get() = watchFaceRef?.get() ?: errorLogAndThrow("no watchface service found!")
         set(watchFace) {
             watchFaceRef = WeakReference(watchFace)
             initializeComplicationsAndBackground() // seems as good a place to this as anything
@@ -133,36 +134,32 @@ object ComplicationWrapper : AnkoLogger {
         val horizontalOffset = (midpointOfScreen - sizeOfComplication) / 2
         val verticalOffset = midpointOfScreen - sizeOfComplication / 2
 
-        val leftBounds = Rect(
+        complicationDrawableMap[LEFT_COMPLICATION_ID]?.bounds = Rect(
                 // Left, Top, Right, Bottom
                 horizontalOffset,
                 verticalOffset,
                 horizontalOffset + sizeOfComplication,
                 verticalOffset + sizeOfComplication)
 
-        val rightBounds = Rect(
+        complicationDrawableMap[RIGHT_COMPLICATION_ID]?.bounds = Rect(
                 // Left, Top, Right, Bottom
                 midpointOfScreen + horizontalOffset,
                 verticalOffset,
                 midpointOfScreen + horizontalOffset + sizeOfComplication,
                 verticalOffset + sizeOfComplication)
 
-        val screenForBackgroundBound = Rect(0, 0, width, height)
-
-        complicationDrawableMap[LEFT_COMPLICATION_ID]?.setBounds(leftBounds)
-        complicationDrawableMap[RIGHT_COMPLICATION_ID]?.setBounds(rightBounds)
-        complicationDrawableMap[BACKGROUND_COMPLICATION_ID]?.setBounds(screenForBackgroundBound)
+        complicationDrawableMap[BACKGROUND_COMPLICATION_ID]?.bounds = Rect(0, 0, width, height)
     }
 
     /**
      * Call this whenever you get an onComplicationUpdated() event.
      */
     fun updateComplication(complicationId: Int, complicationData: ComplicationData?) {
-        verbose { "onComplicationDataUpdate() id: " + complicationId }
+        verbose { "onComplicationDataUpdate() id: $complicationId" }
 
         complicationDrawableMap[complicationId]?.setComplicationData(complicationData)
         if (complicationData == null)
-            complicationDataMap -= complicationId;
+            complicationDataMap -= complicationId
         else
             complicationDataMap += complicationId to complicationData
     }

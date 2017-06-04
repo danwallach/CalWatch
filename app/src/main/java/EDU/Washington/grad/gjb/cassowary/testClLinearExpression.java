@@ -12,7 +12,7 @@
 package EDU.Washington.grad.gjb.cassowary;
 
 public class testClLinearExpression {
-  public final static void main(String[] args) {
+  public static void main(String[] args) {
     ClVariable a = new ClVariable("a");
     ClLinearExpression cle = new ClLinearExpression(a);
     System.out.println(cle.toString());

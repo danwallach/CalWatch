@@ -95,7 +95,7 @@ object CalendarPermission: AnkoLogger {
     fun handleResult(requestCode: Int, permissions: Array<String>, grantResults: IntArray) {
         if (requestCode == INTERNAL_PERM_REQUEST_CODE) {
             // If request is cancelled, the result arrays are empty.
-            if (grantResults.size > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+            if (grantResults.isNotEmpty() && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
                 verbose { "calendar permission granted!" }
                 ClockState.calendarPermission = true
             } else {

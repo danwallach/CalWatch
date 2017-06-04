@@ -193,7 +193,7 @@ public class ClSimplexSolver extends ClTableau
     CLassert(_editVarMap.size() > 0,"_editVarMap.size() > 0");
     resolve();
     _stkCedcns.pop();
-    int n = (_stkCedcns.peek()).intValue();
+    int n = _stkCedcns.peek();
     removeEditVarsTo(n);
     // may later want to do more in here
     return this;
@@ -313,7 +313,7 @@ public class ClSimplexSolver extends ClTableau
 
   // Remove the constraint cn from the tableau
   // Also remove any error variable associated with cn
-  private final ClSimplexSolver removeConstraintInternal(ClConstraint cn)
+  private ClSimplexSolver removeConstraintInternal(ClConstraint cn)
           throws ExCLConstraintNotFound, ExCLInternalError
   {
     if (fTraceOn) fnenterprint("removeConstraint: " + cn);
@@ -782,7 +782,7 @@ public class ClSimplexSolver extends ClTableau
         // we haven't found an restricted variable yet
         if (v.isRestricted()) {
           if (!foundNewRestricted && !v.isDummy() && c < 0.0) {
-            final Set col = (Set) _columns.get(v);
+            final Set col = _columns.get(v);
             if (col == null ||
                     ( col.size() == 1 && columnsHasKey(_objective) ) ) {
               subject = v;
