@@ -24,12 +24,13 @@ import org.jetbrains.anko.warn
  * data for menus (the complication selectors will be added in automatically) via [loadMenus],
  * drawing the complications via [drawComplications], etc.
  *
- * Code here began its life in the exame AnalogWatchFaceService but has been largely rewritten
+ * Code here began its life in the example AnalogWatchFaceService but has been largely rewritten
  * to be relatively independent of the watchface itself, to remove color-setting options, and
  * to use Kotlin's nice features when appropriate.
  */
 object ComplicationWrapper : AnkoLogger {
     private var watchFaceRef: WeakReference<CanvasWatchFaceService?>? = null
+    private var watchFaceClassInternal: Class<out CanvasWatchFaceService>? = null
 
     /**
      * Here's a property to get the CanvasWatchFaceService in use. Set it at startup time.
@@ -41,9 +42,18 @@ object ComplicationWrapper : AnkoLogger {
     var watchFace: CanvasWatchFaceService
         get() = watchFaceRef?.get() ?: errorLogAndThrow("no watchface service found!")
         set(watchFace) {
+            verbose { "Saving watchface service ref in complication wrapper" }
             watchFaceRef = WeakReference(watchFace)
+            watchFaceClassInternal = watchFace::class.java
             initializeComplicationsAndBackground() // seems as good a place to this as anything
         }
+
+    /**
+     * If all we need is a reference to the *class* of the watchface service, then this
+     * property will have it, even if the watchface itself is garbage collected.
+     */
+    val watchFaceClass: Class<out CanvasWatchFaceService>
+        get() = watchFaceClassInternal ?: errorLogAndThrow("no watchface class ref found!")
 
     /**
      * Call this function to load up menu items, along with their callbacks, which you want
@@ -206,7 +216,7 @@ object ComplicationWrapper : AnkoLogger {
         // kinda baffling that this is even necessary; why aren't permissions dealt with when you add the complication?
         watchFace.startActivity(
                 ComplicationHelperActivity.createPermissionRequestHelperIntent(
-                        watchFace, ComponentName(watchFace, watchFace::class.java)))
+                        watchFace, ComponentName(watchFace, watchFaceClass)))
 
     /**
      * Call this if you've got a tap event that might belong to the complication system. As a side

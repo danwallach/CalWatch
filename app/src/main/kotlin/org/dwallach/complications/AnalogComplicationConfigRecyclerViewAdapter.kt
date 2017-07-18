@@ -250,7 +250,7 @@ class AnalogComplicationConfigRecyclerViewAdapter(
                         complicationLocation)
 
                 val watchFace = ComponentName(
-                        currentActivity, ComplicationWrapper.watchFace::class.java)
+                        currentActivity, ComplicationWrapper.watchFaceClass)
 
                 currentActivity.startActivityForResult(
                         ComplicationHelperActivity.createProviderChooserHelperIntent(

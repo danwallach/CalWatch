@@ -29,9 +29,10 @@ class AnalogComplicationConfigActivity : Activity() {
 
         mAdapter = AnalogComplicationConfigRecyclerViewAdapter(
                 applicationContext,
-                ComplicationWrapper.watchFace::class.java,
+                ComplicationWrapper.watchFaceClass,
                 AnalogComplicationConfigData.getDataToPopulateAdapter(this))
 
+        // TODO: this gets a null pointer exception, fix!
         mWearableRecyclerView = findViewById<WearableRecyclerView>(R.id.wearable_recycler_view)
 
         // Aligns the first and last items on the list vertically centered on the screen.
