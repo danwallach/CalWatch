@@ -60,6 +60,10 @@ TODO update the slides
     adding Kotlin material.
 
 ANDROID N / WEAR 2.0 OVERHAUL
+    TODO flat-chin handling is broken
+
+    TODO no configuration gear is shown
+
     TODO interaction of numbers-mode and complications -- do we hide the digits?
         (probably just draw the complications over the digits and let them be cropped)
 

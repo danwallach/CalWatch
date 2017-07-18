@@ -3,7 +3,6 @@ apply plugin: 'kotlin-android'
 apply plugin: 'kotlin-android-extensions'
 
 // idea borrowed from here: http://stackoverflow.com/questions/17097263/automatically-versioning-android-project-from-git-describe-with-android-studio-g
-
 def getVersionCode = { ->
     def versionCode = -1
 
@@ -49,10 +48,9 @@ android {
     defaultConfig {
         applicationId "org.dwallach.calwatch"
         targetSdkVersion 25   // Android 7.1, Nougat, corresponding to Wear 2
-        minSdkVersion 25      // we can now require this as well
+        minSdkVersion 25      // (version 26 apparently isn't supported yet)
         versionCode getVersionCode()
         versionName getVersionName()
-//        mutiDexEnabled true -- unclear we care about this
     }
 
     sourceSets {
@@ -68,7 +66,6 @@ android {
     }
 }
 
-// http://stackoverflow.com/questions/18689365/how-to-add-xlintunchecked-to-my-android-gradle-based-project
 allprojects {
     gradle.projectsEvaluated {
         tasks.withType(JavaCompile) {

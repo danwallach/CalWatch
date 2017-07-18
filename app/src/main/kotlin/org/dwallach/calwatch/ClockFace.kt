@@ -55,7 +55,7 @@ class ClockFace: Observer, AnkoLogger {
             if (FORCE_MOTO_FLAT_BOTTOM)
                 field = 30
             else
-                field = missingBottomPixels
+                field = newVal
 
             computeFlatBottomCorners()
         }
