@@ -8,6 +8,6 @@
     <string name="saved_unread_notifications_pref">saved_unread_notifications</string>
 
     <!-- Use of "\n" is to conserve horizontal space in config menu. -->
-    <string name="analog_complication_config">Analog Complication Config</string>
+    <string name="analog_complication_config">CalWatch Config</string>
     <string name="config_background_image_complication_label">Background\nImage</string>
 </resources>
