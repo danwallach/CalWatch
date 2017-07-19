@@ -159,6 +159,12 @@ object ComplicationWrapper : AnkoLogger {
                 verticalOffset + sizeOfComplication)
 
         complicationDrawableMap[BACKGROUND_COMPLICATION_ID]?.bounds = Rect(0, 0, width, height)
+
+        // at this point, we know the width and height, which also means that the PaintCan styles
+        // have been initialized (since they're a function of screen size as well), so it's safe
+        // to apply some styles to our complications.
+
+        complicationDrawableMap.values.forEach(stylingFunc)
     }
 
     /**
@@ -192,6 +198,7 @@ object ComplicationWrapper : AnkoLogger {
             // custom settings here: black unless an image bitmap makes it otherwise
             setBackgroundColorActive(Color.BLACK)
         }
+
     }
 
     /**
@@ -250,6 +257,18 @@ object ComplicationWrapper : AnkoLogger {
                 else -> warn { "Tapped complication with no actions to take!" }
             }
         }
+    }
+
+    // initially a no-op, will replace later when styleComplications is called
+    var stylingFunc: (ComplicationDrawable) -> Unit = {
+        warn { "Default styles being applied to complications" }
+    }
+
+    /**
+     * Call this to set a lambda which will be called with each ComplicationDrawable to style it.
+     */
+    fun styleComplications(func: (ComplicationDrawable)->Unit) {
+        stylingFunc = func
     }
 }
 

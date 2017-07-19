@@ -119,7 +119,9 @@ object PaintCan: AnkoLogger {
     const val COLOR_TIMER_FILL = 19
     const val COLOR_STEP_COUNT = 20
     const val COLOR_STEP_COUNT_SHADOW = 21
-    const val COLOR_MAX = 21
+    const val COLOR_COMPLICATION_BG = 22
+    const val COLOR_COMPLICATION_FG = 23
+    const val COLOR_MAX = 23
 
 
     /**
@@ -167,6 +169,8 @@ object PaintCan: AnkoLogger {
             palette[style][COLOR_STOPWATCH_FILL] = watchfacePaint(0x9080A3F2.toInt(), style, smTextSize, lineWidth / 3f)  // light blue + transparency
             palette[style][COLOR_TIMER_STROKE] = watchfacePaint(0xFFF2CF80.toInt(), style, smTextSize, lineWidth / 3f) // orange-ish
             palette[style][COLOR_TIMER_FILL] = watchfacePaint(0x90F2CF80.toInt(), style, smTextSize, lineWidth / 3f) // orange-ish + transparency
+            palette[style][COLOR_COMPLICATION_BG] = watchfacePaint(0x80000000.toInt(), style, smTextSize, lineWidth / 8f) // black + transparency
+            palette[style][COLOR_COMPLICATION_FG] = watchfacePaint(Color.WHITE, style, smTextSize, lineWidth / 8f)
 
             // shadows are stroke, not fill, so we fix that here
             palette[style][COLOR_HAND_SHADOW]?.style = Paint.Style.STROKE
@@ -212,11 +216,13 @@ object PaintCan: AnkoLogger {
         // max percentage of pixels on while in low-bit mode.
         palette[STYLE_LOWBIT][COLOR_TIMER_FILL]?.color = Color.BLACK
         palette[STYLE_LOWBIT][COLOR_STOPWATCH_FILL]?.color = Color.BLACK
+        palette[STYLE_LOWBIT][COLOR_COMPLICATION_BG]?.color = Color.BLACK
         palette[STYLE_LOWBIT][COLOR_TIMER_STROKE]?.strokeWidth = lineWidth / 6f
         palette[STYLE_LOWBIT][COLOR_STOPWATCH_STROKE]?.strokeWidth = lineWidth / 6f
 
         palette[STYLE_ANTI_BURNIN][COLOR_TIMER_FILL]?.color = Color.BLACK
         palette[STYLE_ANTI_BURNIN][COLOR_STOPWATCH_FILL]?.color = Color.BLACK
+        palette[STYLE_ANTI_BURNIN][COLOR_COMPLICATION_BG]?.color = Color.BLACK
         palette[STYLE_ANTI_BURNIN][COLOR_TIMER_STROKE]?.strokeWidth = lineWidth / 6f
         palette[STYLE_ANTI_BURNIN][COLOR_STOPWATCH_STROKE]?.strokeWidth = lineWidth / 6f
     }

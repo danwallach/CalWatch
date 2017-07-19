@@ -7,10 +7,7 @@
 
 package org.dwallach.calwatch
 
-import android.graphics.Canvas
-import android.graphics.Color
-import android.graphics.PorterDuff
-import android.graphics.Rect
+import android.graphics.*
 import android.os.Bundle
 import android.support.wearable.watchface.CanvasWatchFaceService
 import android.support.wearable.watchface.WatchFaceService
@@ -137,6 +134,12 @@ class CalWatchFaceService : CanvasWatchFaceService(), AnkoLogger {
             initCalendarFetcher()
 
             ComplicationWrapper.setActiveComplications(this)
+            ComplicationWrapper.styleComplications {
+                it.setBackgroundColorActive(PaintCan[PaintCan.STYLE_NORMAL, PaintCan.COLOR_COMPLICATION_BG].color)
+                it.setBackgroundColorAmbient(PaintCan[PaintCan.STYLE_AMBIENT, PaintCan.COLOR_COMPLICATION_BG].color)
+                it.setBorderColorActive(PaintCan[PaintCan.STYLE_NORMAL, PaintCan.COLOR_COMPLICATION_FG].color)
+                it.setBorderColorAmbient(PaintCan[PaintCan.STYLE_AMBIENT, PaintCan.COLOR_COMPLICATION_FG].color)
+            }
         }
 
         override fun onPropertiesChanged(properties: Bundle?) {
