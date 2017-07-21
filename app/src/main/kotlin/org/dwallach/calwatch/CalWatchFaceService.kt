@@ -23,13 +23,13 @@ import java.lang.ref.WeakReference
 import java.util.Observable
 import java.util.Observer
 import android.support.wearable.complications.ComplicationData
+import org.dwallach.complications.AnalogComplicationConfigRecyclerViewAdapter.ComplicationLocation.*
 
 /**
  * Drawn heavily from the Android Wear SweepWatchFaceService / AnalogWatchFaceService examples.
  */
 class CalWatchFaceService : CanvasWatchFaceService(), AnkoLogger {
     override fun onCreateEngine(): Engine {
-        ComplicationWrapper.watchFace = this
         val engine = Engine()
         engineRef = WeakReference(engine)
         return engine
@@ -133,7 +133,7 @@ class CalWatchFaceService : CanvasWatchFaceService(), AnkoLogger {
 
             initCalendarFetcher()
 
-            ComplicationWrapper.setActiveComplications(this)
+            ComplicationWrapper.init(this@CalWatchFaceService, this, BACKGROUND, RIGHT, TOP, BOTTOM)
             ComplicationWrapper.styleComplications {
                 it.setBackgroundColorActive(PaintCan[PaintCan.STYLE_NORMAL, PaintCan.COLOR_COMPLICATION_BG].color)
                 it.setBackgroundColorAmbient(PaintCan[PaintCan.STYLE_AMBIENT, PaintCan.COLOR_COMPLICATION_BG].color)

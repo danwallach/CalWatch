@@ -39,13 +39,12 @@ object ComplicationWrapper : AnkoLogger {
      * is active, this won't be an issue. We're using a WeakReference to make sure that
      * we're not accidentally keeping anything live that really should die at cleanup time.
      */
-    var watchFace: CanvasWatchFaceService
+    private var watchFace: CanvasWatchFaceService
         get() = watchFaceRef?.get() ?: errorLogAndThrow("no watchface service found!")
         set(watchFace) {
             verbose { "Saving watchface service ref in complication wrapper" }
             watchFaceRef = WeakReference(watchFace)
             watchFaceClassInternal = watchFace::class.java
-            initializeComplicationsAndBackground() // seems as good a place to this as anything
         }
 
     /**
@@ -83,39 +82,35 @@ object ComplicationWrapper : AnkoLogger {
 
     // Unique IDs for each complication. The settings activity that supports allowing users
     // to select their complication data provider requires numbers to be >= 0.
-    private val BACKGROUND_COMPLICATION_ID = 0
+    internal const val BACKGROUND_COMPLICATION_ID = 0
 
-    private val LEFT_COMPLICATION_ID = 100
-    private val RIGHT_COMPLICATION_ID = 101
+    internal const val LEFT_COMPLICATION_ID = 100
+    internal const val RIGHT_COMPLICATION_ID = 101
+    internal const val TOP_COMPLICATION_ID = 102
+    internal const val BOTTOM_COMPLICATION_ID = 103
 
-    // Background, Left and right complication IDs as array for Complication API.
-    private val COMPLICATION_IDS = intArrayOf(BACKGROUND_COMPLICATION_ID, LEFT_COMPLICATION_ID, RIGHT_COMPLICATION_ID)
+    internal lateinit var activeLocations: Array<out ComplicationLocation>
+    internal lateinit var activeComplicationIds: IntArray
+
+    internal val complicationIds get() = activeComplicationIds // read-only access
 
     // Left and right dial supported types.
-    private val COMPLICATION_SUPPORTED_TYPES = arrayOf(
-            intArrayOf(TYPE_LARGE_IMAGE),
-            intArrayOf(TYPE_RANGED_VALUE, TYPE_ICON, TYPE_SHORT_TEXT, TYPE_SMALL_IMAGE),
-            intArrayOf(TYPE_RANGED_VALUE, TYPE_ICON, TYPE_SHORT_TEXT, TYPE_SMALL_IMAGE))
+    private lateinit var activeComplicationSupportedTypes: Array<IntArray>
 
 
     internal fun getComplicationId(complicationLocation: ComplicationLocation): Int =
-        // Add any other supported locations here.
         when (complicationLocation) {
             BACKGROUND -> BACKGROUND_COMPLICATION_ID
             LEFT -> LEFT_COMPLICATION_ID
             RIGHT -> RIGHT_COMPLICATION_ID
-            else -> -1
+            TOP -> TOP_COMPLICATION_ID
+            BOTTOM -> BOTTOM_COMPLICATION_ID
         }
 
-    internal fun getComplicationIds(): IntArray = COMPLICATION_IDS
-
     internal fun getSupportedComplicationTypes(complicationLocation: ComplicationLocation) =
-        // Add any other supported locations here.
         when (complicationLocation) {
-            BACKGROUND -> COMPLICATION_SUPPORTED_TYPES[0]
-            LEFT -> COMPLICATION_SUPPORTED_TYPES[1]
-            RIGHT -> COMPLICATION_SUPPORTED_TYPES[2]
-            else -> intArrayOf()
+            BACKGROUND -> intArrayOf(TYPE_LARGE_IMAGE)
+            LEFT, RIGHT, TOP, BOTTOM -> intArrayOf(TYPE_RANGED_VALUE, TYPE_ICON, TYPE_SHORT_TEXT, TYPE_SMALL_IMAGE)
         }
 
     /**
@@ -158,6 +153,22 @@ object ComplicationWrapper : AnkoLogger {
                 midpointOfScreen + horizontalOffset + sizeOfComplication,
                 verticalOffset + sizeOfComplication)
 
+        // note that we've just swapped the x and y values for TOP to be the same as LEFT
+        complicationDrawableMap[TOP_COMPLICATION_ID]?.bounds = Rect(
+                // Left, Top, Right, Bottom
+                verticalOffset,
+                horizontalOffset,
+                verticalOffset + sizeOfComplication,
+                horizontalOffset + sizeOfComplication)
+
+        // note that we've just swapped the x and y values for BOTTOM to be the same as RIGHT
+        complicationDrawableMap[BOTTOM_COMPLICATION_ID]?.bounds = Rect(
+                // Left, Top, Right, Bottom
+                verticalOffset,
+                midpointOfScreen + horizontalOffset,
+                verticalOffset + sizeOfComplication,
+                midpointOfScreen + horizontalOffset + sizeOfComplication)
+
         complicationDrawableMap[BACKGROUND_COMPLICATION_ID]?.bounds = Rect(0, 0, width, height)
 
         // at this point, we know the width and height, which also means that the PaintCan styles
@@ -175,37 +186,47 @@ object ComplicationWrapper : AnkoLogger {
 
         complicationDrawableMap[complicationId]?.setComplicationData(complicationData)
         if (complicationData == null)
+            // when we get back no complication data, that's the only signal we get
+            // that a complication has been killed, so we're just going to remove the
+            // entry from our map; see also isVisible()
             complicationDataMap -= complicationId
         else
             complicationDataMap += complicationId to complicationData
     }
 
+    /**
+     * Call this if you want to know if a given complication is visible to the user at the moment.
+     * On a watchface, you might use this to decide whether to show or hide numerals.
+     */
+    fun isVisible(location: ComplicationLocation) =
+            complicationDataMap.containsKey(getComplicationId(location))
+
     private var complicationDrawableMap: Map<Int,ComplicationDrawable> = emptyMap()
     private var complicationDataMap: Map<Int,ComplicationData> = emptyMap()
-    private var activeComplicationDrawableMap: Map<Int,ComplicationDrawable> = emptyMap()
-
-    private fun initializeComplicationsAndBackground() {
-        verbose("initializeComplications()")
-
-        val context = watchFace // RuntimeException if the watchface was never initialized
-
-        // Creates a ComplicationDrawable for each location where the user can render a
-        // complication on the watch face. In this watch face, we create one for left, right,
-        // and background, but you could add many more.
-        complicationDrawableMap += LEFT_COMPLICATION_ID to ComplicationDrawable(context)
-        complicationDrawableMap += RIGHT_COMPLICATION_ID to ComplicationDrawable(context)
-        complicationDrawableMap += BACKGROUND_COMPLICATION_ID to ComplicationDrawable(context).apply {
-            // custom settings here: black unless an image bitmap makes it otherwise
-            setBackgroundColorActive(Color.BLACK)
-        }
-
-    }
 
     /**
-     * Call this in your onCreate() to initialize the complications for the engine.
+     * Call this in your onCreate() to initialize the complications for the engine. If no locations
+     * are specified, then you get the default (BACKGROUND, LEFT, RIGHT, TOP, and BOTTOM).
      */
-    fun setActiveComplications(engine: CanvasWatchFaceService.Engine) =
-        engine.setActiveComplications(*COMPLICATION_IDS)
+    fun init(watchFace: CanvasWatchFaceService, engine: CanvasWatchFaceService.Engine, vararg locations: ComplicationLocation) {
+        verbose { "Complication locations: $locations" }
+
+        this.watchFace = watchFace  // creates a weakref, initializes many things
+
+        activeLocations = locations
+        activeComplicationIds = locations.map(this::getComplicationId).toIntArray()
+        activeComplicationSupportedTypes = locations.map(this::getSupportedComplicationTypes).toTypedArray()
+
+        // Creates a ComplicationDrawable for each location where the user can render a
+        // complication on the watch face. Bonus coolness for Kotlin's associate method letting
+        // us convert from an array to a map in one go. Functional programming FTW!
+        complicationDrawableMap = activeComplicationIds.associate { it to ComplicationDrawable(watchFace) }
+
+        // custom settings here: black unless an image bitmap makes it otherwise
+        complicationDrawableMap[BACKGROUND_COMPLICATION_ID]?.setBackgroundColorActive(Color.BLACK)
+
+        engine.setActiveComplications(*activeComplicationIds)
+    }
 
     /**
      * Some complications types are "tappable" and others aren't.
@@ -260,12 +281,14 @@ object ComplicationWrapper : AnkoLogger {
     }
 
     // initially a no-op, will replace later when styleComplications is called
-    var stylingFunc: (ComplicationDrawable) -> Unit = {
+    private var stylingFunc: (ComplicationDrawable) -> Unit = {
         warn { "Default styles being applied to complications" }
     }
 
     /**
      * Call this to set a lambda which will be called with each ComplicationDrawable to style it.
+     * Note that this will only style your foreground complications. The background is only for
+     * full-screen images, so no styling happens there.
      */
     fun styleComplications(func: (ComplicationDrawable)->Unit) {
         stylingFunc = func

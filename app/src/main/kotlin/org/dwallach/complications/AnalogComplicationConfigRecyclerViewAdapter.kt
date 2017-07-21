@@ -29,6 +29,7 @@ import org.dwallach.complications.AnalogComplicationConfigData.PreviewAndComplic
 import org.jetbrains.anko.AnkoLogger
 import org.jetbrains.anko.debug
 import org.jetbrains.anko.verbose
+import org.jetbrains.anko.warn
 
 /**
  * Displays different layouts for configuring watch face's complications and appearance settings
@@ -47,7 +48,7 @@ import org.jetbrains.anko.verbose
 
  */
 class AnalogComplicationConfigRecyclerViewAdapter(
-        private val mContext: Context,
+        mContext: Context,
         watchFaceServiceClass: Class<out CanvasWatchFaceService>,
         private val mSettingsDataSet: List<ConfigItemType>) : RecyclerView.Adapter<RecyclerView.ViewHolder>(), AnkoLogger {
 
@@ -141,15 +142,12 @@ class AnalogComplicationConfigRecyclerViewAdapter(
 
         when (viewHolder.itemViewType) {
             TYPE_PREVIEW_AND_COMPLICATIONS_CONFIG -> {
-                val previewAndComplicationsViewHolder = viewHolder as PreviewAndComplicationsViewHolder
-
                 val previewAndComplicationsConfigItem = configItemType as PreviewAndComplicationsConfigItem
-
                 val defaultComplicationResourceId = previewAndComplicationsConfigItem.defaultComplicationResourceId
-                previewAndComplicationsViewHolder.setDefaultComplicationDrawable(
-                        defaultComplicationResourceId)
-
-                previewAndComplicationsViewHolder.initializesColorsAndComplications()
+                with(viewHolder as PreviewAndComplicationsViewHolder) {
+                    setDefaultComplicationDrawable(defaultComplicationResourceId)
+                    initializesColorsAndComplications()
+                }
             }
 
             TYPE_MORE_OPTIONS -> {
@@ -182,8 +180,11 @@ class AnalogComplicationConfigRecyclerViewAdapter(
         return mSettingsDataSet.size
     }
 
-    /** Updates the selected complication id saved earlier with the new information.  */
-    fun updateSelectedComplication(complicationProviderInfo: ComplicationProviderInfo) {
+    /**
+     * Updates the selected complication id saved earlier with the new information. null if
+     * the complication has been set to be "empty".
+     */
+    fun updateSelectedComplication(complicationProviderInfo: ComplicationProviderInfo?) {
 
         verbose { "updateSelectedComplication: $mPreviewAndComplicationsViewHolder" }
 
@@ -206,35 +207,59 @@ class AnalogComplicationConfigRecyclerViewAdapter(
      */
     inner class PreviewAndComplicationsViewHolder(view: View) : RecyclerView.ViewHolder(view), OnClickListener {
         private val mWatchFaceArmsAndTicksView = view.findViewById<View>(R.id.watch_face_arms_and_ticks)
-        private val mWatchFaceHighlightPreviewView = view.findViewById<View>(R.id.watch_face_highlight)
 
         private val mLeftComplicationBackground = view.findViewById<ImageView>(R.id.left_complication_background)
         private val mRightComplicationBackground = view.findViewById<ImageView>(R.id.right_complication_background)
+        private val mTopComplicationBackground = view.findViewById<ImageView>(R.id.top_complication_background)
+        private val mBottomComplicationBackground = view.findViewById<ImageView>(R.id.bottom_complication_background)
 
         private val mLeftComplication = view.findViewById<ImageButton>(R.id.left_complication)
         private val mRightComplication = view.findViewById<ImageButton>(R.id.right_complication)
+        private val mTopComplication = view.findViewById<ImageButton>(R.id.top_complication)
+        private val mBottomComplication = view.findViewById<ImageButton>(R.id.bottom_complication)
+
+        private fun idToComplicationFn(id: Int) = when(id) {
+            ComplicationWrapper.LEFT_COMPLICATION_ID -> mLeftComplication
+            ComplicationWrapper.RIGHT_COMPLICATION_ID -> mRightComplication
+            ComplicationWrapper.TOP_COMPLICATION_ID -> mTopComplication
+            ComplicationWrapper.BOTTOM_COMPLICATION_ID -> mBottomComplication
+            else -> null
+        }
+
+        private fun idToComplicationBackgroundFn(id: Int) = when(id) {
+            ComplicationWrapper.LEFT_COMPLICATION_ID -> mLeftComplicationBackground
+            ComplicationWrapper.RIGHT_COMPLICATION_ID -> mRightComplicationBackground
+            ComplicationWrapper.TOP_COMPLICATION_ID -> mTopComplicationBackground
+            ComplicationWrapper.BOTTOM_COMPLICATION_ID -> mBottomComplicationBackground
+            else -> null
+        }
+
+        private val idToComplication = ComplicationWrapper.activeComplicationIds.associate { it to idToComplicationFn(it) }
+        private val idToComplicationBackground = ComplicationWrapper.activeComplicationIds.associate { it to idToComplicationBackgroundFn(it) }
+        private val disabledComplicationIds = ComplicationWrapper.complicationIds.toSet() - ComplicationWrapper.activeComplicationIds.toSet()
+        private val disabledComplications = disabledComplicationIds.map(this::idToComplicationFn)
+        private val disabledComplicationBackgrounds = disabledComplicationIds.map(this::idToComplicationBackgroundFn)
 
         private var mDefaultComplicationDrawable: Drawable? = null
 
         init {
-            // Sets up left complication preview.
-            mLeftComplication.setOnClickListener(this)
-            mRightComplication.setOnClickListener(this)
+            idToComplication.values.forEach { it?.setOnClickListener(this) }
         }
 
         override fun onClick(view: View) {
-            if (view == mLeftComplication) {
-                verbose { "Left Complication click()" }
-
-                val currentActivity = view.context as Activity
-                launchComplicationHelperActivity(currentActivity, ComplicationLocation.LEFT)
-
-            } else if (view == mRightComplication) {
-                verbose { "Right Complication click()" }
-
-                val currentActivity = view.context as Activity
-                launchComplicationHelperActivity(currentActivity, ComplicationLocation.RIGHT)
+            val location = when(view) {
+                mLeftComplication -> ComplicationLocation.LEFT
+                mRightComplication -> ComplicationLocation.RIGHT
+                mBottomComplication -> ComplicationLocation.BOTTOM
+                mTopComplication -> ComplicationLocation.TOP
+                else -> null
             }
+            val currentActivity = view.context as Activity
+
+            if (location != null)
+                launchComplicationHelperActivity(currentActivity, location)
+            else
+                debug { "Couldn't figure out location for click! Ignoring." }
         }
 
         // Verifies the watch face supports the complication location, then launches the helper
@@ -269,11 +294,21 @@ class AnalogComplicationConfigRecyclerViewAdapter(
             val context = mWatchFaceArmsAndTicksView.context
             mDefaultComplicationDrawable = context.getDrawable(resourceId)
 
-            mLeftComplication.setImageDrawable(mDefaultComplicationDrawable)
-            mLeftComplicationBackground.visibility = View.INVISIBLE
+            idToComplication.values.forEach {
+                it?.setImageDrawable(mDefaultComplicationDrawable)
+            }
 
-            mRightComplication.setImageDrawable(mDefaultComplicationDrawable)
-            mRightComplicationBackground.visibility = View.INVISIBLE
+            disabledComplications.forEach {
+                it?.visibility = View.INVISIBLE
+            }
+
+            idToComplicationBackground.values.forEach {
+                it?.visibility = View.INVISIBLE
+            }
+
+            disabledComplicationBackgrounds.forEach {
+                it?.visibility = View.INVISIBLE
+            }
         }
 
         fun updateComplicationViews(watchFaceComplicationId: Int,
@@ -281,30 +316,25 @@ class AnalogComplicationConfigRecyclerViewAdapter(
             verbose { "updateComplicationViews(): id:  $watchFaceComplicationId" }
             verbose { "\tinfo: $complicationProviderInfo" }
 
-            if (watchFaceComplicationId == mLeftComplicationId) {
+            val complication = idToComplication[watchFaceComplicationId]
+            val complicationBg = idToComplicationBackground[watchFaceComplicationId]
+
+            if (complication != null && complicationBg != null) {
                 if (complicationProviderInfo != null) {
-                    mLeftComplication.setImageIcon(complicationProviderInfo.providerIcon)
-                    mLeftComplicationBackground.visibility = View.VISIBLE
+                    complication.setImageIcon(complicationProviderInfo.providerIcon)
+                    complicationBg.visibility = View.VISIBLE
 
                 } else {
-                    mLeftComplication.setImageDrawable(mDefaultComplicationDrawable)
-                    mLeftComplicationBackground.visibility = View.INVISIBLE
+                    complication.setImageDrawable(mDefaultComplicationDrawable)
+                    complicationBg.visibility = View.INVISIBLE
                 }
-
-            } else if (watchFaceComplicationId == mRightComplicationId) {
-                if (complicationProviderInfo != null) {
-                    mRightComplication.setImageIcon(complicationProviderInfo.providerIcon)
-                    mRightComplicationBackground.visibility = View.VISIBLE
-
-                } else {
-                    mRightComplication.setImageDrawable(mDefaultComplicationDrawable)
-                    mRightComplicationBackground.visibility = View.INVISIBLE
-                }
+            } else {
+                error { "couldn't find complication or complicationBg!" }
             }
         }
 
         fun initializesColorsAndComplications() {
-            val complicationIds = ComplicationWrapper.getComplicationIds()
+            val complicationIds = ComplicationWrapper.complicationIds
 
             mProviderInfoRetriever.retrieveProviderInfo(
                     object : OnProviderInfoReceivedCallback() {
@@ -357,15 +387,11 @@ class AnalogComplicationConfigRecyclerViewAdapter(
 
             val currentActivity = view.context as Activity
 
-            mSelectedComplicationId = ComplicationWrapper.getComplicationId(
-                    ComplicationLocation.BACKGROUND)
+            mSelectedComplicationId = ComplicationWrapper.getComplicationId(ComplicationLocation.BACKGROUND)
 
             if (mSelectedComplicationId >= 0) {
-
-                val supportedTypes = ComplicationWrapper.getSupportedComplicationTypes(
-                        ComplicationLocation.BACKGROUND)
-
-                val watchFace = ComponentName(currentActivity, ComplicationWrapper.watchFace::class.java)
+                val supportedTypes = ComplicationWrapper.getSupportedComplicationTypes(ComplicationLocation.BACKGROUND)
+                val watchFace = ComponentName(currentActivity, ComplicationWrapper.watchFaceClass)
 
                 currentActivity.startActivityForResult(
                         ComplicationHelperActivity.createProviderChooserHelperIntent(
@@ -382,9 +408,6 @@ class AnalogComplicationConfigRecyclerViewAdapter(
     }
 
     companion object {
-
-        private val TAG = "CompConfigAdapter"
-
         val TYPE_PREVIEW_AND_COMPLICATIONS_CONFIG = 0
         val TYPE_MORE_OPTIONS = 1
         val TYPE_BACKGROUND_COMPLICATION_IMAGE_CONFIG = 2

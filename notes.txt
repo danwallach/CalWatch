@@ -60,10 +60,6 @@ TODO update the slides
     adding Kotlin material.
 
 ANDROID N / WEAR 2.0 OVERHAUL
-    TODO flat-chin handling is broken
-
-    TODO no configuration gear is shown
-
     TODO interaction of numbers-mode and complications -- do we hide the digits?
         (probably just draw the complications over the digits and let them be cropped)
 
@@ -99,3 +95,20 @@ ANDROID N / WEAR 2.0 OVERHAUL
         TODO custom code for custom menu (switch from XML to Anko?)
 
     TODO Merge in Anko synthetic properties where appropraite
+
+    TODO track which complications are visible / invisible, use this to change watchface rendering
+
+    TODO delete ComplicationToggleReceiver? Do we need this for anything else?
+
+    AnalogComplicationRecyclerViewAdapter
+        TODO feed data from ComplicationWrapper, only display desired complication locations (data via ComplicationWrapper?)
+        TODO work in the generalized radio buttons, toggles
+        TODO background watchface image for complication selection?
+
+    Assorted graphics
+        TODO settings_watch_face_preview_background.xml: make something other than a white circle
+
+
+Distant future
+    TODO replace left/right/top/bottom with arbitrary numbers of complications at arbitrary points on the watchface
+    TODO support LONG_TEXT in addition to SHORT_TEXT

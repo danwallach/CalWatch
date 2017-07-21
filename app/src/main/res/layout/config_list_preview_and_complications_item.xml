@@ -34,15 +34,6 @@ based on changes by the user.
         android:background="@drawable/settings_watch_face_preview_background"/>
 
     <View
-        android:id="@+id/watch_face_highlight"
-        android:layout_width="@dimen/analog_complication_settings_preview_size"
-        android:layout_height="@dimen/analog_complication_settings_preview_size"
-        android:layout_centerHorizontal="true"
-        android:layout_centerVertical="true"
-        android:background="@drawable/settings_watch_face_preview_highlight"/>
-
-
-    <View
         android:id="@+id/watch_face_arms_and_ticks"
         android:layout_width="@dimen/analog_complication_settings_preview_size"
         android:layout_height="@dimen/analog_complication_settings_preview_size"
@@ -86,6 +77,44 @@ based on changes by the user.
         android:layout_height="wrap_content"
         android:layout_alignParentRight="true"
         android:layout_centerVertical="true"
+        style="?android:borderlessButtonStyle"
+        android:background="@android:color/transparent"/>
+
+    <ImageView
+        android:id="@+id/top_complication_background"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentTop="true"
+        android:layout_centerHorizontal="true"
+        android:src="@drawable/added_complication"
+        style="?android:borderlessButtonStyle"
+        android:background="@android:color/transparent"/>
+
+    <ImageButton
+        android:id="@+id/top_complication"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentTop="true"
+        android:layout_centerHorizontal="true"
+        style="?android:borderlessButtonStyle"
+        android:background="@android:color/transparent"/>
+
+    <ImageView
+        android:id="@+id/bottom_complication_background"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentBottom="true"
+        android:layout_centerHorizontal="true"
+        android:src="@drawable/added_complication"
+        style="?android:borderlessButtonStyle"
+        android:background="@android:color/transparent"/>
+
+    <ImageButton
+        android:id="@+id/bottom_complication"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentBottom="true"
+        android:layout_centerHorizontal="true"
         style="?android:borderlessButtonStyle"
         android:background="@android:color/transparent"/>
 </RelativeLayout>
