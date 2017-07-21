@@ -73,9 +73,6 @@ class AnalogComplicationConfigRecyclerViewAdapter(
 
     // Selected complication id by user.
     private var mSelectedComplicationId: Int = 0
-
-    private val mLeftComplicationId = ComplicationWrapper.getComplicationId(ComplicationLocation.LEFT)
-    private val mRightComplicationId = ComplicationWrapper.getComplicationId(ComplicationLocation.RIGHT)
     private val mBackgroundComplicationId = ComplicationWrapper.getComplicationId(ComplicationLocation.BACKGROUND)
 
     // Required to retrieve complication data from watch face for preview.
@@ -240,7 +237,7 @@ class AnalogComplicationConfigRecyclerViewAdapter(
         private val disabledComplications = disabledComplicationIds.map(this::idToComplicationFn)
         private val disabledComplicationBackgrounds = disabledComplicationIds.map(this::idToComplicationBackgroundFn)
 
-        private var mDefaultComplicationDrawable: Drawable? = null
+        private lateinit var mDefaultComplicationDrawable: Drawable
 
         init {
             idToComplication.values.forEach { it?.setOnClickListener(this) }
