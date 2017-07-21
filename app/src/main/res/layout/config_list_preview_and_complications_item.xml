@@ -6,7 +6,7 @@
   ~ you may not use this file except in compliance with the License.
   ~ You may obtain a copy of the License at
   ~
-  ~      http://www.apache.org/licenses/LICENSE-2.0
+  ~      http://www.apache.org/licenses/LICENSE-10.0
   ~
   ~ Unless required by applicable law or agreed to in writing, software
   ~ distributed under the License is distributed on an "AS IS" BASIS,
@@ -26,19 +26,20 @@ based on changes by the user.
 
     <ImageView
         android:id="@+id/watch_face_background"
-        android:padding="@dimen/watch_face_preview_background_padding"
-        android:scaleType="fitXY"
         android:layout_width="@dimen/analog_complication_settings_preview_size"
         android:layout_height="@dimen/analog_complication_settings_preview_size"
-        app:layout_constraintRight_toRightOf="parent"
-        app:layout_constraintLeft_toLeftOf="parent"
-        app:layout_constraintTop_toTopOf="parent"
+        android:background="@drawable/settings_watch_face_preview_background"
+        android:padding="@dimen/watch_face_preview_background_padding"
+        android:scaleType="fitXY"
         app:layout_constraintBottom_toBottomOf="parent"
-        android:background="@drawable/settings_watch_face_preview_background"/>
+        app:layout_constraintLeft_toLeftOf="parent"
+        app:layout_constraintRight_toRightOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
 
 
     <View
         android:id="@+id/watch_face_arms_and_ticks"
+        android:padding="@dimen/watch_face_preview_background_padding"
         android:layout_width="@dimen/analog_complication_settings_preview_size"
         android:layout_height="@dimen/analog_complication_settings_preview_size"
         app:layout_constraintRight_toRightOf="parent"
@@ -94,6 +95,7 @@ based on changes by the user.
         android:id="@+id/top_complication_background"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:layout_marginTop="@dimen/watch_face_preview_background_padding"
         app:layout_constraintTop_toTopOf="@id/watch_face_background"
         app:layout_constraintLeft_toLeftOf="parent"
         app:layout_constraintRight_toRightOf="parent"
@@ -105,6 +107,7 @@ based on changes by the user.
         android:id="@+id/top_complication"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:layout_marginTop="@dimen/watch_face_preview_background_padding"
         app:layout_constraintTop_toTopOf="@id/watch_face_background"
         app:layout_constraintLeft_toLeftOf="parent"
         app:layout_constraintRight_toRightOf="parent"
@@ -115,16 +118,19 @@ based on changes by the user.
         android:id="@+id/bottom_complication_background"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:layout_marginBottom="@dimen/watch_face_preview_background_padding"
         android:src="@drawable/added_complication"
         style="?android:borderlessButtonStyle"
         android:background="@android:color/transparent"
-        tools:layout_editor_absoluteY="0dp"
-        tools:layout_editor_absoluteX="0dp" />
+        app:layout_constraintBottom_toBottomOf="@id/watch_face_background"
+        app:layout_constraintLeft_toLeftOf="parent"
+        app:layout_constraintRight_toRightOf="parent" />
 
     <ImageButton
         android:id="@+id/bottom_complication"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:layout_marginBottom="@dimen/watch_face_preview_background_padding"
         app:layout_constraintBottom_toBottomOf="@id/watch_face_background"
         app:layout_constraintLeft_toLeftOf="parent"
         app:layout_constraintRight_toRightOf="parent"

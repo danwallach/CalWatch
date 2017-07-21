@@ -16,7 +16,9 @@ import org.dwallach.calwatch.ClockState.calendarPermission
 import org.dwallach.calwatch.ClockState.showDayDate
 import org.dwallach.calwatch.ClockState.showSeconds
 import org.dwallach.calwatch.ClockState.showStepCounter
+import org.dwallach.complications.AnalogComplicationConfigRecyclerViewAdapter.ComplicationLocation.*
 import org.dwallach.complications.ComplicationWrapper
+import org.dwallach.complications.ComplicationWrapper.isVisible
 import org.jetbrains.anko.*
 import java.util.Observable
 import java.util.Observer
@@ -42,8 +44,6 @@ class ClockFace: Observer, AnkoLogger {
     private var eventList: List<EventWrapper> = emptyList()
     private var maxLevel: Int = 0
 
-    private var facePathCache: Path? = null
-    private var facePathCacheMode = -1
 
 
     private var drawStyle = PaintCan.STYLE_NORMAL // see updateDrawStyle
@@ -340,13 +340,28 @@ class ClockFace: Observer, AnkoLogger {
         canvas.drawText(text, x, y, paint)
     }
 
-    private fun drawFace(canvas: Canvas) {
-        var lFacePathCache = facePathCache
+    private var facePathCache: Path? = null
+    private var facePathComplicationState: Int = 0
+    private var facePathCacheMode = -1
 
+    private fun complicationStateNow(): Int =
+            (if (isVisible(LEFT)) 8 else 0) + (if (isVisible(RIGHT)) 4 else 0) + (if (isVisible(TOP)) 2 else 0) + (if (isVisible(BOTTOM)) 1 else 0)
+
+    private fun getCachedFacePath(mode: Int): Path? =
+        if (facePathComplicationState == complicationStateNow() && facePathCacheMode == mode) facePathCache else null
+
+    private fun saveCachedFacePath(mode: Int, path: Path) {
+        facePathCacheMode = mode
+        facePathCache = path
+        facePathComplicationState = complicationStateNow()
+    }
+
+    private fun drawFace(canvas: Canvas) {
         val bottomHack = missingBottomPixels > 0
 
         // force "lite" mode when in burn-in protection mode
         val lFaceMode = if(drawStyle == PaintCan.STYLE_ANTI_BURNIN) ClockState.FACE_LITE else ClockState.faceMode
+        var lFacePathCache = getCachedFacePath(lFaceMode)
 
         val colorTickShadow = PaintCan[drawStyle, PaintCan.COLOR_TICK_SHADOW]
         val colorSmall = PaintCan[drawStyle, PaintCan.COLOR_SMALL_TEXT_AND_LINES]
@@ -354,17 +369,24 @@ class ClockFace: Observer, AnkoLogger {
         val colorTextShadow = PaintCan[drawStyle, PaintCan.COLOR_BIG_SHADOW]
 
         // check if we've already rendered the face
-        if (lFaceMode != facePathCacheMode || lFacePathCache == null) {
+        if (lFacePathCache == null) {
             verbose { "drawFace: cx($cx), cy($cy), r($radius)" }
 
             lFacePathCache = Path()
 
             verbose { "rendering new face, faceMode($lFaceMode)" }
 
+            if (calendarTicker % 1000 == 0) {
+                verbose { "Complication visibility map: (LEFT, RIGHT, TOP, BOTTOM) -> ${isVisible(LEFT)}, ${isVisible(RIGHT)}, ${isVisible(TOP)}, ${isVisible(BOTTOM)}" }
+            }
+
             if (lFaceMode == ClockState.FACE_TOOL)
-                for (i in 1..59)
+                for (i in 1..59) {
+                    if (bottomHack && isVisible(BOTTOM) && i >= 26 && i <= 34) continue // don't even bother if flat bottom and complication
+
                     if (i % 5 != 0)
-                        drawRadialLine(lFacePathCache, colorSmall.strokeWidth, i.toDouble(), .9f, 1.0f, false, bottomHack)
+                        drawRadialLine(lFacePathCache, colorSmall.strokeWidth, i.toDouble(), 0.9f, 1.0f, false, bottomHack)
+                }
 
             val strokeWidth =
                     if (lFaceMode == ClockState.FACE_LITE || lFaceMode == ClockState.FACE_NUMBERS)
@@ -372,35 +394,46 @@ class ClockFace: Observer, AnkoLogger {
                     else
                         colorBig.strokeWidth
 
+            if (lFaceMode != ClockState.FACE_NUMBERS) {
+                // top of watch
+                val topLineStart = if (isVisible(TOP)) 0.85f else 0.75f
 
-            for(i in 0..59 step 5) {
-                if (i == 0) {
-                    // top of watch: special
-                    if (lFaceMode != ClockState.FACE_NUMBERS) {
-                        drawRadialLine(lFacePathCache, strokeWidth, -0.4, .75f, 1.0f, true, false)
-                        drawRadialLine(lFacePathCache, strokeWidth, 0.4, .75f, 1.0f, true, false)
+                // we draw double lines here, because style
+                drawRadialLine(lFacePathCache, strokeWidth, -0.4, topLineStart, 1.0f, true, false)
+                drawRadialLine(lFacePathCache, strokeWidth, 0.4, topLineStart, 1.0f, true, false)
+
+                // left of watch
+                if (ClockState.showDayDate) {
+                    if (drawStyle != PaintCan.STYLE_ANTI_BURNIN) {
+                        drawRadialLine(lFacePathCache, strokeWidth, 45.0, 0.9f, 1.0f, false, false)
+                    } else {
+                        drawRadialLine(lFacePathCache, strokeWidth, 45.0, 0.75f, 1.0f, false, false)
                     }
-                } else if (i == 45 && drawStyle != PaintCan.STYLE_ANTI_BURNIN && ClockState.showDayDate) {
-                    // 9 o'clock, don't extend into the inside, where we'd overlap with the DayDate display
-                    // except, of course, when we're not showing the DayDate display, which might happen
-                    // via user preference or because we're in burnInProtection ambient mode
-                    drawRadialLine(lFacePathCache, strokeWidth, i.toDouble(), 0.9f, 1.0f, false, false)
-                } else {
-                    // we want lines for 1, 2, 4, 5, 7, 8, 10, and 11 no matter what
-                    if (lFaceMode != ClockState.FACE_NUMBERS || !(i == 15 || i == 30 || i == 45)) {
-                        // in the particular case of 6 o'clock and the Moto 360 bottomHack, we're
-                        // going to make the 6 o'clock index line the same length as the other lines
-                        // so it doesn't stand out as much
-                        if (i == 30 && bottomHack)
-                            drawRadialLine(lFacePathCache, strokeWidth, i.toDouble(), .9f, 1.0f, false, bottomHack)
-                        else
-                            drawRadialLine(lFacePathCache, strokeWidth, i.toDouble(), .75f, 1.0f, false, bottomHack)
+                }
+
+                // right of watch
+                val rightLineStart = if (isVisible(RIGHT)) 0.85f else 0.75f
+                drawRadialLine(lFacePathCache, strokeWidth, 15.0, rightLineStart, 1.0f, false, bottomHack)
+
+                // bottom of watch
+                if (!isVisible(BOTTOM) || !bottomHack) { // don't even bother if we've got a flat tire *and* a complication
+                    val bottomLineStart = when {
+                        isVisible(BOTTOM) -> 0.85f
+                        bottomHack -> 0.9f
+                        else -> 0.75f
                     }
+                    drawRadialLine(lFacePathCache, strokeWidth, 30.0, bottomLineStart, 1.0f, false, bottomHack)
                 }
             }
 
-            facePathCache = lFacePathCache
-            facePathCacheMode = lFaceMode
+            // and the rest of the hour indicators!
+            for (i in 5..59 step 5) {
+                if (i == 15 || i == 30 || i == 45) continue
+
+                drawRadialLine(lFacePathCache, strokeWidth, i.toDouble(), 0.75f, 1.0f, false, bottomHack)
+            }
+
+            saveCachedFacePath(lFaceMode, lFacePathCache)
         }
 
         canvas.drawPath(lFacePathCache, colorSmall)
@@ -422,49 +455,56 @@ class ClockFace: Observer, AnkoLogger {
             //
             // 12 o'clock
             //
-            r = 0.9f
+            if (!isVisible(TOP)) { // don't draw if there's a complication
+                r = 0.9f
 
-            x = clockX(0.0, r)
-            y = clockY(0.0, r) - metrics.ascent / 1.5f
+                x = clockX(0.0, r)
+                y = clockY(0.0, r) - metrics.ascent / 1.5f
 
-            drawShadowText(canvas, "12", x, y, colorBig, colorTextShadow)
+                drawShadowText(canvas, "12", x, y, colorBig, colorTextShadow)
 
-            if (!debugMetricsPrinted) {
-                debugMetricsPrinted = true
-                verbose { "x(%.2f), y(%.2f), metrics.descent(%.2f), metrics.asacent(%.2f)".format(x, y, metrics.descent, metrics.ascent) }
+                if (!debugMetricsPrinted) {
+                    debugMetricsPrinted = true
+                    verbose { "x(%.2f), y(%.2f), metrics.descent(%.2f), metrics.asacent(%.2f)".format(x, y, metrics.descent, metrics.ascent) }
+                }
             }
 
             //
             // 3 o'clock
             //
 
-            r = 0.9f
-            val threeWidth = colorBig.measureText("3")
+            if (!isVisible(RIGHT)) { // don't draw if there's a complication
+                r = 0.9f
 
-            x = clockX(15.0, r) - threeWidth / 2f
-            y = clockY(15.0, r) - metrics.ascent / 2f - metrics.descent / 2f // empirically gets the middle of the "3" -- actually a smidge off with Roboto but close enough for now and totally font-dependent with no help from metrics
+                val threeWidth = colorBig.measureText("3")
 
-            drawShadowText(canvas, "3", x, y, colorBig, colorTextShadow)
+                x = clockX(15.0, r) - threeWidth / 2f
+                y = clockY(15.0, r) - metrics.ascent / 2f - metrics.descent / 2f // empirically gets the middle of the "3" -- actually a smidge off with Roboto but close enough for now and totally font-dependent with no help from metrics
+
+                drawShadowText(canvas, "3", x, y, colorBig, colorTextShadow)
+            }
 
             //
             // 6 o'clock
             //
 
-            r = 0.9f
+            if (!isVisible(BOTTOM)) { // don't draw if there's a complication
+                r = 0.9f
 
-            x = clockX(30.0, r)
-            if (missingBottomPixels != 0)
-                y = clockY(30.0, r) + metrics.descent - missingBottomPixels // another hack for Moto 360
-            else
-                y = clockY(30.0, r) + 0.75f * metrics.descent // scoot it up a tiny bit
+                x = clockX(30.0, r)
+                if (missingBottomPixels != 0)
+                    y = clockY(30.0, r) + metrics.descent - missingBottomPixels // another hack for Moto 360
+                else
+                    y = clockY(30.0, r) + 0.75f * metrics.descent // scoot it up a tiny bit
 
-            drawShadowText(canvas, "6", x, y, colorBig, colorTextShadow)
+                drawShadowText(canvas, "6", x, y, colorBig, colorTextShadow)
+            }
 
             //
             // 9 o'clock
             //
 
-            if (!ClockState.showDayDate) {
+            if (!ClockState.showDayDate) { // don't draw if our internal complication is visible
                 r = 0.9f
                 val nineWidth = colorBig.measureText("9")
 

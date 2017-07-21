@@ -133,7 +133,8 @@ object ComplicationWrapper : AnkoLogger {
      * in the beginning. Note that we're ignoring the presence or absence of a flat tire.
      */
     fun updateBounds(width: Int, height: Int) {
-        val sizeOfComplication = width / 4
+         // width/4 gives the "standard" size but we want a bit bigger
+        val sizeOfComplication = (width / 3.5).toInt()
         val midpointOfScreen = width / 2
 
         val horizontalOffset = (midpointOfScreen - sizeOfComplication) / 2
@@ -192,6 +193,8 @@ object ComplicationWrapper : AnkoLogger {
             complicationDataMap -= complicationId
         else
             complicationDataMap += complicationId to complicationData
+
+        verbose { "Visibility map: (LEFT, RIGHT, TOP, BOTTOM) -> ${isVisible(LEFT)}, ${isVisible(RIGHT)}, ${isVisible(TOP)}, ${isVisible(BOTTOM)}" }
     }
 
     /**

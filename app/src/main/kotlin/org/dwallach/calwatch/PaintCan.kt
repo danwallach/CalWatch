@@ -123,6 +123,9 @@ object PaintCan: AnkoLogger {
     const val COLOR_COMPLICATION_FG = 23
     const val COLOR_MAX = 23
 
+    init {
+        initPaintBucket(300f) // half-assed way to get started, but necessary if we restart directly into the settings dialog
+    }
 
     /**
      * Create all the Paint instances used in the watch face. Call this every time the
@@ -132,7 +135,7 @@ object PaintCan: AnkoLogger {
      * @param radius Radius of the watch face, used to scale all of the line widths
      */
     fun initPaintBucket(radius: Float) {
-        verbose { "initPaintBucket" }
+        verbose { "initPaintBucket: $radius" }
 
         val textSize = radius / 3f
         val smTextSize = radius / 6f
