@@ -18,10 +18,11 @@
 Stacked views to create watch face preview in settings activity's recycler view for live updates
 based on changes by the user.
 -->
-<RelativeLayout
-    xmlns:android="http://schemas.android.com/apk/res/android"
+<android.support.constraint.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
-    android:layout_height="match_parent">
+    android:layout_height="match_parent"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
 
     <ImageView
         android:id="@+id/watch_face_background"
@@ -29,8 +30,10 @@ based on changes by the user.
         android:scaleType="fitXY"
         android:layout_width="@dimen/analog_complication_settings_preview_size"
         android:layout_height="@dimen/analog_complication_settings_preview_size"
-        android:layout_centerHorizontal="true"
-        android:layout_centerVertical="true"
+        app:layout_constraintRight_toRightOf="parent"
+        app:layout_constraintLeft_toLeftOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintBottom_toBottomOf="parent"
         android:background="@drawable/settings_watch_face_preview_background"/>
 
 
@@ -38,17 +41,20 @@ based on changes by the user.
         android:id="@+id/watch_face_arms_and_ticks"
         android:layout_width="@dimen/analog_complication_settings_preview_size"
         android:layout_height="@dimen/analog_complication_settings_preview_size"
-        android:layout_centerHorizontal="true"
-        android:layout_centerVertical="true"
-        android:background="@drawable/settings_watch_face_preview_arms_and_ticks"/>
+        app:layout_constraintRight_toRightOf="parent"
+        app:layout_constraintLeft_toLeftOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintBottom_toBottomOf="parent"
+        android:background="@drawable/ic_preview_transparent"/>
 
 
     <ImageView
         android:id="@+id/left_complication_background"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_alignParentStart="true"
-        android:layout_centerVertical="true"
+        app:layout_constraintLeft_toLeftOf="@id/watch_face_background"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintBottom_toBottomOf="parent"
         android:src="@drawable/added_complication"
         style="?android:borderlessButtonStyle"
         android:background="@android:color/transparent"/>
@@ -57,8 +63,9 @@ based on changes by the user.
         android:id="@+id/left_complication"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_alignParentStart="true"
-        android:layout_centerVertical="true"
+        app:layout_constraintLeft_toLeftOf="@id/watch_face_background"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintBottom_toBottomOf="parent"
         style="?android:borderlessButtonStyle"
         android:background="@android:color/transparent"/>
 
@@ -66,8 +73,9 @@ based on changes by the user.
         android:id="@+id/right_complication_background"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_alignParentRight="true"
-        android:layout_centerVertical="true"
+        app:layout_constraintRight_toRightOf="@id/watch_face_background"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintBottom_toBottomOf="parent"
         android:src="@drawable/added_complication"
         style="?android:borderlessButtonStyle"
         android:background="@android:color/transparent"/>
@@ -76,8 +84,9 @@ based on changes by the user.
         android:id="@+id/right_complication"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_alignParentRight="true"
-        android:layout_centerVertical="true"
+        app:layout_constraintRight_toRightOf="@id/watch_face_background"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintBottom_toBottomOf="parent"
         style="?android:borderlessButtonStyle"
         android:background="@android:color/transparent"/>
 
@@ -85,8 +94,9 @@ based on changes by the user.
         android:id="@+id/top_complication_background"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_alignParentTop="true"
-        android:layout_centerHorizontal="true"
+        app:layout_constraintTop_toTopOf="@id/watch_face_background"
+        app:layout_constraintLeft_toLeftOf="parent"
+        app:layout_constraintRight_toRightOf="parent"
         android:src="@drawable/added_complication"
         style="?android:borderlessButtonStyle"
         android:background="@android:color/transparent"/>
@@ -95,8 +105,9 @@ based on changes by the user.
         android:id="@+id/top_complication"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_alignParentTop="true"
-        android:layout_centerHorizontal="true"
+        app:layout_constraintTop_toTopOf="@id/watch_face_background"
+        app:layout_constraintLeft_toLeftOf="parent"
+        app:layout_constraintRight_toRightOf="parent"
         style="?android:borderlessButtonStyle"
         android:background="@android:color/transparent"/>
 
@@ -104,18 +115,19 @@ based on changes by the user.
         android:id="@+id/bottom_complication_background"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_alignParentBottom="true"
-        android:layout_centerHorizontal="true"
         android:src="@drawable/added_complication"
         style="?android:borderlessButtonStyle"
-        android:background="@android:color/transparent"/>
+        android:background="@android:color/transparent"
+        tools:layout_editor_absoluteY="0dp"
+        tools:layout_editor_absoluteX="0dp" />
 
     <ImageButton
         android:id="@+id/bottom_complication"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_alignParentBottom="true"
-        android:layout_centerHorizontal="true"
+        app:layout_constraintBottom_toBottomOf="@id/watch_face_background"
+        app:layout_constraintLeft_toLeftOf="parent"
+        app:layout_constraintRight_toRightOf="parent"
         style="?android:borderlessButtonStyle"
         android:background="@android:color/transparent"/>
-</RelativeLayout>
+</android.support.constraint.ConstraintLayout>
