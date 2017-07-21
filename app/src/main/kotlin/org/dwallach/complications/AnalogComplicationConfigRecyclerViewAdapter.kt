@@ -26,6 +26,13 @@ import org.dwallach.complications.AnalogComplicationConfigData.BackgroundComplic
 import org.dwallach.complications.AnalogComplicationConfigData.ConfigItemType
 import org.dwallach.complications.AnalogComplicationConfigData.MoreOptionsConfigItem
 import org.dwallach.complications.AnalogComplicationConfigData.PreviewAndComplicationsConfigItem
+import org.dwallach.complications.AnalogComplicationConfigRecyclerViewAdapter.ComplicationLocation.BACKGROUND
+import org.dwallach.complications.ComplicationWrapper.BOTTOM_COMPLICATION_ID
+import org.dwallach.complications.ComplicationWrapper.LEFT_COMPLICATION_ID
+import org.dwallach.complications.ComplicationWrapper.RIGHT_COMPLICATION_ID
+import org.dwallach.complications.ComplicationWrapper.TOP_COMPLICATION_ID
+import org.dwallach.complications.ComplicationWrapper.getComplicationId
+import org.dwallach.complications.ComplicationWrapper.getSupportedComplicationTypes
 import org.jetbrains.anko.AnkoLogger
 import org.jetbrains.anko.debug
 import org.jetbrains.anko.verbose
@@ -73,7 +80,7 @@ class AnalogComplicationConfigRecyclerViewAdapter(
 
     // Selected complication id by user.
     private var mSelectedComplicationId: Int = 0
-    private val mBackgroundComplicationId = ComplicationWrapper.getComplicationId(ComplicationLocation.BACKGROUND)
+    private val mBackgroundComplicationId = getComplicationId(BACKGROUND)
 
     // Required to retrieve complication data from watch face for preview.
     private val mProviderInfoRetriever: ProviderInfoRetriever
@@ -216,26 +223,31 @@ class AnalogComplicationConfigRecyclerViewAdapter(
         private val mBottomComplication = view.findViewById<ImageButton>(R.id.bottom_complication)
 
         private fun idToComplicationFn(id: Int) = when(id) {
-            ComplicationWrapper.LEFT_COMPLICATION_ID -> mLeftComplication
-            ComplicationWrapper.RIGHT_COMPLICATION_ID -> mRightComplication
-            ComplicationWrapper.TOP_COMPLICATION_ID -> mTopComplication
-            ComplicationWrapper.BOTTOM_COMPLICATION_ID -> mBottomComplication
+            LEFT_COMPLICATION_ID -> mLeftComplication
+            RIGHT_COMPLICATION_ID -> mRightComplication
+            TOP_COMPLICATION_ID -> mTopComplication
+            BOTTOM_COMPLICATION_ID -> mBottomComplication
             else -> null
         }
 
         private fun idToComplicationBackgroundFn(id: Int) = when(id) {
-            ComplicationWrapper.LEFT_COMPLICATION_ID -> mLeftComplicationBackground
-            ComplicationWrapper.RIGHT_COMPLICATION_ID -> mRightComplicationBackground
-            ComplicationWrapper.TOP_COMPLICATION_ID -> mTopComplicationBackground
-            ComplicationWrapper.BOTTOM_COMPLICATION_ID -> mBottomComplicationBackground
+            LEFT_COMPLICATION_ID -> mLeftComplicationBackground
+            RIGHT_COMPLICATION_ID -> mRightComplicationBackground
+            TOP_COMPLICATION_ID -> mTopComplicationBackground
+            BOTTOM_COMPLICATION_ID -> mBottomComplicationBackground
             else -> null
         }
 
-        private val idToComplication = ComplicationWrapper.activeComplicationIds.associate { it to idToComplicationFn(it) }
-        private val idToComplicationBackground = ComplicationWrapper.activeComplicationIds.associate { it to idToComplicationBackgroundFn(it) }
-        private val disabledComplicationIds = ComplicationWrapper.complicationIds.toSet() - ComplicationWrapper.activeComplicationIds.toSet()
-        private val disabledComplications = disabledComplicationIds.map(this::idToComplicationFn)
-        private val disabledComplicationBackgrounds = disabledComplicationIds.map(this::idToComplicationBackgroundFn)
+        private val idToComplication =
+                ComplicationWrapper.activeComplicationIds.associate { it to idToComplicationFn(it) }
+        private val idToComplicationBackground =
+                ComplicationWrapper.activeComplicationIds.associate { it to idToComplicationBackgroundFn(it) }
+        private val disabledComplicationIds =
+                ComplicationWrapper.complicationIds.toSet() - ComplicationWrapper.activeComplicationIds.toSet()
+        private val disabledComplications =
+                disabledComplicationIds.map(this::idToComplicationFn)
+        private val disabledComplicationBackgrounds =
+                disabledComplicationIds.map(this::idToComplicationBackgroundFn)
 
         private lateinit var mDefaultComplicationDrawable: Drawable
 
@@ -264,15 +276,12 @@ class AnalogComplicationConfigRecyclerViewAdapter(
         private fun launchComplicationHelperActivity(
                 currentActivity: Activity, complicationLocation: ComplicationLocation) {
 
-            mSelectedComplicationId = ComplicationWrapper.getComplicationId(complicationLocation)
+            mSelectedComplicationId = getComplicationId(complicationLocation)
 
             if (mSelectedComplicationId >= 0) {
 
-                val supportedTypes = ComplicationWrapper.getSupportedComplicationTypes(
-                        complicationLocation)
-
-                val watchFace = ComponentName(
-                        currentActivity, ComplicationWrapper.watchFaceClass)
+                val supportedTypes = getSupportedComplicationTypes(complicationLocation)
+                val watchFace = ComponentName(currentActivity, ComplicationWrapper.watchFaceClass)
 
                 currentActivity.startActivityForResult(
                         ComplicationHelperActivity.createProviderChooserHelperIntent(
@@ -326,7 +335,7 @@ class AnalogComplicationConfigRecyclerViewAdapter(
                     complicationBg.visibility = View.INVISIBLE
                 }
             } else {
-                error { "couldn't find complication or complicationBg!" }
+                warn { "Couldn't find complication or complicationBg!" }
             }
         }
 
@@ -384,10 +393,10 @@ class AnalogComplicationConfigRecyclerViewAdapter(
 
             val currentActivity = view.context as Activity
 
-            mSelectedComplicationId = ComplicationWrapper.getComplicationId(ComplicationLocation.BACKGROUND)
+            mSelectedComplicationId = getComplicationId(BACKGROUND)
 
             if (mSelectedComplicationId >= 0) {
-                val supportedTypes = ComplicationWrapper.getSupportedComplicationTypes(ComplicationLocation.BACKGROUND)
+                val supportedTypes = getSupportedComplicationTypes(BACKGROUND)
                 val watchFace = ComponentName(currentActivity, ComplicationWrapper.watchFaceClass)
 
                 currentActivity.startActivityForResult(

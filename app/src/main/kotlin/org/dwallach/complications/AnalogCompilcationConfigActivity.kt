@@ -11,13 +11,15 @@ import android.support.wearable.complications.ProviderChooserIntent
 import android.support.wearable.view.WearableRecyclerView
 import android.util.Log
 import org.dwallach.R
+import org.jetbrains.anko.AnkoLogger
+import org.jetbrains.anko.debug
 
 
 /**
  * The watch-side config activity for the watchface, which
  * allows for setting the left and right complications of watch face along with other goodies.
  */
-class AnalogComplicationConfigActivity : Activity() {
+class AnalogComplicationConfigActivity : Activity(), AnkoLogger {
 
     private var mWearableRecyclerView: WearableRecyclerView? = null
     private var mAdapter: AnalogComplicationConfigRecyclerViewAdapter? = null
@@ -32,7 +34,6 @@ class AnalogComplicationConfigActivity : Activity() {
                 ComplicationWrapper.watchFaceClass,
                 AnalogComplicationConfigData.getDataToPopulateAdapter(this))
 
-        // TODO: this gets a null pointer exception, fix!
         mWearableRecyclerView = findViewById<WearableRecyclerView>(R.id.wearable_recycler_view)
 
         // Aligns the first and last items on the list vertically centered on the screen.
@@ -45,13 +46,16 @@ class AnalogComplicationConfigActivity : Activity() {
         mWearableRecyclerView?.adapter = mAdapter
     }
 
-    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent) {
+    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
+        if (data == null) {
+            debug { "null intent, nothing to do (requestCode = $requestCode, resultCode = $resultCode)" }
+            return
+        }
 
         if (requestCode == COMPLICATION_CONFIG_REQUEST_CODE && resultCode == Activity.RESULT_OK) {
-
             // Retrieves information for selected Complication provider.
             val complicationProviderInfo = data.getParcelableExtra<ComplicationProviderInfo>(ProviderChooserIntent.EXTRA_PROVIDER_INFO)
-            Log.d(TAG, "Provider: " + complicationProviderInfo)
+            debug { "Provider:  $complicationProviderInfo" }
 
             // Updates preview with new complication information for selected complication id.
             // Note: complication id is saved and tracked in the adapter class.
@@ -61,7 +65,6 @@ class AnalogComplicationConfigActivity : Activity() {
     }
 
     companion object {
-        private val TAG = AnalogComplicationConfigActivity::class.java.simpleName
         internal val COMPLICATION_CONFIG_REQUEST_CODE = 1001
     }
 }

@@ -5,6 +5,7 @@ import android.support.v7.widget.RecyclerView.ViewHolder
 import android.support.v7.widget.RecyclerView
 
 import org.dwallach.R
+import org.dwallach.complications.AnalogComplicationConfigRecyclerViewAdapter.ComplicationLocation.*
 
 object AnalogComplicationConfigData {
     /**
@@ -16,15 +17,19 @@ object AnalogComplicationConfigData {
     }
 
     /**
-     * Includes all data to populate each of the 5 different custom
+     * Includes all data to populate each of the different custom
      * [ViewHolder] types in [AnalogComplicationConfigRecyclerViewAdapter].
      */
     fun getDataToPopulateAdapter(context: Context): List<ConfigItemType> =
             listOf(PreviewAndComplicationsConfigItem(R.drawable.add_complication),
-                    MoreOptionsConfigItem(R.drawable.ic_expand_more_white_18dp),
-                    BackgroundComplicationConfigItem(
+                    MoreOptionsConfigItem(R.drawable.ic_expand_more_white_18dp)).let {
+                // add the background config item only if it's enabled
+                if (ComplicationWrapper.isEnabled(BACKGROUND)) {
+                    it + BackgroundComplicationConfigItem(
                             context.getString(R.string.config_background_image_complication_label),
-                            R.drawable.ic_landscape_white))
+                            R.drawable.ic_landscape_white)
+                } else { it }
+            }
 
     /**
      * Data for Watch Face Preview with Complications Preview item in RecyclerView.

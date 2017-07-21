@@ -201,6 +201,14 @@ object ComplicationWrapper : AnkoLogger {
     fun isVisible(location: ComplicationLocation) =
             complicationDataMap.containsKey(getComplicationId(location))
 
+
+    /**
+     * Call this if you want to know whether the watchface has enabled a given complication location.
+     * This pretty much just queries the locations specified in [init].
+     */
+    fun isEnabled(location: ComplicationLocation) =
+        complicationDrawableMap.containsKey(getComplicationId(location))
+
     private var complicationDrawableMap: Map<Int,ComplicationDrawable> = emptyMap()
     private var complicationDataMap: Map<Int,ComplicationData> = emptyMap()
 

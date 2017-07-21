@@ -24,20 +24,21 @@ Android Wear command-line things I can never remember:
 
 -- How to enable verbose logging from the command-line
 
-    adb -d shell setprop log.tag.ClockFace VERBOSE
-    adb -d shell setprop log.tag.ClockState VERBOSE
-    adb -d shell setprop log.tag.MyViewAnim VERBOSE
-    adb -d shell setprop log.tag.PhoneActivity VERBOSE
-    adb -d shell setprop log.tag.CalendarFetcher VERBOSE
-    adb -d shell setprop log.tag.CalendarPermission VERBOSE
+    adb -d shell
 
-    (or, once a shell is running)
+    (then)
+
     setprop log.tag.ClockFace VERBOSE
     setprop log.tag.ClockState VERBOSE
     setprop log.tag.MyViewAnim VERBOSE
     setprop log.tag.PhoneActivity VERBOSE
     setprop log.tag.CalendarFetcher VERBOSE
     setprop log.tag.CalendarPermission VERBOSE
+    setprop log.tag.AnalogComplicationConfi VERBOSE
+    setprop log.tag.PreviewAndComplications VERBOSE
+    setprop log.tag.BackgroundComplicationV VERBOSE
+    setprop log.tag.ViewRootImpl VERBOSE
+    setprop log.tag.ComplicationWrapper VERBOSE
 
 
 Refactoring / reengineering
