@@ -16,7 +16,7 @@ import org.dwallach.calwatch.ClockState.calendarPermission
 import org.dwallach.calwatch.ClockState.showDayDate
 import org.dwallach.calwatch.ClockState.showSeconds
 import org.dwallach.calwatch.ClockState.showStepCounter
-import org.dwallach.complications.AnalogComplicationConfigRecyclerViewAdapter.ComplicationLocation.*
+import org.dwallach.complications.ComplicationWrapper.ComplicationLocation.*
 import org.dwallach.complications.ComplicationWrapper
 import org.dwallach.complications.ComplicationWrapper.isVisible
 import org.jetbrains.anko.*

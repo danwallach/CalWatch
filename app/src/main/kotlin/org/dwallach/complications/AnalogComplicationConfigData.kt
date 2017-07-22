@@ -5,7 +5,7 @@ import android.support.v7.widget.RecyclerView.ViewHolder
 import android.support.v7.widget.RecyclerView
 
 import org.dwallach.R
-import org.dwallach.complications.AnalogComplicationConfigRecyclerViewAdapter.ComplicationLocation.*
+import org.dwallach.complications.ComplicationWrapper.ComplicationLocation.*
 
 object AnalogComplicationConfigData {
     /**

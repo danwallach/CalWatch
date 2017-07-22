@@ -26,7 +26,7 @@ import org.dwallach.complications.AnalogComplicationConfigData.BackgroundComplic
 import org.dwallach.complications.AnalogComplicationConfigData.ConfigItemType
 import org.dwallach.complications.AnalogComplicationConfigData.MoreOptionsConfigItem
 import org.dwallach.complications.AnalogComplicationConfigData.PreviewAndComplicationsConfigItem
-import org.dwallach.complications.AnalogComplicationConfigRecyclerViewAdapter.ComplicationLocation.BACKGROUND
+import org.dwallach.complications.ComplicationWrapper.ComplicationLocation.BACKGROUND
 import org.dwallach.complications.ComplicationWrapper.BOTTOM_COMPLICATION_ID
 import org.dwallach.complications.ComplicationWrapper.LEFT_COMPLICATION_ID
 import org.dwallach.complications.ComplicationWrapper.RIGHT_COMPLICATION_ID
@@ -58,19 +58,6 @@ class AnalogComplicationConfigRecyclerViewAdapter(
         mContext: Context,
         watchFaceServiceClass: Class<out CanvasWatchFaceService>,
         private val mSettingsDataSet: List<ConfigItemType>) : RecyclerView.Adapter<RecyclerView.ViewHolder>(), AnkoLogger {
-
-    /**
-     * Used by associated watch face to let this
-     * adapter know which complication locations are supported, their ids, and supported
-     * complication data types.
-     */
-    enum class ComplicationLocation {
-        BACKGROUND,
-        LEFT,
-        RIGHT,
-        TOP,
-        BOTTOM
-    }
 
     // ComponentName associated with watch face service (service that renders watch face). Used
     // to retrieve complication information.
@@ -257,10 +244,10 @@ class AnalogComplicationConfigRecyclerViewAdapter(
 
         override fun onClick(view: View) {
             val location = when(view) {
-                mLeftComplication -> ComplicationLocation.LEFT
-                mRightComplication -> ComplicationLocation.RIGHT
-                mBottomComplication -> ComplicationLocation.BOTTOM
-                mTopComplication -> ComplicationLocation.TOP
+                mLeftComplication -> ComplicationWrapper.ComplicationLocation.LEFT
+                mRightComplication -> ComplicationWrapper.ComplicationLocation.RIGHT
+                mBottomComplication -> ComplicationWrapper.ComplicationLocation.BOTTOM
+                mTopComplication -> ComplicationWrapper.ComplicationLocation.TOP
                 else -> null
             }
             val currentActivity = view.context as Activity
@@ -274,7 +261,7 @@ class AnalogComplicationConfigRecyclerViewAdapter(
         // Verifies the watch face supports the complication location, then launches the helper
         // class, so user can choose their complication data provider.
         private fun launchComplicationHelperActivity(
-                currentActivity: Activity, complicationLocation: ComplicationLocation) {
+                currentActivity: Activity, complicationLocation: ComplicationWrapper.ComplicationLocation) {
 
             mSelectedComplicationId = getComplicationId(complicationLocation)
 

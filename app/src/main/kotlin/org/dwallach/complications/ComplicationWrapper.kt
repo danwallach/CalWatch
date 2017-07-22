@@ -9,13 +9,12 @@ import org.jetbrains.anko.AnkoLogger
 import java.lang.ref.WeakReference
 import android.support.wearable.complications.ComplicationData
 import android.support.wearable.complications.ComplicationData.*
-import org.dwallach.complications.AnalogComplicationConfigRecyclerViewAdapter.*
-import org.dwallach.complications.AnalogComplicationConfigRecyclerViewAdapter.ComplicationLocation.*
 import android.support.wearable.complications.rendering.ComplicationDrawable
 import org.jetbrains.anko.verbose
 import android.support.wearable.complications.ComplicationHelperActivity
 import android.content.ComponentName
 import org.dwallach.calwatch.errorLogAndThrow
+import org.dwallach.complications.ComplicationLocation.*
 import org.jetbrains.anko.warn
 
 
@@ -216,15 +215,21 @@ object ComplicationWrapper : AnkoLogger {
     private var complicationDataMap: Map<Int,ComplicationData> = emptyMap()
 
     /**
-     * Call this in your onCreate() to initialize the complications for the engine. If no locations
-     * are specified, then you get the default (BACKGROUND, LEFT, RIGHT, TOP, and BOTTOM).
+     * Call this in your onCreate() to initialize the complications for the engine.
+     *
+     * @param locations specifies a list of [ComplicationLocation] entries where you want your
+     * watchface to support them. To get everything, you'd say _listOf(BACKGROUND, LEFT, RIGHT, TOP, and BOTTOM)_.
+     *
+     * @param menus specifies a list of [MenuGroup] entries, which themselves define either [RadioGroup]
+     * or [Toggle] entries, along with lambdas for callbacks. Whatever you want will show up when the
+     * user selects the gear icon to configure their watchface.
      */
-    fun init(watchFace: CanvasWatchFaceService, engine: CanvasWatchFaceService.Engine, vararg locations: ComplicationLocation) {
+    fun init(watchFace: CanvasWatchFaceService, engine: CanvasWatchFaceService.Engine, locations: List<ComplicationLocation>, menus: List<MenuGroup>) {
         verbose { "Complication locations: $locations" }
 
-        this.watchFace = watchFace  // creates a weakref, initializes many things
+        this.watchFace = watchFace  // intnerally saves a weakref
 
-        activeLocations = locations
+        activeLocations = locations.toTypedArray()
         activeComplicationIds = locations.map(this::getComplicationId).toIntArray()
         activeComplicationSupportedTypes = locations.map(this::getSupportedComplicationTypes).toTypedArray()
 
@@ -304,8 +309,25 @@ object ComplicationWrapper : AnkoLogger {
     fun styleComplications(func: (ComplicationDrawable)->Unit) {
         stylingFunc = func
     }
+
 }
 
+/**
+ * Used by an associated watch face to let this wrapper know which complication locations are
+ * supported. See [ComplicationWrapper.init] for use.
+ */
+enum class ComplicationLocation {
+    BACKGROUND,
+    LEFT,
+    RIGHT,
+    TOP,
+    BOTTOM
+}
+
+/**
+ * Used by an associated watch face to let this wrapper customized the configuration menu,
+ * below the complication selection part. See [ComplicationWrapper.init] for use.
+ */
 sealed class MenuGroup
 data class RadioGroup(val entries: List<Pair<Drawable, Int>>, val default: Int, val callback: (Int)->Unit): MenuGroup()
-data class Toggle(val drawable: Drawable, val enabled: Boolean, val callBack: (Boolean)->Unit): MenuGroup()
+data class Toggle(val drawable: Drawable, val enabled: Boolean, val callback: (Boolean)->Unit): MenuGroup()
