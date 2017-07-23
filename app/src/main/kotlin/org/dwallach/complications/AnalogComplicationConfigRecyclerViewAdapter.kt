@@ -26,33 +26,21 @@ import org.dwallach.complications.AnalogComplicationConfigData.BackgroundComplic
 import org.dwallach.complications.AnalogComplicationConfigData.ConfigItemType
 import org.dwallach.complications.AnalogComplicationConfigData.MoreOptionsConfigItem
 import org.dwallach.complications.AnalogComplicationConfigData.PreviewAndComplicationsConfigItem
-import org.dwallach.complications.ComplicationWrapper.ComplicationLocation.BACKGROUND
+import org.dwallach.complications.ComplicationLocation.*
 import org.dwallach.complications.ComplicationWrapper.BOTTOM_COMPLICATION_ID
 import org.dwallach.complications.ComplicationWrapper.LEFT_COMPLICATION_ID
 import org.dwallach.complications.ComplicationWrapper.RIGHT_COMPLICATION_ID
 import org.dwallach.complications.ComplicationWrapper.TOP_COMPLICATION_ID
 import org.dwallach.complications.ComplicationWrapper.getComplicationId
 import org.dwallach.complications.ComplicationWrapper.getSupportedComplicationTypes
-import org.jetbrains.anko.AnkoLogger
-import org.jetbrains.anko.debug
-import org.jetbrains.anko.verbose
-import org.jetbrains.anko.warn
+import org.jetbrains.anko.*
 
 /**
- * Displays different layouts for configuring watch face's complications and appearance settings
- *
- * All appearance settings are saved via [SharedPreferences].
-
- *
- * Layouts provided by this adapter are split into 5 main view types.
-
+ * Displays different layouts for configuring watch face's complications and appearance settings.
+ * You're responsible for saving your own settings!
  *
  * A watch face preview including complications. Allows user to tap on the complications to
  * change the complication data and see a live preview of the watch face.
-
- *
- * Simple arrow to indicate there are more options below the fold.
-
  */
 class AnalogComplicationConfigRecyclerViewAdapter(
         mContext: Context,
@@ -135,6 +123,7 @@ class AnalogComplicationConfigRecyclerViewAdapter(
             TYPE_PREVIEW_AND_COMPLICATIONS_CONFIG -> {
                 val previewAndComplicationsConfigItem = configItemType as PreviewAndComplicationsConfigItem
                 val defaultComplicationResourceId = previewAndComplicationsConfigItem.defaultComplicationResourceId
+
                 with(viewHolder as PreviewAndComplicationsViewHolder) {
                     setDefaultComplicationDrawable(defaultComplicationResourceId)
                     initializesColorsAndComplications()
@@ -142,22 +131,23 @@ class AnalogComplicationConfigRecyclerViewAdapter(
             }
 
             TYPE_MORE_OPTIONS -> {
-                val moreOptionsViewHolder = viewHolder as MoreOptionsViewHolder
                 val moreOptionsConfigItem = configItemType as MoreOptionsConfigItem
 
-                moreOptionsViewHolder.setIcon(moreOptionsConfigItem.iconResourceId)
+                with(viewHolder as MoreOptionsViewHolder) {
+                    setIcon(moreOptionsConfigItem.iconResourceId)
+                }
             }
 
             TYPE_BACKGROUND_COMPLICATION_IMAGE_CONFIG -> {
-                val backgroundComplicationViewHolder = viewHolder as BackgroundComplicationViewHolder
-
                 val backgroundComplicationConfigItem = configItemType as BackgroundComplicationConfigItem
 
                 val backgroundIconResourceId = backgroundComplicationConfigItem.iconResourceId
                 val backgroundName = backgroundComplicationConfigItem.name
 
-                backgroundComplicationViewHolder.setIcon(backgroundIconResourceId)
-                backgroundComplicationViewHolder.setName(backgroundName)
+                with(viewHolder as BackgroundComplicationViewHolder) {
+                    setIcon(backgroundIconResourceId)
+                    setName(backgroundName)
+                }
             }
         }
     }
@@ -244,10 +234,10 @@ class AnalogComplicationConfigRecyclerViewAdapter(
 
         override fun onClick(view: View) {
             val location = when(view) {
-                mLeftComplication -> ComplicationWrapper.ComplicationLocation.LEFT
-                mRightComplication -> ComplicationWrapper.ComplicationLocation.RIGHT
-                mBottomComplication -> ComplicationWrapper.ComplicationLocation.BOTTOM
-                mTopComplication -> ComplicationWrapper.ComplicationLocation.TOP
+                mLeftComplication -> LEFT
+                mRightComplication -> RIGHT
+                mBottomComplication -> BOTTOM
+                mTopComplication -> TOP
                 else -> null
             }
             val currentActivity = view.context as Activity
@@ -261,7 +251,7 @@ class AnalogComplicationConfigRecyclerViewAdapter(
         // Verifies the watch face supports the complication location, then launches the helper
         // class, so user can choose their complication data provider.
         private fun launchComplicationHelperActivity(
-                currentActivity: Activity, complicationLocation: ComplicationWrapper.ComplicationLocation) {
+                currentActivity: Activity, complicationLocation: ComplicationLocation) {
 
             mSelectedComplicationId = getComplicationId(complicationLocation)
 
@@ -404,5 +394,7 @@ class AnalogComplicationConfigRecyclerViewAdapter(
         val TYPE_PREVIEW_AND_COMPLICATIONS_CONFIG = 0
         val TYPE_MORE_OPTIONS = 1
         val TYPE_BACKGROUND_COMPLICATION_IMAGE_CONFIG = 2
+        val TYPE_TOGGLE = 3
+        val TYPE_RADIO = 4
     }
 }

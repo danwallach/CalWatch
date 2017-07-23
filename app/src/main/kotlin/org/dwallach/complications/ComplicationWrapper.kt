@@ -241,6 +241,8 @@ object ComplicationWrapper : AnkoLogger {
         // custom settings here: black unless an image bitmap makes it otherwise
         complicationDrawableMap[BACKGROUND_COMPLICATION_ID]?.setBackgroundColorActive(Color.BLACK)
 
+        savedMenus = menus
+
         engine.setActiveComplications(*activeComplicationIds)
     }
 
@@ -310,6 +312,8 @@ object ComplicationWrapper : AnkoLogger {
         stylingFunc = func
     }
 
+    internal lateinit var savedMenus: List<MenuGroup>
+    internal fun getMenus() = savedMenus
 }
 
 /**
@@ -329,5 +333,24 @@ enum class ComplicationLocation {
  * below the complication selection part. See [ComplicationWrapper.init] for use.
  */
 sealed class MenuGroup
-data class RadioGroup(val entries: List<Pair<Drawable, Int>>, val default: Int, val callback: (Int)->Unit): MenuGroup()
-data class Toggle(val drawable: Drawable, val enabled: Boolean, val callback: (Boolean)->Unit): MenuGroup()
+
+/**
+ * Each Radio button in a group will be specified with this triple of items: the text to
+ * be displayed, the icon to go with it, and an integer identifier which will be used for
+ * callbacks.
+ *
+ * Note: it's a hack, but identifiers must be *globally* unique, rather than just unique
+ * within the radio group. This simplifies life in the backend.
+ */
+data class RadioEntry(val displayText: String, val iconResourceId: Int, val identifier: Int)
+
+/**
+ * Specifies a list of [RadioEntry]'s, for the RadioGroup, along with the default identifier to be selected
+ * and a callback for whenever this changes.
+ */
+data class RadioGroup(val entries: List<RadioEntry>, val default: Int, val callback: (Int)->Unit): MenuGroup()
+
+/**
+ * Specifies the components of a toggle selection including its initial enabled/disabled state.
+ */
+data class Toggle(val displayText: String, val iconResourceId: Int, val enabled: Boolean, val callback: (Boolean)->Unit): MenuGroup()

@@ -9,7 +9,6 @@ import android.os.Bundle
 import android.support.wearable.complications.ComplicationProviderInfo
 import android.support.wearable.complications.ProviderChooserIntent
 import android.support.wearable.view.WearableRecyclerView
-import android.util.Log
 import org.dwallach.R
 import org.jetbrains.anko.AnkoLogger
 import org.jetbrains.anko.debug
