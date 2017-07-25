@@ -47,11 +47,12 @@ class AnalogComplicationConfigRecyclerViewAdapter(
         watchFaceServiceClass: Class<out CanvasWatchFaceService>,
         private val mSettingsDataSet: List<ConfigItemType>) : RecyclerView.Adapter<RecyclerView.ViewHolder>(), AnkoLogger {
 
+    // Useful reading on all this WearableRecylerView nonsense:
+    // http://www.technotalkative.com/android-wear-part-5-wearablelistview/
+
     // ComponentName associated with watch face service (service that renders watch face). Used
     // to retrieve complication information.
     private val mWatchFaceComponentName = ComponentName(mContext, watchFaceServiceClass)
-
-    internal var mSharedPref: SharedPreferences
 
     // Selected complication id by user.
     private var mSelectedComplicationId: Int = 0
@@ -62,16 +63,14 @@ class AnalogComplicationConfigRecyclerViewAdapter(
 
     // Maintains reference view holder to dynamically update watch face preview. Used instead of
     // notifyItemChanged(int position) to avoid flicker and re-inflating the view.
+
+    // TODO Dynamic watchface preview updates? That code's not here. Find a way to do it!
     private var mPreviewAndComplicationsViewHolder: PreviewAndComplicationsViewHolder? = null
 
     init {
 
         // Default value is invalid (only changed when user taps to change complication).
         mSelectedComplicationId = -1
-
-        mSharedPref = mContext.getSharedPreferences(
-                mContext.getString(R.string.analog_complication_preference_file_key),
-                Context.MODE_PRIVATE)
 
         // Initialization of code to retrieve active complication data for the watch face.
         mProviderInfoRetriever = ProviderInfoRetriever(mContext, Executors.newCachedThreadPool())
