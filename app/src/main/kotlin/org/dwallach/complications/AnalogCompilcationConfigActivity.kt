@@ -12,6 +12,7 @@ import android.support.wearable.view.WearableRecyclerView
 import org.dwallach.R
 import org.jetbrains.anko.AnkoLogger
 import org.jetbrains.anko.debug
+import org.jetbrains.anko.info
 
 
 /**
@@ -26,6 +27,7 @@ class AnalogComplicationConfigActivity : Activity(), AnkoLogger {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
+        info("analog config activity: onCreate")
         setContentView(R.layout.activity_analog_complication_config)
 
         mAdapter = AnalogComplicationConfigRecyclerViewAdapter(
@@ -33,7 +35,7 @@ class AnalogComplicationConfigActivity : Activity(), AnkoLogger {
                 ComplicationWrapper.watchFaceClass,
                 AnalogComplicationConfigData.getDataToPopulateAdapter(this))
 
-        mWearableRecyclerView = findViewById<WearableRecyclerView>(R.id.wearable_recycler_view)
+        mWearableRecyclerView = findViewById(R.id.wearable_recycler_view)
 
         // Aligns the first and last items on the list vertically centered on the screen.
         mWearableRecyclerView?.centerEdgeItems = true
@@ -46,6 +48,7 @@ class AnalogComplicationConfigActivity : Activity(), AnkoLogger {
     }
 
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
+        info("analog config activity: onActivityResult")
         if (data == null) {
             debug { "null intent, nothing to do (requestCode = $requestCode, resultCode = $resultCode)" }
             return
