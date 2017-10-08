@@ -36,11 +36,8 @@ import org.dwallach.complications.ComplicationWrapper.getSupportedComplicationTy
 import org.jetbrains.anko.*
 
 /**
- * Displays different layouts for configuring watch face's complications and appearance settings.
- * You're responsible for saving your own settings!
- *
- * A watch face preview including complications. Allows user to tap on the complications to
- * change the complication data and see a live preview of the watch face.
+ * This class handles all the different config items that might ever be displayed. The WearableRecyclerView
+ * is going to query this for particular viewTypes, and it's going to return things.
  */
 class AnalogComplicationConfigRecyclerViewAdapter(
         mContext: Context,
@@ -68,7 +65,6 @@ class AnalogComplicationConfigRecyclerViewAdapter(
     private var mPreviewAndComplicationsViewHolder: PreviewAndComplicationsViewHolder? = null
 
     init {
-
         // Default value is invalid (only changed when user taps to change complication).
         mSelectedComplicationId = -1
 
@@ -219,7 +215,7 @@ class AnalogComplicationConfigRecyclerViewAdapter(
         private val idToComplicationBackground =
                 ComplicationWrapper.activeComplicationIds.associate { it to idToComplicationBackgroundFn(it) }
         private val disabledComplicationIds =
-                ComplicationWrapper.complicationIds.toSet() - ComplicationWrapper.activeComplicationIds.toSet()
+                ComplicationWrapper.inactiveComplicationIds.toSet()
         private val disabledComplications =
                 disabledComplicationIds.map(this::idToComplicationFn)
         private val disabledComplicationBackgrounds =
@@ -229,6 +225,13 @@ class AnalogComplicationConfigRecyclerViewAdapter(
 
         init {
             idToComplication.values.forEach { it?.setOnClickListener(this) }
+
+            verbose { "Complications from wrapper: ${ComplicationWrapper.complicationIds.toSet()}" }
+            verbose { "Active complications from wrapper: ${ComplicationWrapper.activeComplicationIds.toSet()}" }
+            verbose { "Total num complications (idToComplication): ${idToComplication.size}" }
+            verbose { "Disable complication Ids: $disabledComplicationIds" }
+            verbose { "Num disabled: ${disabledComplications.size}" }
+            verbose { "Num disabled bg: ${disabledComplicationBackgrounds.size}" }
         }
 
         override fun onClick(view: View) {
@@ -273,6 +276,8 @@ class AnalogComplicationConfigRecyclerViewAdapter(
         }
 
         fun setDefaultComplicationDrawable(resourceId: Int) {
+            verbose { "setting default complication drawable, resourceId = $resourceId" }
+
             val context = mWatchFaceArmsAndTicksView.context
             mDefaultComplicationDrawable = context.getDrawable(resourceId)
 
@@ -284,9 +289,9 @@ class AnalogComplicationConfigRecyclerViewAdapter(
                 it?.visibility = View.INVISIBLE
             }
 
-            idToComplicationBackground.values.forEach {
-                it?.visibility = View.INVISIBLE
-            }
+//            idToComplicationBackground.values.forEach {
+//                it?.visibility = View.INVISIBLE
+//            }
 
             disabledComplicationBackgrounds.forEach {
                 it?.visibility = View.INVISIBLE

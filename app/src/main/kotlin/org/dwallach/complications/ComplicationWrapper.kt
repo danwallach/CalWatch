@@ -91,6 +91,8 @@ object ComplicationWrapper : AnkoLogger {
     internal lateinit var activeLocations: Array<out ComplicationLocation>
     internal lateinit var activeComplicationIds: IntArray
 
+    internal lateinit var inactiveComplicationIds: IntArray
+
     internal val complicationIds get() = activeComplicationIds // read-only access
 
     // Left and right dial supported types.
@@ -232,6 +234,14 @@ object ComplicationWrapper : AnkoLogger {
         activeLocations = locations.toTypedArray()
         activeComplicationIds = locations.map(this::getComplicationId).toIntArray()
         activeComplicationSupportedTypes = locations.map(this::getSupportedComplicationTypes).toTypedArray()
+
+        inactiveComplicationIds = listOf(BACKGROUND_COMPLICATION_ID,
+                LEFT_COMPLICATION_ID,
+                RIGHT_COMPLICATION_ID,
+                TOP_COMPLICATION_ID,
+                BOTTOM_COMPLICATION_ID)
+                .filter { !activeComplicationIds.contains(it) }
+                .toIntArray()
 
         // Creates a ComplicationDrawable for each location where the user can render a
         // complication on the watch face. Bonus coolness for Kotlin's associate method letting

@@ -6,8 +6,10 @@ import android.support.v7.widget.RecyclerView
 
 import org.dwallach.R
 import org.dwallach.complications.ComplicationLocation.*
+import org.jetbrains.anko.AnkoLogger
+import org.jetbrains.anko.info
 
-object AnalogComplicationConfigData {
+object AnalogComplicationConfigData: AnkoLogger {
     /**
      * Interface all ConfigItems must implement so the [RecyclerView]'s Adapter associated
      * with the configuration activity knows what type of ViewHolder to inflate.
@@ -21,13 +23,12 @@ object AnalogComplicationConfigData {
      * [ViewHolder] types in [AnalogComplicationConfigRecyclerViewAdapter].
      */
     fun getDataToPopulateAdapter(context: Context): List<ConfigItemType> {
+        info("getDataToPopulateAdapter")
+
         val previewConfigItem = PreviewAndComplicationsConfigItem(R.drawable.add_complication)
         val moreOptionsConfigItem = MoreOptionsConfigItem(R.drawable.ic_expand_more_white_18dp)
 
-        val additionalOptions =
-
-        listOf(PreviewAndComplicationsConfigItem(R.drawable.add_complication),
-                MoreOptionsConfigItem(R.drawable.ic_expand_more_white_18dp)).let {
+        return listOf(previewConfigItem, moreOptionsConfigItem).let {
             // add the background config item only if it's enabled
             if (ComplicationWrapper.isEnabled(BACKGROUND)) {
                 it + BackgroundComplicationConfigItem(
@@ -37,8 +38,6 @@ object AnalogComplicationConfigData {
                 it
             }
         }
-
-        return emptyList() // placeholder for now
     }
 
     /**
