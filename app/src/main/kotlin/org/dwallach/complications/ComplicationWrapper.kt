@@ -15,6 +15,7 @@ import android.support.wearable.complications.ComplicationHelperActivity
 import android.content.ComponentName
 import org.dwallach.calwatch.errorLogAndThrow
 import org.dwallach.complications.ComplicationLocation.*
+import org.jetbrains.anko.info
 import org.jetbrains.anko.warn
 
 
@@ -108,6 +109,16 @@ object ComplicationWrapper : AnkoLogger {
             BOTTOM -> BOTTOM_COMPLICATION_ID
         }
 
+    internal fun complicationIdToLocationString(locationId: Int) =
+            when (locationId) {
+                BACKGROUND_COMPLICATION_ID -> "background"
+                LEFT_COMPLICATION_ID -> "left"
+                RIGHT_COMPLICATION_ID -> "right"
+                TOP_COMPLICATION_ID -> "top"
+                BOTTOM_COMPLICATION_ID -> "bottom"
+                else -> "unknown"
+            }
+
     internal fun getSupportedComplicationTypes(complicationLocation: ComplicationLocation) =
         when (complicationLocation) {
             BACKGROUND -> intArrayOf(TYPE_LARGE_IMAGE)
@@ -184,16 +195,21 @@ object ComplicationWrapper : AnkoLogger {
      * Call this whenever you get an onComplicationUpdated() event.
      */
     fun updateComplication(complicationId: Int, complicationData: ComplicationData?) {
-        verbose { "onComplicationDataUpdate() id: $complicationId" }
+        verbose { "onComplicationDataUpdate() " +
+                "id: $complicationId (${complicationIdToLocationString(complicationId)})," +
+                " data: ${if (complicationData == null) "NULL" else complicationData.toString()}" }
 
         complicationDrawableMap[complicationId]?.setComplicationData(complicationData)
-        if (complicationData == null)
+        if (complicationData == null || complicationData.type == ComplicationData.TYPE_EMPTY) {
             // when we get back no complication data, that's the only signal we get
             // that a complication has been killed, so we're just going to remove the
             // entry from our map; see also isVisible()
             complicationDataMap -= complicationId
-        else
+            info { "Removed complication, id: $complicationId (${complicationIdToLocationString(complicationId)})" }
+        } else {
             complicationDataMap += complicationId to complicationData
+            info { "Added complication, id: $complicationId (${complicationIdToLocationString(complicationId)})" }
+        }
 
         verbose { "Visibility map: (LEFT, RIGHT, TOP, BOTTOM) -> ${isVisible(LEFT)}, ${isVisible(RIGHT)}, ${isVisible(TOP)}, ${isVisible(BOTTOM)}" }
     }
