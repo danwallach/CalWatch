@@ -5,18 +5,15 @@ import android.graphics.Color
 import android.graphics.Rect
 import android.graphics.drawable.Drawable
 import android.support.wearable.watchface.CanvasWatchFaceService
-import org.jetbrains.anko.AnkoLogger
 import java.lang.ref.WeakReference
 import android.support.wearable.complications.ComplicationData
 import android.support.wearable.complications.ComplicationData.*
 import android.support.wearable.complications.rendering.ComplicationDrawable
-import org.jetbrains.anko.verbose
 import android.support.wearable.complications.ComplicationHelperActivity
 import android.content.ComponentName
 import org.dwallach.calwatch.errorLogAndThrow
 import org.dwallach.complications.ComplicationLocation.*
-import org.jetbrains.anko.info
-import org.jetbrains.anko.warn
+import org.jetbrains.anko.*
 
 
 /**
@@ -210,13 +207,19 @@ object ComplicationWrapper : AnkoLogger {
                 info { "Removed complication, id: $complicationId (${complicationIdToLocationString(complicationId)})" }
             }
 
-            // TODO: do we ever see TYPE_NO_DATA, and what should we do about it?
-            // "Type that can be sent by any provider, regardless of the configured type, when
-            // the provider has no data to be displayed. Watch faces may choose whether to render
-            // this in some way or leave the slot empty.
-
             else -> {
                 complicationDataMap += complicationId to complicationData
+
+                if (complicationData.type == ComplicationData.TYPE_NO_DATA) {
+                    // TODO: do we ever see TYPE_NO_DATA, and what should we do about it?
+                    // "Type that can be sent by any provider, regardless of the configured type, when
+                    // the provider has no data to be displayed. Watch faces may choose whether to render
+                    // this in some way or leave the slot empty."
+                    // For now, we log.
+
+                    debug { "unexpected TYPE_NO_DATA for complication, id: $complicationId (${complicationIdToLocationString(complicationId)})" }
+                }
+
                 info { "Added complication, id: $complicationId (${complicationIdToLocationString(complicationId)})" }
             }
         }
