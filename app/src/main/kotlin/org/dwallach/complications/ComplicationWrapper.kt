@@ -192,7 +192,7 @@ object ComplicationWrapper : AnkoLogger {
     }
 
     /**
-     * Call this whenever you get an onComplicationUpdated() event.
+     * Call this whenever you get an onComplicationUpdate() event.
      */
     fun updateComplication(complicationId: Int, complicationData: ComplicationData?) {
         verbose { "onComplicationDataUpdate() " +
@@ -200,15 +200,25 @@ object ComplicationWrapper : AnkoLogger {
                 " data: ${if (complicationData == null) "NULL" else complicationData.toString()}" }
 
         complicationDrawableMap[complicationId]?.setComplicationData(complicationData)
-        if (complicationData == null || complicationData.type == ComplicationData.TYPE_EMPTY) {
-            // when we get back no complication data, that's the only signal we get
-            // that a complication has been killed, so we're just going to remove the
-            // entry from our map; see also isVisible()
-            complicationDataMap -= complicationId
-            info { "Removed complication, id: $complicationId (${complicationIdToLocationString(complicationId)})" }
-        } else {
-            complicationDataMap += complicationId to complicationData
-            info { "Added complication, id: $complicationId (${complicationIdToLocationString(complicationId)})" }
+
+        when {
+            complicationData == null || complicationData.type == ComplicationData.TYPE_EMPTY -> {
+                // when we get back no complication data, that's the only signal we get
+                // that a complication has been killed, so we're just going to remove the
+                // entry from our map; see also isVisible()
+                complicationDataMap -= complicationId
+                info { "Removed complication, id: $complicationId (${complicationIdToLocationString(complicationId)})" }
+            }
+
+            // TODO: do we ever see TYPE_NO_DATA, and what should we do about it?
+            // "Type that can be sent by any provider, regardless of the configured type, when
+            // the provider has no data to be displayed. Watch faces may choose whether to render
+            // this in some way or leave the slot empty.
+
+            else -> {
+                complicationDataMap += complicationId to complicationData
+                info { "Added complication, id: $complicationId (${complicationIdToLocationString(complicationId)})" }
+            }
         }
 
         verbose { "Visibility map: (LEFT, RIGHT, TOP, BOTTOM) -> ${isVisible(LEFT)}, ${isVisible(RIGHT)}, ${isVisible(TOP)}, ${isVisible(BOTTOM)}" }
