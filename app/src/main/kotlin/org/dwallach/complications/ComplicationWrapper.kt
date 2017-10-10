@@ -9,7 +9,6 @@ package org.dwallach.complications
 import android.graphics.Canvas
 import android.graphics.Color
 import android.graphics.Rect
-import android.graphics.drawable.Drawable
 import android.support.wearable.watchface.CanvasWatchFaceService
 import java.lang.ref.WeakReference
 import android.support.wearable.complications.ComplicationData
@@ -242,7 +241,7 @@ object ComplicationWrapper : AnkoLogger {
     fun updateComplication(complicationId: Int, complicationData: ComplicationData?) {
         verbose { "onComplicationDataUpdate() " +
                 "id: $complicationId (${complicationIdToLocationString(complicationId)})," +
-                " data: ${if (complicationData == null) "NULL" else complicationData.toString()}" }
+                " data: ${complicationData?.toString() ?: "NULL!"}" }
 
         complicationDrawableMap[complicationId]?.setComplicationData(complicationData)
 
