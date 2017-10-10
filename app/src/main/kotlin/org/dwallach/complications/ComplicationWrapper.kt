@@ -1,3 +1,9 @@
+/*
+ * CalWatch Complications Support
+ * Copyright (C) 2017 by Dan Wallach
+ * Home page: http://www.cs.rice.edu/~dwallach/calwatch/
+ * Licensing: http://www.cs.rice.edu/~dwallach/calwatch/licensing.html
+ */
 package org.dwallach.complications
 
 import android.graphics.Canvas
@@ -15,15 +21,67 @@ import org.dwallach.calwatch.errorLogAndThrow
 import org.dwallach.complications.ComplicationLocation.*
 import org.jetbrains.anko.*
 
-
 /**
- * The goal is this is to provide a super minimal interface for two things: feeding in configuration
- * data for menus (the complication selectors will be added in automatically) via [loadMenus],
- * drawing the complications via [drawComplications], etc.
+ * The goal is this class is to provide a super minimal interface for two things: specifying configuration
+ * options for on-watch menus and providing hooks to render complications onto your watchface. It's actually
+ * a Kotlin object (i.e., a singleton instance), so no constructor. This maintains all of the state for
+ * your watchface as it interacts with Android's complication support library.
  *
- * Code here began its life in the example AnalogWatchFaceService but has been largely rewritten
+ * # Interacting with ComplicationWrapper
+ *
+ * Everything starts with [init]. You pass in a list of which complication locations ([ComplicationLocation])
+ * you want to enable. You also pass a list of [MenuGroup] to specify what configuration items
+ * you want to have in your menus along with their callback lambdas.
+ *
+ * You can separately pass a lambda to [styleComplications] which will be invoked on each [ComplicationDrawable]
+ * allowing you to set paint colors and such. The assumption is that you want to use the same styling
+ * on each complication. Of course, you're free to do the styling from the XML instead.
+ *
+ * # Delegation to ComplicationWrapper from your watchface engine
+ *
+ * There are a variety of callbacks within [CanvasWatchFaceService.Engine] that you implement as part
+ * of creating a Wear watchface. For each of the methods listed below, you need to call a corresponding
+ * method here in ComplicationWrapper.
+ *
+ * * Whenever your watchface gets a call to [CanvasWatchFaceService.Engine.onPropertiesChanged], you need
+ * to call [updateProperties] with the [CanvasWatchFaceService.PROPERTY_LOW_BIT_AMBIENT]
+ * and [CanvasWatchFaceService.PROPERTY_BURN_IN_PROTECTION] bits.
+ *
+ * * Whenever your watchface gets a call to [CanvasWatchFaceService.Engine.onAmbientModeChanged], you
+ * need to call [updateAmbientMode].
+ *
+ * * Whenever your watchface gets a call to [CanvasWatchFaceService.Engine.onComplicationDataUpdate],
+ * you need to call [updateComplication].
+ *
+ * * Whenever your watchface gets a call to [CanvasWatchFaceService.Engine.onSurfaceChanged],
+ * you need to call [updateBounds]. Your [CanvasWatchFaceService.Engine.onDraw] method is also
+ * passed the bounds. If you notice the bounds changing, which probably shouldn't happen very
+ * often, then go ahead and call [updateBounds] again.
+ *
+ * * Whenever your watchface gets a call to [CanvasWatchFaceService.Engine.onTapCommand] and you think
+ * that it might be for one of the complications, presumably if the tapType is [CanvasWatchFaceService.TAP_TYPE_TAP],
+ * then just call [handleTap] and the event will be processed appropriately.
+ *
+ * # Redrawing your watchface
+ *
+ * When it comes time to draw your watchface and you wish to then draw the complications,
+ * you might first call [drawBackgroundComplication] to render any background complication.
+ * At the point where you're ready for your complications to be drawn,
+ * you would call [drawComplications]. If you have an analog watch and you want the complications
+ * below the watch hands, then draw your hands *after* you call [drawComplications].
+ *
+ * If you want to adjust the geometry of your watchface around the presence or absence of a given
+ * complication, you can call [isVisible]. These queries are guaranteed to be efficient enough
+ * that you can call them on every screen redraw without impacting performance.
+ *
+ * # Engineering history, work in progress
+ *
+ * The code here began its life in the example AnalogWatchFaceService but has been largely rewritten
  * to be relatively independent of the watchface itself, to remove color-setting options, and
- * to use Kotlin's nice features when appropriate.
+ * to use Kotlin's nice features when appropriate. The only thing keeping this from being a standalone
+ * library is all the stuff you need to put in the manifest and in the various resources. I still need
+ * to package those separately. For now, that's the last piece where my application logic and the
+ * complication-handling logic are still smashed together.
  */
 object ComplicationWrapper : AnkoLogger {
     private var watchFaceRef: WeakReference<CanvasWatchFaceService?>? = null
@@ -50,16 +108,6 @@ object ComplicationWrapper : AnkoLogger {
      */
     val watchFaceClass: Class<out CanvasWatchFaceService>
         get() = watchFaceClassInternal ?: errorLogAndThrow("no watchface class ref found!")
-
-    /**
-     * Call this function to load up menu items, along with their callbacks, which you want
-     * to be shown as part of the watchface configuration dialog. Each argument is a [MenuGroup]
-     * which is to say it could be a [RadioGroup] or [Toggle]. To simplify i18n issues, we're
-     * not including strings anywhere here. You just include a drawable icon, and that's it.
-     */
-    fun loadMenus(vararg menus: MenuGroup) {
-        throw NotImplementedError("not implemented yet")
-    }
 
     /**
      * Call this from your main redraw loop and the complications will be rendered to the given canvas.

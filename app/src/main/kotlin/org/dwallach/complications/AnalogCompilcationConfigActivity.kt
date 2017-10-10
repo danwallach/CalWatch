@@ -1,3 +1,9 @@
+/*
+ * CalWatch Complications Support
+ * Copyright (C) 2017 by Dan Wallach
+ * Home page: http://www.cs.rice.edu/~dwallach/calwatch/
+ * Licensing: http://www.cs.rice.edu/~dwallach/calwatch/licensing.html
+ */
 package org.dwallach.complications
 
 /**
