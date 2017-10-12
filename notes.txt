@@ -115,6 +115,13 @@ ANDROID N / WEAR 2.0 OVERHAUL
             Tentatively working now, although the background isn't visible
             TODO find a way to get the "real" watchface into the menu display
 
+    App name: currently shows up as "CalWatch (Wear 1.0)"
+        TODO change to CalWatch (Wear 2.0), probably entails a new package name instead of org.dwallach.calwatch
+
+    Background support
+        TODO Rethink the "stippling" support, such that we get a cleaner layering from background to foreground
+        TODO Pick some sort of PorterDuff mode and draw the two layers at once? Wedges "minus" stipping?
+
 
 Distant future
     TODO replace left/right/top/bottom with arbitrary numbers of complications at arbitrary points on the watchface
