@@ -120,7 +120,14 @@ ANDROID N / WEAR 2.0 OVERHAUL
 
     Background support
         TODO Rethink the "stippling" support, such that we get a cleaner layering from background to foreground
-        TODO Pick some sort of PorterDuff mode and draw the two layers at once? Wedges "minus" stipping?
+        TODO Tentative approach: render the wedges to a bitmap (only needs to be done once per hour), cut a hole in that bitmap
+	http://www.techrepublic.com/article/punch-a-hole-in-a-bitmap-by-using-androids-porter-duff-xfer/
+	https://stackoverflow.com/questions/18387814/drawing-on-canvas-porterduff-mode-clear-draws-black-why
+	https://medium.com/@rgomez/android-how-to-draw-an-overlay-with-a-transparent-hole-471af6cf3953
+	-- This means that, at 60Hz, we'll be compositing bitmap images, but not doing anywhere near as much drawing.
+	-- When we draw the stippling, all we have to do is set paint.setXfermode(new PorterDuffXfermode(PorterDuff.Mode.CLEAR));
+	-- First link has code to create a new Canvas wrapping a Bitmap, draw into the Canvas, return the Bitmap.
+
 
 
 Distant future
