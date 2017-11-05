@@ -55,7 +55,7 @@ class CalWatchFaceService : CanvasWatchFaceService(), AnkoLogger {
             val permissionGiven = CalendarPermission.check(this@CalWatchFaceService)
             if (!ClockState.calendarPermission && permissionGiven) {
                 // Hypothetically this isn't necessary, because it's handled in CalendarPermission.handleResult.
-                // Nonetheless, paranoia.
+                // However, we could get here after a reboot or something. So paranoia is good.
                 warn("we've got permission, need to update the ClockState")
                 ClockState.calendarPermission = true
             }
