@@ -16,7 +16,7 @@ import android.support.wearable.complications.ComplicationData.*
 import android.support.wearable.complications.rendering.ComplicationDrawable
 import android.support.wearable.complications.ComplicationHelperActivity
 import android.content.ComponentName
-import org.dwallach.calwatch.errorLogAndThrow
+import org.dwallach.calwatch2.errorLogAndThrow
 import org.dwallach.complications.ComplicationLocation.*
 import org.jetbrains.anko.*
 

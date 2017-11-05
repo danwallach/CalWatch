@@ -1,4 +1,4 @@
-package org.dwallach.calwatch
+package org.dwallach.calwatch2
 
 import com.google.android.gms.common.api.GoogleApiClient
 import com.google.android.gms.fitness.Fitness

@@ -4,18 +4,18 @@
  * Home page: http://www.cs.rice.edu/~dwallach/calwatch/
  * Licensing: http://www.cs.rice.edu/~dwallach/calwatch/licensing.html
  */
-package org.dwallach.calwatch
+package org.dwallach.calwatch2
 
 import android.graphics.Canvas
 import android.graphics.Paint
 import android.graphics.Path
 import android.graphics.RectF
 import android.graphics.drawable.Drawable
-import org.dwallach.calwatch.BatteryWrapper.batteryPct
-import org.dwallach.calwatch.ClockState.calendarPermission
-import org.dwallach.calwatch.ClockState.showDayDate
-import org.dwallach.calwatch.ClockState.showSeconds
-import org.dwallach.calwatch.ClockState.showStepCounter
+import org.dwallach.calwatch2.BatteryWrapper.batteryPct
+import org.dwallach.calwatch2.ClockState.calendarPermission
+import org.dwallach.calwatch2.ClockState.showDayDate
+import org.dwallach.calwatch2.ClockState.showSeconds
+import org.dwallach.calwatch2.ClockState.showStepCounter
 import org.dwallach.complications.ComplicationLocation.*
 import org.dwallach.complications.ComplicationWrapper
 import org.dwallach.complications.ComplicationWrapper.isVisible

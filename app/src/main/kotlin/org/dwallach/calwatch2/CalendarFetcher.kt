@@ -5,7 +5,7 @@
  * Licensing: http://www.cs.rice.edu/~dwallach/calwatch/licensing.html
  */
 
-package org.dwallach.calwatch
+package org.dwallach.calwatch2
 
 import android.content.BroadcastReceiver
 import android.content.ContentUris
@@ -118,6 +118,7 @@ class CalendarFetcher(initialContext: Context,
         }
 
         if (scanInProgress) {
+            warn { "scan in progress! (CalendarFetcher #$instanceID)" }
             return
         } else {
             verbose { "rescan starting asynchronously (CalendarFetcher #$instanceID)" }
@@ -231,8 +232,13 @@ class CalendarFetcher(initialContext: Context,
      * Starts an asynchronous task to load the calendar
      */
     private fun runAsyncLoader() {
-        val context = getContext() ?: return
-        // nothing to do without a context, so give up, surrender!
+        val context = getContext()
+
+        if (context == null) {
+            error { "no context, cannot load calendar" }
+            scanInProgress = false
+            return
+        }
 
         if (this != singletonFetcher)
             warn { "not using the singleton fetcher! (CalendarFetcher me #$instanceID), singleton #${singletonFetcher?.instanceID})" }
@@ -306,7 +312,7 @@ class CalendarFetcher(initialContext: Context,
 
     companion object {
         private var singletonFetcher: CalendarFetcher? = null
-        private var scanInProgress: Boolean = false
+        @Volatile private var scanInProgress: Boolean = false
         private var instanceCounter: Int = 0 // ID numbers for tracking / better logging
 
         fun requestRescan() {
