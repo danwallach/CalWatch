@@ -20,7 +20,8 @@ Android Wear command-line things I can never remember:
     adb forward tcp:4444 localabstract:/adb-hub; adb connect 127.0.0.1:4444
 
 -- How to get a dump from the watch into a file and see it while it's going
-    adb -s localhost:4444 logcat -v time | & tee logdumps/whatever.txt
+   (-d == USB device, -e == TCP device)
+    adb -e logcat -v time | & tee logdumps/whatever.txt
 
 -- How to enable verbose logging from the command-line
 
