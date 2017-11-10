@@ -44,19 +44,15 @@ def getVersionName = { ->
 android {
     compileSdkVersion 26
     buildToolsVersion '26.0.2'
-
     defaultConfig {
-        applicationId "org.dwallach.calwatch"
+        applicationId 'org.dwallach.calwatch2'
         targetSdkVersion 26   // Android 8.0, Oreo, not yet supported by Wear 2 but coming soon
         minSdkVersion 25      // Android 7.1, Nougat, supposedly the common Wear 2 version
-        versionCode getVersionCode()
         versionName getVersionName()
     }
-
     sourceSets {
         main.java.srcDirs += 'src/main/kotlin'
     }
-
     buildTypes {
         release {
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
@@ -67,6 +63,8 @@ android {
     compileOptions {
         sourceCompatibility JavaVersion.VERSION_1_8
         targetCompatibility JavaVersion.VERSION_1_8
+    }
+    productFlavors {
     }
 }
 
