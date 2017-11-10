@@ -14,7 +14,7 @@ import android.content.Intent
 import android.os.Bundle
 import android.support.wearable.complications.ComplicationProviderInfo
 import android.support.wearable.complications.ProviderChooserIntent
-import android.support.wear.widget.WearableRecyclerView
+import android.support.wearable.view.WearableRecyclerView
 import org.dwallach.R
 import org.jetbrains.anko.AnkoLogger
 import org.jetbrains.anko.debug
@@ -27,7 +27,7 @@ import org.jetbrains.anko.info
  */
 class AnalogComplicationConfigActivity : Activity(), AnkoLogger {
 
-    private var mWearableRecyclerView: WearableRecyclerView? = null
+    private var mWearableRecyclerView: WearableRecyclerView? = null // TODO: replace with non-deprecated variant
     private var mAdapter: AnalogComplicationConfigRecyclerViewAdapter? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
