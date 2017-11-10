@@ -1,4 +1,4 @@
-package org.dwallach.calwatch
+package org.dwallach.calwatch2
 
 import org.jetbrains.anko.AnkoLogger
 import org.jetbrains.anko.error

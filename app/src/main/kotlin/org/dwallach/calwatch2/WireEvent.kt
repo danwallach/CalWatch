@@ -4,7 +4,7 @@
  * Home page: http://www.cs.rice.edu/~dwallach/calwatch/
  * Licensing: http://www.cs.rice.edu/~dwallach/calwatch/licensing.html
  */
-package org.dwallach.calwatch
+package org.dwallach.calwatch2
 
 /**
  * This data structure handles a given calendar event. At one point in history, we were sending

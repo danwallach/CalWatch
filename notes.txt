@@ -20,7 +20,8 @@ Android Wear command-line things I can never remember:
     adb forward tcp:4444 localabstract:/adb-hub; adb connect 127.0.0.1:4444
 
 -- How to get a dump from the watch into a file and see it while it's going
-    adb -s localhost:4444 logcat -v time | & tee logdumps/whatever.txt
+   (-d == USB device, -e == TCP device)
+    adb -e logcat -v time | & tee logdumps/whatever.txt
 
 -- How to enable verbose logging from the command-line
 
@@ -94,6 +95,8 @@ ANDROID N / WEAR 2.0 OVERHAUL
         TODO get this working with the default left/right thing first
         TODO add in radio buttons and switch buttons for CalWatch settings
              TODO but keep the interface clean so the complications package is at least vaguely reusable
+        TODO tear out the WearableRecyclerView, go with a simpler ListView (now official advice!)
+            https://developer.android.com/training/wearables/ui/lists.html
 
     TODO Merge in Anko synthetic properties where appropriate
 
@@ -101,9 +104,7 @@ ANDROID N / WEAR 2.0 OVERHAUL
         TODO feed data from ComplicationWrapper, only display desired complication locations (data via ComplicationWrapper?)
             Tenatively working!
 
-        TODO background watchface image for complication selection?
-            Needs more testing, but tentatively works!
-        TODO 9 o'clock selector needs to be hidden when not desired (INVISIBLE isn't)
+        DONE? 9 o'clock selector needs to be hidden when not desired (INVISIBLE isn't)
             Invisibility is now working!
 
         TODO custom code for custom menu
@@ -116,7 +117,7 @@ ANDROID N / WEAR 2.0 OVERHAUL
             TODO find a way to get the "real" watchface into the menu display
 
     App name: currently shows up as "CalWatch (Wear 1.0)"
-        TODO change to CalWatch (Wear 2.0), probably entails a new package name instead of org.dwallach.calwatch
+        DONE change to CalWatch (Wear 2.0), probably entails a new package name instead of org.dwallach.calwatch
 
     Background support
         TODO Rethink the "stippling" support, such that we get a cleaner layering from background to foreground

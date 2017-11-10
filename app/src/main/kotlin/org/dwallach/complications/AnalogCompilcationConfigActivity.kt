@@ -14,7 +14,7 @@ import android.content.Intent
 import android.os.Bundle
 import android.support.wearable.complications.ComplicationProviderInfo
 import android.support.wearable.complications.ProviderChooserIntent
-import android.support.wearable.view.WearableRecyclerView
+import android.support.wear.widget.WearableRecyclerView
 import org.dwallach.R
 import org.jetbrains.anko.AnkoLogger
 import org.jetbrains.anko.debug
@@ -44,7 +44,7 @@ class AnalogComplicationConfigActivity : Activity(), AnkoLogger {
         mWearableRecyclerView = findViewById(R.id.wearable_recycler_view)
 
         // Aligns the first and last items on the list vertically centered on the screen.
-        mWearableRecyclerView?.centerEdgeItems = true
+//        mWearableRecyclerView?.centerEdgeItems = true
 
         // Improves performance because we know changes in content do not change the layout size of
         // the RecyclerView.
