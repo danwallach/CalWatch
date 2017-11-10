@@ -98,7 +98,7 @@ class CalendarFetcher(initialContext: Context,
      * cannot be used any more. Make a new one if you want to restart things later.
      */
     fun kill() {
-        warn { "killing CalendarFetcher #$instanceID" }
+        warn { "killing, state = " + currentState() }
 
         val context: Context? = getContext()
 
@@ -253,8 +253,10 @@ class CalendarFetcher(initialContext: Context,
         // calendar computation" time reported below seems to be around a second or less -- running
         // once an hour -- so we're not killing the battery in any case.
         //
+        /*
         val wakeLock = context.powerManager.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, "CalWatchWakeLock")
         wakeLock.acquire(10.seconds) // 10 seconds is more than we'll ever need
+        */
 
         warn { "async: wake lock acquired (CalendarFetcher #$instanceID)" }
 
@@ -288,7 +290,7 @@ class CalendarFetcher(initialContext: Context,
                 result = Pair(emptyList(), e)
             } finally {
                 // no matter what, we want to release the wake lock
-                wakeLock.release()
+//                wakeLock.release()
             }
 
             //

@@ -50,7 +50,7 @@ class CalWatchFaceService : CanvasWatchFaceService(), AnkoLogger {
          * Internal function for dealing with the calendar fetcher.
          */
         private fun initCalendarFetcher() {
-            verbose("initCalendarFetcher")
+            warn("initCalendarFetcher")
 
             val permissionGiven = CalendarPermission.check(this@CalWatchFaceService)
             if (!ClockState.calendarPermission && permissionGiven) {
@@ -74,12 +74,11 @@ class CalWatchFaceService : CanvasWatchFaceService(), AnkoLogger {
                 // If the user says "no", they'll be given the "empty calendar" icon and can clock the
                 // screen. The onTap handler will also then kickstart the permission activity.
 
-                verbose("no calendar permission given, launching first-time activity to ask")
+                warn("no calendar permission given, launching first-time activity to ask")
                 PermissionActivity.kickStart(this@CalWatchFaceService, true)
                 return
             }
 
-            calendarFetcher?.kill()
             calendarFetcher = CalendarFetcher(this@CalWatchFaceService)
         }
 
