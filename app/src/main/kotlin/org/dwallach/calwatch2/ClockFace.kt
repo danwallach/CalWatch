@@ -50,13 +50,8 @@ class ClockFace: Observer, AnkoLogger {
 
     // dealing with the "flat tire" a.k.a. "chin" of Moto 360 and any other watches that pull the same trick
     var missingBottomPixels = 0
-        get() = field
         set(newVal) {
-            if (FORCE_MOTO_FLAT_BOTTOM)
-                field = 30
-            else
-                field = newVal
-
+            field = if (FORCE_MOTO_FLAT_BOTTOM) 30 else newVal
             computeFlatBottomCorners()
         }
 
@@ -64,7 +59,6 @@ class ClockFace: Observer, AnkoLogger {
      * Tell the clock face if we're in "mute" mode. For now, we don't care.
      */
     var muteMode: Boolean = false
-        get() = field
         set(newVal) {
             verbose { "setMuteMode: $newVal" }
             field = newVal
@@ -74,7 +68,6 @@ class ClockFace: Observer, AnkoLogger {
      * If true, ambient redrawing will be purely black and white, without any anti-aliasing (default: off).
      */
     var ambientLowBit = FORCE_AMBIENT_LOW_BIT
-        get() = field
         set(newVal) {
             field = newVal || FORCE_AMBIENT_LOW_BIT
             verbose { "ambient low bit: $field" }
@@ -103,7 +96,6 @@ class ClockFace: Observer, AnkoLogger {
      * Set this at initialization time with the icon for the missing calendar.
      */
     var missingCalendarDrawable: Drawable? = null
-        get() = field
         set(drawable) {
             field = drawable
             updateMissingCalendarRect()
@@ -492,10 +484,10 @@ class ClockFace: Observer, AnkoLogger {
                 r = 0.9f
 
                 x = clockX(30.0, r)
-                if (missingBottomPixels != 0)
-                    y = clockY(30.0, r) + metrics.descent - missingBottomPixels // another hack for Moto 360
+                y = if (missingBottomPixels != 0)
+                    clockY(30.0, r) + metrics.descent - missingBottomPixels // another hack for Moto 360
                 else
-                    y = clockY(30.0, r) + 0.75f * metrics.descent // scoot it up a tiny bit
+                    clockY(30.0, r) + 0.75f * metrics.descent // scoot it up a tiny bit
 
                 drawShadowText(canvas, "6", x, y, colorBig, colorTextShadow)
             }
@@ -543,7 +535,7 @@ class ClockFace: Observer, AnkoLogger {
      * call this if external forces at play may have invalidated state
      * being saved inside ClockFace
      */
-    fun wipeCaches() {
+    private fun wipeCaches() {
         verbose { "clearing caches" }
 
         facePathCache = null
@@ -571,7 +563,7 @@ class ClockFace: Observer, AnkoLogger {
         val time = TimeWrapper.localTime
 
         eventList.forEach {
-            val e = it.wireEvent
+            val e = it.calendarEvent
             val evMinLevel = it.minLevel
             val evMaxLevel = it.maxLevel
 
@@ -925,11 +917,11 @@ class ClockFace: Observer, AnkoLogger {
             // and now solve for fractionFromCenter:
             //   (cy - missingBottomPixels) / (radius * sin(angle)) = fractionFromCenter
             val angleRadians = (seconds - 15) * Math.PI * 2.0 / 60.0
-            try {
-                return ((cy - missingBottomPixels) / (radius * Math.sin(angleRadians))).toFloat()
+            return try {
+                ((cy - missingBottomPixels) / (radius * Math.sin(angleRadians))).toFloat()
             } catch (e: ArithmeticException) {
                 // division by zero, weird, so fall back to the default
-                return 1f
+                1f
             }
 
         } else
@@ -963,7 +955,6 @@ class ClockFace: Observer, AnkoLogger {
      * Tracking whether or not we're in ambient mode.
      */
     var ambientMode = false
-        get() = field
         set(newVal) {
             info { "Ambient mode: $field -> $newVal" }
             if (field == newVal) return // nothing changed, so we're good
@@ -978,7 +969,6 @@ class ClockFace: Observer, AnkoLogger {
      * Tracking whether or not we need to be in burnin-protection mode.
      */
     var burnInProtection = FORCE_BURNIN_PROTECTION
-        get() = field
         set(newVal) {
             field = newVal || FORCE_BURNIN_PROTECTION
             updateDrawStyle()
@@ -988,7 +978,6 @@ class ClockFace: Observer, AnkoLogger {
      * Let us know if we're on a square or round watchface. (We don't really care. For now.)
      */
     var round: Boolean = false
-        get() = field
         set(newVal) {
             field = newVal
             verbose { "setRound: $field" }

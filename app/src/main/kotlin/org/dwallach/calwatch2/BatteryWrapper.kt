@@ -26,7 +26,7 @@ object BatteryWrapper: AnkoLogger {
     var batteryPct: Float = 1.0f
         private set
 
-    fun fetchStatus(): Unit {
+    fun fetchStatus() {
         val context = contextRef.get() ?: return // no context, can't do anything
 
         // and now, some code for battery measurement, largely stolen from the
@@ -60,7 +60,7 @@ object BatteryWrapper: AnkoLogger {
 
     fun init(context: Context) {
         info("init")
-        contextRef = WeakReference<Context>(context)
+        contextRef = WeakReference(context)
         fetchStatus()
     }
 }

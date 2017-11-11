@@ -100,13 +100,13 @@ class CalWatchFaceService : CanvasWatchFaceService(), AnkoLogger {
             // load any saved preferences
             PreferencesHelper.loadPreferences(this@CalWatchFaceService)
 
-            // TODO: add Wear2 features here
+            // there were a lot more choices here for Wear1; this seems to do what we want
             setWatchFaceStyle(
                     WatchFaceStyle.Builder(this@CalWatchFaceService)
                             .setStatusBarGravity(Gravity.CENTER)
                             .setViewProtectionMode(WatchFaceStyle.PROTECT_WHOLE_SCREEN)
                             .setShowUnreadCountIndicator(true)
-                            .setAcceptsTapEvents(true)// we need tap events for permission requests
+                            .setAcceptsTapEvents(true)
                             .build())
 
             BatteryWrapper.init(this@CalWatchFaceService)

@@ -30,7 +30,7 @@ object ClockState : Observable(), AnkoLogger {
     var showDayDate: Boolean = Constants.DEFAULT_SHOW_DAY_DATE
     var showStepCounter: Boolean = Constants.DEFAULT_SHOW_STEP_COUNTER
 
-    private var eventList: List<WireEvent> = emptyList()
+    private var eventList: List<CalendarEvent> = emptyList()
     private var visibleEventList: List<EventWrapper> = emptyList()
 
     var maxLevel: Int = 0
@@ -60,7 +60,7 @@ object ClockState : Observable(), AnkoLogger {
      * should be called externally, and only from the main UI thread. This is exactly what
      * CalendarFetcher does.
      */
-    fun setWireEventList(eventList: List<WireEvent>) {
+    fun setWireEventList(eventList: List<CalendarEvent>) {
         verbose { "fresh calendar event list, " + eventList.size + " entries" }
         val (visibleEventList, maxLevel) = clipToVisible(eventList)
         verbose { "--> $visibleEventList visible events" }
@@ -100,7 +100,7 @@ object ClockState : Observable(), AnkoLogger {
      * events visible in the next twelve hours, with events that would be off-screen
      * clipped to the 12-hour dial.
      */
-    private fun clipToVisible(events: List<WireEvent>): Pair<List<EventWrapper>, Int> {
+    private fun clipToVisible(events: List<CalendarEvent>): Pair<List<EventWrapper>, Int> {
         val gmtOffset = TimeWrapper.gmtOffset
 
         val localClipTime = TimeWrapper.localFloorHour
@@ -174,8 +174,8 @@ object ClockState : Observable(), AnkoLogger {
 
         verbose("Visible:")
         visibleEventList.forEach {
-            verbose { "--> displayColor(%06x), minLevel(${it.minLevel}), maxLevel(${it.maxLevel}), startTime(${it.wireEvent.startTime}), endTime(${it.wireEvent.endTime})"
-                    .format(it.wireEvent.displayColor) }
+            verbose { "--> displayColor(%06x), minLevel(${it.minLevel}), maxLevel(${it.maxLevel}), startTime(${it.calendarEvent.startTime}), endTime(${it.calendarEvent.endTime})"
+                    .format(it.calendarEvent.displayColor) }
         }
     }
 }

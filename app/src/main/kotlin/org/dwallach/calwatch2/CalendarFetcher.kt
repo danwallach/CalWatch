@@ -39,8 +39,8 @@ import org.jetbrains.anko.*
  * of the hour, when it's time to update the calendar.
  */
 class CalendarFetcher(initialContext: Context,
-                      val contentUri: Uri = WearableCalendarContract.Instances.CONTENT_URI,
-                      val authority: String = WearableCalendarContract.AUTHORITY): AnkoLogger {
+                      private val contentUri: Uri = WearableCalendarContract.Instances.CONTENT_URI,
+                      private val authority: String = WearableCalendarContract.AUTHORITY): AnkoLogger {
     // this will fire when it's time to (re)load the calendar, launching an asynchronous
     // task to do all the dirty work and eventually update ClockState
     private val contextRef = WeakReference(initialContext)
@@ -140,9 +140,9 @@ class CalendarFetcher(initialContext: Context,
      * an exception, because this result is meant to be saved across threads, which a thrown exception
      * can't do very well.
      */
-    private fun loadContent(context: Context): Pair<List<WireEvent>, Exception?> {
+    private fun loadContent(context: Context): Pair<List<CalendarEvent>, Exception?> {
         // local state which we'll eventually return
-        var cr = emptyList<WireEvent>()
+        var cr = emptyList<CalendarEvent>()
 
         // first, get the list of calendars
         info { "loadContent: starting to load content (CalendarFetcher #$instanceID)" }
@@ -197,7 +197,7 @@ class CalendarFetcher(initialContext: Context,
                         val visible = iCursor.getInt(i) != 0
 
                         if (visible && !allDay)
-                            cr += WireEvent(startTime, endTime, displayColor)
+                            cr += CalendarEvent(startTime, endTime, displayColor)
 
                     } while (iCursor.moveToNext())
                     info {"loadContent: visible instances found: ${cr.size}" }
@@ -217,7 +217,7 @@ class CalendarFetcher(initialContext: Context,
                 // Third-priority sort: startTime, with objects starting later (smaller) appearing first in the sort.
 
                 return Pair(cr.sortedWith(
-                        compareBy<WireEvent> { it.displayColor }
+                        compareBy<CalendarEvent> { it.displayColor }
                                 .thenBy { it.endTime }
                                 .thenByDescending { it.startTime }),
                         null)
@@ -271,7 +271,7 @@ class CalendarFetcher(initialContext: Context,
         // next to all of the hash tables and such as to what their generic types should have been,
         // but when I tried to make those into real parametric Java type declarations, some things
         // didn't match up quite right.
-        var result: Pair<List<WireEvent>, Throwable?>
+        var result: Pair<List<CalendarEvent>, Throwable?>
         doAsync {
             try {
                 val startTime = SystemClock.elapsedRealtimeNanos()

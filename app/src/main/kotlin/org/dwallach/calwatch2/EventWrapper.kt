@@ -8,14 +8,25 @@ package org.dwallach.calwatch2
 
 import android.graphics.Path
 
-class EventWrapper(val wireEvent: WireEvent) {
+/**
+ * This data structure contains each calendar event. We only care about a handful of fields.
+ * It's separate from EventWrapper because we might want to save these things for later, while the
+ * wrapper parts are easily reconstructed. We used to send them from phone to watch, but the
+ * data is all now available locally.
+ */
+data class CalendarEvent(val startTime: Long, val endTime: Long, val displayColor: Int)
+
+/**
+ * This class wraps a calendar event with a number of other fields.
+ */
+class EventWrapper(val calendarEvent: CalendarEvent) {
     /**
      * The first time this event is rendered, it will be rendered to a Path, so subsequent calls to
      * render it will go much faster.
      */
     var path: Path? = null
-    private val paint = PaintCan.getCalendarPaint(wireEvent.displayColor)
-    private val greyPaint = PaintCan.getCalendarGreyPaint(wireEvent.displayColor)
+    private val paint = PaintCan.getCalendarPaint(calendarEvent.displayColor)
+    private val greyPaint = PaintCan.getCalendarGreyPaint(calendarEvent.displayColor)
     private val lowBitPaint = PaintCan[PaintCan.STYLE_LOWBIT, PaintCan.COLOR_LOWBIT_CALENDAR_FILL]
     var minLevel: Int = 0
     var maxLevel: Int = 0
@@ -27,9 +38,9 @@ class EventWrapper(val wireEvent: WireEvent) {
     }
 
     fun overlaps(e: EventWrapper) =
-            this.wireEvent.startTime < e.wireEvent.endTime && e.wireEvent.startTime < this.wireEvent.endTime
+            this.calendarEvent.startTime < e.calendarEvent.endTime && e.calendarEvent.startTime < this.calendarEvent.endTime
 
     override fun toString() =
             "%d -> %d, color(%08x), levels(%d,%d)"
-                    .format(wireEvent.startTime, wireEvent.endTime, wireEvent.displayColor, minLevel, maxLevel)
+                    .format(calendarEvent.startTime, calendarEvent.endTime, calendarEvent.displayColor, minLevel, maxLevel)
 }

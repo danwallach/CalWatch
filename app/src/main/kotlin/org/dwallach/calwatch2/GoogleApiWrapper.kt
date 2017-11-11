@@ -15,8 +15,8 @@ import com.google.android.gms.wearable.Wearable
 import org.jetbrains.anko.*
 
 /**
- * Unified support for dealing with the Google API client. Note that we're hard-coding the Api's that
- * we're adding. If you're using this in some other app, you'll either want to edit the calls to the
+ * Unified support for dealing with the Google API client. Note that we're hard-coding the apis that
+ * we need for CalWatch. If you're using this in some other app, you'll either want to edit the calls to the
  * builder, or otherwise generalize this class.
  */
 

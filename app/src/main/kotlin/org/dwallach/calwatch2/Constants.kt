@@ -7,8 +7,8 @@
 package org.dwallach.calwatch2
 
 object Constants {
-    const val PREFS_KEY = "org.dwallach.calwatch.prefs"
-    const val DATA_KEY = "org.dwallach.calwatch.data"
+    const val PREFS_KEY = "org.dwallach.calwatch2.prefs"
+    const val DATA_KEY = "org.dwallach.calwatch2.data"
     const val SETTINGS_PATH = "/settings"
     const val DEFAULT_WATCHFACE = ClockState.FACE_TOOL
     const val DEFAULT_SHOW_SECONDS = true

@@ -33,25 +33,23 @@ object PreferencesHelper: AnkoLogger {
      * which is the newest version. This will help with legacy migration. (If the version
      * is zero, then some of the values in ClockState will have been set from the defaults.)
      */
-    fun loadPreferences(context: Context) : Int {
-        with (context.getSharedPreferences(Constants.PREFS_KEY, Context.MODE_PRIVATE)) {
-            val faceMode = getInt("faceMode", Constants.DEFAULT_WATCHFACE)
-            val showSeconds = getBoolean("showSeconds", Constants.DEFAULT_SHOW_SECONDS)
-            val showDayDate = getBoolean("showDayDate", Constants.DEFAULT_SHOW_DAY_DATE)
-            val showStepCounter = getBoolean("showStepCounter", Constants.DEFAULT_SHOW_STEP_COUNTER)
-            val version = getInt("preferencesVersion", 0)
+    fun loadPreferences(context: Context): Int = with (context.getSharedPreferences(Constants.PREFS_KEY, Context.MODE_PRIVATE)) {
+        val faceMode = getInt("faceMode", Constants.DEFAULT_WATCHFACE)
+        val showSeconds = getBoolean("showSeconds", Constants.DEFAULT_SHOW_SECONDS)
+        val showDayDate = getBoolean("showDayDate", Constants.DEFAULT_SHOW_DAY_DATE)
+        val showStepCounter = getBoolean("showStepCounter", Constants.DEFAULT_SHOW_STEP_COUNTER)
+        val version = getInt("preferencesVersion", 0)
 
-            verbose { "loadPreferences: $faceMode, showSeconds: $showSeconds, showDayDate: $showDayDate, showStepCounter: $showStepCounter, preferencesVersion: $version" }
+        verbose { "loadPreferences: $faceMode, showSeconds: $showSeconds, showDayDate: $showDayDate, showStepCounter: $showStepCounter, preferencesVersion: $version" }
 
-            ClockState.faceMode = faceMode
-            ClockState.showSeconds = showSeconds
-            ClockState.showDayDate = showDayDate
-            ClockState.showStepCounter = showStepCounter
+        ClockState.faceMode = faceMode
+        ClockState.showSeconds = showSeconds
+        ClockState.showDayDate = showDayDate
+        ClockState.showStepCounter = showStepCounter
 
-            ClockState.pingObservers() // we only need to do this once, versus multiple times when done internally
+        ClockState.pingObservers() // we only need to do this once, versus multiple times when done internally
 
-            return version
-        }
+        return version
 
         // Kotlin engineering note: return inside of a lambda will return from the nearest enclosing `fun`,
         // so the above code has the desired effect.
