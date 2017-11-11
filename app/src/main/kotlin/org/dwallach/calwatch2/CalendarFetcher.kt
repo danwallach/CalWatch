@@ -53,7 +53,7 @@ class CalendarFetcher(initialContext: Context,
 
     private val broadcastReceiver = object : BroadcastReceiver() {
         override fun onReceive(context: Context, intent: Intent) {
-            warn { "receiver: got intent message.  action(${intent.action}), data(${intent.data}), toString($intent)" }
+            info { "receiver: got intent message.  action(${intent.action}), data(${intent.data}), toString($intent)" }
             if (Intent.ACTION_PROVIDER_CHANGED == intent.action) {
 
                 // Google's reference code also checks that the Uri matches intent.getData(), but the URI we're getting back via intent.getData() is:
@@ -64,8 +64,10 @@ class CalendarFetcher(initialContext: Context,
 
                 // Solution? Screw it. Whatever we get, we don't care, we'll reload the calendar.
 
-                warn("receiver: time to load new calendar data")
+                info("receiver: time to load new calendar data")
                 rescan()
+            } else {
+                warn { "receiver: ignoring intent: action(${intent.action}), data(${intent.data}), toString($intent)" }
             }
         }
     }
@@ -76,7 +78,7 @@ class CalendarFetcher(initialContext: Context,
         singletonFetcher = this // and now the newbie becomes the singleton
 
         // hook into watching the calendar (code borrowed from Google's calendar wear app)
-        warn("setting up intent receiver")
+        info("setting up intent receiver")
         val filter = IntentFilter(Intent.ACTION_PROVIDER_CHANGED).apply {
             addDataScheme("content")
             addDataAuthority(authority, null)
@@ -125,7 +127,7 @@ class CalendarFetcher(initialContext: Context,
             warn { "scan in progress, not doing another scan! (CalendarFetcher #$instanceID)" }
             return
         } else {
-            warn { "rescan starting asynchronously (CalendarFetcher #$instanceID)" }
+            info { "rescan starting asynchronously (CalendarFetcher #$instanceID)" }
             scanInProgress = true
             runAsyncLoader()
         }
@@ -143,7 +145,7 @@ class CalendarFetcher(initialContext: Context,
         var cr = emptyList<WireEvent>()
 
         // first, get the list of calendars
-        warn { "loadContent: starting to load content (CalendarFetcher #$instanceID)" }
+        info { "loadContent: starting to load content (CalendarFetcher #$instanceID)" }
 
         TimeWrapper.update()
         val time = TimeWrapper.gmtTime
@@ -151,7 +153,7 @@ class CalendarFetcher(initialContext: Context,
         val queryEndMillis = queryStartMillis + 24.hours
 
         try {
-            warn { "loadContent: Query times... Now: %s, QueryStart: %s, QueryEnd: %s"
+            info { "loadContent: Query times... Now: %s, QueryStart: %s, QueryEnd: %s"
                     .format(DateUtils.formatDateTime(context, time, DateUtils.FORMAT_SHOW_DATE or DateUtils.FORMAT_SHOW_TIME),
                             DateUtils.formatDateTime(context, queryStartMillis, DateUtils.FORMAT_SHOW_TIME or DateUtils.FORMAT_SHOW_DATE),
                             DateUtils.formatDateTime(context, queryEndMillis, DateUtils.FORMAT_SHOW_TIME or DateUtils.FORMAT_SHOW_DATE)) }
@@ -198,7 +200,7 @@ class CalendarFetcher(initialContext: Context,
                             cr += WireEvent(startTime, endTime, displayColor)
 
                     } while (iCursor.moveToNext())
-                    warn {"loadContent: visible instances found: ${cr.size}" }
+                    info {"loadContent: visible instances found: ${cr.size}" }
                 }
 
                 // lifecycle cleanliness: important to close down when we're done
@@ -247,21 +249,13 @@ class CalendarFetcher(initialContext: Context,
         if (this != singletonFetcher)
             warn { "not using the singleton fetcher! (CalendarFetcher me #$instanceID), singleton #${singletonFetcher?.instanceID})" }
 
-        //
-        // Why a wake-lock? In part, because the Google sample code does it this way, and in part
-        // because it makes sense. We want this task to finish quickly. In practice, the "total
-        // calendar computation" time reported below seems to be around a second or less -- running
-        // once an hour -- so we're not killing the battery in any case.
-        //
-        /*
-        val wakeLock = context.powerManager.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, "CalWatchWakeLock")
-        wakeLock.acquire(10.seconds) // 10 seconds is more than we'll ever need
-        */
 
-        warn { "async: wake lock acquired (CalendarFetcher #$instanceID)" }
+        // Historical note: we used to acquire a wake lock here, in part because that's what
+        // some sample Android code did while accessing the calendar. With Wear 2, this seemed
+        // to cause weird problems, but only after reboot. Experimentally removing the wake lock
+        // code fixed the weird problems, and everything still works. So, no more wake lock!
 
-        //
-        // This is the Anko library being awesome. Rather than using AsyncTask, which can get
+        // The code below is the Anko library being awesome. Rather than using AsyncTask, which can get
         // messy, we instead say "this block should run asynchronously, and oh by the way, run this
         // other code on the UI thread once the asynchronous bit is done". Spectacular. The main async
         // block will be producing its result in the result variable, declared below, which is then
@@ -277,20 +271,16 @@ class CalendarFetcher(initialContext: Context,
         // next to all of the hash tables and such as to what their generic types should have been,
         // but when I tried to make those into real parametric Java type declarations, some things
         // didn't match up quite right.
-        //
         var result: Pair<List<WireEvent>, Throwable?>
         doAsync {
             try {
                 val startTime = SystemClock.elapsedRealtimeNanos()
                 result = loadContent(context)
                 val endTime = SystemClock.elapsedRealtimeNanos()
-                warn { "async: total calendar computation time: %.3f ms".format((endTime - startTime) / 1000000.0) }
+                info { "async: total calendar computation time: %.3f ms".format((endTime - startTime) / 1000000.0) }
             } catch (e: Throwable) {
                 // pass the exception back to the UI thread; we'll log it there
                 result = Pair(emptyList(), e)
-            } finally {
-                // no matter what, we want to release the wake lock
-//                wakeLock.release()
             }
 
             //
@@ -311,7 +301,7 @@ class CalendarFetcher(initialContext: Context,
                     ClockState.pingObservers()
                 }
 
-                warn { "uiThread: complete (CalendarFetcher #$instanceID)" }
+                info { "uiThread: complete (CalendarFetcher #$instanceID)" }
             }
         }
     }
@@ -326,16 +316,15 @@ class CalendarFetcher(initialContext: Context,
                         .format(singletonFetcher?.toString() ?: "null")
 
         fun requestRescan() {
-            warn { "requestRescan: " + currentState() }
+            info { "requestRescan: " + currentState() }
             singletonFetcher?.rescan()
         }
 
-        private fun calendarColorFix(calendarColor: Int, eventColor: Int) =
-                when {
-                    eventColor != 0 -> eventColor
-                    calendarColor != 0 -> calendarColor
-                    else -> Color.DKGRAY
-                }
+        private fun calendarColorFix(calendarColor: Int, eventColor: Int) = when {
+            eventColor != 0 -> eventColor
+            calendarColor != 0 -> calendarColor
+            else -> Color.DKGRAY
+        }
     }
 }
 
