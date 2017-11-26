@@ -20,6 +20,7 @@ import org.dwallach.complications.ComplicationLocation.*
 import org.dwallach.complications.ComplicationWrapper
 import org.dwallach.complications.ComplicationWrapper.isVisible
 import org.jetbrains.anko.*
+import java.lang.Math.*
 import java.util.Observable
 import java.util.Observer
 
@@ -769,7 +770,7 @@ class ClockFace: Observer, AnkoLogger {
 
         if(drawStyle == PaintCan.STYLE_NORMAL && batteryPct > Constants.POWER_WARN_LOW_LEVEL) {
             // we're rounding to the nearest thousand, i.e.,  1499 -> 1, 1500 -> 2, etc.
-            val stepCountDigits = Math.floor((stepCount + 500.0) / 1000.0)
+            val stepCountDigits = floor((stepCount + 500.0) / 1000.0)
             val stepCountString = if (stepCountDigits > 99) "++" else stepCountDigits.toInt().toString()
 
             val textPaint = PaintCan[drawStyle, PaintCan.COLOR_STEP_COUNT_TEXT]
@@ -839,9 +840,9 @@ class ClockFace: Observer, AnkoLogger {
         //    it's a non-rectangular screen, and (to date anyway) no flat tire to worry about
 
         if (missingBottomPixels != 0) {
-            val angle = Math.asin(1.0 - missingBottomPixels.toDouble() / cy.toDouble())
+            val angle = asin(1.0 - missingBottomPixels.toDouble() / cy.toDouble())
 
-            flatBottomCornerTime = (angle * 30.0 / Math.PI + 15).toFloat()
+            flatBottomCornerTime = (angle * 30.0 / PI + 15).toFloat()
             verbose { "flatBottomCornerTime($flatBottomCornerTime) <-- angle($angle), missingBottomPixels($missingBottomPixels), cy($cy)" }
 
             flatBottomCornerY1_R100 = clockY(flatBottomCornerTime.toDouble(), 1f)
@@ -896,13 +897,13 @@ class ClockFace: Observer, AnkoLogger {
 
     // clock math
     private fun clockX(seconds: Double, fractionFromCenter: Float): Float {
-        val angleRadians = (seconds - 15) * Math.PI * 2.0 / 60.0
-        return (cx + radius.toDouble() * fractionFromCenter.toDouble() * Math.cos(angleRadians)).toFloat()
+        val angleRadians = (seconds - 15) * PI * 2.0 / 60.0
+        return (cx + radius.toDouble() * fractionFromCenter.toDouble() * cos(angleRadians)).toFloat()
     }
 
     private fun clockY(seconds: Double, fractionFromCenter: Float): Float {
-        val angleRadians = (seconds - 15) * Math.PI * 2.0 / 60.0
-        return (cy + radius.toDouble() * fractionFromCenter.toDouble() * Math.sin(angleRadians)).toFloat()
+        val angleRadians = (seconds - 15) * PI * 2.0 / 60.0
+        return (cy + radius.toDouble() * fractionFromCenter.toDouble() * sin(angleRadians)).toFloat()
     }
 
     // hack for Moto360: given the location on the dial (seconds), and the originally
@@ -916,9 +917,9 @@ class ClockFace: Observer, AnkoLogger {
             //   cy*2 - missingBottomPixels = cy + radius * fractionFromCenter * sin(angle)
             // and now solve for fractionFromCenter:
             //   (cy - missingBottomPixels) / (radius * sin(angle)) = fractionFromCenter
-            val angleRadians = (seconds - 15) * Math.PI * 2.0 / 60.0
+            val angleRadians = (seconds - 15) * PI * 2.0 / 60.0
             return try {
-                ((cy - missingBottomPixels) / (radius * Math.sin(angleRadians))).toFloat()
+                ((cy - missingBottomPixels) / (radius * sin(angleRadians))).toFloat()
             } catch (e: ArithmeticException) {
                 // division by zero, weird, so fall back to the default
                 1f
@@ -1009,16 +1010,16 @@ class ClockFace: Observer, AnkoLogger {
         private const val NON_LINEAR_TABLE_SIZE = 1000
         private val NON_LINEAR_TABLE = DoubleArray(NON_LINEAR_TABLE_SIZE) { i ->
             // This is where we initialize our non-linear second hand table.
-            // We're implementing y=[(1+sin(theta - pi/2))/2] ^ pow over x in [0,pi]
+            // We're implementing y=[(1+sin(theta - pi/2))/2] ^ pow over theta in [0,pi]
             // Adjusting the power makes the second hand hang out closer to its
             // starting position and then launch faster to hit the target when we
             // get closer to the next second.
             val iFrac: Double = i.toDouble() / NON_LINEAR_TABLE_SIZE.toDouble()
-            val thetaMinusPi2: Double = (iFrac - 0.5) * Math.PI
+            val thetaMinusPi2: Double = (iFrac - 0.5) * PI
 
             // two components here: the non-linear part (with Math.pow and Math.sin) and then a linear
             // part (with iFrac). This make sure we still have some motion. The second hand never entirely stops.
-            0.7 * Math.pow((1.0 + Math.sin(thetaMinusPi2)) / 2.0, 8.0) + 0.3 * iFrac
+            0.7 * pow((1.0 + sin(thetaMinusPi2)) / 2.0, 8.0) + 0.3 * iFrac
         }
 
         /**
@@ -1029,7 +1030,7 @@ class ClockFace: Observer, AnkoLogger {
          * making the table bigger and clipping to the nearest table entry.
          */
         private fun nonLinearSeconds(linearSeconds: Double): Double {
-            val secFloor = Math.floor(linearSeconds)
+            val secFloor = floor(linearSeconds)
             val secFrac = linearSeconds - secFloor
             return secFloor + NON_LINEAR_TABLE[(secFrac * NON_LINEAR_TABLE_SIZE).toInt()]
         }

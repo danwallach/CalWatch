@@ -184,7 +184,9 @@ class CalendarFetcher(initialContext: Context,
                     instancesProjection, null, null, null)
 
             // if it's null, which shouldn't ever happen, then we at least won't gratuitously fail here
-            if (iCursor != null) {
+            if (iCursor == null) {
+                warn { "Got null cursor, no events!" }
+            } else {
                 if (iCursor.moveToFirst()) {
                     do {
                         var i = 0

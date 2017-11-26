@@ -13,8 +13,21 @@ import android.graphics.Path
  * It's separate from EventWrapper because we might want to save these things for later, while the
  * wrapper parts are easily reconstructed. We used to send them from phone to watch, but the
  * data is all now available locally.
+ *
+ * Note that all times are in *milliseconds*, as returned by various Android time functions.
+ * See also [TimeWrapper].
  */
-data class CalendarEvent(val startTime: Long, val endTime: Long, val displayColor: Int)
+data class CalendarEvent(val startTime: Long, val endTime: Long, val displayColor: Int) {
+    operator fun plus(offset: Long) =
+        CalendarEvent(startTime + offset, endTime + offset, displayColor)
+
+    operator fun plus(offset: Int) = plus(offset.toLong())
+
+    fun clip(clipStart: Long, clipEnd: Long) = CalendarEvent(
+            startTime = if(startTime < clipStart) clipStart else startTime,
+            endTime = if(endTime > clipEnd) clipEnd else endTime,
+            displayColor = displayColor)
+}
 
 /**
  * This class wraps a calendar event with a number of other fields.

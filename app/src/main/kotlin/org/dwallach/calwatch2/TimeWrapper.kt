@@ -114,21 +114,20 @@ object TimeWrapper: AnkoLogger {
     /**
      * For performance monitoring: report the FPS counters and reset them immediately.
      */
-    fun frameReport() {
-        //
-        // Note that the externally visible TimeWrapper APIs report the current time at a resolution
-        // of milliseconds, while our internal framerate measurement and reporting are using the
-        // nanosecond-accurate system clock counter. Thus, for the frame* functions, you'll see
-        // different correction factors.
-        //
-        frameReport(SystemClock.elapsedRealtimeNanos())
-    }
+    fun frameReport() = frameReport(SystemClock.elapsedRealtimeNanos())
 
     /**
      * Internal version, avoids multiple calls to get the system clock.
      * @param currentTime
      */
     private fun frameReport(currentTime: Long) {
+        //
+        // Note that the externally visible TimeWrapper APIs report the current time at a resolution
+        // of milliseconds, while our internal framerate measurement and reporting are using the
+        // nanosecond-accurate system clock counter. Thus, for the frame* functions, you'll see
+        // different correction factors.
+        //
+
         val elapsedTime = currentTime - lastFPSTime // ns since last time we printed something
         if (samples > 0 && elapsedTime > 0) {
             val fps = samples * 1000000000f / elapsedTime  // * 10^9 so we're not just computing frames per nanosecond

@@ -108,10 +108,8 @@ object ClockState : Observable(), AnkoLogger {
         val clipEndMillis = clipStartMillis + 43200000  // 12 hours later
 
         val clippedEvents = events.map {
-            // chop the start/end of the event to fit onscreen
-            it.copy(startTime = if(it.startTime < clipStartMillis) clipStartMillis else it.startTime,
-                    endTime = if(it.endTime > clipEndMillis) clipEndMillis else it.endTime)
-        }.filter {
+            it.clip(clipStartMillis, clipEndMillis)
+        } .filter {
             // require events to be onscreen
             it.endTime > clipStartMillis && it.startTime < clipEndMillis
             // require events to not fill the full screen
@@ -120,7 +118,7 @@ object ClockState : Observable(), AnkoLogger {
                     && it.endTime > it.startTime
         }.map {
             // apply GMT offset, and then wrap with EventWrapper, where the layout will happen
-            EventWrapper(it.copy(startTime = it.startTime + gmtOffset, endTime = it.endTime + gmtOffset))
+            EventWrapper(it + gmtOffset)
         }
 
         // now, we run off and do screen layout
