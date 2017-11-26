@@ -49,6 +49,7 @@ android {
         targetSdkVersion 26   // Android 8.0, Oreo, not yet supported by Wear 2 but coming soon
         minSdkVersion 25      // Android 7.1, Nougat, supposedly the common Wear 2 version
         versionName getVersionName()
+        versionCode getVersionCode()
     }
     sourceSets {
         main.java.srcDirs += 'src/main/kotlin'

@@ -51,20 +51,17 @@ object FitnessWrapper: AnkoLogger {
     private fun getGoogleApi(): GoogleApiClient? {
         val client = GoogleApiWrapper.client
 
-        if(client == null)  {
-            noGoogleApiCounterNull++
-            return null // nothing to do!
+        return when {
+            client == null -> {
+                noGoogleApiCounterNull++
+                null // nothing to do!
+            }
+            client.isConnecting || !client.isConnected -> {
+                noGoogleApiCounterConnecting++
+                null // nothing to do!
+            }
+            else -> client
         }
-        if(client.isConnecting) {
-            noGoogleApiCounterConnecting++
-            return null // nothing to do!
-        }
-        if(!client.isConnected) {
-            noGoogleApiCounterConnected++
-            return null // nothing to do!
-        }
-
-        return client
     }
 
     /**
