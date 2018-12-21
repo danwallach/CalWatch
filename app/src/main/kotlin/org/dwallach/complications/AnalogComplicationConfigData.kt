@@ -10,6 +10,7 @@ import android.content.Context
 //import android.support.v7.widget.RecyclerView.ViewHolder
 //import android.support.v7.widget.RecyclerView
 import androidx.recyclerview.widget.RecyclerView
+import androidx.recyclerview.widget.RecyclerView.ViewHolder
 
 import org.dwallach.R
 import org.dwallach.complications.ComplicationLocation.*
