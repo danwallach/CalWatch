@@ -43,13 +43,6 @@ class CalWatchFaceService : CanvasWatchFaceService(), AnkoLogger {
          * Call this if there's been a status update in the calendar permissions.
          */
         fun calendarPermissionUpdate() {
-            initCalendarFetcher()
-        }
-
-        /**
-         * Internal function for dealing with the calendar fetcher.
-         */
-        private fun initCalendarFetcher() {
             warn("initCalendarFetcher")
 
             val permissionGiven = CalendarPermission.check(this@CalWatchFaceService)
@@ -60,26 +53,8 @@ class CalWatchFaceService : CanvasWatchFaceService(), AnkoLogger {
                 ClockState.calendarPermission = true
             }
 
-            if (!permissionGiven) {
-                // If we got here, then we don't have permission to read the calendar. Bummer. The
-                // only way to fix this is to create a whole new Activity from which to make the
-                // request of the user.
-
-                // If this succeeds, then it will asynchronously call calendarPermissionUpdate(), which will
-                // call back to initCalendarFetcher(). That's why we're returning right after this.
-
-                // The "firstTimeOnly" bit here is what keeps this from going into infinite recursion.
-                // We'll only launch the activity in this instance if we've never asked the user before.
-
-                // If the user says "no", they'll be given the "empty calendar" icon and can clock the
-                // screen. The onTap handler will also then kickstart the permission activity.
-
-                warn("no calendar permission given, launching first-time activity to ask")
-                PermissionActivity.kickStart(this@CalWatchFaceService, true)
-                return
-            }
-
-            calendarFetcher = CalendarFetcher(this@CalWatchFaceService)
+            if (permissionGiven)
+                calendarFetcher = CalendarFetcher(this@CalWatchFaceService)
         }
 
         /**
@@ -125,7 +100,7 @@ class CalWatchFaceService : CanvasWatchFaceService(), AnkoLogger {
 
             CalendarPermission.init(this@CalWatchFaceService)
 
-            initCalendarFetcher()
+            calendarPermissionUpdate()
 
             ComplicationWrapper.init(this@CalWatchFaceService, this, listOf(BACKGROUND, RIGHT, TOP, BOTTOM))
             ComplicationWrapper.styleComplications {

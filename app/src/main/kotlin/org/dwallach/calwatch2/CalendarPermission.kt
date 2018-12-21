@@ -66,7 +66,6 @@ object CalendarPermission: AnkoLogger {
     /**
      * Request permission to access the calendar.
      */
-    @SuppressLint("CommitPrefEdits")
     fun request(activity: Activity) {
         if (!check(activity)) {
             numRequests++

@@ -63,6 +63,8 @@ TODO update the slides
     adding Kotlin material.
 
 ANDROID N / WEAR 2.0 OVERHAUL
+    TODO: start off in the "haven't asked for calendar permission" state, don't ask until we get a user click
+
     TODO: Don't even bother drawing the calendar wedges in "always on" greyscale mode. Save power, reduce light output
 
     TODO: Always on mode on the Fossil shifts the display, but leaves pixels behind; investigate better screen clearing?

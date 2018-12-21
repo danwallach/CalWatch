@@ -142,7 +142,7 @@ class CalendarFetcher(initialContext: Context,
      */
     private fun loadContent(context: Context): Pair<List<CalendarEvent>, Exception?> {
         // local state which we'll eventually return
-        var cr = emptyList<CalendarEvent>()
+        val cr = mutableListOf<CalendarEvent>()
 
         // first, get the list of calendars
         info { "loadContent: starting to load content (CalendarFetcher #$instanceID)" }
@@ -199,7 +199,7 @@ class CalendarFetcher(initialContext: Context,
                         val visible = iCursor.getInt(i) != 0
 
                         if (visible && !allDay)
-                            cr += CalendarEvent(startTime, endTime, displayColor)
+                            cr.add(CalendarEvent(startTime, endTime, displayColor))
 
                     } while (iCursor.moveToNext())
                     info {"loadContent: visible instances found: ${cr.size}" }
