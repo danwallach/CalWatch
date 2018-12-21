@@ -10,7 +10,7 @@ import android.app.Activity
 import android.content.ComponentName
 import android.content.Context
 import android.graphics.drawable.Drawable
-import android.support.v7.widget.RecyclerView
+//import android.support.v7.widget.RecyclerView
 import android.support.wearable.complications.ComplicationHelperActivity
 import android.support.wearable.complications.ComplicationProviderInfo
 import android.support.wearable.complications.ProviderInfoRetriever
@@ -23,6 +23,7 @@ import android.view.ViewGroup
 import android.widget.Button
 import android.widget.ImageButton
 import android.widget.ImageView
+import androidx.recyclerview.widget.RecyclerView
 
 import java.util.concurrent.Executors
 
