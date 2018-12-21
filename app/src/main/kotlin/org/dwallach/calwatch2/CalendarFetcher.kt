@@ -140,7 +140,7 @@ class CalendarFetcher(initialContext: Context,
      * an exception, because this result is meant to be saved across threads, which a thrown exception
      * can't do very well.
      */
-    private fun loadContent(context: Context): Pair<List<CalendarEvent>, Exception?> {
+    private fun loadContent(context: Context): Pair<List<CalendarEvent>, Throwable?> {
         // local state which we'll eventually return
         val cr = mutableListOf<CalendarEvent>()
 
@@ -202,14 +202,14 @@ class CalendarFetcher(initialContext: Context,
                             cr.add(CalendarEvent(startTime, endTime, displayColor))
 
                     } while (iCursor.moveToNext())
-                    info {"loadContent: visible instances found: ${cr.size}" }
+                    info { "loadContent: visible instances found: ${cr.size}" }
                 }
 
                 // lifecycle cleanliness: important to close down when we're done
                 iCursor.close()
             }
 
-            if (!cr.isEmpty()) {
+            val sorted =
                 // Primary sort: color, so events from the same calendar will become consecutive wedges
 
                 // Secondary sort: endTime, with objects ending earlier appearing first in the sort.
@@ -217,21 +217,24 @@ class CalendarFetcher(initialContext: Context,
                 //    ones will end late in the day, and will thus end up on the inside of the watchface)
 
                 // Third-priority sort: startTime, with objects starting later (smaller) appearing first in the sort.
-
-                return Pair(cr.sortedWith(
+                cr.sortedWith(
                         compareBy<CalendarEvent> { it.displayColor }
                                 .thenBy { it.endTime }
-                                .thenByDescending { it.startTime }),
-                        null)
-            } else {
-                return Pair(emptyList(), null)
-            }
+                                .thenByDescending { it.startTime })
+
+            info { "loadContent: still have ${sorted.size} results" }
+
+            return Pair(sorted, null)
         } catch (e: SecurityException) {
             // apparently we don't have permission for the calendar!
             error("security exception while reading calendar!", e)
             kill()
             ClockState.calendarPermission = false
 
+            return Pair(emptyList(), e)
+        } catch (e: Throwable) {
+            error("wildly unexpected exception when reading calendar!", e)
+            kill()
             return Pair(emptyList(), e)
         }
     }
