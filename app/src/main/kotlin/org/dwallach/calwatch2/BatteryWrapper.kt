@@ -42,7 +42,9 @@ object BatteryWrapper: AnkoLogger {
                 return
             }
 
-            with(intent) {
+            // For whatever reason, Kotlin is failing to infer that intent is not null here,
+            // but adding the type cast seems to solve the problem. Shouldn't happen.
+            with(intent as Intent) {
                 // Are we charging / charged?
                 isCharging = when (getIntExtra(BatteryManager.EXTRA_STATUS, -1)) {
                     BatteryManager.BATTERY_STATUS_CHARGING, BatteryManager.BATTERY_STATUS_FULL -> true
