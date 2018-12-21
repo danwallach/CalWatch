@@ -69,10 +69,6 @@ class CalWatchFaceService : CanvasWatchFaceService(), AnkoLogger {
 
             super.onCreate(holder)
 
-            GoogleApiWrapper.startConnection(this@CalWatchFaceService.baseContext) {
-                verbose { "GoogleApi ready" }
-            }
-
             // announce our version number to the logs
             VersionWrapper.logVersion(this@CalWatchFaceService)
 
@@ -253,7 +249,6 @@ class CalWatchFaceService : CanvasWatchFaceService(), AnkoLogger {
         override fun onDestroy() {
             verbose("onDestroy")
 
-            GoogleApiWrapper.close()
             ClockState.deleteObserver(this)
             calendarFetcher?.kill()
             clockFace.kill()
