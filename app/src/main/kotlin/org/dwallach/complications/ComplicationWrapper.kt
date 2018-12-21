@@ -380,7 +380,7 @@ object ComplicationWrapper : AnkoLogger {
     }
 
     // initially a no-op, will replace later when styleComplications is called
-    private var stylingFunc: (ComplicationDrawable) -> Unit = {
+    private var stylingFunc: ComplicationDrawable.() -> Unit = {
         warn { "Default styles being applied to complications" }
     }
 
@@ -389,7 +389,7 @@ object ComplicationWrapper : AnkoLogger {
      * Note that this will only style your foreground complications. The background is only for
      * full-screen images, so no styling happens there.
      */
-    fun styleComplications(func: (ComplicationDrawable)->Unit) {
+    fun styleComplications(func: ComplicationDrawable.() -> Unit) {
         stylingFunc = func
     }
 }

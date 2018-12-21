@@ -69,6 +69,10 @@ class CalWatchFaceService : CanvasWatchFaceService(), AnkoLogger {
 
             super.onCreate(holder)
 
+            GoogleApiWrapper.startConnection(this@CalWatchFaceService.baseContext) {
+                verbose { "GoogleApi ready" }
+            }
+
             // announce our version number to the logs
             VersionWrapper.logVersion(this@CalWatchFaceService)
 
@@ -85,10 +89,6 @@ class CalWatchFaceService : CanvasWatchFaceService(), AnkoLogger {
                             .build())
 
             BatteryWrapper.init(this@CalWatchFaceService)
-
-            GoogleApiWrapper.startConnection(this@CalWatchFaceService.baseContext) {
-                verbose { "GoogleApi ready" }
-            }
 
             val resources = this@CalWatchFaceService.resources
 
@@ -108,10 +108,10 @@ class CalWatchFaceService : CanvasWatchFaceService(), AnkoLogger {
 
             ComplicationWrapper.init(this@CalWatchFaceService, this, listOf(BACKGROUND, RIGHT, TOP, BOTTOM))
             ComplicationWrapper.styleComplications {
-                it.setBackgroundColorActive(PaintCan[PaintCan.STYLE_NORMAL, PaintCan.COLOR_COMPLICATION_BG].color)
-                it.setBackgroundColorAmbient(PaintCan[PaintCan.STYLE_AMBIENT, PaintCan.COLOR_COMPLICATION_BG].color)
-                it.setBorderColorActive(PaintCan[PaintCan.STYLE_NORMAL, PaintCan.COLOR_COMPLICATION_FG].color)
-                it.setBorderColorAmbient(PaintCan[PaintCan.STYLE_AMBIENT, PaintCan.COLOR_COMPLICATION_FG].color)
+                setBackgroundColorActive(PaintCan[PaintCan.STYLE_NORMAL, PaintCan.COLOR_COMPLICATION_BG].color)
+                setBackgroundColorAmbient(PaintCan[PaintCan.STYLE_AMBIENT, PaintCan.COLOR_COMPLICATION_BG].color)
+                setBorderColorActive(PaintCan[PaintCan.STYLE_NORMAL, PaintCan.COLOR_COMPLICATION_FG].color)
+                setBorderColorAmbient(PaintCan[PaintCan.STYLE_AMBIENT, PaintCan.COLOR_COMPLICATION_FG].color)
             }
         }
 
