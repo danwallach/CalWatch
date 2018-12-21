@@ -34,16 +34,7 @@ object AnalogComplicationConfigData: AnkoLogger {
         val previewConfigItem = PreviewAndComplicationsConfigItem(R.drawable.add_complication)
         val moreOptionsConfigItem = MoreOptionsConfigItem(R.drawable.ic_expand_more_white_18dp)
 
-        return listOf(previewConfigItem, moreOptionsConfigItem).let {
-            // add the background config item only if it's enabled
-            if (ComplicationWrapper.isEnabled(BACKGROUND)) {
-                it + BackgroundComplicationConfigItem(
-                        context.getString(R.string.config_background_image_complication_label),
-                        R.drawable.ic_landscape_white)
-            } else {
-                it
-            }
-        }
+        return listOf(previewConfigItem, moreOptionsConfigItem)
     }
 
     /**
@@ -70,7 +61,7 @@ object AnalogComplicationConfigData: AnkoLogger {
             val iconResourceId: Int) : ConfigItemType {
 
         override val configType: Int
-            get() = AnalogComplicationConfigRecyclerViewAdapter.TYPE_BACKGROUND_COMPLICATION_IMAGE_CONFIG
+            get() = AnalogComplicationConfigRecyclerViewAdapter.TYPE_CHANGE_WATCHFACE_STYLE
     }
 
     /**
@@ -85,14 +76,5 @@ object AnalogComplicationConfigData: AnkoLogger {
 
         override val configType: Int
             get() = AnalogComplicationConfigRecyclerViewAdapter.TYPE_TOGGLE
-    }
-}
-
-fun MenuGroup.toConfigItemType(): AnalogComplicationConfigData.ConfigItemType? = when(this) {
-    is RadioGroup -> {
-        null
-    }
-    is Toggle -> {
-        AnalogComplicationConfigData.ToggleConfigItem(iconResourceId, displayText, enabled, callback)
     }
 }

@@ -20,4 +20,4 @@
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     style="@style/ButtonConfigurationStyle"
-    android:text="Notification"/>
+    android:text="@string/notifications"/>

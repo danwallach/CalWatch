@@ -111,10 +111,11 @@ class CalWatchFaceService : CanvasWatchFaceService(), AnkoLogger {
 
             BatteryWrapper.init(this@CalWatchFaceService)
 
+            /*
             GoogleApiWrapper.startConnection(this@CalWatchFaceService.baseContext, true) {
                 verbose { "GoogleApi ready" }
-                FitnessWrapper.subscribe()
             }
+            */
 
             val resources = this@CalWatchFaceService.resources
 
@@ -132,7 +133,7 @@ class CalWatchFaceService : CanvasWatchFaceService(), AnkoLogger {
 
             initCalendarFetcher()
 
-            ComplicationWrapper.init(this@CalWatchFaceService, this, listOf(BACKGROUND, RIGHT, TOP, BOTTOM), emptyList())
+            ComplicationWrapper.init(this@CalWatchFaceService, this, listOf(BACKGROUND, RIGHT, TOP, BOTTOM))
             ComplicationWrapper.styleComplications {
                 it.setBackgroundColorActive(PaintCan[PaintCan.STYLE_NORMAL, PaintCan.COLOR_COMPLICATION_BG].color)
                 it.setBackgroundColorAmbient(PaintCan[PaintCan.STYLE_AMBIENT, PaintCan.COLOR_COMPLICATION_BG].color)
@@ -183,9 +184,6 @@ class CalWatchFaceService : CanvasWatchFaceService(), AnkoLogger {
             else
                 TimeWrapper.frameReset()
 
-            // Useful to dump at the same time.
-            FitnessWrapper.report()
-
             invalidate()
         }
 
@@ -194,7 +192,7 @@ class CalWatchFaceService : CanvasWatchFaceService(), AnkoLogger {
          */
         override fun onComplicationDataUpdate(
                 complicationId: Int, complicationData: ComplicationData?) {
-            verbose { "onComplicationDataUpdate() id: " + complicationId }
+            verbose { "onComplicationDataUpdate() id: $complicationId" }
 
             ComplicationWrapper.updateComplication(complicationId, complicationData)
             invalidate()
@@ -313,9 +311,6 @@ class CalWatchFaceService : CanvasWatchFaceService(), AnkoLogger {
                 TimeWrapper.frameReport()
             else
                 TimeWrapper.frameReset()
-
-            // Useful to dump at the same time
-            FitnessWrapper.report()
         }
     }
 

@@ -42,19 +42,7 @@ object GoogleApiWrapper : GoogleApiClient.ConnectionCallbacks, GoogleApiClient.O
                     .Builder(context)
                     .addConnectionCallbacks(this)
                     .addOnConnectionFailedListener(this)
-                    .addApi(Wearable.API)
-                    .apply {
-                        //
-                        // Fun fact: you can get at these APIs without any permission or login
-                        // on wear, but that's not true for mobile. Consequently, we're now
-                        // dealing with two versions of everything.
-                        //
-                        if(wear) {
-                            addApi(Fitness.HISTORY_API)
-                            addApi(Fitness.RECORDING_API)
-                            useDefaultAccount()
-                        }
-                    }
+                    .addApiIfAvailable(Wearable.API)
                     .build()
             lClient.connect() // starts asynchronous connection
 

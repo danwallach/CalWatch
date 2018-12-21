@@ -13,7 +13,6 @@ object Constants {
     const val DEFAULT_WATCHFACE = ClockState.FACE_TOOL
     const val DEFAULT_SHOW_SECONDS = true
     const val DEFAULT_SHOW_DAY_DATE = true
-    const val DEFAULT_SHOW_STEP_COUNTER = false
     const val POWER_WARN_LOW_LEVEL = 0.33f
     const val POWER_WARN_CRITICAL_LEVEL = 0.1f
 }

@@ -28,7 +28,6 @@ object ClockState : Observable(), AnkoLogger {
     var faceMode: Int = Constants.DEFAULT_WATCHFACE
     var showSeconds: Boolean = Constants.DEFAULT_SHOW_SECONDS
     var showDayDate: Boolean = Constants.DEFAULT_SHOW_DAY_DATE
-    var showStepCounter: Boolean = Constants.DEFAULT_SHOW_STEP_COUNTER
 
     private var eventList: List<CalendarEvent> = emptyList()
     private var visibleEventList: List<EventWrapper> = emptyList()

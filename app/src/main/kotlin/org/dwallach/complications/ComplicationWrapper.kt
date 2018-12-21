@@ -29,8 +29,7 @@ import org.jetbrains.anko.*
  * # Interacting with ComplicationWrapper
  *
  * Everything starts with [init]. You pass in a list of which complication locations ([ComplicationLocation])
- * you want to enable. You also pass a list of [MenuGroup] to specify what configuration items
- * you want to have in your menus along with their callback lambdas.
+ * you want to enable.
  *
  * You can separately pass a lambda to [styleComplications] which will be invoked on each [ComplicationDrawable]
  * allowing you to set paint colors and such. The assumption is that you want to use the same styling
@@ -299,12 +298,8 @@ object ComplicationWrapper : AnkoLogger {
      *
      * @param locations specifies a list of [ComplicationLocation] entries where you want your
      * watchface to support them. To get everything, you'd say _listOf(BACKGROUND, LEFT, RIGHT, TOP, and BOTTOM)_.
-     *
-     * @param menus specifies a list of [MenuGroup] entries, which themselves define either [RadioGroup]
-     * or [Toggle] entries, along with lambdas for callbacks. Whatever you want will show up when the
-     * user selects the gear icon to configure their watchface.
      */
-    fun init(watchFace: CanvasWatchFaceService, engine: CanvasWatchFaceService.Engine, locations: List<ComplicationLocation>, menus: List<MenuGroup>) {
+    fun init(watchFace: CanvasWatchFaceService, engine: CanvasWatchFaceService.Engine, locations: List<ComplicationLocation>) {
         verbose { "Complication locations: $locations" }
 
         this.watchFace = watchFace  // intnerally saves a weakref
@@ -328,8 +323,6 @@ object ComplicationWrapper : AnkoLogger {
 
         // custom settings here: black unless an image bitmap makes it otherwise
         complicationDrawableMap[BACKGROUND_COMPLICATION_ID]?.setBackgroundColorActive(Color.BLACK)
-
-        savedMenus = menus
 
         engine.setActiveComplications(*activeComplicationIds)
     }
@@ -399,9 +392,6 @@ object ComplicationWrapper : AnkoLogger {
     fun styleComplications(func: (ComplicationDrawable)->Unit) {
         stylingFunc = func
     }
-
-    internal lateinit var savedMenus: List<MenuGroup>
-    internal fun getMenus() = savedMenus
 }
 
 /**
@@ -415,30 +405,3 @@ enum class ComplicationLocation {
     TOP,
     BOTTOM
 }
-
-/**
- * Used by an associated watch face to let this wrapper customized the configuration menu,
- * below the complication selection part. See [ComplicationWrapper.init] for use.
- */
-sealed class MenuGroup
-
-/**
- * Each Radio button in a group will be specified with this triple of items: the text to
- * be displayed, the icon to go with it, and an integer identifier which will be used for
- * callbacks.
- *
- * Note: it's a hack, but identifiers must be *globally* unique, rather than just unique
- * within the radio group. This simplifies life in the backend.
- */
-data class RadioEntry(val displayText: String, val iconResourceId: Int, val identifier: Int)
-
-/**
- * Specifies a list of [RadioEntry]'s, for the RadioGroup, along with the default identifier to be selected
- * and a callback for whenever this changes.
- */
-data class RadioGroup(val entries: List<RadioEntry>, val default: Int, val callback: (Int)->Unit): MenuGroup()
-
-/**
- * Specifies the components of a toggle selection including its initial enabled/disabled state.
- */
-data class Toggle(val displayText: String, val iconResourceId: Int, val enabled: Boolean, val callback: (Boolean)->Unit): MenuGroup()

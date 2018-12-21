@@ -17,10 +17,9 @@ object PreferencesHelper: AnkoLogger {
             putInt("faceMode", ClockState.faceMode)
             putBoolean("showSeconds", ClockState.showSeconds)
             putBoolean("showDayDate", ClockState.showDayDate)
-            putBoolean("showStepCounter", ClockState.showStepCounter)
             putInt("preferencesVersion", 3)
 
-            verbose { "savePreferences: ${ClockState.faceMode}, showSeconds: ${ClockState.showSeconds}, showDayDate: ${ClockState.showDayDate}, showStepCounter: ${ClockState.showStepCounter}" }
+            verbose { "savePreferences: ${ClockState.faceMode}, showSeconds: ${ClockState.showSeconds}, showDayDate: ${ClockState.showDayDate}" }
 
             if (!commit())
                 error("savePreferences commit failed ?!")
@@ -37,15 +36,13 @@ object PreferencesHelper: AnkoLogger {
         val faceMode = getInt("faceMode", Constants.DEFAULT_WATCHFACE)
         val showSeconds = getBoolean("showSeconds", Constants.DEFAULT_SHOW_SECONDS)
         val showDayDate = getBoolean("showDayDate", Constants.DEFAULT_SHOW_DAY_DATE)
-        val showStepCounter = getBoolean("showStepCounter", Constants.DEFAULT_SHOW_STEP_COUNTER)
         val version = getInt("preferencesVersion", 0)
 
-        verbose { "loadPreferences: $faceMode, showSeconds: $showSeconds, showDayDate: $showDayDate, showStepCounter: $showStepCounter, preferencesVersion: $version" }
+        verbose { "loadPreferences: $faceMode, showSeconds: $showSeconds, showDayDate: $showDayDate, preferencesVersion: $version" }
 
         ClockState.faceMode = faceMode
         ClockState.showSeconds = showSeconds
         ClockState.showDayDate = showDayDate
-        ClockState.showStepCounter = showStepCounter
 
         ClockState.pingObservers() // we only need to do this once, versus multiple times when done internally
 

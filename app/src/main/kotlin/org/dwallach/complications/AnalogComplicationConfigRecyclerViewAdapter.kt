@@ -9,7 +9,6 @@ package org.dwallach.complications
 import android.app.Activity
 import android.content.ComponentName
 import android.content.Context
-import android.content.SharedPreferences
 import android.graphics.drawable.Drawable
 import android.support.v7.widget.RecyclerView
 import android.support.wearable.complications.ComplicationHelperActivity
@@ -59,7 +58,6 @@ class AnalogComplicationConfigRecyclerViewAdapter(
 
     // Selected complication id by user.
     private var mSelectedComplicationId: Int = 0
-    private val mBackgroundComplicationId = getComplicationId(BACKGROUND)
 
     // Required to retrieve complication data from watch face for preview.
     private val mProviderInfoRetriever: ProviderInfoRetriever
@@ -103,8 +101,8 @@ class AnalogComplicationConfigRecyclerViewAdapter(
                                     parent,
                                     false))
 
-            TYPE_BACKGROUND_COMPLICATION_IMAGE_CONFIG ->
-                    BackgroundComplicationViewHolder(LayoutInflater.from(parent.context)
+            TYPE_CHANGE_WATCHFACE_STYLE ->
+                    WatchfaceStyleViewHolder(LayoutInflater.from(parent.context)
                             .inflate(
                                     R.layout.config_list_background_complication_item,
                                     parent,
@@ -139,13 +137,13 @@ class AnalogComplicationConfigRecyclerViewAdapter(
                 }
             }
 
-            TYPE_BACKGROUND_COMPLICATION_IMAGE_CONFIG -> {
+            TYPE_CHANGE_WATCHFACE_STYLE -> {
                 val backgroundComplicationConfigItem = configItemType as BackgroundComplicationConfigItem
 
                 val backgroundIconResourceId = backgroundComplicationConfigItem.iconResourceId
                 val backgroundName = backgroundComplicationConfigItem.name
 
-                with(viewHolder as BackgroundComplicationViewHolder) {
+                with(viewHolder as WatchfaceStyleViewHolder) {
                     setIcon(backgroundIconResourceId)
                     setName(backgroundName)
                 }
@@ -177,11 +175,15 @@ class AnalogComplicationConfigRecyclerViewAdapter(
         }
     }
 
+    /*** -- this used to be required, but somehow isn't now... weird
+
     override fun onDetachedFromRecyclerView(recyclerView: RecyclerView?) {
         super.onDetachedFromRecyclerView(recyclerView)
         // Required to release retriever for active complication data on detach.
         mProviderInfoRetriever.release()
     }
+
+    ***/
 
     /**
      * Displays watch face preview along with complication locations. Allows user to tap on the
@@ -284,8 +286,12 @@ class AnalogComplicationConfigRecyclerViewAdapter(
         fun setDefaultComplicationDrawable(resourceId: Int) {
             verbose { "setting default complication drawable, resourceId = $resourceId" }
 
-            val context = mWatchFaceArmsAndTicksView.context
-            mDefaultComplicationDrawable = context.getDrawable(resourceId)
+            // This is a bit of a hack, but it works.
+            val context = mWatchFaceArmsAndTicksView.context ?: return
+
+            // It's technically possible or getDrawable to return null, but we're looking
+            // up an id that was just passed to us, so it will never fail in practice.
+            mDefaultComplicationDrawable = context.getDrawable(resourceId) ?: return
 
             idToComplication.values.forEach {
                 it?.setImageDrawable(mDefaultComplicationDrawable)
@@ -356,27 +362,31 @@ class AnalogComplicationConfigRecyclerViewAdapter(
         }
     }
 
-    /** Displays button to trigger background image complication selector.  */
-    inner class BackgroundComplicationViewHolder(view: View) : RecyclerView.ViewHolder(view), OnClickListener {
-        private val mBackgroundComplicationButton = view.findViewById<Button>(R.id.background_complication_button)
+    /** Displays button to trigger watchface style selector.  */
+    inner class WatchfaceStyleViewHolder(view: View) : RecyclerView.ViewHolder(view), OnClickListener {
+        private val watchfaceViewButton = view.findViewById<Button>(R.id.watchface_view_style)
 
         init {
             view.setOnClickListener(this)
         }
 
         fun setName(name: String) {
-            mBackgroundComplicationButton.text = name
+            watchfaceViewButton.text = name
         }
 
         fun setIcon(resourceId: Int) {
-            val context = mBackgroundComplicationButton.context
-            mBackgroundComplicationButton.setCompoundDrawablesWithIntrinsicBounds(
+            val context = watchfaceViewButton.context
+            watchfaceViewButton.setCompoundDrawablesWithIntrinsicBounds(
                     context.getDrawable(resourceId), null, null, null)
         }
 
         override fun onClick(view: View) {
             val position = adapterPosition
-            debug { "Background Complication onClick() position: $position" }
+            debug { "Watchface style onClick() position: $position" }
+
+            debug { "TODO: launch activity for watchface style selector! "}
+
+            /***
 
             val currentActivity = view.context as Activity
 
@@ -397,14 +407,15 @@ class AnalogComplicationConfigRecyclerViewAdapter(
             } else {
                 debug { "Complication not supported by watch face." }
             }
+
+            ***/
         }
     }
 
     companion object {
-        val TYPE_PREVIEW_AND_COMPLICATIONS_CONFIG = 0
-        val TYPE_MORE_OPTIONS = 1
-        val TYPE_BACKGROUND_COMPLICATION_IMAGE_CONFIG = 2
-        val TYPE_TOGGLE = 3
-        val TYPE_RADIO = 4
+        const val TYPE_PREVIEW_AND_COMPLICATIONS_CONFIG = 0
+        const val TYPE_MORE_OPTIONS = 1
+        const val TYPE_CHANGE_WATCHFACE_STYLE = 2
+        const val TYPE_TOGGLE = 3
     }
 }

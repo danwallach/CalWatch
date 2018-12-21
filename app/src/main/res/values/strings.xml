@@ -9,5 +9,6 @@
 
     <!-- Use of "\n" is to conserve horizontal space in config menu. -->
     <string name="analog_complication_config">CalWatch2 Config</string>
-    <string name="config_background_image_complication_label">Background\nImage</string>
+    <string name="watchface_style_selector">Watchface Style</string>
+    <string name="notifications">Notifications</string>
 </resources>

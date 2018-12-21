@@ -15,7 +15,6 @@ import org.dwallach.calwatch2.BatteryWrapper.batteryPct
 import org.dwallach.calwatch2.ClockState.calendarPermission
 import org.dwallach.calwatch2.ClockState.showDayDate
 import org.dwallach.calwatch2.ClockState.showSeconds
-import org.dwallach.calwatch2.ClockState.showStepCounter
 import org.dwallach.complications.ComplicationLocation.*
 import org.dwallach.complications.ComplicationWrapper
 import org.dwallach.complications.ComplicationWrapper.isVisible
@@ -144,15 +143,23 @@ class ClockFace: Observer, AnkoLogger {
             // First thing, we'll draw any background that the complications might be providing, but only
             // if we're in "normal" mode. Note that we're not doing complication rendering unless we have
             // the calendar permission.
-            if (drawStyle == PaintCan.STYLE_NORMAL && calendarPermission)
-                ComplicationWrapper.drawBackgroundComplication(canvas, currentTimeMillis)
+
+            // NOTE: disabled for now until we figure out a better way of doing partial transparency
+            // for the calendar pie wedges.
+
+//            if (drawStyle == PaintCan.STYLE_NORMAL && calendarPermission)
+//                ComplicationWrapper.drawBackgroundComplication(canvas, currentTimeMillis)
 
             // the calendar goes on the very bottom and everything else stacks above; the code for calendar drawing
             // works great in low-bit mode, leaving big white wedges, but this violates the rules, per Google:
+
             // "For OLED screens, you must use a black background. Non-background pixels must be less than 10
             // percent of total pixels. You can use low-bit color for up to 5 percent of pixels on screens that support it."
             // -- http://developer.android.com/design/wear/watchfaces.html
-            if (drawStyle == PaintCan.STYLE_NORMAL || drawStyle == PaintCan.STYLE_AMBIENT) drawCalendar(canvas)
+
+            // NOTE: We used to also do this for the "AMBIENT" style, but we're removing it so
+            // more of the screen is black, and thus we save power on OLED screens.
+            if (drawStyle == PaintCan.STYLE_NORMAL) drawCalendar(canvas)
 
             // next, we draw the indices or numbers of the watchface
             drawFace(canvas)
@@ -162,10 +169,6 @@ class ClockFace: Observer, AnkoLogger {
             // We disable the battery meter when we're in ambientMode with burnInProtection, since
             // we don't want to burn a hole in the very center of the screen.
             if (drawStyle != PaintCan.STYLE_ANTI_BURNIN) drawBattery(canvas)
-
-            // The step counter knows how to draw itself differently in different modes, taking advantage
-            // of the 1-bit color options that are available even in low-bit ambient mode.
-            drawStepCount(canvas)
 
             // We're drawing the complications *before* the hands, at least for now, and we're only
             // doing it if we have calendar permissions. Otherwise not.
@@ -526,8 +529,10 @@ class ClockFace: Observer, AnkoLogger {
 
         if (drawStyle == PaintCan.STYLE_NORMAL && showSeconds) {
             val secondsColor = PaintCan[PaintCan.STYLE_NORMAL, PaintCan.COLOR_SECOND_HAND]
-            // ugly details: we might run 10% or more away from our targets at 4Hz, making the second
-            // hand miss the indices. Ugly. Thus, some hackery.
+            // Cleverness: we're doing "nonLinearSeconds" which gives us the funky sweeping
+            // behavior that European rail clocks demonstrate. The only thing that "real" rail
+            // clocks have the we don't is a two second hard stop at 12 o'clock.
+
             drawRadialLine(canvas, nonLinearSeconds(seconds), 0.1f, 0.95f, secondsColor, shadowColor)
         }
     }
@@ -605,8 +610,8 @@ class ClockFace: Observer, AnkoLogger {
         // we might want to rejigger this to be paranoid about concurrency smashing stipplePathCache,
         // but it's less of a problem here than with the watchFace, because the external UI isn't
         // inducing the state here to change
+        val lStipplePathCache = stipplePathCache ?: Path()
         if (stippleTime != stippleTimeCache || stipplePathCache == null) {
-            val lStipplePathCache = Path()
             stippleTimeCache = stippleTime
 
             //            if(calendarTicker % 1000 == 0)
@@ -676,7 +681,7 @@ class ClockFace: Observer, AnkoLogger {
 
             stipplePathCache = lStipplePathCache
         }
-        canvas.drawPath(stipplePathCache, PaintCan[drawStyle, PaintCan.COLOR_BLACK_FILL])
+        canvas.drawPath(lStipplePathCache, PaintCan[drawStyle, PaintCan.COLOR_BLACK_FILL])
     }
 
     private var batteryPathCache: Path? = null
@@ -687,11 +692,11 @@ class ClockFace: Observer, AnkoLogger {
         val time = TimeWrapper.gmtTime
 
         // we don't want to poll *too* often; the code below translates to about once per five minute
+        val lBatteryPathCache = batteryPathCache ?: Path()
         if (batteryPathCache == null || time - batteryCacheTime > 5.minutes) {
             verbose("fetching new battery status")
             BatteryWrapper.fetchStatus()
             batteryCacheTime = time
-            val lBatteryPathCache = Path()
 
             //
             // The concept: draw nothing unless the battery is low. At 30% (POWER_WARN_LOW_LEVEL),
@@ -722,67 +727,7 @@ class ClockFace: Observer, AnkoLogger {
         // (in ambient mode, we can't show it at all because of burn-in issues)
         if (batteryPathCache != null) {
             val paint = PaintCan[drawStyle, if (batteryCritical) PaintCan.COLOR_BATTERY_CRITICAL else PaintCan.COLOR_BATTERY_LOW]
-            canvas.drawPath(batteryPathCache, paint)
-        }
-    }
-
-    private var stepCountPath: Path? = null
-    private var oldStepCount = 0
-
-    private fun drawStepCount(canvas: Canvas) {
-        // There's a battery strategy going on in here that's a bit complex. We have three battery
-        // ranges to worry about: full, warning, and critical (defined in Constants). When we're
-        // full (or at least, above the warning level), then we'll draw everything. Once we hit
-        // the warning level, we'll kill off the digits because drawBattery() will start rendering
-        // its power warning data. Once we hit the critical level, we're going to kill off the
-        // step counter in its entirety because the user really needs to get their phone back
-        // on the charger, and because the step counter seems to have a non-zero impact on battery
-        // life, so we'll try to save a bit on power usage.
-
-        if(!showStepCounter || batteryPct < Constants.POWER_WARN_CRITICAL_LEVEL) return
-
-        val stepCount = FitnessWrapper.getStepCount()
-
-        if(stepCount == 0) return // nothing to do!
-
-        if(oldStepCount != stepCount) {
-            oldStepCount = stepCount
-            stepCountPath = null // force the path to be recomputed
-        }
-
-        // We're going to draw an arc from 12 o'clock, going clockwise, where an arc, all the way
-        // around represents 12000 steps. That's an arbitrary constant, but it fits nicely with
-        // the 12 hours in the dial. We'll also be showing a digit (code below) which will help
-        // train the user.
-
-        val paint = PaintCan[drawStyle, PaintCan.COLOR_STEP_COUNT]
-        val outlinePaint = PaintCan[drawStyle, PaintCan.COLOR_STEP_COUNT]
-
-        val seconds: Double = if(stepCount > 12000) { 60.0 } else { stepCount / 200.0 }
-
-        // the battery ends at radius 0.06f and the hands start at 0.1f; we're going to draw this arc
-        // in between
-
-        stepCountPath = drawRadialArc(canvas, stepCountPath, 0.0, seconds, 0.065f, 0.090f, paint, outlinePaint, false)
-
-        // next, we're going to put the thousands-digit of the step counter in the dead center, but
-        // only when we're in "normal" mode (i.e., we're not in one of the ambient modes).
-
-        if(drawStyle == PaintCan.STYLE_NORMAL && batteryPct > Constants.POWER_WARN_LOW_LEVEL) {
-            // we're rounding to the nearest thousand, i.e.,  1499 -> 1, 1500 -> 2, etc.
-            val stepCountDigits = floor((stepCount + 500.0) / 1000.0)
-            val stepCountString = if (stepCountDigits > 99) "++" else stepCountDigits.toInt().toString()
-
-            val textPaint = PaintCan[drawStyle, PaintCan.COLOR_STEP_COUNT_TEXT]
-
-            // AA note: we only draw the month box when in normal mode, not ambient, so no AA gymnastics here
-
-            val metrics = textPaint.fontMetrics
-            // note: metrics.ascent is a *negative* number while metrics.descent is a *positive* number;
-            // we're trying to vertically center the text around the watch origin, so we need a correction here
-            val dy = (-metrics.ascent - metrics.descent)/2f
-
-            drawShadowText(canvas, stepCountString, cx.toFloat(), cy.toFloat() + dy, textPaint, null)
+            canvas.drawPath(lBatteryPathCache, paint)
         }
     }
 

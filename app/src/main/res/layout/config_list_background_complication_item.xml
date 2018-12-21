@@ -16,8 +16,8 @@
   -->
 <Button
     xmlns:android="http://schemas.android.com/apk/res/android"
-    android:id="@+id/background_complication_button"
+    android:id="@+id/watchface_view_style"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     style="@style/ButtonConfigurationStyle"
-    android:text="Background Complication"/>
+    android:text="@string/watchface_style_selector" />
