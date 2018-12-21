@@ -111,12 +111,6 @@ class CalWatchFaceService : CanvasWatchFaceService(), AnkoLogger {
 
             BatteryWrapper.init(this@CalWatchFaceService)
 
-            /*
-            GoogleApiWrapper.startConnection(this@CalWatchFaceService.baseContext, true) {
-                verbose { "GoogleApi ready" }
-            }
-            */
-
             val resources = this@CalWatchFaceService.resources
 
             if (resources == null) {
@@ -279,7 +273,6 @@ class CalWatchFaceService : CanvasWatchFaceService(), AnkoLogger {
         override fun onDestroy() {
             verbose("onDestroy")
 
-            GoogleApiWrapper.close()
             ClockState.deleteObserver(this)
             calendarFetcher?.kill()
             clockFace.kill()
