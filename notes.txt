@@ -40,6 +40,7 @@ Android Wear command-line things I can never remember:
     setprop log.tag.BackgroundComplicationV VERBOSE
     setprop log.tag.ViewRootImpl VERBOSE
     setprop log.tag.ComplicationWrapper VERBOSE
+    setprop log.tag.CalWatchFaceService VERBOSE
 
 
 Refactoring / reengineering
@@ -131,6 +132,10 @@ ANDROID N / WEAR 2.0 OVERHAUL
 	-- First link has code to create a new Canvas wrapping a Bitmap, draw into the Canvas, return the Bitmap.
 
 
+Miscellaneous
+    TODO: Don't even bother drawing the calendar wedges in "always on" greyscale mode. Save power, reduce light output
+    TODO: Always on mode on the Fossil shifts the display, but leaves pixels behind; investigate better screen clearing?
+    TODO: Remove ProGuard, supposedly replace by R8
 
 Distant future
     TODO replace left/right/top/bottom with arbitrary numbers of complications at arbitrary points on the watchface
