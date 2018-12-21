@@ -6,14 +6,14 @@
  */
 package org.dwallach.calwatch2
 
-import android.annotation.SuppressLint
 import android.content.Context
+import androidx.core.content.edit
 import org.jetbrains.anko.*
 
 object PreferencesHelper: AnkoLogger {
-    @SuppressLint("CommitPrefEdits")
-    fun savePreferences(context: Context) {
-        with (context.getSharedPreferences(Constants.PREFS_KEY, Context.MODE_PRIVATE).edit()) {
+//    @SuppressLint("CommitPrefEdits")
+    fun savePreferences(context: Context) =
+        context.getSharedPreferences(Constants.PREFS_KEY, Context.MODE_PRIVATE).edit {
             putInt("faceMode", ClockState.faceMode)
             putBoolean("showSeconds", ClockState.showSeconds)
             putBoolean("showDayDate", ClockState.showDayDate)
@@ -24,7 +24,6 @@ object PreferencesHelper: AnkoLogger {
             if (!commit())
                 error("savePreferences commit failed ?!")
         }
-    }
 
     /**
      * Updates the preferences in ClockState, returns an integer version number. So far,

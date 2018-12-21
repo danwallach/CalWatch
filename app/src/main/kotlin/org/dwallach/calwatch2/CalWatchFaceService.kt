@@ -205,6 +205,7 @@ class CalWatchFaceService : CanvasWatchFaceService(), AnkoLogger {
 
         private fun updateBounds(width: Int, height: Int) {
             if (width != oldWidth || height != oldHeight) {
+                info { "updateBounds: $width x $height" }
                 oldWidth = width
                 oldHeight = height
                 clockFace.setSize(width, height)
