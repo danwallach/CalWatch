@@ -14,11 +14,8 @@
                         <option name="values">
                           <map>
                             <entry key="assetSourceType" value="FILE" />
-                            <entry key="height" value="2000" />
-                            <entry key="outputName" value="ic_numbers_deselected" />
-                            <entry key="overrideSize" value="true" />
-                            <entry key="sourceFile" value="$PROJECT_DIR$/images/numbers-deselected.svg" />
-                            <entry key="width" value="2000" />
+                            <entry key="outputName" value="ic_all_faces_icon" />
+                            <entry key="sourceFile" value="$PROJECT_DIR$/images/all-faces-icon.svg" />
                           </map>
                         </option>
                       </PersistentState>

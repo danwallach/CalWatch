@@ -13,7 +13,6 @@ import androidx.recyclerview.widget.RecyclerView
 import androidx.recyclerview.widget.RecyclerView.ViewHolder
 
 import org.dwallach.R
-import org.dwallach.complications.ComplicationLocation.*
 import org.jetbrains.anko.AnkoLogger
 import org.jetbrains.anko.info
 
@@ -33,16 +32,17 @@ object AnalogComplicationConfigData: AnkoLogger {
     fun getDataToPopulateAdapter(context: Context): List<ConfigItemType> {
         info("getDataToPopulateAdapter")
 
-        val previewConfigItem = PreviewAndComplicationsConfigItem(R.drawable.add_complication)
-        val moreOptionsConfigItem = MoreOptionsConfigItem(R.drawable.ic_expand_more_white_18dp)
-
-        return listOf(previewConfigItem, moreOptionsConfigItem)
+        return listOf(
+                PreviewAndComplicationsConfigItem(R.drawable.add_complication),
+                MoreOptionsConfigItem(R.drawable.ic_expand_more_white_18dp),
+                WatchfaceChangeStyle(R.drawable.ic_all_faces_icon,
+                        context.getString(R.string.watchface_style_selector)))
     }
 
     /**
      * Data for Watch Face Preview with Complications Preview item in RecyclerView.
      */
-    class PreviewAndComplicationsConfigItem internal constructor(val defaultComplicationResourceId: Int) : ConfigItemType {
+    class PreviewAndComplicationsConfigItem(val defaultComplicationResourceId: Int) : ConfigItemType {
         override val configType: Int
             get() = AnalogComplicationConfigRecyclerViewAdapter.TYPE_PREVIEW_AND_COMPLICATIONS_CONFIG
     }
@@ -50,26 +50,25 @@ object AnalogComplicationConfigData: AnkoLogger {
     /**
      * Data for "more options" item in RecyclerView.
      */
-    class MoreOptionsConfigItem internal constructor(val iconResourceId: Int) : ConfigItemType {
+    class MoreOptionsConfigItem(val iconResourceId: Int) : ConfigItemType {
         override val configType: Int
             get() = AnalogComplicationConfigRecyclerViewAdapter.TYPE_MORE_OPTIONS
     }
 
     /**
-     * Data for background image complication picker item in RecyclerView.
+     * Currently support for the "watch style" configuration. Eventually will
+     * morph into general-purpose support for text buttons.
      */
-    class BackgroundComplicationConfigItem internal constructor(
-            val name: String,
-            val iconResourceId: Int) : ConfigItemType {
+    class WatchfaceChangeStyle(val iconResourceId: Int, val name: String) : ConfigItemType {
 
         override val configType: Int
             get() = AnalogComplicationConfigRecyclerViewAdapter.TYPE_CHANGE_WATCHFACE_STYLE
     }
 
     /**
-     * Data for a toggle switch
+     * Data for a toggle switch (currently unused, but maybe some day)
      */
-    class ToggleConfigItem internal constructor(
+    class ToggleConfigItem(
             val iconResourceId: Int,
             val displayText: String,
             var enabled: Boolean,

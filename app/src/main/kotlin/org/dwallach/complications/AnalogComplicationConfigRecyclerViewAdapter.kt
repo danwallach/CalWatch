@@ -29,7 +29,6 @@ import java.util.concurrent.Executors
 
 import org.dwallach.R
 import org.dwallach.calwatch2.StylePickerActivity
-import org.dwallach.complications.AnalogComplicationConfigData.BackgroundComplicationConfigItem
 import org.dwallach.complications.AnalogComplicationConfigData.ConfigItemType
 import org.dwallach.complications.AnalogComplicationConfigData.MoreOptionsConfigItem
 import org.dwallach.complications.AnalogComplicationConfigData.PreviewAndComplicationsConfigItem
@@ -140,7 +139,7 @@ class AnalogComplicationConfigRecyclerViewAdapter(
             }
 
             TYPE_CHANGE_WATCHFACE_STYLE -> {
-                val backgroundComplicationConfigItem = configItemType as BackgroundComplicationConfigItem
+                val backgroundComplicationConfigItem = configItemType as AnalogComplicationConfigData.WatchfaceChangeStyle
 
                 val backgroundIconResourceId = backgroundComplicationConfigItem.iconResourceId
                 val backgroundName = backgroundComplicationConfigItem.name
