@@ -30,8 +30,6 @@ import java.util.concurrent.Executors
 import org.dwallach.R
 import org.dwallach.calwatch2.StylePickerActivity
 import org.dwallach.complications.AnalogComplicationConfigData.ConfigItemType
-import org.dwallach.complications.AnalogComplicationConfigData.MoreOptionsConfigItem
-import org.dwallach.complications.AnalogComplicationConfigData.PreviewAndComplicationsConfigItem
 import org.dwallach.complications.ComplicationLocation.*
 import org.dwallach.complications.ComplicationWrapper.BOTTOM_COMPLICATION_ID
 import org.dwallach.complications.ComplicationWrapper.LEFT_COMPLICATION_ID
@@ -121,8 +119,7 @@ class AnalogComplicationConfigRecyclerViewAdapter(
 
         when (viewHolder.itemViewType) {
             TYPE_PREVIEW_AND_COMPLICATIONS_CONFIG -> {
-                val previewAndComplicationsConfigItem = configItemType as PreviewAndComplicationsConfigItem
-                val defaultComplicationResourceId = previewAndComplicationsConfigItem.defaultComplicationResourceId
+                val defaultComplicationResourceId = configItemType.iconResourceId
 
                 with(viewHolder as PreviewAndComplicationsViewHolder) {
                     setDefaultComplicationDrawable(defaultComplicationResourceId)
@@ -131,18 +128,14 @@ class AnalogComplicationConfigRecyclerViewAdapter(
             }
 
             TYPE_MORE_OPTIONS -> {
-                val moreOptionsConfigItem = configItemType as MoreOptionsConfigItem
-
                 with(viewHolder as MoreOptionsViewHolder) {
-                    setIcon(moreOptionsConfigItem.iconResourceId)
+                    setIcon(configItemType.iconResourceId)
                 }
             }
 
             TYPE_CHANGE_WATCHFACE_STYLE -> {
-                val backgroundComplicationConfigItem = configItemType as AnalogComplicationConfigData.WatchfaceChangeStyle
-
-                val backgroundIconResourceId = backgroundComplicationConfigItem.iconResourceId
-                val backgroundName = backgroundComplicationConfigItem.name
+                val backgroundIconResourceId = configItemType.iconResourceId
+                val backgroundName = configItemType.name
 
                 with(viewHolder as WatchfaceStyleViewHolder) {
                     setIcon(backgroundIconResourceId)
@@ -393,6 +386,5 @@ class AnalogComplicationConfigRecyclerViewAdapter(
         const val TYPE_PREVIEW_AND_COMPLICATIONS_CONFIG = 0
         const val TYPE_MORE_OPTIONS = 1
         const val TYPE_CHANGE_WATCHFACE_STYLE = 2
-        const val TYPE_TOGGLE = 3
     }
 }
