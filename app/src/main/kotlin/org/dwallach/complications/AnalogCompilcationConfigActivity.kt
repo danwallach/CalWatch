@@ -15,6 +15,7 @@ import android.os.Bundle
 import android.support.wearable.complications.ComplicationProviderInfo
 import android.support.wearable.complications.ProviderChooserIntent
 import android.support.wearable.view.WearableRecyclerView
+import androidx.appcompat.app.AppCompatActivity
 import org.dwallach.R
 import org.jetbrains.anko.AnkoLogger
 import org.jetbrains.anko.debug
@@ -25,7 +26,7 @@ import org.jetbrains.anko.info
  * The watch-side config activity for the watchface, which
  * allows for setting the left and right complications of watch face along with other goodies.
  */
-class AnalogComplicationConfigActivity : Activity(), AnkoLogger {
+class AnalogComplicationConfigActivity : AppCompatActivity(), AnkoLogger {
 
     private var mWearableRecyclerView: WearableRecyclerView? = null // TODO: replace with non-deprecated variant
     private var mAdapter: AnalogComplicationConfigRecyclerViewAdapter? = null
