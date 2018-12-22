@@ -209,20 +209,19 @@ class CalendarFetcher(initialContext: Context,
                 iCursor.close()
             }
 
+            // Primary sort: color, so events from the same calendar will become consecutive wedges
+
+            // Secondary sort: endTime, with objects ending earlier appearing first in the sort.
+            //   (goal: first fill in the outer ring of the display with smaller wedges; the big
+            //    ones will end late in the day, and will thus end up on the inside of the watchface)
+
+            // Third-priority sort: startTime, with objects starting later (smaller) appearing first in the sort.
             val sorted =
-                // Primary sort: color, so events from the same calendar will become consecutive wedges
-
-                // Secondary sort: endTime, with objects ending earlier appearing first in the sort.
-                //   (goal: first fill in the outer ring of the display with smaller wedges; the big
-                //    ones will end late in the day, and will thus end up on the inside of the watchface)
-
-                // Third-priority sort: startTime, with objects starting later (smaller) appearing first in the sort.
                 cr.sortedWith(
                         compareBy<CalendarEvent> { it.displayColor }
                                 .thenBy { it.endTime }
                                 .thenByDescending { it.startTime })
 
-            info { "loadContent: still have ${sorted.size} results" }
 
             return eitherLeft(sorted)
         } catch (e: SecurityException) {
@@ -298,11 +297,11 @@ class CalendarFetcher(initialContext: Context,
             uiThread {
                 scanInProgress = false
                 result.match(
-                        { wireEventList: List<CalendarEvent> ->
+                        { wireEventList ->
                             ClockState.setWireEventList(wireEventList)
                             ClockState.pingObservers()
                         },
-                        { th: Throwable ->
+                        { th ->
                             warn( { "uiThread: failure in async computation (CalendarFetcher #$instanceID)" }, th)
                         } )
 
