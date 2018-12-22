@@ -42,17 +42,42 @@ object PaintCan: AnkoLogger {
 
     private lateinit var palette: Array<Array<Paint?>>
 
-    const val STYLE_NORMAL = 0
-    const val STYLE_AMBIENT = 1
-    const val STYLE_LOWBIT = 2
-    const val STYLE_ANTI_BURNIN = 3
-    const val STYLE_MAX = 3
+
+    enum class Style {
+        NORMAL,
+        AMBIENT,
+        AMBIENT_ANTI_BURNIN,
+        LOWBIT,
+        LOWBIT_ANTI_BURNIN,
+        MAX
+    }
+
+    enum class Brush {
+        BATTERY_LOW,
+        BATTERY_CRITICAL,
+        SECOND_HAND,
+        HAND_SHADOW,
+        TICK_SHADOW,
+        MINUTE_HAND,
+        HOUR_HAND,
+        ARC_SHADOW,
+        SMALL_TEXT_AND_LINES,
+        BIG_TEXT_AND_LINES,
+        BLACK_FILL,
+        LOWBIT_CALENDAR_FILL,
+        SMALL_SHADOW,
+        BIG_SHADOW,
+        COMPLICATION_BG,
+        COMPLICATION_FG,
+        MAX
+    }
+
 
     /**
      * This generates all the Paint that we'll need for drawing the watchface. These are all cached
      * in the palette and accessed elsewhere via PaintCan.get().
      */
-    private fun watchfacePaint(_argb: Int, _style: Int, _textSize: Float, _strokeWidth: Float, forceColorAmbient: Boolean = false) =
+    private fun watchfacePaint(_argb: Int, _style: Style, _textSize: Float, _strokeWidth: Float, forceColorAmbient: Boolean = false) =
         // underscores in the formal parameters to fix the variable shadowing in the apply block, below
         Paint(Paint.SUBPIXEL_TEXT_FLAG or Paint.HINTING_ON).apply {
             strokeCap = Paint.Cap.SQUARE
@@ -60,15 +85,15 @@ object PaintCan: AnkoLogger {
             textSize = _textSize
             style = Paint.Style.FILL
             textAlign = Paint.Align.CENTER
-            isAntiAlias = _style == STYLE_NORMAL || _style == STYLE_AMBIENT // anti-aliasing is forbidden in the low-bit modes
+            isAntiAlias = _style == Style.NORMAL || _style == Style.AMBIENT // anti-aliasing is forbidden in the low-bit modes
 
             // In specific cases, we're going to force colors to be colorful even in ambient mode (see below)
-            val effectiveStyle = if(_style == STYLE_AMBIENT && forceColorAmbient) STYLE_NORMAL else _style
+            val effectiveStyle = if(_style == Style.AMBIENT && forceColorAmbient) Style.NORMAL else _style
 
             color = when (effectiveStyle) {
-                STYLE_NORMAL -> _argb
+                Style.NORMAL -> _argb
 
-                STYLE_LOWBIT, STYLE_ANTI_BURNIN -> when(_argb) {
+                Style.LOWBIT, Style.LOWBIT_ANTI_BURNIN -> when(_argb) {
                     //
                     // Quoth the Google: One reduced color space power saving method is to use a
                     // "low-bit" mode. In low-bit mode, the available colors are limited to
@@ -88,7 +113,7 @@ object PaintCan: AnkoLogger {
                     else -> if (_argb and 0xffffff > 0) 0xffffffff.toInt() else 0xff000000.toInt()
                 }
 
-                STYLE_AMBIENT -> argbToGreyARGB(_argb)
+                Style.AMBIENT, Style.AMBIENT_ANTI_BURNIN -> argbToGreyARGB(_argb)
 
                 else -> {
                     error { "watchfacePaint: unknown style: $_style" }
@@ -96,32 +121,6 @@ object PaintCan: AnkoLogger {
                 }
             }
         }
-
-    const val COLOR_BATTERY_LOW = 0
-    const val COLOR_BATTERY_CRITICAL = 1
-    const val COLOR_SECOND_HAND = 2
-    const val COLOR_HAND_SHADOW = 3
-    const val COLOR_TICK_SHADOW = 4
-    const val COLOR_MINUTE_HAND = 5
-    const val COLOR_HOUR_HAND = 6
-    const val COLOR_ARC_SHADOW = 7
-    const val COLOR_STEP_COUNT_TEXT = 8
-    const val COLOR_SMALL_TEXT_AND_LINES = 9
-    const val COLOR_BIG_TEXT_AND_LINES = 10
-    const val COLOR_BLACK_FILL = 11
-    const val COLOR_LOWBIT_CALENDAR_FILL = 12
-    const val COLOR_SMALL_SHADOW = 13
-    const val COLOR_BIG_SHADOW = 14
-    const val COLOR_STOPWATCH_STROKE = 15
-    const val COLOR_STOPWATCH_FILL = 16
-    const val COLOR_STOPWATCH_SECONDS = 17
-    const val COLOR_TIMER_STROKE = 18
-    const val COLOR_TIMER_FILL = 19
-    const val COLOR_STEP_COUNT = 20
-    const val COLOR_STEP_COUNT_SHADOW = 21
-    const val COLOR_COMPLICATION_BG = 22
-    const val COLOR_COMPLICATION_FG = 23
-    const val COLOR_MAX = 23
 
     init {
         initPaintBucket(300f) // half-assed way to get started, but necessary if we restart directly into the settings dialog
@@ -141,101 +140,78 @@ object PaintCan: AnkoLogger {
         val smTextSize = radius / 6f
         val lineWidth = radius / 20f
 
-        palette = Array(STYLE_MAX + 1) { arrayOfNulls<Paint>(COLOR_MAX + 1) }
+        palette = Array(Style.MAX.ordinal) { arrayOfNulls<Paint>(Brush.MAX.ordinal) }
 
-        for (style in 0..STYLE_MAX) {
-            // Quoth the Google: "You can use color elements for up to 5 percent of total pixels." We're going to
-            // do this for the remaining battery indicator and step counter, which are well under the required 5%.
+        for (style in Style.values()) {
+            if (style == Style.MAX) break
+            val i = style.ordinal
+
+            // Quoth the Google: "You can use color elements for up to 5 percent of total pixels."
             // http://developer.android.com/design/wear/watchfaces.html
-            palette[style][COLOR_BATTERY_LOW] = watchfacePaint(Color.YELLOW, style, smTextSize, lineWidth / 3f, true)
-            palette[style][COLOR_BATTERY_CRITICAL] = watchfacePaint(Color.RED, style, smTextSize, lineWidth / 3f, true)
+            palette[i][Brush.BATTERY_LOW.ordinal] = watchfacePaint(Color.YELLOW, style, smTextSize, lineWidth / 3f, true)
+            palette[i][Brush.BATTERY_CRITICAL.ordinal] = watchfacePaint(Color.RED, style, smTextSize, lineWidth / 3f, true)
 
-            palette[style][COLOR_SECOND_HAND] = watchfacePaint(Color.RED, style, smTextSize, lineWidth / 3f)
-            palette[style][COLOR_HAND_SHADOW] = watchfacePaint(Color.BLACK, style, smTextSize, lineWidth / 8f)
-            palette[style][COLOR_TICK_SHADOW] = watchfacePaint(Color.BLACK, style, smTextSize, lineWidth / 8f)
-            palette[style][COLOR_MINUTE_HAND] = watchfacePaint(Color.WHITE, style, textSize, lineWidth)
-            palette[style][COLOR_HOUR_HAND] = watchfacePaint(Color.WHITE, style, textSize, lineWidth * 1.5f)
-            palette[style][COLOR_ARC_SHADOW] = watchfacePaint(Color.BLACK, style, smTextSize, lineWidth / 6f)
-            palette[style][COLOR_STEP_COUNT_TEXT] = watchfacePaint(Color.GREEN, style, smTextSize * 0.6f, lineWidth / 6f)
-            palette[style][COLOR_SMALL_TEXT_AND_LINES] = watchfacePaint(Color.WHITE, style, smTextSize, lineWidth / 3f)
-            palette[style][COLOR_BIG_TEXT_AND_LINES] = watchfacePaint(Color.WHITE, style, textSize, lineWidth)
-            palette[style][COLOR_BIG_SHADOW] = watchfacePaint(Color.BLACK, style, textSize, lineWidth / 2f)
-            palette[style][COLOR_BLACK_FILL] = watchfacePaint(Color.BLACK, style, textSize, lineWidth)
-            palette[style][COLOR_LOWBIT_CALENDAR_FILL] = watchfacePaint(Color.WHITE, style, textSize, lineWidth) // the docs claim we have access to other colors here, like CYAN, but that's not true at least on the Moto 360 Sport
-            palette[style][COLOR_SMALL_SHADOW] = watchfacePaint(Color.BLACK, style, smTextSize, lineWidth / 4f)
-            palette[style][COLOR_STEP_COUNT] = watchfacePaint(Color.GREEN, style, smTextSize, lineWidth / 2f)
-            palette[style][COLOR_STEP_COUNT_SHADOW] = watchfacePaint(Color.BLACK, style, smTextSize, lineWidth / 8f)
+            palette[i][Brush.SECOND_HAND.ordinal] = watchfacePaint(Color.RED, style, smTextSize, lineWidth / 3f)
+            palette[i][Brush.HAND_SHADOW.ordinal] = watchfacePaint(Color.BLACK, style, smTextSize, lineWidth / 8f)
+            palette[i][Brush.TICK_SHADOW.ordinal] = watchfacePaint(Color.BLACK, style, smTextSize, lineWidth / 8f)
+            palette[i][Brush.MINUTE_HAND.ordinal] = watchfacePaint(Color.WHITE, style, textSize, lineWidth)
+            palette[i][Brush.HOUR_HAND.ordinal] = watchfacePaint(Color.WHITE, style, textSize, lineWidth * 1.5f)
+            palette[i][Brush.ARC_SHADOW.ordinal] = watchfacePaint(Color.BLACK, style, smTextSize, lineWidth / 6f)
+            palette[i][Brush.SMALL_TEXT_AND_LINES.ordinal] = watchfacePaint(Color.WHITE, style, smTextSize, lineWidth / 3f)
+            palette[i][Brush.BIG_TEXT_AND_LINES.ordinal] = watchfacePaint(Color.WHITE, style, textSize, lineWidth)
+            palette[i][Brush.BIG_SHADOW.ordinal] = watchfacePaint(Color.BLACK, style, textSize, lineWidth / 2f)
+            palette[i][Brush.BLACK_FILL.ordinal] = watchfacePaint(Color.BLACK, style, textSize, lineWidth)
+            palette[i][Brush.LOWBIT_CALENDAR_FILL.ordinal] = watchfacePaint(Color.WHITE, style, textSize, lineWidth) // the docs claim we have access to other colors here, like CYAN, but that's not true at least on the Moto 360 Sport
+            palette[i][Brush.SMALL_SHADOW.ordinal] = watchfacePaint(Color.BLACK, style, smTextSize, lineWidth / 4f)
 
             // toInt because of a Kotlin bug: https://youtrack.jetbrains.com/issue/KT-4749
-            palette[style][COLOR_STOPWATCH_SECONDS] = watchfacePaint(0xFF80A3F2.toInt(), style, smTextSize, lineWidth / 8f)  // light blue
-            palette[style][COLOR_STOPWATCH_STROKE] = watchfacePaint(0xFF80A3F2.toInt(), style, smTextSize, lineWidth / 3f)  // light blue
-            palette[style][COLOR_STOPWATCH_FILL] = watchfacePaint(0x9080A3F2.toInt(), style, smTextSize, lineWidth / 3f)  // light blue + transparency
-            palette[style][COLOR_TIMER_STROKE] = watchfacePaint(0xFFF2CF80.toInt(), style, smTextSize, lineWidth / 3f) // orange-ish
-            palette[style][COLOR_TIMER_FILL] = watchfacePaint(0x90F2CF80.toInt(), style, smTextSize, lineWidth / 3f) // orange-ish + transparency
-            palette[style][COLOR_COMPLICATION_BG] = watchfacePaint(0x80000000.toInt(), style, smTextSize, lineWidth / 8f) // black + transparency
-            palette[style][COLOR_COMPLICATION_FG] = watchfacePaint(Color.WHITE, style, smTextSize, lineWidth / 8f)
+            palette[i][Brush.COMPLICATION_BG.ordinal] = watchfacePaint(0x80000000.toInt(), style, smTextSize, lineWidth / 8f) // black + transparency
+            palette[i][Brush.COMPLICATION_FG.ordinal] = watchfacePaint(Color.WHITE, style, smTextSize, lineWidth / 8f)
 
             // shadows are stroke, not fill, so we fix that here
-            palette[style][COLOR_HAND_SHADOW]?.style = Paint.Style.STROKE
-            palette[style][COLOR_TICK_SHADOW]?.style = Paint.Style.STROKE
-            palette[style][COLOR_ARC_SHADOW]?.style = Paint.Style.STROKE
-            palette[style][COLOR_SMALL_SHADOW]?.style = Paint.Style.STROKE
-            palette[style][COLOR_BIG_SHADOW]?.style = Paint.Style.STROKE
-            palette[style][COLOR_STOPWATCH_STROKE]?.style = Paint.Style.STROKE
-            palette[style][COLOR_TIMER_STROKE]?.style = Paint.Style.STROKE
-            palette[style][COLOR_STEP_COUNT_SHADOW]?.style = Paint.Style.STROKE
+            palette[i][Brush.HAND_SHADOW.ordinal]?.style = Paint.Style.STROKE
+            palette[i][Brush.TICK_SHADOW.ordinal]?.style = Paint.Style.STROKE
+            palette[i][Brush.ARC_SHADOW.ordinal]?.style = Paint.Style.STROKE
+            palette[i][Brush.SMALL_SHADOW.ordinal]?.style = Paint.Style.STROKE
+            palette[i][Brush.BIG_SHADOW.ordinal]?.style = Paint.Style.STROKE
 
             // by default, text is centered, but some styles want it on the left
             // (these are the places where we'll eventually have to do more work for RTL languages)
-            palette[style][COLOR_STEP_COUNT_TEXT]?.textAlign = Paint.Align.CENTER
-            palette[style][COLOR_SMALL_TEXT_AND_LINES]?.textAlign = Paint.Align.LEFT
-            palette[style][COLOR_SMALL_SHADOW]?.textAlign = Paint.Align.LEFT
+            palette[i][Brush.SMALL_TEXT_AND_LINES.ordinal]?.textAlign = Paint.Align.LEFT
+            palette[i][Brush.SMALL_SHADOW.ordinal]?.textAlign = Paint.Align.LEFT
         }
 
-        // In low-bit anti-burnin mode: we'll be drawing some "shadows" as
+        // In anti-burnin mode: we'll be drawing some "shadows" as
         // white outlines around black centers, "hollowing out" the hands as we're supposed to do.
-        palette[STYLE_ANTI_BURNIN][COLOR_HAND_SHADOW]?.color = Color.WHITE
-        palette[STYLE_ANTI_BURNIN][COLOR_HAND_SHADOW]?.strokeWidth = lineWidth / 6f
+        for (i in listOf(Style.AMBIENT_ANTI_BURNIN.ordinal, Style.LOWBIT_ANTI_BURNIN.ordinal)) {
+            palette[i][Brush.HAND_SHADOW.ordinal]?.color = Color.WHITE
+            palette[i][Brush.HAND_SHADOW.ordinal]?.strokeWidth = lineWidth / 6f
 
-        palette[STYLE_ANTI_BURNIN][COLOR_MINUTE_HAND]?.color = Color.BLACK
-        palette[STYLE_ANTI_BURNIN][COLOR_MINUTE_HAND]?.style = Paint.Style.STROKE
+            palette[i][Brush.MINUTE_HAND.ordinal]?.color = Color.BLACK
+            palette[i][Brush.MINUTE_HAND.ordinal]?.style = Paint.Style.STROKE
 
-        palette[STYLE_ANTI_BURNIN][COLOR_HOUR_HAND]?.color = Color.BLACK
-        palette[STYLE_ANTI_BURNIN][COLOR_HOUR_HAND]?.style = Paint.Style.STROKE
+            palette[i][Brush.HOUR_HAND.ordinal]?.color = Color.BLACK
+            palette[i][Brush.HOUR_HAND.ordinal]?.style = Paint.Style.STROKE
 
-        palette[STYLE_ANTI_BURNIN][COLOR_ARC_SHADOW]?.color = Color.WHITE
-        palette[STYLE_ANTI_BURNIN][COLOR_SMALL_SHADOW]?.color = Color.WHITE
-        palette[STYLE_ANTI_BURNIN][COLOR_BIG_SHADOW]?.color = Color.WHITE
+            palette[i][Brush.ARC_SHADOW.ordinal]?.color = Color.WHITE
+            palette[i][Brush.SMALL_SHADOW.ordinal]?.color = Color.WHITE
+            palette[i][Brush.BIG_SHADOW.ordinal]?.color = Color.WHITE
 
-        // Also, we're still going to change the style for the stopwatch and timer rendering, since our only
-        // choices are black or white, we'll go with black for the fills. The outlines will still be white
-        // (see the "stroke" paints versus the "fill" paints).
+            palette[i][Brush.BIG_TEXT_AND_LINES.ordinal]?.color = Color.BLACK
+            palette[i][Brush.BIG_SHADOW.ordinal]?.color = Color.WHITE
 
-        // Technically, we have access to other colors when in low-bit, but they're not consistently supported
-        // across Wear devices. We can only count on black and white, and nothing else, so we might as well
-        // try to make it look tolerable that way. Here, the fill colors will be black, and the outlines
-        // will be white (per the colorTimerStroke and colorStopwatchStroke above). It would look better
-        // in b&w to have the whole outer ring be white, but this would violate Google's rules about
-        // max percentage of pixels on while in low-bit mode.
-        palette[STYLE_LOWBIT][COLOR_TIMER_FILL]?.color = Color.BLACK
-        palette[STYLE_LOWBIT][COLOR_STOPWATCH_FILL]?.color = Color.BLACK
-        palette[STYLE_LOWBIT][COLOR_COMPLICATION_BG]?.color = Color.BLACK
-        palette[STYLE_LOWBIT][COLOR_TIMER_STROKE]?.strokeWidth = lineWidth / 6f
-        palette[STYLE_LOWBIT][COLOR_STOPWATCH_STROKE]?.strokeWidth = lineWidth / 6f
+            palette[i][Brush.COMPLICATION_BG.ordinal]?.color = Color.BLACK
+            palette[i][Brush.COMPLICATION_BG.ordinal]?.color = Color.BLACK
+        }
 
-        palette[STYLE_ANTI_BURNIN][COLOR_TIMER_FILL]?.color = Color.BLACK
-        palette[STYLE_ANTI_BURNIN][COLOR_STOPWATCH_FILL]?.color = Color.BLACK
-        palette[STYLE_ANTI_BURNIN][COLOR_COMPLICATION_BG]?.color = Color.BLACK
-        palette[STYLE_ANTI_BURNIN][COLOR_TIMER_STROKE]?.strokeWidth = lineWidth / 6f
-        palette[STYLE_ANTI_BURNIN][COLOR_STOPWATCH_STROKE]?.strokeWidth = lineWidth / 6f
     }
 
     /**
-     * This will return a Paint of a given style and colorID, where those are the constants
+     * This will return a Paint of a given style and brushId, where those are the constants
      * defined in this file. Anything else will cause an exception.
      */
-    operator fun get(style: Int, colorID: Int): Paint =
-        requireNotNull(palette[style][colorID], { "undefined paintcan color, style($style), colorID($colorID)" })
+    operator fun get(style: Style, brushId: Brush): Paint =
+        requireNotNull(palette[style.ordinal][brushId.ordinal], { "undefined paintcan color, style($style), brushId($brushId)" })
 
     fun getCalendarGreyPaint(argb: Int) = getCalendarPaint(argbToGreyARGB(argb))
 

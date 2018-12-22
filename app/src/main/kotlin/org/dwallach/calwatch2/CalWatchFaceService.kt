@@ -1,6 +1,6 @@
 /*
  * CalWatch
- * Copyright (C) 2014 by Dan Wallach
+ * Copyright (C) 2014-2018 by Dan Wallach
  * Home page: http://www.cs.rice.edu/~dwallach/calwatch/
  * Licensing: http://www.cs.rice.edu/~dwallach/calwatch/licensing.html
  */
@@ -18,12 +18,15 @@ import android.view.WindowInsets
 import org.dwallach.R
 import org.dwallach.complications.ComplicationWrapper
 import org.jetbrains.anko.*
+import org.dwallach.calwatch2.PaintCan.Style
+import org.dwallach.calwatch2.PaintCan.Brush
 
 import java.lang.ref.WeakReference
 import java.util.Observable
 import java.util.Observer
 import android.support.wearable.complications.ComplicationData
 import org.dwallach.complications.ComplicationLocation.*
+import org.dwallach.complications.ComplicationWrapper.styleComplications
 
 /**
  * Drawn heavily from the Android Wear SweepWatchFaceService / AnalogWatchFaceService examples.
@@ -103,11 +106,11 @@ class CalWatchFaceService : CanvasWatchFaceService(), AnkoLogger {
             calendarPermissionUpdate()
 
             ComplicationWrapper.init(this@CalWatchFaceService, this, listOf(BACKGROUND, RIGHT, TOP, BOTTOM))
-            ComplicationWrapper.styleComplications {
-                setBackgroundColorActive(PaintCan[PaintCan.STYLE_NORMAL, PaintCan.COLOR_COMPLICATION_BG].color)
-                setBackgroundColorAmbient(PaintCan[PaintCan.STYLE_AMBIENT, PaintCan.COLOR_COMPLICATION_BG].color)
-                setBorderColorActive(PaintCan[PaintCan.STYLE_NORMAL, PaintCan.COLOR_COMPLICATION_FG].color)
-                setBorderColorAmbient(PaintCan[PaintCan.STYLE_AMBIENT, PaintCan.COLOR_COMPLICATION_FG].color)
+            styleComplications {
+                setBackgroundColorActive(PaintCan[Style.NORMAL, Brush.COMPLICATION_BG].color)
+                setBackgroundColorAmbient(PaintCan[Style.AMBIENT, Brush.COMPLICATION_BG].color)
+                setBorderColorActive(PaintCan[Style.NORMAL, Brush.COMPLICATION_FG].color)
+                setBorderColorAmbient(PaintCan[Style.AMBIENT, Brush.COMPLICATION_FG].color)
             }
         }
 

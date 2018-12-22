@@ -38,17 +38,9 @@ class EventWrapper(val calendarEvent: CalendarEvent) {
      * render it will go much faster.
      */
     var path: Path? = null
-    private val paint = PaintCan.getCalendarPaint(calendarEvent.displayColor)
-    private val greyPaint = PaintCan.getCalendarGreyPaint(calendarEvent.displayColor)
-    private val lowBitPaint = PaintCan[PaintCan.STYLE_LOWBIT, PaintCan.COLOR_LOWBIT_CALENDAR_FILL]
+    val paint = PaintCan.getCalendarPaint(calendarEvent.displayColor)
     var minLevel: Int = 0
     var maxLevel: Int = 0
-
-    fun getPaint(drawStyle: Int) = when(drawStyle) {
-        PaintCan.STYLE_ANTI_BURNIN,PaintCan.STYLE_LOWBIT -> lowBitPaint // for now anyway, we're behaving identically for lowBit and for burnInProtection
-        PaintCan.STYLE_AMBIENT -> greyPaint
-        else -> paint
-    }
 
     fun overlaps(e: EventWrapper) =
             this.calendarEvent.startTime < e.calendarEvent.endTime && e.calendarEvent.startTime < this.calendarEvent.endTime

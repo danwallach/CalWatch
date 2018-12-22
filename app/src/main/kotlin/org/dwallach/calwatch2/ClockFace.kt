@@ -1,6 +1,6 @@
 /*
  * CalWatch
- * Copyright (C) 2014 by Dan Wallach
+ * Copyright (C) 2014-2018 by Dan Wallach
  * Home page: http://www.cs.rice.edu/~dwallach/calwatch/
  * Licensing: http://www.cs.rice.edu/~dwallach/calwatch/licensing.html
  */
@@ -15,6 +15,8 @@ import org.dwallach.calwatch2.BatteryWrapper.batteryPct
 import org.dwallach.calwatch2.ClockState.calendarPermission
 import org.dwallach.calwatch2.ClockState.showDayDate
 import org.dwallach.calwatch2.ClockState.showSeconds
+import org.dwallach.calwatch2.PaintCan.Brush
+import org.dwallach.calwatch2.PaintCan.Style
 import org.dwallach.complications.ComplicationLocation.*
 import org.dwallach.complications.ComplicationWrapper
 import org.dwallach.complications.ComplicationWrapper.isVisible
@@ -46,7 +48,7 @@ class ClockFace: Observer, AnkoLogger {
 
 
 
-    private var drawStyle = PaintCan.STYLE_NORMAL // see updateDrawStyle
+    private var drawStyle = Style.NORMAL // see updateDrawStyle
 
     // dealing with the "flat tire" a.k.a. "chin" of Moto 360 and any other watches that pull the same trick
     var missingBottomPixels = 0
@@ -76,10 +78,11 @@ class ClockFace: Observer, AnkoLogger {
 
     private fun updateDrawStyle() {
         drawStyle = when {
-            ambientMode && ambientLowBit && burnInProtection -> PaintCan.STYLE_ANTI_BURNIN
-            ambientMode && ambientLowBit -> PaintCan.STYLE_LOWBIT
-            ambientMode -> PaintCan.STYLE_AMBIENT
-            else -> PaintCan.STYLE_NORMAL
+            ambientMode && ambientLowBit && burnInProtection -> Style.LOWBIT_ANTI_BURNIN
+            ambientMode && ambientLowBit -> Style.LOWBIT
+            ambientMode && burnInProtection -> Style.AMBIENT_ANTI_BURNIN
+            ambientMode -> Style.AMBIENT
+            else -> Style.NORMAL
         }
     }
 
@@ -147,7 +150,7 @@ class ClockFace: Observer, AnkoLogger {
             // NOTE: disabled for now until we figure out a better way of doing partial transparency
             // for the calendar pie wedges.
 
-//            if (drawStyle == PaintCan.STYLE_NORMAL && calendarPermission)
+//            if (drawStyle == Style.NORMAL && calendarPermission)
 //                ComplicationWrapper.drawBackgroundComplication(canvas, currentTimeMillis)
 
             // the calendar goes on the very bottom and everything else stacks above; the code for calendar drawing
@@ -159,7 +162,7 @@ class ClockFace: Observer, AnkoLogger {
 
             // NOTE: We used to also do this for the "AMBIENT" style, but we're removing it so
             // more of the screen is black, and thus we save power on OLED screens.
-            if (drawStyle == PaintCan.STYLE_NORMAL) drawCalendar(canvas)
+            if (drawStyle == Style.NORMAL) drawCalendar(canvas)
 
             // next, we draw the indices or numbers of the watchface
             drawFace(canvas)
@@ -168,7 +171,7 @@ class ClockFace: Observer, AnkoLogger {
 
             // We disable the battery meter when we're in ambientMode with burnInProtection, since
             // we don't want to burn a hole in the very center of the screen.
-            if (drawStyle != PaintCan.STYLE_ANTI_BURNIN) drawBattery(canvas)
+            if (!burnInProtection) drawBattery(canvas)
 
             // We're drawing the complications *before* the hands, at least for now, and we're only
             // doing it if we have calendar permissions. Otherwise not.
@@ -179,7 +182,7 @@ class ClockFace: Observer, AnkoLogger {
 
             // something a real watch can't do: float the text over the hands
             // (but disable when we're in ambientMode with burnInProtection)
-            if (drawStyle != PaintCan.STYLE_ANTI_BURNIN && showDayDate) drawMonthBox(canvas)
+            if (!burnInProtection && showDayDate) drawMonthBox(canvas)
 
         } catch (th: Throwable) {
             error("exception in drawEverything", th)
@@ -211,7 +214,7 @@ class ClockFace: Observer, AnkoLogger {
             }
         }
 
-        if (drawStyle == PaintCan.STYLE_ANTI_BURNIN) {
+        if (burnInProtection) {
             // scale down everything to leave a 10 pixel margin
 
             val ratio = (radius - 10f) / radius
@@ -253,7 +256,7 @@ class ClockFace: Observer, AnkoLogger {
      * The path used for drawing is returned and may be passed back in next time, to the *path*
      * argument, which will make things go much faster.
      */
-    private fun drawRadialArc(canvas: Canvas, path: Path?, secondsStart: Double, secondsEnd: Double, startRadiusRatio: Float, endRadiusRatio: Float, paint: Paint, outlinePaint: Paint?, lowBitSquish: Boolean = true): Path {
+    private fun drawRadialArc(canvas: Canvas, path: Path?, secondsStart: Double, secondsEnd: Double, startRadiusRatio: Float, endRadiusRatio: Float, paint: Paint, outlinePaint: Paint?): Path {
         var startRadius = startRadiusRatio
         var endRadius = endRadiusRatio
         /*
@@ -266,7 +269,7 @@ class ClockFace: Observer, AnkoLogger {
             errorLogAndThrow("arc too big! radius(%.2f -> %.2f), seconds(%.2f -> %.2f)".format(startRadius, endRadius, secondsStart, secondsEnd))
         }
 
-        if (drawStyle == PaintCan.STYLE_ANTI_BURNIN) {
+        if (burnInProtection) {
             // scale down everything to leave a 10 pixel margin
 
             val ratio = (radius - 10f) / radius
@@ -284,23 +287,9 @@ class ClockFace: Observer, AnkoLogger {
             val midOvalDelta = getRectRadius((startRadius + endRadius) / 2f - 0.025f)
             val startOval = getRectRadius(startRadius)
             val endOval = getRectRadius(endRadius)
-            if (drawStyle == PaintCan.STYLE_ANTI_BURNIN && lowBitSquish) {
-                // In ambient low-bit mode, we originally drew some slender arcs of fixed width at roughly the center of the big
-                // colored pie wedge which we normally show when we're not in ambient mode. Currently this is dead code because
-                // drawCalendar() becomes a no-op in ambientLowBit when burn-in protection is on.
-                p.arcTo(midOval, (secondsStart * 6 - 90).toFloat(), ((secondsEnd - secondsStart) * 6).toFloat(), true)
-                p.arcTo(midOvalDelta, (secondsEnd * 6 - 90).toFloat(), (-(secondsEnd - secondsStart) * 6).toFloat())
-                p.close()
-            } else {
-                p.arcTo(startOval, (secondsStart * 6 - 90).toFloat(), ((secondsEnd - secondsStart) * 6).toFloat(), true)
-                p.arcTo(endOval, (secondsEnd * 6 - 90).toFloat(), (-(secondsEnd - secondsStart) * 6).toFloat())
-                p.close()
-
-                //            Log.e(TAG, "New arc: radius(" + Float.toString((float) startRadius) + "," + Float.toString((float) endRadius) +
-                //                    "), seconds(" + Float.toString((float) secondsStart) + "," + Float.toString((float) secondsEnd) + ")")
-                //            Log.e(TAG, "--> arcTo: startOval, " + Float.toString((float) (secondsStart * 6 - 90)) + ", " +  Float.toString((float) ((secondsEnd - secondsStart) * 6)))
-                //            Log.e(TAG, "--> arcTo: endOval, " + Float.toString((float) (secondsEnd * 6 - 90)) + ", " +  Float.toString((float) (-(secondsEnd - secondsStart) * 6)))
-            }
+            p.arcTo(startOval, (secondsStart * 6 - 90).toFloat(), ((secondsEnd - secondsStart) * 6).toFloat(), true)
+            p.arcTo(endOval, (secondsEnd * 6 - 90).toFloat(), (-(secondsEnd - secondsStart) * 6).toFloat())
+            p.close()
         }
 
         canvas.drawPath(p, paint)
@@ -317,8 +306,8 @@ class ClockFace: Observer, AnkoLogger {
         val x1 = clockX(45.0, .85f)
         val y1 = clockY(45.0, .85f)
 
-        val paint = PaintCan[drawStyle, PaintCan.COLOR_SMALL_TEXT_AND_LINES]
-        val shadow = PaintCan[drawStyle, PaintCan.COLOR_SMALL_SHADOW]
+        val paint = PaintCan[drawStyle, Brush.SMALL_TEXT_AND_LINES]
+        val shadow = PaintCan[drawStyle, Brush.SMALL_SHADOW]
 
         // AA note: we only draw the month box when in normal mode, not ambient, so no AA gymnastics here
 
@@ -356,13 +345,16 @@ class ClockFace: Observer, AnkoLogger {
         val bottomHack = missingBottomPixels > 0
 
         // force "lite" mode when in burn-in protection mode
-        val lFaceMode = if(drawStyle == PaintCan.STYLE_ANTI_BURNIN) ClockState.FACE_LITE else ClockState.faceMode
+//        val lFaceMode = if(drawStyle == Style.LOWBIT_ANTI_BURNIN) ClockState.FACE_LITE else ClockState.faceMode
+
+        // see if we can make this work properly without needing to drop into "lite" mode
+        val lFaceMode = ClockState.faceMode
         var lFacePathCache = getCachedFacePath(lFaceMode)
 
-        val colorTickShadow = PaintCan[drawStyle, PaintCan.COLOR_TICK_SHADOW]
-        val colorSmall = PaintCan[drawStyle, PaintCan.COLOR_SMALL_TEXT_AND_LINES]
-        val colorBig = PaintCan[drawStyle, PaintCan.COLOR_BIG_TEXT_AND_LINES]
-        val colorTextShadow = PaintCan[drawStyle, PaintCan.COLOR_BIG_SHADOW]
+        val colorTickShadow = PaintCan[drawStyle, Brush.TICK_SHADOW]
+        val colorSmall = PaintCan[drawStyle, Brush.SMALL_TEXT_AND_LINES]
+        val colorBig = PaintCan[drawStyle, Brush.BIG_TEXT_AND_LINES]
+        val colorTextShadow = PaintCan[drawStyle, Brush.BIG_SHADOW]
 
         // check if we've already rendered the face
         if (lFacePathCache == null) {
@@ -400,7 +392,7 @@ class ClockFace: Observer, AnkoLogger {
 
                 // left of watch
                 if (ClockState.showDayDate) {
-                    if (drawStyle != PaintCan.STYLE_ANTI_BURNIN) {
+                    if (drawStyle != Style.LOWBIT_ANTI_BURNIN) {
                         drawRadialLine(lFacePathCache, strokeWidth, 45.0, 0.9f, 1.0f, false, false)
                     } else {
                         drawRadialLine(lFacePathCache, strokeWidth, 45.0, 0.75f, 1.0f, false, false)
@@ -520,15 +512,15 @@ class ClockFace: Observer, AnkoLogger {
         val hours = minutes / 12.0  // because drawRadialLine is scaled to a 60-unit circle
 
 
-        val shadowColor = PaintCan[drawStyle, PaintCan.COLOR_HAND_SHADOW]
-        val hourColor = PaintCan[drawStyle, PaintCan.COLOR_HOUR_HAND]
-        val minuteColor = PaintCan[drawStyle, PaintCan.COLOR_MINUTE_HAND]
+        val shadowColor = PaintCan[drawStyle, Brush.HAND_SHADOW]
+        val hourColor = PaintCan[drawStyle, Brush.HOUR_HAND]
+        val minuteColor = PaintCan[drawStyle, Brush.MINUTE_HAND]
 
         drawRadialLine(canvas, hours, 0.1f, 0.6f, hourColor, shadowColor)
         drawRadialLine(canvas, minutes, 0.1f, 0.9f, minuteColor, shadowColor)
 
-        if (drawStyle == PaintCan.STYLE_NORMAL && showSeconds) {
-            val secondsColor = PaintCan[PaintCan.STYLE_NORMAL, PaintCan.COLOR_SECOND_HAND]
+        if (drawStyle == Style.NORMAL && showSeconds) {
+            val secondsColor = PaintCan[Style.NORMAL, Brush.SECOND_HAND]
             // Cleverness: we're doing "nonLinearSeconds" which gives us the funky sweeping
             // behavior that European rail clocks demonstrate. The only thing that "real" rail
             // clocks have the we don't is a two second hard stop at 12 o'clock.
@@ -561,7 +553,7 @@ class ClockFace: Observer, AnkoLogger {
 
         // if we don't have permission to see the calendar, then we'll let the user know, but we won't
         // bug them in any of the ambient modes.
-        if (!calendarPermission && drawStyle == PaintCan.STYLE_NORMAL) {
+        if (!calendarPermission && drawStyle == Style.NORMAL) {
             missingCalendarDrawable?.draw(canvas)
             return
         }
@@ -589,8 +581,8 @@ class ClockFace: Observer, AnkoLogger {
 
             // path caching happens inside drawRadialArc
 
-            val arcColor = it.getPaint(drawStyle)
-            val arcShadow = PaintCan[drawStyle, PaintCan.COLOR_ARC_SHADOW]
+            val arcColor = it.paint
+            val arcShadow = PaintCan[drawStyle, Brush.ARC_SHADOW]
 
             it.path = drawRadialArc(canvas, it.path, arcStart, arcEnd,
                     CALENDAR_RING_MAX_RADIUS - evMinLevel * CALENDAR_RING_WIDTH / (maxLevel + 1),
@@ -681,7 +673,7 @@ class ClockFace: Observer, AnkoLogger {
 
             stipplePathCache = lStipplePathCache
         }
-        canvas.drawPath(lStipplePathCache, PaintCan[drawStyle, PaintCan.COLOR_BLACK_FILL])
+        canvas.drawPath(lStipplePathCache, PaintCan[drawStyle, Brush.BLACK_FILL])
     }
 
     private var batteryPathCache: Path? = null
@@ -726,7 +718,7 @@ class ClockFace: Observer, AnkoLogger {
         // note that we'll flip the color from white to red once the battery gets below 10%
         // (in ambient mode, we can't show it at all because of burn-in issues)
         if (batteryPathCache != null) {
-            val paint = PaintCan[drawStyle, if (batteryCritical) PaintCan.COLOR_BATTERY_CRITICAL else PaintCan.COLOR_BATTERY_LOW]
+            val paint = PaintCan[drawStyle, if (batteryCritical) Brush.BATTERY_CRITICAL else Brush.BATTERY_LOW]
             canvas.drawPath(lBatteryPathCache, paint)
         }
     }

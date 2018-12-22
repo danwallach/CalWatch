@@ -1,6 +1,6 @@
 /*
  * CalWatch
- * Copyright (C) 2014 by Dan Wallach
+ * Copyright (C) 2014-2018 by Dan Wallach
  * Home page: http://www.cs.rice.edu/~dwallach/calwatch/
  * Licensing: http://www.cs.rice.edu/~dwallach/calwatch/licensing.html
  */

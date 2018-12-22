@@ -7,14 +7,14 @@
 
 package org.dwallach.calwatch2
 
-import android.app.Activity
 import android.content.Context
+import androidx.appcompat.app.AppCompatActivity
 import org.jetbrains.anko.*
 
 /**
  * We need a separate activity for the sole purpose of requesting permissions.
  */
-class PermissionActivity : Activity(), AnkoLogger {
+class PermissionActivity : AppCompatActivity(), AnkoLogger {
     override fun onRequestPermissionsResult(requestCode: Int, permissions: Array<String>, grantResults: IntArray) {
         verbose("onRequestPermissionsResult")
         CalendarPermission.handleResult(requestCode, permissions, grantResults)
