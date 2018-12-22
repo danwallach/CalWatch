@@ -140,7 +140,7 @@ class CalendarFetcher(initialContext: Context,
      * an exception, because this result is meant to be saved across threads, which a thrown exception
      * can't do very well.
      */
-    private fun loadContent(context: Context): Pair<List<CalendarEvent>, Throwable?> {
+    private fun loadContent(context: Context): Either<List<CalendarEvent>, Throwable> {
         // local state which we'll eventually return
         val cr = mutableListOf<CalendarEvent>()
 
@@ -224,18 +224,18 @@ class CalendarFetcher(initialContext: Context,
 
             info { "loadContent: still have ${sorted.size} results" }
 
-            return Pair(sorted, null)
+            return eitherLeft(sorted)
         } catch (e: SecurityException) {
             // apparently we don't have permission for the calendar!
             error("security exception while reading calendar!", e)
             kill()
             ClockState.calendarPermission = false
 
-            return Pair(emptyList(), e)
+            return eitherRight(e)
         } catch (e: Throwable) {
             error("wildly unexpected exception when reading calendar!", e)
             kill()
-            return Pair(emptyList(), e)
+            return eitherRight(e)
         }
     }
 
@@ -276,7 +276,7 @@ class CalendarFetcher(initialContext: Context,
         // next to all of the hash tables and such as to what their generic types should have been,
         // but when I tried to make those into real parametric Java type declarations, some things
         // didn't match up quite right.
-        var result: Pair<List<CalendarEvent>, Throwable?>
+        var result: Either<List<CalendarEvent>, Throwable>
         doAsync {
             try {
                 val startTime = SystemClock.elapsedRealtimeNanos()
@@ -285,7 +285,7 @@ class CalendarFetcher(initialContext: Context,
                 info { "async: total calendar computation time: %.3f ms".format((endTime - startTime) / 1000000.0) }
             } catch (e: Throwable) {
                 // pass the exception back to the UI thread; we'll log it there
-                result = Pair(emptyList(), e)
+                result = eitherRight(e)
             }
 
             //
@@ -297,14 +297,14 @@ class CalendarFetcher(initialContext: Context,
             //
             uiThread {
                 scanInProgress = false
-                val (wireEventList, e) = result
-
-                if (e != null) {
-                    warn( { "uiThread: failure in async computation (CalendarFetcher #$instanceID)" }, e)
-                } else {
-                    ClockState.setWireEventList(wireEventList)
-                    ClockState.pingObservers()
-                }
+                result.match(
+                        { wireEventList: List<CalendarEvent> ->
+                            ClockState.setWireEventList(wireEventList)
+                            ClockState.pingObservers()
+                        },
+                        { th: Throwable ->
+                            warn( { "uiThread: failure in async computation (CalendarFetcher #$instanceID)" }, th)
+                        } )
 
                 info { "uiThread: complete (CalendarFetcher #$instanceID)" }
             }
