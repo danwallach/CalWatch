@@ -743,6 +743,9 @@ class ClockFace: Observer, AnkoLogger {
 
         radius = if (cx > cy) cy else cx // minimum of the two
 
+        ClockState.screenX = cx
+        ClockState.screenY = cy
+
         // This creates all the Paint objects used throughout the draw routines
         // here. Everything scales with the radius of the watchface, which is why
         // we're calling it from here.

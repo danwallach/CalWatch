@@ -17,6 +17,7 @@
         android:label="@string/app_name"
         android:theme="@android:style/Theme.DeviceDefault"
         tools:ignore="AllowBackup,GoogleAppIndexingWarning">
+
         <uses-library
             android:name="com.google.android.wearable"
             android:required="true" />
@@ -47,22 +48,25 @@
 
             <intent-filter>
                 <action android:name="android.service.wallpaper.WallpaperService" />
+
                 <category android:name="com.google.android.wearable.watchface.category.WATCH_FACE" />
             </intent-filter>
         </service>
 
         <activity android:name="android.support.wearable.complications.ComplicationHelperActivity" />
-
         <activity
             android:name=".complications.AnalogComplicationConfigActivity"
             android:label="@string/analog_complication_config">
-
             <intent-filter>
                 <action android:name="com.example.android.wearable.watchface.CONFIG_COMPLICATION_SIMPLE" />
+
                 <category android:name="com.google.android.wearable.watchface.category.WEARABLE_CONFIGURATION" />
                 <category android:name="android.intent.category.DEFAULT" />
             </intent-filter>
         </activity>
+
+        <activity android:name=".calwatch2.StylePickerActivity"
+            android:launchMode="singleInstance"/>
 
         <activity
             android:name=".calwatch2.PermissionActivity"
@@ -71,6 +75,7 @@
         <meta-data
             android:name="com.google.android.gms.version"
             android:value="@integer/google_play_services_version" />
+
     </application>
 
 </manifest>

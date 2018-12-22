@@ -35,6 +35,9 @@ object ClockState : Observable(), AnkoLogger {
     var maxLevel: Int = 0
         private set
 
+    var screenX: Int = -1 // used in places where we can't see the clockface
+    var screenY: Int = -1 // used in places where we can't see the clockface
+
     /**
      * Query whether or not a wire update has arrived yet. If the result is false,
      * *and* we're running on the watch, then we've only got default values. If we're

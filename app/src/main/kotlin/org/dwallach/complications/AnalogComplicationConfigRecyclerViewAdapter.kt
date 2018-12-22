@@ -28,6 +28,7 @@ import androidx.recyclerview.widget.RecyclerView
 import java.util.concurrent.Executors
 
 import org.dwallach.R
+import org.dwallach.calwatch2.StylePickerActivity
 import org.dwallach.complications.AnalogComplicationConfigData.BackgroundComplicationConfigItem
 import org.dwallach.complications.AnalogComplicationConfigData.ConfigItemType
 import org.dwallach.complications.AnalogComplicationConfigData.MoreOptionsConfigItem
@@ -105,7 +106,7 @@ class AnalogComplicationConfigRecyclerViewAdapter(
             TYPE_CHANGE_WATCHFACE_STYLE ->
                     WatchfaceStyleViewHolder(LayoutInflater.from(parent.context)
                             .inflate(
-                                    R.layout.config_list_background_complication_item,
+                                    R.layout.config_watchface_style,
                                     parent,
                                     false))
 
@@ -385,31 +386,7 @@ class AnalogComplicationConfigRecyclerViewAdapter(
             val position = adapterPosition
             debug { "Watchface style onClick() position: $position" }
 
-            debug { "TODO: launch activity for watchface style selector! "}
-
-            /***
-
-            val currentActivity = view.context as Activity
-
-            mSelectedComplicationId = getComplicationId(BACKGROUND)
-
-            if (mSelectedComplicationId >= 0) {
-                val supportedTypes = getSupportedComplicationTypes(BACKGROUND)
-                val watchFace = ComponentName(currentActivity, ComplicationWrapper.watchFaceClass)
-
-                currentActivity.startActivityForResult(
-                        ComplicationHelperActivity.createProviderChooserHelperIntent(
-                                currentActivity,
-                                watchFace,
-                                mSelectedComplicationId,
-                                *supportedTypes),
-                        AnalogComplicationConfigActivity.COMPLICATION_CONFIG_REQUEST_CODE)
-
-            } else {
-                debug { "Complication not supported by watch face." }
-            }
-
-            ***/
+            StylePickerActivity.kickStart(watchfaceViewButton.context)
         }
     }
 

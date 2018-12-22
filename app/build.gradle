@@ -20,7 +20,8 @@ def getVersionCode = { String apk ->
 
         println "version code: " + versionCode
     }
-    catch (ignored) { }
+    catch (ignored) {
+    }
 
     return Integer.parseInt(versionCode)
 }
@@ -38,7 +39,8 @@ def getVersionName = { ->
 
         println "version name: " + versionName
     }
-    catch (ignored) { }
+    catch (ignored) {
+    }
 
     return versionName
 }
@@ -97,6 +99,7 @@ allprojects {
 dependencies {
     implementation fileTree(include: ['*.jar'], dir: 'libs')
     implementation 'com.google.android.support:wearable:2.4.0'
+    implementation 'androidx.appcompat:appcompat:1.0.2'
     compileOnly 'com.google.android.wearable:wearable:2.4.0'
 
     implementation 'com.google.android.gms:play-services-wearable:16.0.1'
