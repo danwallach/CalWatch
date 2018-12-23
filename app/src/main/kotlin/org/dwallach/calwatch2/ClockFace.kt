@@ -219,7 +219,7 @@ class ClockFace: Observer, AnkoLogger {
             }
         }
 
-        if (drawStyle == Style.AMBIENT_ANTI_BURNIN || drawStyle == Style.LOWBIT) {
+        if (drawStyle == Style.AMBIENT_ANTI_BURNIN || drawStyle == Style.LOWBIT_ANTI_BURNIN) {
             // scale down everything to leave a 10 pixel margin
 
             val ratio = (radius - 10f) / radius
