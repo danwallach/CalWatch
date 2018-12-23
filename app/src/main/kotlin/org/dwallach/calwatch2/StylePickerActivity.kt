@@ -56,6 +56,8 @@ class StylePickerActivity : AppCompatActivity(), AnkoLogger, OnTouchListener {
                         PreferencesHelper.savePreferences(v.context)
                         ClockState.notifyObservers()
 
+                        finish() // tell activity that it's time to die
+
                         true
                     }
                 }
