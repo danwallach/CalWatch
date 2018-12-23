@@ -32,7 +32,8 @@ object AnalogComplicationConfigData: AnkoLogger {
                         R.drawable.ic_expand_more_white_18dp),
                 ConfigItemType(
                         AnalogComplicationConfigRecyclerViewAdapter.TYPE_CHANGE_WATCHFACE_STYLE,
-                        R.drawable.ic_all_faces_icon,
+//                        R.drawable.ic_all_faces_icon,
+                        R.drawable.icon_preview, // shouldn't be drawn ever, but...
                         context.getString(R.string.watchface_style_selector)))
     }
 }

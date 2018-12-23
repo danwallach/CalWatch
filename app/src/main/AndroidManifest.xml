@@ -66,9 +66,6 @@
             </intent-filter>
         </activity>
 
-        <activity android:name=".calwatch2.StylePickerActivity"
-            android:launchMode="singleInstance"/>
-
         <activity
             android:name=".calwatch2.PermissionActivity"
             android:launchMode="singleInstance" />

@@ -20,7 +20,6 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.View.OnClickListener
 import android.view.ViewGroup
-import android.widget.Button
 import android.widget.ImageButton
 import android.widget.ImageView
 import androidx.recyclerview.widget.RecyclerView
@@ -28,7 +27,6 @@ import androidx.recyclerview.widget.RecyclerView
 import java.util.concurrent.Executors
 
 import org.dwallach.R
-import org.dwallach.calwatch2.StylePickerActivity
 import org.dwallach.complications.AnalogComplicationConfigData.ConfigItemType
 import org.dwallach.complications.ComplicationLocation.*
 import org.dwallach.complications.ComplicationWrapper.BOTTOM_COMPLICATION_ID
@@ -101,7 +99,7 @@ class AnalogComplicationConfigRecyclerViewAdapter(
                                     false))
 
             TYPE_CHANGE_WATCHFACE_STYLE ->
-                    WatchfaceStyleViewHolder(LayoutInflater.from(parent.context)
+                    VanillaViewHolder(LayoutInflater.from(parent.context)
                             .inflate(
                                     R.layout.config_watchface_style,
                                     parent,
@@ -133,15 +131,7 @@ class AnalogComplicationConfigRecyclerViewAdapter(
                 }
             }
 
-            TYPE_CHANGE_WATCHFACE_STYLE -> {
-                val backgroundIconResourceId = configItemType.iconResourceId
-                val backgroundName = configItemType.name
-
-                with(viewHolder as WatchfaceStyleViewHolder) {
-                    setIcon(backgroundIconResourceId)
-                    setName(backgroundName)
-                }
-            }
+            TYPE_CHANGE_WATCHFACE_STYLE -> { }
         }
     }
 
@@ -356,31 +346,8 @@ class AnalogComplicationConfigRecyclerViewAdapter(
         }
     }
 
-    /** Displays button to trigger watchface style selector.  */
-    inner class WatchfaceStyleViewHolder(view: View) : RecyclerView.ViewHolder(view), OnClickListener {
-        private val watchfaceViewButton = view.findViewById<Button>(R.id.watchface_view_style)
-
-        init {
-            view.setOnClickListener(this)
-        }
-
-        fun setName(name: String) {
-            watchfaceViewButton.text = name
-        }
-
-        fun setIcon(resourceId: Int) {
-            val context = watchfaceViewButton.context
-            watchfaceViewButton.setCompoundDrawablesWithIntrinsicBounds(
-                    context.getDrawable(resourceId), null, null, null)
-        }
-
-        override fun onClick(view: View) {
-            val position = adapterPosition
-            debug { "Watchface style onClick() position: $position" }
-
-            StylePickerActivity.kickStart(watchfaceViewButton.context)
-        }
-    }
+    /** Oddly, RecyclerView.ViewHolder is abstract, but has no unimplemented methods, so fine. */
+    inner class VanillaViewHolder(view: View) : RecyclerView.ViewHolder(view)
 
     companion object {
         const val TYPE_PREVIEW_AND_COMPLICATIONS_CONFIG = 0
