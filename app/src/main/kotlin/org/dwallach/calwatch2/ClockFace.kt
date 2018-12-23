@@ -274,15 +274,6 @@ class ClockFace: Observer, AnkoLogger {
             errorLogAndThrow("arc too big! radius(%.2f -> %.2f), seconds(%.2f -> %.2f)".format(startRadius, endRadius, secondsStart, secondsEnd))
         }
 
-        if (burninProtectionMode()) {
-            // scale down everything to leave a 10 pixel margin
-
-            val ratio = (radius - 10f) / radius
-
-            startRadius *= ratio
-            endRadius *= ratio
-        }
-
         var p: Path? = path
 
         if (p == null) {

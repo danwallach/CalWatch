@@ -71,19 +71,11 @@ ANDROID N / WEAR 2.0 OVERHAUL
 
     TODO: resurrect the showSeconds and showDayDate options, or just leave them dead?
 
-    TODO: either migrate to the new GoogleApi from the old GoogleApiClient, or perhaps kill off the whole thing
-    https://developer.android.com/training/wearables/data-layer/migrate-to-googleapi
-
     TODO interaction of numbers-mode and complications -- do we hide the digits?
         Tentatively fixed: we drop the digits when there's a complication nearby
 
     TODO complication rendering order: do we draw the hands on top of the complications or not?
         Tentatively fixed: hands go on top
-
-    TODO handling of no-calendar-permission
-        TODO if no calendar permission, display a button with the calendar icon
-            TODO if clicked, launch the permission thing
-        TODO suppress complication rendering unless we have calendar permission
 
     TODO pre-load complications? Day-Date left
         Current working plan: we keep with our built-in day-date and only use "complications" for the rest
