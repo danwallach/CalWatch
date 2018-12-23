@@ -219,6 +219,10 @@ class ClockFace: Observer, AnkoLogger {
             }
         }
 
+        /***
+         * Killing this off for now. We've done lots of other goodies for anti-burnin, and
+         * this really hurts readability on a small screen.
+         *
         if (drawStyle == Style.AMBIENT_ANTI_BURNIN || drawStyle == Style.LOWBIT_ANTI_BURNIN) {
             // scale down everything to leave a 10 pixel margin
 
@@ -227,6 +231,7 @@ class ClockFace: Observer, AnkoLogger {
             endRadius *= ratio
             strokeWidth *= ratio
         }
+        ***/
 
         val x1 = clockX(lseconds, startRadius)
         val y1 = clockY(lseconds, startRadius)
