@@ -8,6 +8,7 @@ package org.dwallach.calwatch2
 
 import android.graphics.Color
 import android.graphics.Paint
+import org.dwallach.calwatch2.PaintCan.Brush.*
 import org.jetbrains.anko.*
 
 /**
@@ -61,11 +62,12 @@ object PaintCan: AnkoLogger {
         MINUTE_HAND,
         HOUR_HAND,
         ARC_SHADOW,
-        SMALL_TEXT_AND_LINES,
+        MONTHBOX_TEXT,
+        MONTHBOX_SHADOW,
+        SMALL_LINES,
         BIG_TEXT_AND_LINES,
         BLACK_FILL,
         LOWBIT_CALENDAR_FILL,
-        SMALL_SHADOW,
         BIG_SHADOW,
         COMPLICATION_BG,
         COMPLICATION_FG,
@@ -85,7 +87,10 @@ object PaintCan: AnkoLogger {
             textSize = _textSize
             style = Paint.Style.FILL
             textAlign = Paint.Align.CENTER
-            isAntiAlias = _style == Style.NORMAL || _style == Style.AMBIENT // anti-aliasing is forbidden in the low-bit modes
+            isAntiAlias = when(_style) {
+                Style.NORMAL, Style.AMBIENT, Style.AMBIENT_ANTI_BURNIN -> true
+                else -> false // anti-aliasing is forbidden in the low-bit modes
+            }
 
             // In specific cases, we're going to force colors to be colorful even in ambient mode (see below)
             val effectiveStyle = if(_style == Style.AMBIENT && forceColorAmbient) Style.NORMAL else _style
@@ -140,7 +145,7 @@ object PaintCan: AnkoLogger {
         val smTextSize = radius / 6f
         val lineWidth = radius / 20f
 
-        palette = Array(Style.MAX.ordinal) { arrayOfNulls<Paint>(Brush.MAX.ordinal) }
+        palette = Array(Style.MAX.ordinal) { arrayOfNulls<Paint>(MAX.ordinal) }
 
         for (style in Style.values()) {
             if (style == Style.MAX) break
@@ -148,60 +153,64 @@ object PaintCan: AnkoLogger {
 
             // Quoth the Google: "You can use color elements for up to 5 percent of total pixels."
             // http://developer.android.com/design/wear/watchfaces.html
-            palette[i][Brush.BATTERY_LOW.ordinal] = watchfacePaint(Color.YELLOW, style, smTextSize, lineWidth / 3f, true)
-            palette[i][Brush.BATTERY_CRITICAL.ordinal] = watchfacePaint(Color.RED, style, smTextSize, lineWidth / 3f, true)
+            palette[i][BATTERY_LOW.ordinal] = watchfacePaint(Color.YELLOW, style, smTextSize, lineWidth / 3f, true)
+            palette[i][BATTERY_CRITICAL.ordinal] = watchfacePaint(Color.RED, style, smTextSize, lineWidth / 3f, true)
 
-            palette[i][Brush.SECOND_HAND.ordinal] = watchfacePaint(Color.RED, style, smTextSize, lineWidth / 3f)
-            palette[i][Brush.HAND_SHADOW.ordinal] = watchfacePaint(Color.BLACK, style, smTextSize, lineWidth / 8f)
-            palette[i][Brush.TICK_SHADOW.ordinal] = watchfacePaint(Color.BLACK, style, smTextSize, lineWidth / 8f)
-            palette[i][Brush.MINUTE_HAND.ordinal] = watchfacePaint(Color.WHITE, style, textSize, lineWidth)
-            palette[i][Brush.HOUR_HAND.ordinal] = watchfacePaint(Color.WHITE, style, textSize, lineWidth * 1.5f)
-            palette[i][Brush.ARC_SHADOW.ordinal] = watchfacePaint(Color.BLACK, style, smTextSize, lineWidth / 6f)
-            palette[i][Brush.SMALL_TEXT_AND_LINES.ordinal] = watchfacePaint(Color.WHITE, style, smTextSize, lineWidth / 3f)
-            palette[i][Brush.BIG_TEXT_AND_LINES.ordinal] = watchfacePaint(Color.WHITE, style, textSize, lineWidth)
-            palette[i][Brush.BIG_SHADOW.ordinal] = watchfacePaint(Color.BLACK, style, textSize, lineWidth / 2f)
-            palette[i][Brush.BLACK_FILL.ordinal] = watchfacePaint(Color.BLACK, style, textSize, lineWidth)
-            palette[i][Brush.LOWBIT_CALENDAR_FILL.ordinal] = watchfacePaint(Color.WHITE, style, textSize, lineWidth) // the docs claim we have access to other colors here, like CYAN, but that's not true at least on the Moto 360 Sport
-            palette[i][Brush.SMALL_SHADOW.ordinal] = watchfacePaint(Color.BLACK, style, smTextSize, lineWidth / 4f)
+            palette[i][SECOND_HAND.ordinal] = watchfacePaint(Color.RED, style, smTextSize, lineWidth / 3f)
+            palette[i][HAND_SHADOW.ordinal] = watchfacePaint(Color.BLACK, style, smTextSize, lineWidth / 8f)
+            palette[i][TICK_SHADOW.ordinal] = watchfacePaint(Color.BLACK, style, smTextSize, lineWidth / 8f)
+            palette[i][MINUTE_HAND.ordinal] = watchfacePaint(Color.WHITE, style, textSize, lineWidth)
+            palette[i][HOUR_HAND.ordinal] = watchfacePaint(Color.WHITE, style, textSize, lineWidth * 1.5f)
+            palette[i][ARC_SHADOW.ordinal] = watchfacePaint(Color.BLACK, style, smTextSize, lineWidth / 6f)
+            palette[i][MONTHBOX_TEXT.ordinal] = watchfacePaint(Color.WHITE, style, smTextSize, lineWidth / 3f)
+            palette[i][SMALL_LINES.ordinal] = watchfacePaint(Color.WHITE, style, smTextSize, lineWidth / 3f)
+            palette[i][BIG_TEXT_AND_LINES.ordinal] = watchfacePaint(Color.WHITE, style, textSize, lineWidth)
+            palette[i][BIG_SHADOW.ordinal] = watchfacePaint(Color.BLACK, style, textSize, lineWidth / 2f)
+            palette[i][BLACK_FILL.ordinal] = watchfacePaint(Color.BLACK, style, textSize, lineWidth)
+            palette[i][LOWBIT_CALENDAR_FILL.ordinal] = watchfacePaint(Color.WHITE, style, textSize, lineWidth) // the docs claim we have access to other colors here, like CYAN, but that's not true at least on the Moto 360 Sport
+            palette[i][MONTHBOX_SHADOW.ordinal] = watchfacePaint(Color.BLACK, style, smTextSize, lineWidth / 4f)
 
             // toInt because of a Kotlin bug: https://youtrack.jetbrains.com/issue/KT-4749
-            palette[i][Brush.COMPLICATION_BG.ordinal] = watchfacePaint(0x80000000.toInt(), style, smTextSize, lineWidth / 8f) // black + transparency
-            palette[i][Brush.COMPLICATION_FG.ordinal] = watchfacePaint(Color.WHITE, style, smTextSize, lineWidth / 8f)
+            palette[i][COMPLICATION_BG.ordinal] = watchfacePaint(0x80000000.toInt(), style, smTextSize, lineWidth / 8f) // black + transparency
+            palette[i][COMPLICATION_FG.ordinal] = watchfacePaint(Color.WHITE, style, smTextSize, lineWidth / 8f)
 
             // shadows are stroke, not fill, so we fix that here
-            palette[i][Brush.HAND_SHADOW.ordinal]?.style = Paint.Style.STROKE
-            palette[i][Brush.TICK_SHADOW.ordinal]?.style = Paint.Style.STROKE
-            palette[i][Brush.ARC_SHADOW.ordinal]?.style = Paint.Style.STROKE
-            palette[i][Brush.SMALL_SHADOW.ordinal]?.style = Paint.Style.STROKE
-            palette[i][Brush.BIG_SHADOW.ordinal]?.style = Paint.Style.STROKE
+            palette[i][HAND_SHADOW.ordinal]?.style = Paint.Style.STROKE
+            palette[i][TICK_SHADOW.ordinal]?.style = Paint.Style.STROKE
+            palette[i][ARC_SHADOW.ordinal]?.style = Paint.Style.STROKE
+            palette[i][MONTHBOX_SHADOW.ordinal]?.style = Paint.Style.STROKE
+            palette[i][BIG_SHADOW.ordinal]?.style = Paint.Style.STROKE
 
             // by default, text is centered, but some styles want it on the left
             // (these are the places where we'll eventually have to do more work for RTL languages)
-            palette[i][Brush.SMALL_TEXT_AND_LINES.ordinal]?.textAlign = Paint.Align.LEFT
-            palette[i][Brush.SMALL_SHADOW.ordinal]?.textAlign = Paint.Align.LEFT
+            palette[i][MONTHBOX_TEXT.ordinal]?.textAlign = Paint.Align.LEFT
+            palette[i][MONTHBOX_SHADOW.ordinal]?.textAlign = Paint.Align.LEFT
         }
 
         // In anti-burnin mode: we'll be drawing some "shadows" as
         // white outlines around black centers, "hollowing out" the hands as we're supposed to do.
-        for (i in listOf(Style.AMBIENT_ANTI_BURNIN.ordinal, Style.LOWBIT_ANTI_BURNIN.ordinal)) {
-            palette[i][Brush.HAND_SHADOW.ordinal]?.color = Color.WHITE
-            palette[i][Brush.HAND_SHADOW.ordinal]?.strokeWidth = lineWidth / 6f
+        for (i in listOf(Style.AMBIENT.ordinal,
+                Style.AMBIENT_ANTI_BURNIN.ordinal,
+                Style.LOWBIT_ANTI_BURNIN.ordinal)) {
+            palette[i][HAND_SHADOW.ordinal]?.color = Color.WHITE
+            palette[i][HAND_SHADOW.ordinal]?.strokeWidth = lineWidth / 6f
 
-            palette[i][Brush.MINUTE_HAND.ordinal]?.color = Color.BLACK
-            palette[i][Brush.MINUTE_HAND.ordinal]?.style = Paint.Style.STROKE
+            palette[i][MINUTE_HAND.ordinal]?.color = Color.BLACK
+            palette[i][MINUTE_HAND.ordinal]?.style = Paint.Style.STROKE
 
-            palette[i][Brush.HOUR_HAND.ordinal]?.color = Color.BLACK
-            palette[i][Brush.HOUR_HAND.ordinal]?.style = Paint.Style.STROKE
+            palette[i][HOUR_HAND.ordinal]?.color = Color.BLACK
+            palette[i][HOUR_HAND.ordinal]?.style = Paint.Style.STROKE
 
-            palette[i][Brush.ARC_SHADOW.ordinal]?.color = Color.WHITE
-            palette[i][Brush.SMALL_SHADOW.ordinal]?.color = Color.WHITE
-            palette[i][Brush.BIG_SHADOW.ordinal]?.color = Color.WHITE
+            palette[i][ARC_SHADOW.ordinal]?.color = Color.WHITE
+//            palette[i][MONTHBOX_SHADOW.ordinal]?.color = Color.WHITE
+            palette[i][BIG_SHADOW.ordinal]?.color = Color.WHITE
 
-            palette[i][Brush.BIG_TEXT_AND_LINES.ordinal]?.color = Color.BLACK
-            palette[i][Brush.BIG_SHADOW.ordinal]?.color = Color.WHITE
+//            palette[i][MONTHBOX_TEXT.ordinal]?.color = Color.BLACK
+            palette[i][BIG_TEXT_AND_LINES.ordinal]?.color = Color.BLACK
+            palette[i][BIG_SHADOW.ordinal]?.color = Color.WHITE
 
-            palette[i][Brush.COMPLICATION_BG.ordinal]?.color = Color.BLACK
-            palette[i][Brush.COMPLICATION_BG.ordinal]?.color = Color.BLACK
+            palette[i][COMPLICATION_BG.ordinal]?.color = Color.BLACK
+            palette[i][COMPLICATION_BG.ordinal]?.color = Color.BLACK
         }
 
     }

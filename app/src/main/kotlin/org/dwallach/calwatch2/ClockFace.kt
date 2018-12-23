@@ -86,6 +86,11 @@ class ClockFace: Observer, AnkoLogger {
         }
     }
 
+    private fun burninProtectionMode() = when (drawStyle) {
+        Style.NORMAL, Style.AMBIENT -> false
+        else -> true
+    }
+
     init {
         instanceID = instanceCounter++
         verbose { "ClockFace setup, instance($instanceID)" }
@@ -171,7 +176,7 @@ class ClockFace: Observer, AnkoLogger {
 
             // We disable the battery meter when we're in ambientMode with burnInProtection, since
             // we don't want to burn a hole in the very center of the screen.
-            if (!burnInProtection) drawBattery(canvas)
+            if (!burninProtectionMode()) drawBattery(canvas)
 
             // We're drawing the complications *before* the hands, at least for now, and we're only
             // doing it if we have calendar permissions. Otherwise not.
@@ -182,7 +187,7 @@ class ClockFace: Observer, AnkoLogger {
 
             // something a real watch can't do: float the text over the hands
             // (but disable when we're in ambientMode with burnInProtection)
-            if (!burnInProtection && showDayDate) drawMonthBox(canvas)
+            if (showDayDate) drawMonthBox(canvas)
 
         } catch (th: Throwable) {
             error("exception in drawEverything", th)
@@ -269,7 +274,7 @@ class ClockFace: Observer, AnkoLogger {
             errorLogAndThrow("arc too big! radius(%.2f -> %.2f), seconds(%.2f -> %.2f)".format(startRadius, endRadius, secondsStart, secondsEnd))
         }
 
-        if (burnInProtection) {
+        if (burninProtectionMode()) {
             // scale down everything to leave a 10 pixel margin
 
             val ratio = (radius - 10f) / radius
@@ -306,8 +311,8 @@ class ClockFace: Observer, AnkoLogger {
         val x1 = clockX(45.0, .85f)
         val y1 = clockY(45.0, .85f)
 
-        val paint = PaintCan[drawStyle, Brush.SMALL_TEXT_AND_LINES]
-        val shadow = PaintCan[drawStyle, Brush.SMALL_SHADOW]
+        val paint = PaintCan[drawStyle, Brush.MONTHBOX_TEXT]
+        val shadow = PaintCan[drawStyle, Brush.MONTHBOX_SHADOW]
 
         // AA note: we only draw the month box when in normal mode, not ambient, so no AA gymnastics here
 
@@ -352,7 +357,7 @@ class ClockFace: Observer, AnkoLogger {
         var lFacePathCache = getCachedFacePath(lFaceMode)
 
         val colorTickShadow = PaintCan[drawStyle, Brush.TICK_SHADOW]
-        val colorSmall = PaintCan[drawStyle, Brush.SMALL_TEXT_AND_LINES]
+        val colorSmall = PaintCan[drawStyle, Brush.SMALL_LINES]
         val colorBig = PaintCan[drawStyle, Brush.BIG_TEXT_AND_LINES]
         val colorTextShadow = PaintCan[drawStyle, Brush.BIG_SHADOW]
 
@@ -377,7 +382,7 @@ class ClockFace: Observer, AnkoLogger {
                 }
 
             val strokeWidth =
-                    if (lFaceMode == ClockState.FACE_LITE || lFaceMode == ClockState.FACE_NUMBERS)
+                    if (lFaceMode == ClockState.FACE_LITE || lFaceMode == ClockState.FACE_NUMBERS || drawStyle != Style.NORMAL)
                         colorSmall.strokeWidth
                     else
                         colorBig.strokeWidth
@@ -392,11 +397,9 @@ class ClockFace: Observer, AnkoLogger {
 
                 // left of watch
                 if (ClockState.showDayDate) {
-                    if (drawStyle != Style.LOWBIT_ANTI_BURNIN) {
-                        drawRadialLine(lFacePathCache, strokeWidth, 45.0, 0.9f, 1.0f, false, false)
-                    } else {
-                        drawRadialLine(lFacePathCache, strokeWidth, 45.0, 0.75f, 1.0f, false, false)
-                    }
+                    drawRadialLine(lFacePathCache, strokeWidth, 45.0, 0.9f, 1.0f, false, false)
+                } else {
+                    drawRadialLine(lFacePathCache, strokeWidth, 45.0, 0.75f, 1.0f, false, false)
                 }
 
                 // right of watch
