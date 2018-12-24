@@ -181,13 +181,15 @@ class ClockFace: Observer, AnkoLogger {
             // we don't want to burn a hole in the very center of the screen.
             if (!burninProtectionMode()) drawBattery(canvas)
 
-            drawHands(canvas)
+            // We're drawing the complications *before* the hands. We tried it after, but it
+            // looks awful in ambient mode.
 
-            // We're drawing the complications *after* the hands, to float them on top.
             // (If we don't have calendar permission, then we'll be insisting on that before
             // we do any complications. Any click will cause a permission dialog. Good UX?)
             if (calendarPermission)
                 ComplicationWrapper.drawComplications(canvas, currentTimeMillis)
+
+            drawHands(canvas)
 
             // something a real watch can't do: float the text over the hands
             // (but disable when we're in ambientMode with burnInProtection)

@@ -108,7 +108,7 @@ class CalWatchFaceService : CanvasWatchFaceService(), AnkoLogger {
             ComplicationWrapper.init(this@CalWatchFaceService, this, listOf(BACKGROUND, RIGHT, TOP, BOTTOM))
             styleComplications {
                 setBackgroundColorActive(PaintCan[Style.NORMAL, Brush.COMPLICATION_BG].color)
-                setBackgroundColorAmbient(PaintCan[Style.AMBIENT, Brush.COMPLICATION_BG].color)
+//                setBackgroundColorAmbient(PaintCan[Style.AMBIENT, Brush.COMPLICATION_BG].color)
                 setBorderColorActive(PaintCan[Style.NORMAL, Brush.COMPLICATION_FG].color)
                 setBorderColorAmbient(PaintCan[Style.AMBIENT, Brush.COMPLICATION_FG].color)
             }

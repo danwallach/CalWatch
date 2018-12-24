@@ -189,9 +189,13 @@ object PaintCan: AnkoLogger {
 
         // In anti-burnin mode: we'll be drawing some "shadows" as
         // white outlines around black centers, "hollowing out" the hands as we're supposed to do.
-        for (i in listOf(Style.AMBIENT.ordinal,
-                Style.AMBIENT_ANTI_BURNIN.ordinal,
-                Style.LOWBIT_ANTI_BURNIN.ordinal)) {
+        for (style in listOf(Style.AMBIENT, Style.AMBIENT_ANTI_BURNIN, Style.LOWBIT_ANTI_BURNIN)) {
+
+            val i = style.ordinal
+
+            palette[i][COMPLICATION_BG.ordinal] =
+                    watchfacePaint(0x00000000.toInt(), style, smTextSize, lineWidth / 8f) // black + fully transparent
+
             palette[i][HAND_SHADOW.ordinal]?.color = Color.WHITE
             palette[i][HAND_SHADOW.ordinal]?.strokeWidth = lineWidth / 6f
 
