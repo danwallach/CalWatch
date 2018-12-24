@@ -16,8 +16,8 @@
   -->
 <Switch
     xmlns:android="http://schemas.android.com/apk/res/android"
-    android:id="@+id/unread_notification_switch"
+    android:id="@+id/day_date_select"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     style="@style/ButtonConfigurationStyle"
-    android:text="@string/notifications"/>
+    android:text="@string/watchface_day_date_selector"/>

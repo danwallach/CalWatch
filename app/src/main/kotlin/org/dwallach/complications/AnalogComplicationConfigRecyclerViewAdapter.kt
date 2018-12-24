@@ -6,6 +6,7 @@
  */
 package org.dwallach.complications
 
+import android.annotation.SuppressLint
 import android.app.Activity
 import android.content.ComponentName
 import android.content.Context
@@ -17,16 +18,20 @@ import android.support.wearable.complications.ProviderInfoRetriever
 import android.support.wearable.complications.ProviderInfoRetriever.OnProviderInfoReceivedCallback
 import android.support.wearable.watchface.CanvasWatchFaceService
 import android.view.LayoutInflater
+import android.view.MotionEvent.*
 import android.view.View
 import android.view.View.OnClickListener
 import android.view.ViewGroup
 import android.widget.ImageButton
 import android.widget.ImageView
+import android.widget.Switch
 import androidx.recyclerview.widget.RecyclerView
 
 import java.util.concurrent.Executors
 
 import org.dwallach.R
+import org.dwallach.calwatch2.ClockState
+import org.dwallach.calwatch2.PreferencesHelper
 import org.dwallach.complications.AnalogComplicationConfigData.ConfigItemType
 import org.dwallach.complications.ComplicationLocation.*
 import org.dwallach.complications.ComplicationWrapper.BOTTOM_COMPLICATION_ID
@@ -77,14 +82,17 @@ class AnalogComplicationConfigRecyclerViewAdapter(
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): RecyclerView.ViewHolder {
         verbose { "onCreateViewHolder(): viewType: $viewType" }
 
+        val settings = mSettingsDataSet[viewType]
+
         return when (viewType) {
             TYPE_PREVIEW_AND_COMPLICATIONS_CONFIG -> {
                 // Need direct reference to watch face preview view holder to update watch face
                 // preview based on selections from the user.
                 val tmp = PreviewAndComplicationsViewHolder(
+                        settings.iconResourceId,
                         LayoutInflater.from(parent.context)
                                 .inflate(
-                                        R.layout.config_list_preview_and_complications_item,
+                                        settings.layoutId,
                                         parent,
                                         false))
                 mPreviewAndComplicationsViewHolder = tmp
@@ -92,47 +100,39 @@ class AnalogComplicationConfigRecyclerViewAdapter(
             }
 
             TYPE_MORE_OPTIONS -> MoreOptionsViewHolder(
+                    settings.iconResourceId,
                     LayoutInflater.from(parent.context)
-                            .inflate(
-                                    R.layout.config_list_more_options_item,
-                                    parent,
-                                    false))
+                            .inflate(settings.layoutId, parent, false))
 
             TYPE_CHANGE_WATCHFACE_STYLE ->
                     VanillaViewHolder(LayoutInflater.from(parent.context)
-                            .inflate(
-                                    R.layout.config_watchface_style,
-                                    parent,
-                                    false))
+                            .inflate(settings.layoutId, parent, false))
+
+            TYPE_DAY_DATE ->
+                ToggleViewHolder(settings.inflatedId,
+                        settings.name,
+                        LayoutInflater.from(parent.context)
+                                .inflate(settings.layoutId, parent, false),
+                        { ClockState.showDayDate }, {
+                            ClockState.showDayDate = it
+                            PreferencesHelper.savePreferences(parent.context)
+                            ClockState.pingObservers()
+                        })
 
             else -> throw RuntimeException("unknown viewType: $viewType")
         }
     }
 
+    /** All our "holders" also have a bindInit() method to set them up */
+    interface HolderInit {
+        fun bindInit()
+    }
+
+
     override fun onBindViewHolder(viewHolder: RecyclerView.ViewHolder, position: Int) {
         verbose { "Element $position set." }
 
-        // Pulls all data required for creating the UX for the specific setting option.
-        val configItemType = mSettingsDataSet[position]
-
-        when (viewHolder.itemViewType) {
-            TYPE_PREVIEW_AND_COMPLICATIONS_CONFIG -> {
-                val defaultComplicationResourceId = configItemType.iconResourceId
-
-                with(viewHolder as PreviewAndComplicationsViewHolder) {
-                    setDefaultComplicationDrawable(defaultComplicationResourceId)
-                    initializesColorsAndComplications()
-                }
-            }
-
-            TYPE_MORE_OPTIONS -> {
-                with(viewHolder as MoreOptionsViewHolder) {
-                    setIcon(configItemType.iconResourceId)
-                }
-            }
-
-            TYPE_CHANGE_WATCHFACE_STYLE -> { }
-        }
+        (viewHolder as HolderInit).bindInit()
     }
 
     override fun getItemViewType(position: Int): Int {
@@ -159,21 +159,11 @@ class AnalogComplicationConfigRecyclerViewAdapter(
         }
     }
 
-    /*** -- this used to be required, but somehow isn't now... weird
-
-    override fun onDetachedFromRecyclerView(recyclerView: RecyclerView?) {
-        super.onDetachedFromRecyclerView(recyclerView)
-        // Required to release retriever for active complication data on detach.
-        mProviderInfoRetriever.release()
-    }
-
-    ***/
-
     /**
      * Displays watch face preview along with complication locations. Allows user to tap on the
      * complication they want to change and preview updates dynamically.
      */
-    inner class PreviewAndComplicationsViewHolder(view: View) : RecyclerView.ViewHolder(view), OnClickListener {
+    inner class PreviewAndComplicationsViewHolder(val iconId: Int, view: View) : RecyclerView.ViewHolder(view), OnClickListener, HolderInit {
         private val mWatchFaceArmsAndTicksView = view.findViewById<View>(R.id.watch_face_arms_and_ticks)
 
         private val mLeftComplicationBackground = view.findViewById<ImageView>(R.id.left_complication_background)
@@ -185,6 +175,11 @@ class AnalogComplicationConfigRecyclerViewAdapter(
         private val mRightComplication = view.findViewById<ImageButton>(R.id.right_complication)
         private val mTopComplication = view.findViewById<ImageButton>(R.id.top_complication)
         private val mBottomComplication = view.findViewById<ImageButton>(R.id.bottom_complication)
+
+        override fun bindInit() {
+            setDefaultComplicationDrawable()
+            initializesColorsAndComplications()
+        }
 
         private fun idToComplicationFn(id: Int) = when(id) {
             LEFT_COMPLICATION_ID -> mLeftComplication
@@ -267,15 +262,15 @@ class AnalogComplicationConfigRecyclerViewAdapter(
             }
         }
 
-        fun setDefaultComplicationDrawable(resourceId: Int) {
-            verbose { "setting default complication drawable, resourceId = $resourceId" }
+        fun setDefaultComplicationDrawable() {
+            verbose { "setting default complication drawable, resourceId = $iconId" }
 
             // This is a bit of a hack, but it works.
             val context = mWatchFaceArmsAndTicksView.context ?: return
 
             // It's technically possible or getDrawable to return null, but we're looking
             // up an id that was just passed to us, so it will never fail in practice.
-            mDefaultComplicationDrawable = context.getDrawable(resourceId) ?: return
+            mDefaultComplicationDrawable = context.getDrawable(iconId) ?: return
 
             idToComplication.values.forEach {
                 it?.setImageDrawable(mDefaultComplicationDrawable)
@@ -336,22 +331,47 @@ class AnalogComplicationConfigRecyclerViewAdapter(
     }
 
     /** Displays icon to indicate there are more options below the fold.  */
-    inner class MoreOptionsViewHolder(view: View) : RecyclerView.ViewHolder(view) {
+    inner class MoreOptionsViewHolder(val iconId: Int, view: View) : RecyclerView.ViewHolder(view), HolderInit {
 
         private val mMoreOptionsImageView = view.findViewById<ImageView>(R.id.more_options_image_view)
 
-        fun setIcon(resourceId: Int) {
+        override fun bindInit() {
             val context = mMoreOptionsImageView.context
-            mMoreOptionsImageView.setImageDrawable(context.getDrawable(resourceId))
+            mMoreOptionsImageView.setImageDrawable(context.getDrawable(iconId))
         }
     }
 
-    /** Oddly, RecyclerView.ViewHolder is abstract, but has no unimplemented methods, so fine. */
-    inner class VanillaViewHolder(view: View) : RecyclerView.ViewHolder(view)
+    /** Nothing much going on here, but it's still necessary. */
+    inner class VanillaViewHolder(view: View) : RecyclerView.ViewHolder(view), HolderInit {
+        override fun bindInit() { }
+    }
+
+    inner class ToggleViewHolder(viewId: Int,
+                                 val text: String,
+                                 view: View,
+                                 val isSelected: () -> Boolean,
+                                 val callback: (Boolean) -> Unit): RecyclerView.ViewHolder(view), HolderInit {
+
+        private val switch = view.findViewById<Switch>(viewId)
+
+        @SuppressLint("ClickableViewAccessibility")
+        override fun bindInit() {
+            switch.showText = true
+            switch.isChecked = isSelected()
+            switch.setOnTouchListener { _, ev ->
+                when (ev.action) {
+                    ACTION_UP, ACTION_BUTTON_RELEASE, ACTION_POINTER_UP -> callback(switch.isChecked)
+                    else -> { }
+                }
+                true
+            }
+        }
+    }
 
     companion object {
         const val TYPE_PREVIEW_AND_COMPLICATIONS_CONFIG = 0
         const val TYPE_MORE_OPTIONS = 1
-        const val TYPE_CHANGE_WATCHFACE_STYLE = 2
+        const val TYPE_DAY_DATE = 2
+        const val TYPE_CHANGE_WATCHFACE_STYLE = 3
     }
 }
