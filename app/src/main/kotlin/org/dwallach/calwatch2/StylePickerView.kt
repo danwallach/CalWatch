@@ -10,9 +10,6 @@ package org.dwallach.calwatch2
 import android.annotation.SuppressLint
 import android.content.Context
 import android.graphics.Canvas
-import android.graphics.Color
-import android.graphics.PorterDuff
-import android.graphics.drawable.Drawable
 import android.util.AttributeSet
 import android.view.MotionEvent
 import android.view.MotionEvent.*
@@ -23,7 +20,6 @@ import org.dwallach.calwatch2.ClockState.FACE_NUMBERS
 import org.dwallach.calwatch2.ClockState.FACE_TOOL
 import org.jetbrains.anko.AnkoLogger
 import org.jetbrains.anko.info
-import org.jetbrains.anko.verbose
 import org.jetbrains.anko.warn
 import kotlin.math.PI
 import kotlin.math.atan2
@@ -33,14 +29,10 @@ class StylePickerView(context: Context, attrs: AttributeSet) : View(context, att
     private var h: Int = -1
 
     private val toolSelected = context.getDrawable(R.drawable.ic_tool_selected)
-    private val toolDeselected = context.getDrawable(R.drawable.ic_tool_deselected)
     private val liteSelected = context.getDrawable(R.drawable.ic_lite_selected)
-    private val liteDeselected = context.getDrawable(R.drawable.ic_lite_deselected)
     private val numbersSelected = context.getDrawable(R.drawable.ic_numbers_selected)
-    private val numbersDeselected = context.getDrawable(R.drawable.ic_numbers_deselected)
 
-    private val allDrawables = listOf(toolSelected, toolDeselected,
-            liteSelected, liteDeselected, numbersSelected, numbersDeselected)
+    private val allDrawables = listOf(toolSelected, liteSelected, numbersSelected)
 
 
     override fun onVisibilityChanged(changedView: View?, visibility: Int) = invalidate()
@@ -70,24 +62,9 @@ class StylePickerView(context: Context, attrs: AttributeSet) : View(context, att
         info { "onDraw: $w, $h: ${ClockState.faceMode}" }
 
         when (ClockState.faceMode) {
-            ClockState.FACE_NUMBERS -> {
-                numbersSelected?.draw(canvas)
-                toolDeselected?.draw(canvas)
-                liteDeselected?.draw(canvas)
-            }
-
-            ClockState.FACE_LITE -> {
-                numbersDeselected?.draw(canvas)
-                toolDeselected?.draw(canvas)
-                liteSelected?.draw(canvas)
-            }
-
-            ClockState.FACE_TOOL -> {
-                numbersDeselected?.draw(canvas)
-                toolSelected?.draw(canvas)
-                liteDeselected?.draw(canvas)
-            }
-
+            ClockState.FACE_NUMBERS -> numbersSelected?.draw(canvas)
+            ClockState.FACE_LITE -> liteSelected?.draw(canvas)
+            ClockState.FACE_TOOL -> toolSelected?.draw(canvas)
             else -> warn { "onDraw: Unexpected faceMode: ${ClockState.faceMode}" }
         }
     }
