@@ -25,6 +25,7 @@ import android.view.ViewGroup
 import android.widget.ImageButton
 import android.widget.ImageView
 import android.widget.Switch
+import android.widget.ToggleButton
 import androidx.recyclerview.widget.RecyclerView
 
 import java.util.concurrent.Executors
@@ -110,6 +111,7 @@ class AnalogComplicationConfigRecyclerViewAdapter(
 
             TYPE_DAY_DATE ->
                 ToggleViewHolder(settings.inflatedId,
+                        settings.iconResourceId,
                         settings.name,
                         LayoutInflater.from(parent.context)
                                 .inflate(settings.layoutId, parent, false),
@@ -307,7 +309,11 @@ class AnalogComplicationConfigRecyclerViewAdapter(
                     complicationBg.visibility = View.INVISIBLE
                 }
             } else {
-                warn { "Couldn't find complication or complicationBg!" }
+                warn {
+                    String.format("Couldn't find complication (%s) or complicationBg (%s) for id $watchFaceComplicationId",
+                            if (complication == null) "null" else "okay",
+                            if (complicationBg == null) "null" else "okay")
+                }
             }
         }
 
@@ -347,24 +353,29 @@ class AnalogComplicationConfigRecyclerViewAdapter(
     }
 
     inner class ToggleViewHolder(viewId: Int,
+                                 val iconId: Int,
                                  val text: String,
                                  view: View,
                                  val isSelected: () -> Boolean,
-                                 val callback: (Boolean) -> Unit): RecyclerView.ViewHolder(view), HolderInit {
+                                 val callback: (Boolean) -> Unit):
+            RecyclerView.ViewHolder(view), HolderInit, OnClickListener {
 
         private val switch = view.findViewById<Switch>(viewId)
 
         @SuppressLint("ClickableViewAccessibility")
         override fun bindInit() {
-            switch.showText = true
             switch.isChecked = isSelected()
-            switch.setOnTouchListener { _, ev ->
-                when (ev.action) {
-                    ACTION_UP, ACTION_BUTTON_RELEASE, ACTION_POINTER_UP -> callback(switch.isChecked)
-                    else -> { }
-                }
-                true
-            }
+            switch.setOnClickListener(this)
+
+            // TODO: nuke the icon entirely, replace with groovy animated switches used by WearOS Settings
+            switch.setCompoundDrawablesWithIntrinsicBounds(switch.context.getDrawable(iconId), null, null, null)
+        }
+
+        override fun onClick(v: View?) {
+            val switchState = switch.isChecked
+            info { "Switch ($text) checked: $switchState" }
+
+            callback(switch.isChecked)
         }
     }
 

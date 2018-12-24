@@ -14,10 +14,10 @@
   ~ See the License for the specific language governing permissions and
   ~ limitations under the License.
   -->
-<Switch
-    xmlns:android="http://schemas.android.com/apk/res/android"
+<Switch xmlns:android="http://schemas.android.com/apk/res/android"
     android:id="@+id/day_date_select"
+    style="@style/ButtonConfigurationStyle"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    style="@style/ButtonConfigurationStyle"
-    android:text="@string/watchface_day_date_selector"/>
+    android:checked="true"
+    android:text="@string/watchface_day_date_selector" />

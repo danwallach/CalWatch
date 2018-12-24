@@ -36,7 +36,7 @@ object AnalogComplicationConfigData: AnkoLogger {
                         R.id.more_options_image_view),
                 ConfigItemType(
                         AnalogComplicationConfigRecyclerViewAdapter.TYPE_DAY_DATE,
-                        0,
+                        R.drawable.ic_date_time_selector,
                         R.layout.config_day_date_select,
                         R.id.day_date_select,
                         context.getString(R.string.watchface_day_date_selector)),

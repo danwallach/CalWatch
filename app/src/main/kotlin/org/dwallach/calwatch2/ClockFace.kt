@@ -12,6 +12,9 @@ import android.graphics.Path
 import android.graphics.RectF
 import android.graphics.drawable.Drawable
 import org.dwallach.calwatch2.BatteryWrapper.batteryPct
+import org.dwallach.calwatch2.ClockState.FACE_LITE
+import org.dwallach.calwatch2.ClockState.FACE_NUMBERS
+import org.dwallach.calwatch2.ClockState.FACE_TOOL
 import org.dwallach.calwatch2.ClockState.calendarPermission
 import org.dwallach.calwatch2.ClockState.showDayDate
 import org.dwallach.calwatch2.ClockState.showSeconds
@@ -178,12 +181,13 @@ class ClockFace: Observer, AnkoLogger {
             // we don't want to burn a hole in the very center of the screen.
             if (!burninProtectionMode()) drawBattery(canvas)
 
-            // We're drawing the complications *before* the hands, at least for now, and we're only
-            // doing it if we have calendar permissions. Otherwise not.
+            drawHands(canvas)
+
+            // We're drawing the complications *after* the hands, to float them on top.
+            // (If we don't have calendar permission, then we'll be insisting on that before
+            // we do any complications. Any click will cause a permission dialog. Good UX?)
             if (calendarPermission)
                 ComplicationWrapper.drawComplications(canvas, currentTimeMillis)
-
-            drawHands(canvas)
 
             // something a real watch can't do: float the text over the hands
             // (but disable when we're in ambientMode with burnInProtection)
@@ -346,7 +350,7 @@ class ClockFace: Observer, AnkoLogger {
         val bottomHack = missingBottomPixels > 0
 
         // force "lite" mode when in burn-in protection mode
-//        val lFaceMode = if(drawStyle == Style.LOWBIT_ANTI_BURNIN) ClockState.FACE_LITE else ClockState.faceMode
+//        val lFaceMode = if(drawStyle == Style.LOWBIT_ANTI_BURNIN) FACE_LITE else ClockState.faceMode
 
         // see if we can make this work properly without needing to drop into "lite" mode
         val lFaceMode = ClockState.faceMode
@@ -369,7 +373,7 @@ class ClockFace: Observer, AnkoLogger {
                 verbose { "Complication visibility map: (LEFT, RIGHT, TOP, BOTTOM) -> ${isVisible(LEFT)}, ${isVisible(RIGHT)}, ${isVisible(TOP)}, ${isVisible(BOTTOM)}" }
             }
 
-            if (lFaceMode == ClockState.FACE_TOOL)
+            if (lFaceMode == FACE_TOOL)
                 for (i in 1..59) {
                     if (bottomHack && isVisible(BOTTOM) && i >= 26 && i <= 34) continue // don't even bother if flat bottom and complication
 
@@ -378,12 +382,12 @@ class ClockFace: Observer, AnkoLogger {
                 }
 
             val strokeWidth =
-                    if (lFaceMode == ClockState.FACE_LITE || lFaceMode == ClockState.FACE_NUMBERS || drawStyle != Style.NORMAL)
+                    if (lFaceMode == FACE_LITE || lFaceMode == FACE_NUMBERS || drawStyle != Style.NORMAL)
                         colorSmall.strokeWidth
                     else
                         colorBig.strokeWidth
 
-            if (lFaceMode != ClockState.FACE_NUMBERS) {
+            if (lFaceMode != FACE_NUMBERS) {
                 // top of watch
                 val topLineStart = if (isVisible(TOP)) 0.85f else 0.75f
 
@@ -392,7 +396,7 @@ class ClockFace: Observer, AnkoLogger {
                 drawRadialLine(lFacePathCache, strokeWidth, 0.4, topLineStart, 1.0f, true, false)
 
                 // left of watch
-                if (ClockState.showDayDate) {
+                if (showDayDate) {
                     drawRadialLine(lFacePathCache, strokeWidth, 45.0, 0.9f, 1.0f, false, false)
                 } else {
                     drawRadialLine(lFacePathCache, strokeWidth, 45.0, 0.75f, 1.0f, false, false)
@@ -426,7 +430,7 @@ class ClockFace: Observer, AnkoLogger {
         canvas.drawPath(lFacePathCache, colorSmall)
         canvas.drawPath(lFacePathCache, colorTickShadow)
 
-        if (lFaceMode == ClockState.FACE_NUMBERS) {
+        if (lFaceMode == FACE_NUMBERS) {
             // in this case, we'll draw "12", "3", and "6". No "9" because that's where the
             // month and day will go
             var x: Float
@@ -491,7 +495,7 @@ class ClockFace: Observer, AnkoLogger {
             // 9 o'clock
             //
 
-            if (!ClockState.showDayDate) { // don't draw if our internal complication is visible
+            if (!showDayDate) { // don't draw if our internal complication is visible
                 r = 0.9f
                 val nineWidth = colorBig.measureText("9")
 

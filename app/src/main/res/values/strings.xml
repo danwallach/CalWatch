@@ -10,6 +10,6 @@
     <!-- Use of "\n" is to conserve horizontal space in config menu. -->
     <string name="analog_complication_config">CalWatch2 Config</string>
     <string name="watchface_style_selector">Watchface Style</string>
-    <string name="watchface_day_date_selector">Day/Date Display</string>
+    <string name="watchface_day_date_selector">Day/Date</string>
     <string name="notifications">Notifications</string>
 </resources>
