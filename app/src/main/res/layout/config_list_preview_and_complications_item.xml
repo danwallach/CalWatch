@@ -18,7 +18,7 @@
 Stacked views to create watch face preview in settings activity's recycler view for live updates
 based on changes by the user.
 -->
-<androidx.constraintlayout.widget.ConstraintLayout
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/preview_and_complications_item"
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
@@ -40,49 +40,46 @@ based on changes by the user.
 
     <ImageView
         android:id="@+id/left_complication_background"
+        style="?android:borderlessButtonStyle"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginLeft="-12dp"
-        app:layout_constraintLeft_toLeftOf="@id/watch_face_arms_and_ticks"
-        app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintBottom_toBottomOf="parent"
+        android:background="@android:color/transparent"
         android:src="@drawable/added_complication"
-        style="?android:borderlessButtonStyle"
-        android:background="@android:color/transparent"/>
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        tools:layout_editor_absoluteX="-16dp" />
 
     <ImageButton
         android:id="@+id/left_complication"
+        style="?android:borderlessButtonStyle"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginLeft="-12dp"
-        app:layout_constraintLeft_toLeftOf="@id/watch_face_arms_and_ticks"
-        app:layout_constraintTop_toTopOf="parent"
+        android:background="@android:color/transparent"
         app:layout_constraintBottom_toBottomOf="parent"
-        style="?android:borderlessButtonStyle"
-        android:background="@android:color/transparent"/>
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintVertical_bias="0.503"
+        tools:layout_editor_absoluteX="-16dp" />
 
     <ImageView
         android:id="@+id/right_complication_background"
         style="?android:borderlessButtonStyle"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginRight="-12dp"
         android:background="@android:color/transparent"
         android:src="@drawable/added_complication"
         app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintRight_toRightOf="@id/watch_face_arms_and_ticks"
-        app:layout_constraintTop_toTopOf="parent" />
+        app:layout_constraintTop_toTopOf="parent"
+        tools:layout_editor_absoluteX="140dp" />
 
     <ImageButton
         android:id="@+id/right_complication"
         style="?android:borderlessButtonStyle"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginRight="-12dp"
         android:background="@android:color/transparent"
         app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintRight_toRightOf="@id/watch_face_arms_and_ticks"
-        app:layout_constraintTop_toTopOf="parent" />
+        app:layout_constraintTop_toTopOf="parent"
+        tools:layout_editor_absoluteX="140dp" />
 
     <ImageView
         android:id="@+id/top_complication_background"
