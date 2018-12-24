@@ -12,4 +12,9 @@
     <string name="watchface_style_selector">Watchface Style</string>
     <string name="watchface_day_date_selector">Day/Date</string>
     <string name="notifications">Notifications</string>
+
+    <string name="left_complication">Left Complication</string>
+    <string name="right_complication">Right Complication</string>
+    <string name="top_complication">Top Complication</string>
+    <string name="bottom_complication">Bottom Complication</string>
 </resources>

@@ -40,73 +40,77 @@ based on changes by the user.
 
     <ImageView
         android:id="@+id/left_complication_background"
-        style="?android:borderlessButtonStyle"
+        style="@style/ButtonConfigurationStyle"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:background="@android:color/transparent"
         android:src="@drawable/added_complication"
+        app:layout_constraintLeft_toLeftOf="parent"
         app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintTop_toTopOf="parent"
-        tools:layout_editor_absoluteX="-16dp" />
+        app:layout_constraintTop_toTopOf="parent" />
 
     <ImageButton
         android:id="@+id/left_complication"
-        style="?android:borderlessButtonStyle"
+        style="@style/ButtonConfigurationStyle"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:background="@android:color/transparent"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintVertical_bias="0.503"
-        tools:layout_editor_absoluteX="-16dp" />
+        android:contentDescription="@string/left_complication"
+        app:layout_constraintBottom_toBottomOf="@+id/left_complication_background"
+        app:layout_constraintLeft_toLeftOf="@id/left_complication_background"
+        app:layout_constraintRight_toRightOf="@id/left_complication_background"
+        app:layout_constraintTop_toTopOf="@id/left_complication_background" />
 
     <ImageView
         android:id="@+id/right_complication_background"
-        style="?android:borderlessButtonStyle"
+        style="@style/ButtonConfigurationStyle"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:background="@android:color/transparent"
         android:src="@drawable/added_complication"
+        app:layout_constraintRight_toRightOf="parent"
         app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintTop_toTopOf="parent"
-        tools:layout_editor_absoluteX="140dp" />
+        app:layout_constraintTop_toTopOf="parent" />
 
     <ImageButton
         android:id="@+id/right_complication"
-        style="?android:borderlessButtonStyle"
+        style="@style/ButtonConfigurationStyle"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:background="@android:color/transparent"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintTop_toTopOf="parent"
-        tools:layout_editor_absoluteX="140dp" />
+        android:contentDescription="@string/right_complication"
+        app:layout_constraintBottom_toBottomOf="@+id/right_complication_background"
+        app:layout_constraintLeft_toLeftOf="@id/right_complication_background"
+        app:layout_constraintRight_toRightOf="@id/right_complication_background"
+        app:layout_constraintTop_toTopOf="@id/right_complication_background" />
 
     <ImageView
         android:id="@+id/top_complication_background"
-        style="?android:borderlessButtonStyle"
+        style="@style/ButtonConfigurationStyle"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginTop="4dp"
         android:background="@android:color/transparent"
         android:src="@drawable/added_complication"
+        android:layout_marginTop="4dp"
         app:layout_constraintLeft_toLeftOf="parent"
         app:layout_constraintRight_toRightOf="parent"
-        app:layout_constraintTop_toTopOf="@id/watch_face_arms_and_ticks" />
+        app:layout_constraintTop_toTopOf="@+id/watch_face_arms_and_ticks" />
 
     <ImageButton
         android:id="@+id/top_complication"
-        style="?android:borderlessButtonStyle"
+        style="@style/ButtonConfigurationStyle"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginTop="4dp"
         android:background="@android:color/transparent"
-        app:layout_constraintLeft_toLeftOf="parent"
-        app:layout_constraintRight_toRightOf="parent"
-        app:layout_constraintTop_toTopOf="@id/watch_face_arms_and_ticks" />
+        android:contentDescription="@string/top_complication"
+        app:layout_constraintBottom_toBottomOf="@+id/top_complication_background"
+        app:layout_constraintLeft_toLeftOf="@id/top_complication_background"
+        app:layout_constraintRight_toRightOf="@id/top_complication_background"
+        app:layout_constraintTop_toTopOf="@id/top_complication_background" />
 
     <ImageView
         android:id="@+id/bottom_complication_background"
-        style="?android:borderlessButtonStyle"
+        style="@style/ButtonConfigurationStyle"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginBottom="4dp"
@@ -118,12 +122,13 @@ based on changes by the user.
 
     <ImageButton
         android:id="@+id/bottom_complication"
-        style="?android:borderlessButtonStyle"
+        style="@style/ButtonConfigurationStyle"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginBottom="4dp"
         android:background="@android:color/transparent"
-        app:layout_constraintBottom_toBottomOf="@id/watch_face_arms_and_ticks"
-        app:layout_constraintLeft_toLeftOf="parent"
-        app:layout_constraintRight_toRightOf="parent" />
+        android:contentDescription="@string/bottom_complication"
+        app:layout_constraintBottom_toBottomOf="@+id/bottom_complication_background"
+        app:layout_constraintLeft_toLeftOf="@id/bottom_complication_background"
+        app:layout_constraintRight_toRightOf="@id/bottom_complication_background"
+        app:layout_constraintTop_toTopOf="@id/bottom_complication_background" />
 </androidx.constraintlayout.widget.ConstraintLayout>
