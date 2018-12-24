@@ -18,14 +18,12 @@ import android.support.wearable.complications.ProviderInfoRetriever
 import android.support.wearable.complications.ProviderInfoRetriever.OnProviderInfoReceivedCallback
 import android.support.wearable.watchface.CanvasWatchFaceService
 import android.view.LayoutInflater
-import android.view.MotionEvent.*
 import android.view.View
 import android.view.View.OnClickListener
 import android.view.ViewGroup
 import android.widget.ImageButton
 import android.widget.ImageView
 import android.widget.Switch
-import android.widget.ToggleButton
 import androidx.recyclerview.widget.RecyclerView
 
 import java.util.concurrent.Executors

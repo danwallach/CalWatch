@@ -63,6 +63,8 @@ TODO update the slides
     adding Kotlin material.
 
 ANDROID N / WEAR 2.0 OVERHAUL
+    TODO: fix the background of the complication picker so it's not cut-off at the sides
+
     TODO: Always on mode on the Fossil shifts the display, but leaves pixels behind; investigate better screen clearing?
       -- seems to be fixed?
 
