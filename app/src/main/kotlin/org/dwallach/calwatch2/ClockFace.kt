@@ -32,7 +32,7 @@ import java.util.Observer
  * All of the graphics calls for drawing watchfaces happen here. Note that this class knows
  * nothing about Android widgets, views, or activities. That stuff is handled in CalWatchFaceService.
  */
-class ClockFace: Observer, AnkoLogger {
+class ClockFace(val configMode: Boolean = false): Observer, AnkoLogger {
     // an instance of the ClockFace class is created anew alongside the rest of the UI; this number
     // helps us keep track of which instance is which
     private val instanceID: Int
@@ -170,7 +170,7 @@ class ClockFace: Observer, AnkoLogger {
 
             // NOTE: We used to also do this for the "AMBIENT" style, but we're removing it so
             // more of the screen is black, and thus we save power on OLED screens.
-            if (drawStyle == Style.NORMAL) drawCalendar(canvas)
+            if (drawStyle == Style.NORMAL && !configMode) drawCalendar(canvas)
 
             // next, we draw the indices or numbers of the watchface
             drawFace(canvas)
@@ -179,17 +179,17 @@ class ClockFace: Observer, AnkoLogger {
 
             // We disable the battery meter when we're in ambientMode with burnInProtection, since
             // we don't want to burn a hole in the very center of the screen.
-            if (!burninProtectionMode()) drawBattery(canvas)
+            if (!burninProtectionMode() && !configMode) drawBattery(canvas)
 
             // We're drawing the complications *before* the hands. We tried it after, but it
             // looks awful in ambient mode.
 
             // (If we don't have calendar permission, then we'll be insisting on that before
             // we do any complications. Any click will cause a permission dialog. Good UX?)
-            if (calendarPermission)
+            if (calendarPermission && !configMode)
                 ComplicationWrapper.drawComplications(canvas, currentTimeMillis)
 
-            drawHands(canvas)
+            if (!configMode) drawHands(canvas)
 
             // something a real watch can't do: float the text over the hands
             // (but disable when we're in ambientMode with burnInProtection)

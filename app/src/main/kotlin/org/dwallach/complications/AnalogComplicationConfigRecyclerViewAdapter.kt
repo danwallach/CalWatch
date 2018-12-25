@@ -1,6 +1,6 @@
 /*
  * CalWatch Complications Support
- * Copyright (C) 2017 by Dan Wallach
+ * Copyright (C) 2017-2018 by Dan Wallach
  * Home page: http://www.cs.rice.edu/~dwallach/calwatch/
  * Licensing: http://www.cs.rice.edu/~dwallach/calwatch/licensing.html
  */
@@ -29,6 +29,7 @@ import androidx.recyclerview.widget.RecyclerView
 import java.util.concurrent.Executors
 
 import org.dwallach.R
+import org.dwallach.calwatch2.ClockFaceConfigView
 import org.dwallach.calwatch2.ClockState
 import org.dwallach.calwatch2.PreferencesHelper
 import org.dwallach.complications.AnalogComplicationConfigData.ConfigItemType
@@ -117,6 +118,7 @@ class AnalogComplicationConfigRecyclerViewAdapter(
                             ClockState.showDayDate = it
                             PreferencesHelper.savePreferences(parent.context)
                             ClockState.pingObservers()
+                            ClockFaceConfigView.redraw()
                         })
 
             else -> throw RuntimeException("unknown viewType: $viewType")

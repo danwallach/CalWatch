@@ -1,6 +1,6 @@
 /*
  * CalWatch Complications Support
- * Copyright (C) 2017 by Dan Wallach
+ * Copyright (C) 2017-2018 by Dan Wallach
  * Home page: http://www.cs.rice.edu/~dwallach/calwatch/
  * Licensing: http://www.cs.rice.edu/~dwallach/calwatch/licensing.html
  */
@@ -339,11 +339,12 @@ object ComplicationWrapper : AnkoLogger {
      * Call this if the watchface complication is of the NO_PERMISSION type, so we need
      * to request the permission.
      */
-    private fun launchPermissionForComplication() =
+    private fun launchPermissionForComplication() {
         // kinda baffling that this is even necessary; why aren't permissions dealt with when you add the complication?
         watchFace.startActivity(
                 ComplicationHelperActivity.createPermissionRequestHelperIntent(
                         watchFace, ComponentName(watchFace, watchFaceClass)))
+    }
 
     /**
      * Call this if you've got a tap event that might belong to the complication system. As a side
