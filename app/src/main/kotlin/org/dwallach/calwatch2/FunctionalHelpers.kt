@@ -44,3 +44,19 @@ inline fun <A: Any, B: Any, R> Either<A, B>.match(leftF: (A) -> R, rightF: (B) -
     isRight -> rightF(right as B)
     else -> throw RuntimeException("Something bad happened here")
 }
+
+/**
+ * Given any function from K to V (both non-null, otherwise unconstrained), returns
+ * another function, also from K to V, which memoizes the results, only calling the
+ * internal function exactly once for each input.
+ */
+fun <K: Any, V: Any, F : (K) -> V> F.memoize(): (K) -> V {
+    val map = mutableMapOf<K, V>()
+    return {
+        map[it] ?: {
+            val newV = this(it)
+            map[it] = newV
+            newV
+        }()
+    }
+}

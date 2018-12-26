@@ -18,17 +18,21 @@
 Stacked views to create watch face preview in settings activity's recycler view for live updates
 based on changes by the user.
 -->
-<androidx.constraintlayout.widget.ConstraintLayout xmlns:tools="http://schemas.android.com/tools"
-    android:id="@+id/preview_and_complications_item"
-    xmlns:android="http://schemas.android.com/apk/res/android"
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/preview_and_complications_item"
     android:layout_width="match_parent"
-    android:layout_height="match_parent">
+    android:layout_height="wrap_content">
 
     <org.dwallach.calwatch2.ClockFaceConfigView
         android:id="@+id/watch_face_arms_and_ticks"
         android:layout_width="match_parent"
-        android:layout_height="match_parent" />
+        android:layout_height="0dp"
+        app:layout_constraintDimensionRatio="1:1"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
 
 
     <ImageView
@@ -39,9 +43,9 @@ based on changes by the user.
         android:layout_marginLeft="2dp"
         android:background="@android:color/transparent"
         android:src="@drawable/added_complication"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintLeft_toLeftOf="parent"
-        app:layout_constraintTop_toTopOf="parent" />
+        app:layout_constraintBottom_toBottomOf="@id/watch_face_arms_and_ticks"
+        app:layout_constraintLeft_toLeftOf="@id/watch_face_arms_and_ticks"
+        app:layout_constraintTop_toTopOf="@id/watch_face_arms_and_ticks" />
 
     <ImageButton
         android:id="@+id/left_complication"
@@ -63,9 +67,9 @@ based on changes by the user.
         android:layout_marginRight="2dp"
         android:background="@android:color/transparent"
         android:src="@drawable/added_complication"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintRight_toRightOf="parent"
-        app:layout_constraintTop_toTopOf="parent" />
+        app:layout_constraintBottom_toBottomOf="@id/watch_face_arms_and_ticks"
+        app:layout_constraintRight_toRightOf="@id/watch_face_arms_and_ticks"
+        app:layout_constraintTop_toTopOf="@id/watch_face_arms_and_ticks" />
 
     <ImageButton
         android:id="@+id/right_complication"
@@ -84,11 +88,11 @@ based on changes by the user.
         style="@style/ButtonConfigurationStyle"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginTop="28dp"
+        android:layout_marginTop="2dp"
         android:background="@android:color/transparent"
         android:src="@drawable/added_complication"
-        app:layout_constraintLeft_toLeftOf="parent"
-        app:layout_constraintRight_toRightOf="parent"
+        app:layout_constraintLeft_toLeftOf="@id/watch_face_arms_and_ticks"
+        app:layout_constraintRight_toRightOf="@id/watch_face_arms_and_ticks"
         app:layout_constraintTop_toTopOf="@+id/watch_face_arms_and_ticks" />
 
     <ImageButton
@@ -108,12 +112,12 @@ based on changes by the user.
         style="@style/ButtonConfigurationStyle"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginBottom="28dp"
+        android:layout_marginBottom="2dp"
         android:background="@android:color/transparent"
         android:src="@drawable/added_complication"
         app:layout_constraintBottom_toBottomOf="@id/watch_face_arms_and_ticks"
-        app:layout_constraintLeft_toLeftOf="parent"
-        app:layout_constraintRight_toRightOf="parent" />
+        app:layout_constraintLeft_toLeftOf="@id/watch_face_arms_and_ticks"
+        app:layout_constraintRight_toRightOf="@id/watch_face_arms_and_ticks" />
 
     <ImageButton
         android:id="@+id/bottom_complication"

@@ -98,7 +98,6 @@ class CalWatchFaceService : CanvasWatchFaceService(), AnkoLogger {
             clockFace = ClockFace()
             clockFace.missingCalendarDrawable = getDrawable(R.drawable.ic_empty_calendar)
 
-
             ClockState.addObserver(this) // callbacks if something changes
 
             CalendarPermission.init(this@CalWatchFaceService)
@@ -107,10 +106,9 @@ class CalWatchFaceService : CanvasWatchFaceService(), AnkoLogger {
 
             ComplicationWrapper.init(this@CalWatchFaceService, this, listOf(BACKGROUND, RIGHT, TOP, BOTTOM))
             styleComplications {
-                setBackgroundColorActive(PaintCan[Style.NORMAL, Brush.COMPLICATION_BG].color)
-//                setBackgroundColorAmbient(PaintCan[Style.AMBIENT, Brush.COMPLICATION_BG].color)
-                setBorderColorActive(PaintCan[Style.NORMAL, Brush.COMPLICATION_FG].color)
-                setBorderColorAmbient(PaintCan[Style.AMBIENT, Brush.COMPLICATION_FG].color)
+                setBackgroundColorActive(PaintCan.COMPLICATION_BG_COLOR)
+                setBorderColorActive(PaintCan.COMPLICATION_FG_COLOR)
+                setBorderColorAmbient(PaintCan.COMPLICATION_FG_COLOR)
             }
         }
 

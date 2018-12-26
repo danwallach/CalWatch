@@ -17,33 +17,8 @@ import org.jetbrains.anko.*
  * the same color twice.
  * Created by dwallach on 8/15/14.
  */
-object PaintCan: AnkoLogger {
-    private var paintMap = emptyMap<Int,Paint>()
-
-    /**
-     * This gets a Paint of a given color. If the same color is requested more than once,
-     * the Paint will only be created once and is internally cached. We use this for the
-     * calendar wedges, where the colors are coming from the user's calendar.
-     *
-     * This is *not* meant for use in low-bit mode, when anti-aliasing is forbidden.
-     * In that mode, we behave completely differently, drawing thin arcs rather than
-     * large wedges.
-     */
-    fun getCalendarPaint(argb: Int): Paint {
-        return paintMap[argb] ?: {
-            val newPaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
-                strokeJoin = Paint.Join.BEVEL
-                color = argb
-                style = Paint.Style.FILL
-            }
-
-            paintMap += argb to newPaint // cache the resulting Paint object for next time
-            newPaint
-        }()
-    }
-
-    private lateinit var palette: Array<Array<Paint?>>
-
+class PaintCan(val radius: Float): AnkoLogger {
+    private var palette: Array<Array<Paint?>>
 
     enum class Style {
         NORMAL,
@@ -70,76 +45,15 @@ object PaintCan: AnkoLogger {
         BLACK_FILL,
         LOWBIT_CALENDAR_FILL,
         BIG_SHADOW,
-        COMPLICATION_BG,
-        COMPLICATION_FG,
         MAX
-    }
-
-
-    /**
-     * This generates all the Paint that we'll need for drawing the watchface. These are all cached
-     * in the palette and accessed elsewhere via PaintCan.get().
-     */
-    private fun watchfacePaint(_argb: Int, _style: Style, _textSize: Float, _strokeWidth: Float, forceColorAmbient: Boolean = false) =
-        // underscores in the formal parameters to fix the variable shadowing in the apply block, below
-        Paint(Paint.SUBPIXEL_TEXT_FLAG or Paint.HINTING_ON).apply {
-            strokeCap = Paint.Cap.SQUARE
-            strokeWidth = _strokeWidth
-            textSize = _textSize
-            style = Paint.Style.FILL
-            textAlign = Paint.Align.CENTER
-            isAntiAlias = when(_style) {
-                Style.NORMAL, Style.AMBIENT, Style.AMBIENT_ANTI_BURNIN -> true
-                else -> false // anti-aliasing is forbidden in the low-bit modes
-            }
-
-            // In specific cases, we're going to force colors to be colorful even in ambient mode (see below)
-            val effectiveStyle = if(_style == Style.AMBIENT && forceColorAmbient) Style.NORMAL else _style
-
-            color = when (effectiveStyle) {
-                Style.NORMAL -> _argb
-
-                Style.LOWBIT, Style.LOWBIT_ANTI_BURNIN -> when(_argb) {
-                    //
-                    // Quoth the Google: One reduced color space power saving method is to use a
-                    // "low-bit" mode. In low-bit mode, the available colors are limited to
-                    // black, white, blue, red, magenta, green, cyan, and yellow.
-                    //
-                    // http://developer.android.com/design/wear/watchfaces.html
-                    //
-                    // So we'll pass those colors through unmolested. On some watches, like the Moto 360 Sport,
-                    // you still only get black & white, so all of these non-black colors just become white.
-                    //
-                    Color.BLACK, Color.WHITE, Color.BLUE, Color.RED, Color.MAGENTA,
-                    Color.GREEN, Color.CYAN, Color.YELLOW -> _argb
-
-                    //
-                    // Any other color is mashed into being pure white or black
-                    //
-                    else -> if (_argb and 0xffffff > 0) 0xffffffff.toInt() else 0xff000000.toInt()
-                }
-
-                Style.AMBIENT, Style.AMBIENT_ANTI_BURNIN -> argbToGreyARGB(_argb)
-
-                else -> {
-                    error { "watchfacePaint: unknown style: $_style" }
-                    0
-                }
-            }
-        }
-
-    init {
-        initPaintBucket(300f) // half-assed way to get started, but necessary if we restart directly into the settings dialog
     }
 
     /**
      * Create all the Paint instances used in the watch face. Call this every time the
      * watch radius changes, perhaps because of a resize event on the phone. Make sure
      * to call this *before* trying to get() any colors, or you'll get a NullPointerException.
-
-     * @param radius Radius of the watch face, used to scale all of the line widths
      */
-    fun initPaintBucket(radius: Float) {
+    init {
         verbose { "initPaintBucket: $radius" }
 
         val textSize = radius / 3f
@@ -171,10 +85,6 @@ object PaintCan: AnkoLogger {
             palette[i][LOWBIT_CALENDAR_FILL.ordinal] = watchfacePaint(Color.WHITE, style, textSize, lineWidth) // the docs claim we have access to other colors here, like CYAN, but that's not true at least on the Moto 360 Sport
             palette[i][MONTHBOX_SHADOW.ordinal] = watchfacePaint(Color.BLACK, style, smTextSize, lineWidth / 4f)
 
-            // toInt because of a Kotlin bug: https://youtrack.jetbrains.com/issue/KT-4749
-            palette[i][COMPLICATION_BG.ordinal] = watchfacePaint(0x80000000.toInt(), style, smTextSize, lineWidth / 8f) // black + transparency
-            palette[i][COMPLICATION_FG.ordinal] = watchfacePaint(Color.WHITE, style, smTextSize, lineWidth / 8f)
-
             // shadows are stroke, not fill, so we fix that here
             palette[i][HAND_SHADOW.ordinal]?.style = Paint.Style.STROKE
             palette[i][TICK_SHADOW.ordinal]?.style = Paint.Style.STROKE
@@ -191,11 +101,7 @@ object PaintCan: AnkoLogger {
         // In anti-burnin mode: we'll be drawing some "shadows" as
         // white outlines around black centers, "hollowing out" the hands as we're supposed to do.
         for (style in listOf(Style.AMBIENT, Style.AMBIENT_ANTI_BURNIN, Style.LOWBIT_ANTI_BURNIN)) {
-
             val i = style.ordinal
-
-            palette[i][COMPLICATION_BG.ordinal] =
-                    watchfacePaint(0x00000000.toInt(), style, smTextSize, lineWidth / 8f) // black + fully transparent
 
             palette[i][HAND_SHADOW.ordinal]?.color = Color.WHITE
             palette[i][HAND_SHADOW.ordinal]?.strokeWidth = lineWidth / 6f
@@ -213,11 +119,7 @@ object PaintCan: AnkoLogger {
 //            palette[i][MONTHBOX_TEXT.ordinal]?.color = Color.BLACK
             palette[i][BIG_TEXT_AND_LINES.ordinal]?.color = Color.BLACK
             palette[i][BIG_SHADOW.ordinal]?.color = Color.WHITE
-
-            palette[i][COMPLICATION_BG.ordinal]?.color = Color.BLACK
-            palette[i][COMPLICATION_BG.ordinal]?.color = Color.BLACK
         }
-
     }
 
     /**
@@ -227,31 +129,110 @@ object PaintCan: AnkoLogger {
     operator fun get(style: Style, brushId: Brush): Paint =
         requireNotNull(palette[style.ordinal][brushId.ordinal], { "undefined paintcan color, style($style), brushId($brushId)" })
 
-    fun getCalendarGreyPaint(argb: Int) = getCalendarPaint(argbToGreyARGB(argb))
+    companion object: AnkoLogger {
+        private fun colorFunc(argb: Int) = Paint(Paint.ANTI_ALIAS_FLAG).apply {
+            strokeJoin = Paint.Join.BEVEL
+            color = argb
+            style = Paint.Style.FILL
+        }
 
-    private fun argbToLuminance(argb: Int): Float {
-        val r = (argb and 0xff0000) shr 16
-        val g = (argb and 0xff00) shr 8
-        val b = argb and 255
+        private val colorFuncMemo = ::colorFunc.memoize()
 
-        val fr = r / 255.0f
-        val fg = g / 255.0f
-        val fb = b / 255.0f
+        /**
+         * This gets a Paint of a given color. If the same color is requested more than once,
+         * the Paint will only be created once and is internally cached. We use this for the
+         * calendar wedges, where the colors are coming from the user's calendar.
+         *
+         * This is *not* meant for use in low-bit mode, when anti-aliasing is forbidden.
+         * In that mode, we behave completely differently, drawing thin arcs rather than
+         * large wedges.
+         */
+        fun getCalendarPaint(argb: Int): Paint = colorFuncMemo(argb)
 
-        // Many different codes (for reference):
-        // http://www.f4.fhtw-berlin.de/~barthel/ImageJ/ColorInspector/HTMLHelp/farbraumJava.htm
-        var fy = .299f * fr + .587f * fg + .114f * fb
+        /**
+         * This gets a greyscale Paint based on the given color, otherwise behaving
+         * the same as [getCalendarPaint].
+         */
+        fun getCalendarGreyPaint(argb: Int) = getCalendarPaint(argbToGreyARGB(argb))
 
-        // clipping shouldn't be necessary, but paranoia is warranted
-        if (fy > 1.0f) fy = 1.0f
+        private fun argbToLuminance(argb: Int): Float {
+            val r = (argb and 0xff0000) shr 16
+            val g = (argb and 0xff00) shr 8
+            val b = argb and 255
 
-        return fy
+            val fr = r / 255.0f
+            val fg = g / 255.0f
+            val fb = b / 255.0f
 
-    }
+            // Many different codes (for reference):
+            // http://www.f4.fhtw-berlin.de/~barthel/ImageJ/ColorInspector/HTMLHelp/farbraumJava.htm
+            var fy = .299f * fr + .587f * fg + .114f * fb
 
-    private fun argbToGreyARGB(argb: Int): Int {
-        val a = (argb and 0xff000000.toInt()) shr 24 // toInt because of a Kotlin bug: https://youtrack.jetbrains.com/issue/KT-4749
-        val y = (argbToLuminance(argb) * 255f).toInt()
-        return a shl 24 or (y shl 16) or (y shl 8) or y
+            // clipping shouldn't be necessary, but paranoia is warranted
+            if (fy > 1.0f) fy = 1.0f
+
+            return fy
+
+        }
+
+        private fun argbToGreyARGB(argb: Int): Int {
+            val a = (argb and 0xff000000.toInt()) shr 24 // toInt because of a Kotlin bug: https://youtrack.jetbrains.com/issue/KT-4749
+            val y = (argbToLuminance(argb) * 255f).toInt()
+            return a shl 24 or (y shl 16) or (y shl 8) or y
+        }
+
+        /**
+         * This generates all the Paint that we'll need for drawing the watchface. These are all cached.
+         */
+        private fun watchfacePaint(_argb: Int, _style: Style, _textSize: Float, _strokeWidth: Float, forceColorAmbient: Boolean = false) =
+        // underscores in the formal parameters to fix the variable shadowing in the apply block, below
+                Paint(Paint.SUBPIXEL_TEXT_FLAG or Paint.HINTING_ON).apply {
+                    strokeCap = Paint.Cap.SQUARE
+                    strokeWidth = _strokeWidth
+                    textSize = _textSize
+                    style = Paint.Style.FILL
+                    textAlign = Paint.Align.CENTER
+                    isAntiAlias = when(_style) {
+                        Style.NORMAL, Style.AMBIENT, Style.AMBIENT_ANTI_BURNIN -> true
+                        else -> false // anti-aliasing is forbidden in the low-bit modes
+                    }
+
+                    // In specific cases, we're going to force colors to be colorful even in ambient mode (see below)
+                    val effectiveStyle = if(_style == Style.AMBIENT && forceColorAmbient) Style.NORMAL else _style
+
+                    color = when (effectiveStyle) {
+                        Style.NORMAL -> _argb
+
+                        Style.LOWBIT, Style.LOWBIT_ANTI_BURNIN -> when(_argb) {
+                            //
+                            // Quoth the Google: One reduced color space power saving method is to use a
+                            // "low-bit" mode. In low-bit mode, the available colors are limited to
+                            // black, white, blue, red, magenta, green, cyan, and yellow.
+                            //
+                            // http://developer.android.com/design/wear/watchfaces.html
+                            //
+                            // So we'll pass those colors through unmolested. On some watches, like the Moto 360 Sport,
+                            // you still only get black & white, so all of these non-black colors just become white.
+                            //
+                            Color.BLACK, Color.WHITE, Color.BLUE, Color.RED, Color.MAGENTA,
+                            Color.GREEN, Color.CYAN, Color.YELLOW -> _argb
+
+                            //
+                            // Any other color is mashed into being pure white or black
+                            //
+                            else -> if (_argb and 0xffffff > 0) 0xffffffff.toInt() else 0xff000000.toInt()
+                        }
+
+                        Style.AMBIENT, Style.AMBIENT_ANTI_BURNIN -> argbToGreyARGB(_argb)
+
+                        else -> {
+                            error { "watchfacePaint: unknown style: $_style" }
+                            0
+                        }
+                    }
+                }
+
+        val COMPLICATION_BG_COLOR = watchfacePaint(0x80000000.toInt(), Style.NORMAL, 0f, 0f).color
+        val COMPLICATION_FG_COLOR = watchfacePaint(Color.WHITE, Style.NORMAL, 0f, 0f).color
     }
 }

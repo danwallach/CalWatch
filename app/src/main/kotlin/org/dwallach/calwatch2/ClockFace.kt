@@ -49,7 +49,7 @@ class ClockFace(val configMode: Boolean = false): Observer, AnkoLogger {
     private var eventList: List<EventWrapper> = emptyList()
     private var maxLevel: Int = 0
 
-
+    private var paintCan: PaintCan = PaintCan(400f) // initial value, will be overridden by setSize()
 
     private var drawStyle = Style.NORMAL // see updateDrawStyle
 
@@ -223,7 +223,7 @@ class ClockFace(val configMode: Boolean = false): Observer, AnkoLogger {
         var lseconds = seconds
         var startRadius = startRadiusRatio
         var endRadius = endRadiusRatio
-        var strokeWidth = startStrokeWidth
+        val strokeWidth = startStrokeWidth
 
         if (flatBottomHack) {
             val clipRadius = radiusToEdge(lseconds)
@@ -282,8 +282,8 @@ class ClockFace(val configMode: Boolean = false): Observer, AnkoLogger {
      * argument, which will make things go much faster.
      */
     private fun drawRadialArc(canvas: Canvas, path: Path?, secondsStart: Double, secondsEnd: Double, startRadiusRatio: Float, endRadiusRatio: Float, paint: Paint, outlinePaint: Paint?): Path {
-        var startRadius = startRadiusRatio
-        var endRadius = endRadiusRatio
+        val startRadius = startRadiusRatio
+        val endRadius = endRadiusRatio
         /*
          * Below is an attempt to do this "correctly" using the arc functionality supported natively
          * by Android's Path.
@@ -299,8 +299,6 @@ class ClockFace(val configMode: Boolean = false): Observer, AnkoLogger {
         if (p == null) {
             p = Path()
 
-            val midOval = getRectRadius((startRadius + endRadius) / 2f + 0.025f)
-            val midOvalDelta = getRectRadius((startRadius + endRadius) / 2f - 0.025f)
             val startOval = getRectRadius(startRadius)
             val endOval = getRectRadius(endRadius)
             p.arcTo(startOval, (secondsStart * 6 - 90).toFloat(), ((secondsEnd - secondsStart) * 6).toFloat(), true)
@@ -322,8 +320,8 @@ class ClockFace(val configMode: Boolean = false): Observer, AnkoLogger {
         val x1 = clockX(45.0, .85f)
         val y1 = clockY(45.0, .85f)
 
-        val paint = PaintCan[drawStyle, Brush.MONTHBOX_TEXT]
-        val shadow = PaintCan[drawStyle, Brush.MONTHBOX_SHADOW]
+        val paint = paintCan[drawStyle, Brush.MONTHBOX_TEXT]
+        val shadow = paintCan[drawStyle, Brush.MONTHBOX_SHADOW]
 
         // AA note: we only draw the month box when in normal mode, not ambient, so no AA gymnastics here
 
@@ -367,10 +365,10 @@ class ClockFace(val configMode: Boolean = false): Observer, AnkoLogger {
         val lFaceMode = ClockState.faceMode
         var lFacePathCache = getCachedFacePath(lFaceMode)
 
-        val colorTickShadow = PaintCan[drawStyle, Brush.TICK_SHADOW]
-        val colorSmall = PaintCan[drawStyle, Brush.SMALL_LINES]
-        val colorBig = PaintCan[drawStyle, Brush.BIG_TEXT_AND_LINES]
-        val colorTextShadow = PaintCan[drawStyle, Brush.BIG_SHADOW]
+        val colorTickShadow = paintCan[drawStyle, Brush.TICK_SHADOW]
+        val colorSmall = paintCan[drawStyle, Brush.SMALL_LINES]
+        val colorBig = paintCan[drawStyle, Brush.BIG_TEXT_AND_LINES]
+        val colorTextShadow = paintCan[drawStyle, Brush.BIG_SHADOW]
 
         // check if we've already rendered the face
         if (lFacePathCache == null) {
@@ -526,15 +524,15 @@ class ClockFace(val configMode: Boolean = false): Observer, AnkoLogger {
         val hours = minutes / 12.0  // because drawRadialLine is scaled to a 60-unit circle
 
 
-        val shadowColor = PaintCan[drawStyle, Brush.HAND_SHADOW]
-        val hourColor = PaintCan[drawStyle, Brush.HOUR_HAND]
-        val minuteColor = PaintCan[drawStyle, Brush.MINUTE_HAND]
+        val shadowColor = paintCan[drawStyle, Brush.HAND_SHADOW]
+        val hourColor = paintCan[drawStyle, Brush.HOUR_HAND]
+        val minuteColor = paintCan[drawStyle, Brush.MINUTE_HAND]
 
         drawRadialLine(canvas, hours, 0.1f, 0.6f, hourColor, shadowColor)
         drawRadialLine(canvas, minutes, 0.1f, 0.9f, minuteColor, shadowColor)
 
         if (drawStyle == Style.NORMAL && showSeconds) {
-            val secondsColor = PaintCan[Style.NORMAL, Brush.SECOND_HAND]
+            val secondsColor = paintCan[Style.NORMAL, Brush.SECOND_HAND]
             // Cleverness: we're doing "nonLinearSeconds" which gives us the funky sweeping
             // behavior that European rail clocks demonstrate. The only thing that "real" rail
             // clocks have the we don't is a two second hard stop at 12 o'clock.
@@ -596,7 +594,7 @@ class ClockFace(val configMode: Boolean = false): Observer, AnkoLogger {
             // path caching happens inside drawRadialArc
 
             val arcColor = it.paint
-            val arcShadow = PaintCan[drawStyle, Brush.ARC_SHADOW]
+            val arcShadow = paintCan[drawStyle, Brush.ARC_SHADOW]
 
             it.path = drawRadialArc(canvas, it.path, arcStart, arcEnd,
                     CALENDAR_RING_MAX_RADIUS - evMinLevel * CALENDAR_RING_WIDTH / (maxLevel + 1),
@@ -687,7 +685,7 @@ class ClockFace(val configMode: Boolean = false): Observer, AnkoLogger {
 
             stipplePathCache = lStipplePathCache
         }
-        canvas.drawPath(lStipplePathCache, PaintCan[drawStyle, Brush.BLACK_FILL])
+        canvas.drawPath(lStipplePathCache, paintCan[drawStyle, Brush.BLACK_FILL])
     }
 
     private var batteryPathCache: Path? = null
@@ -732,7 +730,7 @@ class ClockFace(val configMode: Boolean = false): Observer, AnkoLogger {
         // note that we'll flip the color from white to red once the battery gets below 10%
         // (in ambient mode, we can't show it at all because of burn-in issues)
         if (batteryPathCache != null) {
-            val paint = PaintCan[drawStyle, if (batteryCritical) Brush.BATTERY_CRITICAL else Brush.BATTERY_LOW]
+            val paint = paintCan[drawStyle, if (batteryCritical) Brush.BATTERY_CRITICAL else Brush.BATTERY_LOW]
             canvas.drawPath(lBatteryPathCache, paint)
         }
     }
@@ -749,18 +747,15 @@ class ClockFace(val configMode: Boolean = false): Observer, AnkoLogger {
 
         radius = if (cx > cy) cy else cx // minimum of the two
 
-        ClockState.screenX = cx
-        ClockState.screenY = cy
+        if (!configMode) {
+            computeFlatBottomCorners()
+            updateMissingCalendarRect()
+        }
 
         // This creates all the Paint objects used throughout the draw routines
         // here. Everything scales with the radius of the watchface, which is why
         // we're calling it from here.
-        PaintCan.initPaintBucket(radius.toFloat())
-
-        computeFlatBottomCorners()
-
-        updateMissingCalendarRect()
-
+        paintCan = PaintCan(radius.toFloat())
         wipeCaches()
     }
 

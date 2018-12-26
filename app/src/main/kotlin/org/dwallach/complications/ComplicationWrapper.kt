@@ -16,6 +16,7 @@ import android.support.wearable.complications.ComplicationData.*
 import android.support.wearable.complications.rendering.ComplicationDrawable
 import android.support.wearable.complications.ComplicationHelperActivity
 import android.content.ComponentName
+import org.dwallach.calwatch2.CalWatchFaceService
 import org.dwallach.calwatch2.errorLogAndThrow
 import org.dwallach.complications.ComplicationLocation.*
 import org.jetbrains.anko.*
@@ -83,7 +84,6 @@ import org.jetbrains.anko.*
  */
 object ComplicationWrapper : AnkoLogger {
     private var watchFaceRef: WeakReference<CanvasWatchFaceService?>? = null
-    private var watchFaceClassInternal: Class<out CanvasWatchFaceService>? = null
 
     /**
      * Here's a property to get the CanvasWatchFaceService in use. Set it at startup time.
@@ -97,7 +97,6 @@ object ComplicationWrapper : AnkoLogger {
         set(watchFace) {
             verbose { "Saving watchface service ref in complication wrapper" }
             watchFaceRef = WeakReference(watchFace)
-            watchFaceClassInternal = watchFace::class.java
         }
 
     /**
@@ -105,7 +104,7 @@ object ComplicationWrapper : AnkoLogger {
      * property will have it, even if the watchface itself is garbage collected.
      */
     val watchFaceClass: Class<out CanvasWatchFaceService>
-        get() = watchFaceClassInternal ?: errorLogAndThrow("no watchface class ref found!")
+        get() = CalWatchFaceService::class.java
 
     /**
      * Call this from your main redraw loop and the complications will be rendered to the given canvas.
