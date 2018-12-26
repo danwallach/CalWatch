@@ -1,0 +1,42 @@
+This watch face reads your calendar and displays your events for the next twelve hours around the
+watch dial, using the same colors and visibility as your real calendar. With the configuration
+panel, you can choose from several different face styles, as well as turning on or off the day/date block.
+You can additionally select any complications you wish to add to your watchface.
+
+(Complication support require a Wear 2 device.)
+
+<b>Installation</b>
+
+Once you install CalWatch2, it will show up in the list of watchfaces on your watch as well as in
+the Wear OS app on your phone. You can select it in either place.
+
+<b>A few cool features</b>
+
+&bull; The second hand has a non-linear sweeping effect, similar to what you'll see in many
+European railroad clocks.
+
+&bull; Once your battery is below 33%, a yellow circle appears in the center. As the battery
+level drops, the circle grows. At 10% battery remaining, it turns red.
+
+&bull; CalWatch2 works correctly with "ambient" mode, including "low-bit" mode on watches that require it.
+
+&bull; If you have a Moto 360 or other "flat bottom" round watch, CalWatch2 will adjust itself appropriately.
+
+&bull; The calendars events shown on the watch face are exactly the calendar events that are
+visible from the calendar app on your phone, with the same event times and colors. If you want
+to change what's visible on your watch, run Wear OS app on your phone, then select "Agenda settings".
+
+&bull; The watch will display your calendar events within a twelve hour window. If, for example,
+it's 9:30am, you'll see events starting at 9:00am and lasting through 8:59pm. Any events that
+started before 9am but end in the visible region will still appear, but their start time will
+be clipped. Likewise, any events that start in the visible region but end afterward will have
+the end time clipped. This clipping is shown on the watch face with the ragged edge around
+events at the clipping line.
+
+&bull; CalWatch2 ignores "all day" or any event that would make a full circle around the dial.
+This gives you more room to see the events that start and end in the next 12 hours.
+
+<b>Permissions and privacy</b>
+
+<i>CalWatch2 does not transmit your personal information to anybody!</i> CalWatch2 reads your
+calendar and displays it locally, but never sends anything to the network.
