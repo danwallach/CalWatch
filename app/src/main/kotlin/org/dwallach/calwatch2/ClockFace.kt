@@ -135,6 +135,15 @@ class ClockFace(val configMode: Boolean = false): Observer, AnkoLogger {
     }
 
     /**
+     * Restricted version of [drawEverything] for use in [ClockFaceConfigView], which only
+     * needs to draw the background and nothing else.
+     */
+    fun drawBackgroundOnly(canvas: Canvas) {
+        drawFace(canvas)
+        if (showDayDate) drawMonthBox(canvas)
+    }
+
+    /**
      * Call this from your onDraw() method. Note that one possible side-effect of this will
      * be the asynchronous refresh of the calendar database (inside CalendarFetcher), which might
      * not complete for seconds after drawEverything() returns.
@@ -170,7 +179,7 @@ class ClockFace(val configMode: Boolean = false): Observer, AnkoLogger {
 
             // NOTE: We used to also do this for the "AMBIENT" style, but we're removing it so
             // more of the screen is black, and thus we save power on OLED screens.
-            if (drawStyle == Style.NORMAL && !configMode) drawCalendar(canvas)
+            if (drawStyle == Style.NORMAL) drawCalendar(canvas)
 
             // next, we draw the indices or numbers of the watchface
             drawFace(canvas)
@@ -179,17 +188,17 @@ class ClockFace(val configMode: Boolean = false): Observer, AnkoLogger {
 
             // We disable the battery meter when we're in ambientMode with burnInProtection, since
             // we don't want to burn a hole in the very center of the screen.
-            if (!burninProtectionMode() && !configMode) drawBattery(canvas)
+            if (!burninProtectionMode()) drawBattery(canvas)
 
             // We're drawing the complications *before* the hands. We tried it after, but it
             // looks awful in ambient mode.
 
             // (If we don't have calendar permission, then we'll be insisting on that before
             // we do any complications. Any click will cause a permission dialog. Good UX?)
-            if (calendarPermission && !configMode)
+            if (calendarPermission)
                 ComplicationWrapper.drawComplications(canvas, currentTimeMillis)
 
-            if (!configMode) drawHands(canvas)
+            drawHands(canvas)
 
             // something a real watch can't do: float the text over the hands
             // (but disable when we're in ambientMode with burnInProtection)

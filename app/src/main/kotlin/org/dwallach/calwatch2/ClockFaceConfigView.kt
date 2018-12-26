@@ -38,6 +38,7 @@ class ClockFaceConfigView(context: Context, attrs: AttributeSet): View(context, 
         this.h = h
 
         info { "onSizeChanged: $w, $h" }
+        clockFace.setSize(w, h)
         invalidate()
     }
 
@@ -53,15 +54,12 @@ class ClockFaceConfigView(context: Context, attrs: AttributeSet): View(context, 
 
         // we don't want to clear everything, only the central circle
         canvas.drawCircle(w/2f, h/2f, w/2f, blackPaint)
-        clockFace.drawEverything(canvas)
+        clockFace.drawBackgroundOnly(canvas)
     }
 
     companion object {
         private lateinit var viewRef: WeakReference<ClockFaceConfigView>
 
-        fun redraw() {
-            val view = viewRef.get()
-            if (view != null) view.invalidate()
-        }
+        fun redraw() = viewRef.get()?.invalidate()
     }
 }
