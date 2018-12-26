@@ -58,8 +58,11 @@ class ClockFaceConfigView(context: Context, attrs: AttributeSet): View(context, 
     }
 
     companion object {
-        private lateinit var viewRef: WeakReference<ClockFaceConfigView>
+        private var viewRef: WeakReference<ClockFaceConfigView>? = null
 
-        fun redraw() = viewRef.get()?.invalidate()
+        // If the viewRef isn't present, which should only happen on Wear 1.x, then we'll
+        // do exactly nothing here. On Wear 2+, we'll refresh the image behind the complication
+        // picker to reflect the other choices.
+        fun redraw() = viewRef?.get()?.invalidate()
     }
 }

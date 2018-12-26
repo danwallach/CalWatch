@@ -32,6 +32,7 @@ import org.dwallach.R
 import org.dwallach.calwatch2.ClockFaceConfigView
 import org.dwallach.calwatch2.ClockState
 import org.dwallach.calwatch2.PreferencesHelper
+import org.dwallach.calwatch2.errorLogAndThrow
 import org.dwallach.complications.AnalogComplicationConfigData.ConfigItemType
 import org.dwallach.complications.ComplicationLocation.*
 import org.dwallach.complications.ComplicationWrapper.BOTTOM_COMPLICATION_ID
@@ -50,6 +51,9 @@ class AnalogComplicationConfigRecyclerViewAdapter(
         mContext: Context,
         watchFaceServiceClass: Class<out CanvasWatchFaceService>,
         private val mSettingsDataSet: List<ConfigItemType>) : RecyclerView.Adapter<RecyclerView.ViewHolder>(), AnkoLogger {
+
+    // mapping from configTypes (int) to ConfigItemType
+    private val mSettingsTypeMap = mSettingsDataSet.associateBy { it.configType }
 
     // Useful reading on all this WearableRecylerView nonsense:
     // http://www.technotalkative.com/android-wear-part-5-wearablelistview/
@@ -82,7 +86,8 @@ class AnalogComplicationConfigRecyclerViewAdapter(
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): RecyclerView.ViewHolder {
         verbose { "onCreateViewHolder(): viewType: $viewType" }
 
-        val settings = mSettingsDataSet[viewType]
+        val settings = mSettingsTypeMap[viewType] ?:
+            errorLogAndThrow("No settings for viewType: $viewType")
 
         return when (viewType) {
             TYPE_PREVIEW_AND_COMPLICATIONS_CONFIG -> {
@@ -129,7 +134,6 @@ class AnalogComplicationConfigRecyclerViewAdapter(
     interface HolderInit {
         fun bindInit()
     }
-
 
     override fun onBindViewHolder(viewHolder: RecyclerView.ViewHolder, position: Int) {
         verbose { "Element $position set." }

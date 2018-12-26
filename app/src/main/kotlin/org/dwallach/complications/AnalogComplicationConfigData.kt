@@ -15,7 +15,7 @@ import org.jetbrains.anko.AnkoLogger
 import org.jetbrains.anko.info
 
 object AnalogComplicationConfigData: AnkoLogger {
-    data class ConfigItemType( val configType: Int, val iconResourceId: Int, val layoutId: Int, val inflatedId: Int, val name: String = "")
+    data class ConfigItemType(val configType: Int, val iconResourceId: Int, val layoutId: Int, val inflatedId: Int, val name: String = "", val disabled: Boolean = false)
 
     /**
      * Includes all data to populate each of the different custom
