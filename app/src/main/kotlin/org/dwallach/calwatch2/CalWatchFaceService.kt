@@ -104,7 +104,11 @@ class CalWatchFaceService : CanvasWatchFaceService(), AnkoLogger {
 
             calendarPermissionUpdate()
 
-            ComplicationWrapper.init(this@CalWatchFaceService, this, listOf(BACKGROUND, RIGHT, TOP, BOTTOM))
+            // Note: this is the place where we specify which complications we want and don't want.
+            // We're deliberately disabling the bottom and left complications, since we draw our
+            // own background, and because the left complication is replaced with our built-in day/date
+            // rendering.
+            ComplicationWrapper.init(this@CalWatchFaceService, this, listOf(RIGHT, TOP, BOTTOM))
             styleComplications {
                 setBackgroundColorActive(PaintCan.COMPLICATION_BG_COLOR)
                 setBorderColorActive(PaintCan.COMPLICATION_FG_COLOR)

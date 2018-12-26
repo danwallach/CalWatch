@@ -370,6 +370,12 @@ class ClockFace(val configMode: Boolean = false): Observer, AnkoLogger {
         val colorBig = paintCan[drawStyle, Brush.BIG_TEXT_AND_LINES]
         val colorTextShadow = paintCan[drawStyle, Brush.BIG_SHADOW]
 
+        val strokeWidth =
+                if (lFaceMode == FACE_LITE || lFaceMode == FACE_NUMBERS || drawStyle != Style.NORMAL)
+                    colorSmall.strokeWidth
+                else
+                    colorBig.strokeWidth
+
         // check if we've already rendered the face
         if (lFacePathCache == null) {
             verbose { "drawFace: cx($cx), cy($cy), r($radius)" }
@@ -389,12 +395,6 @@ class ClockFace(val configMode: Boolean = false): Observer, AnkoLogger {
                     if (i % 5 != 0)
                         drawRadialLine(lFacePathCache, colorSmall.strokeWidth, i.toDouble(), 0.9f, 1.0f, false, bottomHack)
                 }
-
-            val strokeWidth =
-                    if (lFaceMode == FACE_LITE || lFaceMode == FACE_NUMBERS || drawStyle != Style.NORMAL)
-                        colorSmall.strokeWidth
-                    else
-                        colorBig.strokeWidth
 
             if (lFaceMode != FACE_NUMBERS) {
                 // top of watch
@@ -467,7 +467,14 @@ class ClockFace(val configMode: Boolean = false): Observer, AnkoLogger {
                     debugMetricsPrinted = true
                     verbose { "x(%.2f), y(%.2f), metrics.descent(%.2f), metrics.asacent(%.2f)".format(x, y, metrics.descent, metrics.ascent) }
                 }
+            } else {
+                val topLineStart = 0.85f
+
+                // we draw double lines here, because style
+                drawRadialLine(lFacePathCache, strokeWidth, -0.4, topLineStart, 1.0f, true, false)
+                drawRadialLine(lFacePathCache, strokeWidth, 0.4, topLineStart, 1.0f, true, false)
             }
+
 
             //
             // 3 o'clock
@@ -482,6 +489,9 @@ class ClockFace(val configMode: Boolean = false): Observer, AnkoLogger {
                 y = clockY(15.0, r) - metrics.ascent / 2f - metrics.descent / 2f // empirically gets the middle of the "3" -- actually a smidge off with Roboto but close enough for now and totally font-dependent with no help from metrics
 
                 drawShadowText(canvas, "3", x, y, colorBig, colorTextShadow)
+            } else {
+                val rightLineStart = 0.85f
+                drawRadialLine(lFacePathCache, strokeWidth, 15.0, rightLineStart, 1.0f, false, bottomHack)
             }
 
             //
@@ -498,6 +508,12 @@ class ClockFace(val configMode: Boolean = false): Observer, AnkoLogger {
                     clockY(30.0, r) + 0.75f * metrics.descent // scoot it up a tiny bit
 
                 drawShadowText(canvas, "6", x, y, colorBig, colorTextShadow)
+            } else {
+                val bottomLineStart = when {
+                    bottomHack -> 0.9f
+                    else -> 0.85f
+                }
+                drawRadialLine(lFacePathCache, strokeWidth, 30.0, bottomLineStart, 1.0f, false, bottomHack)
             }
 
             //

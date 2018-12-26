@@ -372,7 +372,7 @@ class AnalogComplicationConfigRecyclerViewAdapter(
             switch.setOnClickListener(this)
 
             // TODO: nuke the icon entirely, replace with groovy animated switches used by WearOS Settings
-            switch.setCompoundDrawablesWithIntrinsicBounds(switch.context.getDrawable(iconId), null, null, null)
+//            switch.setCompoundDrawablesWithIntrinsicBounds(switch.context.getDrawable(iconId), null, null, null)
         }
 
         override fun onClick(v: View?) {

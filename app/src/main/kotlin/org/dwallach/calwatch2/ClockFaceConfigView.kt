@@ -16,6 +16,7 @@ import org.jetbrains.anko.AnkoLogger
 import org.jetbrains.anko.info
 import org.jetbrains.anko.warn
 import java.lang.ref.WeakReference
+import java.util.*
 
 class ClockFaceConfigView(context: Context, attrs: AttributeSet): View(context, attrs), AnkoLogger {
     val clockFace = ClockFace(true)
@@ -26,7 +27,7 @@ class ClockFaceConfigView(context: Context, attrs: AttributeSet): View(context, 
 
 
     init {
-        viewRef = WeakReference(this)
+        viewRefMap[this] = true
     }
 
     override fun onVisibilityChanged(changedView: View?, visibility: Int) = invalidate()
@@ -58,11 +59,11 @@ class ClockFaceConfigView(context: Context, attrs: AttributeSet): View(context, 
     }
 
     companion object {
-        private var viewRef: WeakReference<ClockFaceConfigView>? = null
+        private var viewRefMap = WeakHashMap<ClockFaceConfigView, Boolean>()
 
-        // If the viewRef isn't present, which should only happen on Wear 1.x, then we'll
-        // do exactly nothing here. On Wear 2+, we'll refresh the image behind the complication
-        // picker to reflect the other choices.
-        fun redraw() = viewRef?.get()?.invalidate()
+        // Finds all extant ClockFaceConfigViews and invalidates them all. On Wear 1.x, we
+        // expect there to be exactly none of them. On Wear 2+, we're expecting at most
+        // one at a time, but we're being slightly general-purpose here.
+        fun redraw() = viewRefMap.keys.forEach { it.invalidate() }
     }
 }

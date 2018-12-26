@@ -16,8 +16,9 @@
   -->
 <Switch xmlns:android="http://schemas.android.com/apk/res/android"
     android:id="@+id/day_date_select"
-    style="@style/ButtonConfigurationStyle"
+    style="@style/Widget.Wear.RoundSwitch"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
+    android:layout_marginBottom="12dp"
     android:checked="true"
     android:text="@string/watchface_day_date_selector" />

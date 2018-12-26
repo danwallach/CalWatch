@@ -20,6 +20,9 @@ import org.dwallach.calwatch2.CalWatchFaceService
 import org.dwallach.calwatch2.errorLogAndThrow
 import org.dwallach.complications.ComplicationLocation.*
 import org.jetbrains.anko.*
+import android.content.Intent.FLAG_ACTIVITY_NEW_TASK
+import org.dwallach.calwatch2.ClockFaceConfigView
+
 
 /**
  * The goal is this class is to provide a super minimal interface for two things: specifying configuration
@@ -272,6 +275,9 @@ object ComplicationWrapper : AnkoLogger {
         }
 
         verbose { "Visibility map: (LEFT, RIGHT, TOP, BOTTOM) -> ${isVisible(LEFT)}, ${isVisible(RIGHT)}, ${isVisible(TOP)}, ${isVisible(BOTTOM)}" }
+
+        // makes sure that rendering the face background updates properly when changing complication settings
+        ClockFaceConfigView.redraw()
     }
 
     /**
@@ -280,7 +286,6 @@ object ComplicationWrapper : AnkoLogger {
      */
     fun isVisible(location: ComplicationLocation) =
             complicationDataMap.containsKey(getComplicationId(location))
-
 
     /**
      * Call this if you want to know whether the watchface has enabled a given complication location.
@@ -340,9 +345,17 @@ object ComplicationWrapper : AnkoLogger {
      */
     private fun launchPermissionForComplication() {
         // kinda baffling that this is even necessary; why aren't permissions dealt with when you add the complication?
-        watchFace.startActivity(
-                ComplicationHelperActivity.createPermissionRequestHelperIntent(
-                        watchFace, ComponentName(watchFace, watchFaceClass)))
+
+        val componentName = ComponentName(
+                watchFace.applicationContext,
+                watchFaceClass)
+
+        val permissionRequestIntent = ComplicationHelperActivity.createPermissionRequestHelperIntent(
+                watchFace.applicationContext, componentName)
+
+        permissionRequestIntent.addFlags(FLAG_ACTIVITY_NEW_TASK) // trying to work around an odd bug
+
+        watchFace.startActivity(permissionRequestIntent)
     }
 
     /**
