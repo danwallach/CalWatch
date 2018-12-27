@@ -18,12 +18,8 @@ import android.view.WindowInsets
 import org.dwallach.R
 import org.dwallach.complications.ComplicationWrapper
 import org.jetbrains.anko.*
-import org.dwallach.calwatch2.PaintCan.Style
-import org.dwallach.calwatch2.PaintCan.Brush
 
 import java.lang.ref.WeakReference
-import java.util.Observable
-import java.util.Observer
 import android.support.wearable.complications.ComplicationData
 import org.dwallach.complications.ComplicationLocation.*
 import org.dwallach.complications.ComplicationWrapper.styleComplications
@@ -38,7 +34,7 @@ class CalWatchFaceService : CanvasWatchFaceService(), AnkoLogger {
         return engine
     }
 
-    inner class Engine : CanvasWatchFaceService.Engine(), Observer {
+    inner class Engine : CanvasWatchFaceService.Engine() {
         private lateinit var clockFace: ClockFace
         private var calendarFetcher: CalendarFetcher? = null
 
@@ -58,13 +54,6 @@ class CalWatchFaceService : CanvasWatchFaceService(), AnkoLogger {
 
             if (permissionGiven)
                 calendarFetcher = CalendarFetcher(this@CalWatchFaceService)
-        }
-
-        /**
-         * Callback from ClockState if something changes, which means we'll need to redraw.
-         */
-        override fun update(observable: Observable?, data: Any?) {
-            invalidate()
         }
 
         override fun onCreate(holder: SurfaceHolder?) {
@@ -97,8 +86,6 @@ class CalWatchFaceService : CanvasWatchFaceService(), AnkoLogger {
 
             clockFace = ClockFace()
             clockFace.missingCalendarDrawable = getDrawable(R.drawable.ic_empty_calendar)
-
-            ClockState.addObserver(this) // callbacks if something changes
 
             CalendarPermission.init(this@CalWatchFaceService)
 
@@ -190,6 +177,7 @@ class CalWatchFaceService : CanvasWatchFaceService(), AnkoLogger {
                 oldHeight = height
                 clockFace.setSize(width, height)
                 ComplicationWrapper.updateBounds(width, height)
+                Utilities.redrawEverything()
             }
         }
 
@@ -254,9 +242,7 @@ class CalWatchFaceService : CanvasWatchFaceService(), AnkoLogger {
         override fun onDestroy() {
             verbose("onDestroy")
 
-            ClockState.deleteObserver(this)
             calendarFetcher?.kill()
-            clockFace.kill()
 
             super.onDestroy()
         }
@@ -269,6 +255,8 @@ class CalWatchFaceService : CanvasWatchFaceService(), AnkoLogger {
                 missingBottomPixels = insets.systemWindowInsetBottom
                 verbose { "onApplyWindowInsets (round: $round), (chinSize: $missingBottomPixels)" }
             }
+
+            Utilities.redrawEverything()
         }
 
         override fun onVisibilityChanged(visible: Boolean) {
@@ -293,5 +281,7 @@ class CalWatchFaceService : CanvasWatchFaceService(), AnkoLogger {
 
         val engine: Engine?
             get() = engineRef?.get()
+
+        fun redraw() { engine?.invalidate() }
     }
 }

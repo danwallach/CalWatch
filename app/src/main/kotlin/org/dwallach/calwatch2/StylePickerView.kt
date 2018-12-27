@@ -99,10 +99,7 @@ class StylePickerView(context: Context, attrs: AttributeSet) : View(context, att
                 info { "Theta: $thetaStr --> new face mode ${ ClockState.faceMode }" }
 
                 PreferencesHelper.savePreferences(context)
-                ClockState.notifyObservers()
-
-                invalidate()
-                ClockFaceConfigView.redraw()
+                Utilities.redrawEverything()
             }
             true
         }

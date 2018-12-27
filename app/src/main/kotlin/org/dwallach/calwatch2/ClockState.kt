@@ -8,8 +8,6 @@ package org.dwallach.calwatch2
 
 import org.jetbrains.anko.*
 
-import java.util.Observable
-
 /**
  * We're doing something of the model-view-controller thing here, where ClockState has the "model" --
  * everything necessary to render a clockface including what style it is, whether we're supposed
@@ -20,7 +18,7 @@ import java.util.Observable
  * The idea is that there is a ClockState singleton, and it doesn't know anything about Android
  * contexts or any of that stuff.
  */
-object ClockState : Observable(), AnkoLogger {
+object ClockState : AnkoLogger {
     const val FACE_TOOL = 0
     const val FACE_NUMBERS = 1
     const val FACE_LITE = 2
@@ -151,16 +149,6 @@ object ClockState : Observable(), AnkoLogger {
     fun getVisibleEventList(): List<EventWrapper> {
         recomputeVisibleEvents() // might start an async update, might not
         return visibleEventList // return the best current data we've got
-    }
-
-    /**
-     * Call this for all the ClockState observers to get updated.
-     */
-    fun pingObservers() {
-        // this incantation will make observers elsewhere aware that there's new content
-        setChanged()
-        notifyObservers()
-        clearChanged()
     }
 
     private fun debugDump() {

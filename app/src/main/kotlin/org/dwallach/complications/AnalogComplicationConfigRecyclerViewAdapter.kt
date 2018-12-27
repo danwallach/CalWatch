@@ -6,7 +6,6 @@
  */
 package org.dwallach.complications
 
-import android.annotation.SuppressLint
 import android.app.Activity
 import android.content.ComponentName
 import android.content.Context
@@ -29,10 +28,7 @@ import androidx.recyclerview.widget.RecyclerView
 import java.util.concurrent.Executors
 
 import org.dwallach.R
-import org.dwallach.calwatch2.ClockFaceConfigView
-import org.dwallach.calwatch2.ClockState
-import org.dwallach.calwatch2.PreferencesHelper
-import org.dwallach.calwatch2.errorLogAndThrow
+import org.dwallach.calwatch2.*
 import org.dwallach.complications.AnalogComplicationConfigData.ConfigItemType
 import org.dwallach.complications.ComplicationLocation.*
 import org.dwallach.complications.ComplicationWrapper.BOTTOM_COMPLICATION_ID
@@ -42,6 +38,7 @@ import org.dwallach.complications.ComplicationWrapper.TOP_COMPLICATION_ID
 import org.dwallach.complications.ComplicationWrapper.getComplicationId
 import org.dwallach.complications.ComplicationWrapper.getSupportedComplicationTypes
 import org.jetbrains.anko.*
+import java.util.*
 
 /**
  * This class handles all the different config items that might ever be displayed. The WearableRecyclerView
@@ -122,8 +119,7 @@ class AnalogComplicationConfigRecyclerViewAdapter(
                         { ClockState.showDayDate }, {
                             ClockState.showDayDate = it
                             PreferencesHelper.savePreferences(parent.context)
-                            ClockState.pingObservers()
-                            ClockFaceConfigView.redraw()
+                            Utilities.redrawEverything()
                         })
 
             else -> throw RuntimeException("unknown viewType: $viewType")
@@ -169,7 +165,7 @@ class AnalogComplicationConfigRecyclerViewAdapter(
      * Displays watch face preview along with complication locations. Allows user to tap on the
      * complication they want to change and preview updates dynamically.
      */
-    inner class PreviewAndComplicationsViewHolder(val iconId: Int, view: View) : RecyclerView.ViewHolder(view), OnClickListener, HolderInit {
+    inner class PreviewAndComplicationsViewHolder(private val iconId: Int, view: View) : RecyclerView.ViewHolder(view), OnClickListener, HolderInit {
         private val mWatchFaceArmsAndTicksView = view.findViewById<View>(R.id.watch_face_arms_and_ticks)
 
         private val mLeftComplicationBackground = view.findViewById<ImageView>(R.id.left_complication_background)
@@ -240,7 +236,7 @@ class AnalogComplicationConfigRecyclerViewAdapter(
             if (location != null)
                 launchComplicationHelperActivity(currentActivity, location)
             else
-                debug { "Couldn't figure out location for click! Ignoring." }
+                warn { "Couldn't figure out location for click! Ignoring." }
         }
 
         // Verifies the watch face supports the complication location, then launches the helper
@@ -347,7 +343,10 @@ class AnalogComplicationConfigRecyclerViewAdapter(
 
         override fun bindInit() {
             val context = mMoreOptionsImageView.context
-            mMoreOptionsImageView.setImageDrawable(context.getDrawable(iconId))
+            if (context == null)
+                warn("No context for MoreOptionsViewHolder")
+            else
+                mMoreOptionsImageView.setImageDrawable(context.getDrawable(iconId))
         }
     }
 
@@ -357,8 +356,8 @@ class AnalogComplicationConfigRecyclerViewAdapter(
     }
 
     inner class ToggleViewHolder(viewId: Int,
-                                 val iconId: Int,
-                                 val text: String,
+                                 iconId: Int,
+                                 private val text: String,
                                  view: View,
                                  val isSelected: () -> Boolean,
                                  val callback: (Boolean) -> Unit):
@@ -366,12 +365,22 @@ class AnalogComplicationConfigRecyclerViewAdapter(
 
         private val switch = view.findViewById<Switch>(viewId)
 
-        @SuppressLint("ClickableViewAccessibility")
-        override fun bindInit() {
+        init {
+            allToggles[this] = true
+        }
+
+        fun reloadState() {
             switch.isChecked = isSelected()
+        }
+
+        override fun bindInit() {
+            reloadState()
             switch.setOnClickListener(this)
 
-            // TODO: nuke the icon entirely, replace with groovy animated switches used by WearOS Settings
+            // TODO: the line below sets up the icon on the left, currently disabled, but what
+            //   we really want is to move the toggle-switch to the left side, which doesn't seem
+            //   to be easily done.
+
 //            switch.setCompoundDrawablesWithIntrinsicBounds(switch.context.getDrawable(iconId), null, null, null)
         }
 
@@ -388,5 +397,9 @@ class AnalogComplicationConfigRecyclerViewAdapter(
         const val TYPE_MORE_OPTIONS = 1
         const val TYPE_DAY_DATE = 2
         const val TYPE_CHANGE_WATCHFACE_STYLE = 3
+
+        private val allToggles = WeakHashMap<ToggleViewHolder, Boolean>()
+
+        fun reloadAllToggles() = allToggles.keys.forEach { it.reloadState() }
     }
 }

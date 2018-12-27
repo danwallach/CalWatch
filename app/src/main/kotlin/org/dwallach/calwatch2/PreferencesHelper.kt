@@ -44,7 +44,7 @@ object PreferencesHelper: AnkoLogger {
         ClockState.showSeconds = showSeconds
         ClockState.showDayDate = showDayDate
 
-        ClockState.pingObservers() // we only need to do this once, versus multiple times when done internally
+        Utilities.redrawEverything()
 
         return version
 

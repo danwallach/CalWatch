@@ -299,7 +299,7 @@ class CalendarFetcher(initialContext: Context,
                 result.match(
                         { wireEventList ->
                             ClockState.setWireEventList(wireEventList)
-                            ClockState.pingObservers()
+                            Utilities.redrawEverything()
                         },
                         { th ->
                             warn( { "uiThread: failure in async computation (CalendarFetcher #$instanceID)" }, th)

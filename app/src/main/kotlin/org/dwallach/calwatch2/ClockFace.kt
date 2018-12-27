@@ -25,14 +25,13 @@ import org.dwallach.complications.ComplicationWrapper
 import org.dwallach.complications.ComplicationWrapper.isVisible
 import org.jetbrains.anko.*
 import java.lang.Math.*
-import java.util.Observable
-import java.util.Observer
+import java.util.*
 
 /**
  * All of the graphics calls for drawing watchfaces happen here. Note that this class knows
  * nothing about Android widgets, views, or activities. That stuff is handled in CalWatchFaceService.
  */
-class ClockFace(val configMode: Boolean = false): Observer, AnkoLogger {
+class ClockFace(val configMode: Boolean = false): AnkoLogger {
     // an instance of the ClockFace class is created anew alongside the rest of the UI; this number
     // helps us keep track of which instance is which
     private val instanceID: Int
@@ -95,11 +94,11 @@ class ClockFace(val configMode: Boolean = false): Observer, AnkoLogger {
     }
 
     init {
+        faceRefMap[this] = true // weak references to all ClockFace instances
         instanceID = instanceCounter++
         verbose { "ClockFace setup, instance($instanceID)" }
+        wipeAllCaches() // paranoia
 
-        ClockState.addObserver(this) // so we get callbacks when the clock state changes
-        update(null, null) // and we'll do that callback for the first time, just to initialize things
         missingBottomPixels = 0 // just to get things started; flat bottom detection happens later
     }
 
@@ -562,7 +561,7 @@ class ClockFace(val configMode: Boolean = false): Observer, AnkoLogger {
      * being saved inside ClockFace
      */
     private fun wipeCaches() {
-        verbose { "clearing caches" }
+        verbose { "clearing caches: instance $instanceID" }
 
         facePathCache = null
         batteryPathCache = null
@@ -894,19 +893,6 @@ class ClockFace(val configMode: Boolean = false): Observer, AnkoLogger {
             return 1f
     }
 
-    // call this if you want this instance to head to the garbage collector; this disconnects
-    // it from paying attention to changes in the ClockState
-    fun kill() {
-        ClockState.deleteObserver(this)
-    }
-
-    // this gets called when the ClockState updates itself
-    override fun update(observable: Observable?, data: Any?) {
-        verbose { "update - instance($instanceID)" }
-        wipeCaches() // nuke saved Paths and such, because all sorts of state may have just changed
-        verbose { "caches wiped ($instanceID)" }
-    }
-
     private fun updateEventList() {
         // This is cheap enough that we can afford to do it at 60Hz, although the call to getVisibleEventList()
         // might start a task, on a different thread, to update the events from the calendar. If that happens,
@@ -1005,5 +991,13 @@ class ClockFace(val configMode: Boolean = false): Observer, AnkoLogger {
         //
         // Typical usage: if(calendarTicker % 100 == 0) Log.v(...)
         private var calendarTicker = 0
+
+        private var faceRefMap = WeakHashMap<ClockFace, Boolean>()
+
+        /**
+         * Finds all extant ClockFace instances and wipe their caches. Use this when
+         * underlying state (ClockState, etc.) might have changed.
+         */
+        fun wipeAllCaches() = faceRefMap.keys.forEach { it.wipeCaches() }
     }
 }
