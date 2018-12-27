@@ -15,7 +15,6 @@ import android.util.AttributeSet
 import android.view.MotionEvent
 import android.view.MotionEvent.*
 import android.view.View
-import org.dwallach.complications.AnalogComplicationConfigRecyclerViewAdapter
 import org.jetbrains.anko.AnkoLogger
 import org.jetbrains.anko.info
 import org.jetbrains.anko.warn
@@ -25,7 +24,7 @@ import kotlin.math.atan2
 import kotlin.math.sqrt
 
 class ClockFaceConfigView(context: Context, attrs: AttributeSet): View(context, attrs), AnkoLogger {
-    val clockFace = ClockFace(true)
+    private val clockFace = ClockFace(true)
     private val blackPaint = PaintCan.getCalendarGreyPaint(Color.BLACK)
 
     private var w: Int = -1

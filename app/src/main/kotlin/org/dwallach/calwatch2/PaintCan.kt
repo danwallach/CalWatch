@@ -127,7 +127,9 @@ class PaintCan(val radius: Float): AnkoLogger {
      * defined in this file. Anything else will cause an exception.
      */
     operator fun get(style: Style, brushId: Brush): Paint =
-        requireNotNull(palette[style.ordinal][brushId.ordinal], { "undefined paintcan color, style($style), brushId($brushId)" })
+        requireNotNull(palette[style.ordinal][brushId.ordinal]) {
+            "undefined paintcan color, style($style), brushId($brushId)"
+        }
 
     companion object: AnkoLogger {
         private fun colorFunc(argb: Int) = Paint(Paint.ANTI_ALIAS_FLAG).apply {

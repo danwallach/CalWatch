@@ -222,7 +222,6 @@ class ClockFace(val configMode: Boolean = false): AnkoLogger {
         var lseconds = seconds
         var startRadius = startRadiusRatio
         var endRadius = endRadiusRatio
-        val strokeWidth = startStrokeWidth
 
         if (flatBottomHack) {
             val clipRadius = radiusToEdge(lseconds)
@@ -256,8 +255,8 @@ class ClockFace(val configMode: Boolean = false): AnkoLogger {
             x2 = x1
         }
 
-        val dx = (clockX(lseconds + 15, 1f) - cx) * 0.5f * strokeWidth / radius
-        val dy = (clockY(lseconds + 15, 1f) - cy) * 0.5f * strokeWidth / radius
+        val dx = (clockX(lseconds + 15, 1f) - cx) * 0.5f * startStrokeWidth / radius
+        val dy = (clockY(lseconds + 15, 1f) - cy) * 0.5f * startStrokeWidth / radius
 
         path.moveTo(x1 + dx, y1 + dy)
         path.lineTo(x2 + dx, y2 + dy)
@@ -281,16 +280,14 @@ class ClockFace(val configMode: Boolean = false): AnkoLogger {
      * argument, which will make things go much faster.
      */
     private fun drawRadialArc(canvas: Canvas, path: Path?, secondsStart: Double, secondsEnd: Double, startRadiusRatio: Float, endRadiusRatio: Float, paint: Paint, outlinePaint: Paint?): Path {
-        val startRadius = startRadiusRatio
-        val endRadius = endRadiusRatio
         /*
          * Below is an attempt to do this "correctly" using the arc functionality supported natively
          * by Android's Path.
          */
 
-        if (startRadius < 0 || startRadius > 1 || endRadius < 0 || endRadius > 1) {
+        if (startRadiusRatio < 0 || startRadiusRatio > 1 || endRadiusRatio < 0 || endRadiusRatio > 1) {
             // if this happens, then we've got a serious bug somewhere; time for a kaboom
-            errorLogAndThrow("arc too big! radius(%.2f -> %.2f), seconds(%.2f -> %.2f)".format(startRadius, endRadius, secondsStart, secondsEnd))
+            errorLogAndThrow("arc too big! radius(%.2f -> %.2f), seconds(%.2f -> %.2f)".format(startRadiusRatio, endRadiusRatio, secondsStart, secondsEnd))
         }
 
         var p: Path? = path
@@ -298,8 +295,8 @@ class ClockFace(val configMode: Boolean = false): AnkoLogger {
         if (p == null) {
             p = Path()
 
-            val startOval = getRectRadius(startRadius)
-            val endOval = getRectRadius(endRadius)
+            val startOval = getRectRadius(startRadiusRatio)
+            val endOval = getRectRadius(endRadiusRatio)
             p.arcTo(startOval, (secondsStart * 6 - 90).toFloat(), ((secondsEnd - secondsStart) * 6).toFloat(), true)
             p.arcTo(endOval, (secondsEnd * 6 - 90).toFloat(), (-(secondsEnd - secondsStart) * 6).toFloat())
             p.close()

@@ -74,6 +74,6 @@ class AnalogComplicationConfigActivity : AppCompatActivity(), AnkoLogger {
     }
 
     companion object {
-        internal val COMPLICATION_CONFIG_REQUEST_CODE = 1001
+        internal const val COMPLICATION_CONFIG_REQUEST_CODE = 1001
     }
 }

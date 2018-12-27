@@ -47,12 +47,12 @@ object EventLayoutUniform: AnkoLogger {
         try {
             val solver = ClSimplexSolver()
 
-            val startLevels = Array(nEvents) { ClVariable("start" + it) }
-            val sizes = Array(nEvents) { ClVariable("size" + it) }
+            val startLevels = Array(nEvents) { ClVariable("start$it") }
+            val sizes = Array(nEvents) { ClVariable("size$it") }
 
             var sumSizes = ClLinearExpression(0.0)
 
-            for(i in 0..nEvents-1) {
+            for(i in 0 until nEvents) {
                 // constraints: variables have to fit between 0 and max
                 solver.addBounds(startLevels[i], 0.0, MAXLEVEL.toDouble())
                 solver.addBounds(sizes[i], 0.0, MAXLEVEL.toDouble())
@@ -70,8 +70,8 @@ object EventLayoutUniform: AnkoLogger {
             val sumSizesEq = ClLinearInequality(sumSizes, CL.GEQ, ClLinearExpression((MAXLEVEL * nEvents).toDouble()), ClStrength.weak)
             solver.addConstraint(sumSizesEq)
 
-            for(i in 0..nEvents-1) {
-                for(j in i+1..nEvents-1) {
+            for(i in 0 until nEvents) {
+                for(j in i+1 until nEvents) {
                     if (events[i].overlaps(events[j])) {
                         overlapCounter[i]++
                         overlapCounter[j]++
@@ -100,7 +100,7 @@ object EventLayoutUniform: AnkoLogger {
 
             verbose("Event layout success.")
 
-            for(i in 0..nEvents-1) {
+            for(i in 0 until nEvents) {
                 val e = events[i]
                 val start = startLevels[i].value().toInt()
                 val size = sizes[i].value().toInt()

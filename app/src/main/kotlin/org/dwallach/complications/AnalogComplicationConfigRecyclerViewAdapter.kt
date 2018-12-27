@@ -264,7 +264,7 @@ class AnalogComplicationConfigRecyclerViewAdapter(
             }
         }
 
-        fun setDefaultComplicationDrawable() {
+        private fun setDefaultComplicationDrawable() {
             verbose { "setting default complication drawable, resourceId = $iconId" }
 
             // This is a bit of a hack, but it works.
@@ -317,7 +317,7 @@ class AnalogComplicationConfigRecyclerViewAdapter(
             }
         }
 
-        fun initializesColorsAndComplications() {
+        private fun initializesColorsAndComplications() {
             val complicationIds = ComplicationWrapper.complicationIds
 
             mProviderInfoRetriever.retrieveProviderInfo(

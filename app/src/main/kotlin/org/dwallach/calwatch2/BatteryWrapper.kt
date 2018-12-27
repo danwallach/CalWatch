@@ -9,7 +9,7 @@ package org.dwallach.calwatch2
 import android.content.Context
 import android.content.Intent
 import android.content.IntentFilter
-import android.os.BatteryManager
+import android.os.BatteryManager.*
 import org.jetbrains.anko.*
 import java.lang.ref.WeakReference
 
@@ -46,8 +46,8 @@ object BatteryWrapper: AnkoLogger {
             // but adding the type cast seems to solve the problem. Shouldn't happen.
             with(intent as Intent) {
                 // Are we charging / charged?
-                isCharging = when (getIntExtra(BatteryManager.EXTRA_STATUS, -1)) {
-                    BatteryManager.BATTERY_STATUS_CHARGING, BatteryManager.BATTERY_STATUS_FULL -> true
+                isCharging = when (getIntExtra(EXTRA_STATUS, -1)) {
+                    BATTERY_STATUS_CHARGING, BATTERY_STATUS_FULL -> true
                     else -> false
                 }
 
@@ -56,8 +56,8 @@ object BatteryWrapper: AnkoLogger {
                 //            val usbCharge = chargePlug == BatteryManager.BATTERY_PLUGGED_USB
                 //            val acCharge = chargePlug == BatteryManager.BATTERY_PLUGGED_AC
 
-                val level = getIntExtra(BatteryManager.EXTRA_LEVEL, -1)
-                val scale = getIntExtra(BatteryManager.EXTRA_SCALE, -1)
+                val level = getIntExtra(EXTRA_LEVEL, -1)
+                val scale = getIntExtra(EXTRA_SCALE, -1)
 
                 batteryPct = level / scale.toFloat()
             }
