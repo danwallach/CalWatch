@@ -100,6 +100,7 @@ class StylePickerView(context: Context, attrs: AttributeSet) : View(context, att
 
                 PreferencesHelper.savePreferences(context)
                 Utilities.redrawEverything()
+                invalidate()
             }
             true
         }
