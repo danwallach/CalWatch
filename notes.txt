@@ -58,9 +58,6 @@ ANDROID N / WEAR 2.0 OVERHAUL / REFACTORING / RE-ENGINEERING
     TODO code refactoring
         TODO simplify / kill WireEvent and WireUpdate
         TODO simplify / kill PreferencesHelper
-        TODO Rip out Observer/Listener logic (getting untenable) and redo with functional-reactive style
-        - CalendarFetcher now works in a vaguely functional style, but we'd want to get rid of the observers
-          on ClockState
 
     TODO too much .toFloat() and .toDouble() in ClockFace -- cleanup?!
     - We could try to standardize everything with Float, but many of the trig function in Math require Double
@@ -70,12 +67,10 @@ ANDROID N / WEAR 2.0 OVERHAUL / REFACTORING / RE-ENGINEERING
 
     TODO: Remove ProGuard, supposedly replace by R8
 
-    TODO: Resurrect background images for a future release
-      -- requires redoing the way the stipple pattern is rendered, or something else weird with PorterDuff modes
-
     Settings UI
         TODO tear out the WearableRecyclerView, go with a simpler ListView (now official advice!)
             https://developer.android.com/training/wearables/ui/lists.html
+            Although, what we're doing now works, and makes it easy for us to tweak Wear 1.x vs. 2.x
 
     TODO Merge in Anko synthetic properties where appropriate
 
