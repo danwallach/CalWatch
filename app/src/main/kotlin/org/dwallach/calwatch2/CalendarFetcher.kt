@@ -147,8 +147,6 @@ class CalendarFetcher(initialContext: Context,
      * can't do very well.
      */
     private fun loadContent(context: Context): List<CalendarEvent>? {
-        val startTimeNano = SystemClock.elapsedRealtimeNanos()
-
         // local state which we'll eventually return
         val cr = mutableListOf<CalendarEvent>()
 
@@ -240,8 +238,6 @@ class CalendarFetcher(initialContext: Context,
                                 .thenBy { it.endTime }
                                 .thenByDescending { it.startTime })
 
-        val endTimeNano = SystemClock.elapsedRealtimeNanos()
-        info { "async: total calendar computation time: %.3f ms".format((endTimeNano - startTimeNano) / 1000000.0) }
 
         return sorted
     }
@@ -270,14 +266,26 @@ class CalendarFetcher(initialContext: Context,
             info { "runAsyncLoader: here we go! (CalendarFetcher #$instanceID)" }
             // Asynchronously fetches the content, then runs the rest of the block on the UI thread
             // once we get back.
-            val eventList = withContext(Dispatchers.Default) { loadContent(context) }
+            val eventList = withContext(Dispatchers.Default) {
+                val startTimeNano = SystemClock.elapsedRealtimeNanos()
+                val result = loadContent(context)
+                val endTimeNano = SystemClock.elapsedRealtimeNanos()
+                info { "runAsyncLoader: total calendar fetch time: %.3f ms".format((endTimeNano - startTimeNano) / 1000000.0) }
+                result
+            }
 
             if (eventList == null) {
                 warn { "runAsyncLoader: No result, not updating any calendar state (CalendarFetcher #$instanceID)" }
                 scanInProgress = false
             } else {
                 info { "runAsyncLoader: success reading the calendar (CalendarFetcher #$instanceID)" }
-                val layoutPair = withContext(Dispatchers.Default) { ClockStateHelper.clipToVisible(eventList) }
+                val layoutPair = withContext(Dispatchers.Default) {
+                    val startTimeNano = SystemClock.elapsedRealtimeNanos()
+                    val result = ClockStateHelper.clipToVisible(eventList)
+                    val endTimeNano = SystemClock.elapsedRealtimeNanos()
+                    info { "runAsyncLoader: total calendar layout time: %.3f ms".format((endTimeNano - startTimeNano) / 1000000.0) }
+                    result
+                }
                 scanInProgress = false
                 ClockState.setWireEventList(eventList, layoutPair)
                 Utilities.redrawEverything()
