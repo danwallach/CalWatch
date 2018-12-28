@@ -42,3 +42,13 @@ This gives you more room to see the events that start and end in the next 12 hou
 
 <i>CalWatch2 does not transmit your personal information to anybody!</i> CalWatch2 reads your
 calendar and displays it locally, but never sends anything to the network.
+
+<b>Why aren't my events updating?</b>
+
+There seems to be a bug in some newer versions of WearOS where CalWatch2 doesn't get notified when
+the calendar is updated. Your feedback on this is important to finding and fixing the bug.
+Meanwhile, you can force the calendar to reload itself by changing your watchface to something else
+and then back to CalWatch2. Also, CalWatch2 reloads the calendar every hour.
+
+(<i>Watches known to do event updates properly:</i> Wear 1.x devices (e.g., LG G Watch) and Wear 2.15.x devices (e.g., Moto 360v2).
+<i>Watches known to have issues:</i> Wear 2.2 devices (e.g., Fossil Sport).)
