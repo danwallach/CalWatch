@@ -1,13 +1,13 @@
-![CalWatch](images/feature-graphic-sm.png)
+![CalWatch2](images/feature-graphic-sm.png)
 
-* Copyright (C) 2014-2017 by Dan Wallach
+* Copyright (C) 2014-2018 by Dan Wallach
 * Home page: http://www.cs.rice.edu/~dwallach/calwatch/
 * Licensing: http://www.cs.rice.edu/~dwallach/calwatch/licensing.html
 
 ## tl;dr
 
-CalWatch is an open-source Android Wear 2.0 watchface application that reads your calendar
-and renders the next twelve hours of your schedule around the face of the watch. CalWatch
+CalWatch2 is an open-source WearOS watchface, compatible with WearOS 1.x and 2.x, that reads your calendar
+and renders the next twelve hours of your schedule around the face of the watch. CalWatch2
 is mostly implemented in the Kotlin programming language.
 
 ## What's where
@@ -29,7 +29,7 @@ is mostly implemented in the Kotlin programming language.
 
 * /logdumps -- logcat plus notes from the various times that CalWatch has blown up
 
-* /app -- the unifed app that runs on Wear 2 watches
+* /app -- the unifed app that runs on Wear watches
     * src/androidTest/java/ -- some old unit tests for event layout
     * src/main/kotlin/ -- CalWatch source-code files
         * org.dwallach.calwatch/ -- CalWatch Kotlin files
@@ -45,11 +45,12 @@ is mostly implemented in the Kotlin programming language.
 If you look at code prior to release4, you'll see that this project was written entirely in Java.
 Starting with release4, I ported most everything to Kotlin and did a ton of code cleanup. release5
 features a complete redesign of the user preferences panel, running on the phone, with the latest Material
-Design styling. Shortly thereafter, at I/O 2016, Google announced Wear 2 which, of course,
+Design styling. Shortly thereafter, at I/O 2016, Google announced WearOS 2 which, of course,
 completely changed how the phone and the watch relate to one another. Fast forward to I/O 2017 and
 Google announced they were providing sample code and libraries to make it much easier to support
 complications, plus they're finally rolling out Wear 2 to more watches. Consequently, release6
-and thereafter will exclusively focus on Wear 2.
+now supports Wear 2.x watches, moving all the configuration dialogs away from the phone and doing
+everything on the watch.
 
 ## Credit where credit is due:
 
