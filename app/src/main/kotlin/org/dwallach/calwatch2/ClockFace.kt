@@ -22,7 +22,7 @@ import org.dwallach.calwatch2.PaintCan.Brush
 import org.dwallach.calwatch2.PaintCan.Style
 import org.dwallach.complications.ComplicationLocation.*
 import org.dwallach.complications.ComplicationWrapper
-import org.dwallach.complications.ComplicationWrapper.isVisible
+import org.dwallach.complications.ComplicationWrapper.isComplicationVisible
 import org.jetbrains.anko.*
 import java.lang.Math.*
 import java.util.*
@@ -340,7 +340,7 @@ class ClockFace(val configMode: Boolean = false): AnkoLogger {
     private var facePathCacheMode = -1
 
     private fun complicationStateNow(): Int =
-            (if (isVisible(LEFT)) 8 else 0) + (if (isVisible(RIGHT)) 4 else 0) + (if (isVisible(TOP)) 2 else 0) + (if (isVisible(BOTTOM)) 1 else 0)
+            (if (isComplicationVisible(LEFT)) 8 else 0) + (if (isComplicationVisible(RIGHT)) 4 else 0) + (if (isComplicationVisible(TOP)) 2 else 0) + (if (isComplicationVisible(BOTTOM)) 1 else 0)
 
     private fun getCachedFacePath(mode: Int): Path? =
         if (facePathComplicationState == complicationStateNow() && facePathCacheMode == mode) facePathCache else null
@@ -381,40 +381,57 @@ class ClockFace(val configMode: Boolean = false): AnkoLogger {
             verbose { "rendering new face, faceMode($lFaceMode)" }
 
             if (calendarTicker % 1000 == 0) {
-                verbose { "Complication visibility map: (LEFT, RIGHT, TOP, BOTTOM) -> ${isVisible(LEFT)}, ${isVisible(RIGHT)}, ${isVisible(TOP)}, ${isVisible(BOTTOM)}" }
+                verbose { "Complication visibility map: (LEFT, RIGHT, TOP, BOTTOM) -> ${isComplicationVisible(LEFT)}, ${isComplicationVisible(RIGHT)}, ${isComplicationVisible(TOP)}, ${isComplicationVisible(BOTTOM)}" }
             }
 
             if (lFaceMode == FACE_TOOL)
                 for (i in 1..59) {
-                    if (bottomHack && isVisible(BOTTOM) && i >= 26 && i <= 34) continue // don't even bother if flat bottom and complication
+                    if (bottomHack && isComplicationVisible(BOTTOM) && i >= 26 && i <= 34) continue // don't even bother if flat bottom and complication
 
                     if (i % 5 != 0)
                         drawRadialLine(lFacePathCache, colorSmall.strokeWidth, i.toDouble(), 0.9f, 1.0f, false, bottomHack)
                 }
 
-            if (lFaceMode != FACE_NUMBERS) {
-                // top of watch
-                val topLineStart = if (isVisible(TOP)) 0.85f else 0.75f
+            // The logic here is a bit painful: if we're doing LITE or TOOL, then we want to
+            // draw these big lines at 12 o'clock, 3 o'clock, 6 o'clock, and 9 o'clock. But if
+            // we're doing NUMBERS, then we don't, **except** when we've got a complication
+            // in the same side of the watchface. At that point, we'll suppress the drawing
+            // of the digits below, and we want the lines again.
+
+            if (lFaceMode != FACE_NUMBERS || isComplicationVisible(TOP)) {
+                //
+                // 12 o'clock
+                //
+                val topLineStart = if (isComplicationVisible(TOP)) 0.85f else 0.75f
 
                 // we draw double lines here, because style
                 drawRadialLine(lFacePathCache, strokeWidth, -0.4, topLineStart, 1.0f, true, false)
                 drawRadialLine(lFacePathCache, strokeWidth, 0.4, topLineStart, 1.0f, true, false)
+            }
 
-                // left of watch
-                if (showDayDate) {
-                    drawRadialLine(lFacePathCache, strokeWidth, 45.0, 0.9f, 1.0f, false, false)
-                } else {
-                    drawRadialLine(lFacePathCache, strokeWidth, 45.0, 0.75f, 1.0f, false, false)
-                }
+            if (lFaceMode != FACE_NUMBERS || isComplicationVisible(LEFT)) {
+                //
+                // 9 o'clock
+                //
+                val leftLineStart = if (showDayDate) 0.9f else 0.75f
+                drawRadialLine(lFacePathCache, strokeWidth, 45.0, leftLineStart, 1.0f, false, false)
+            }
 
-                // right of watch
-                val rightLineStart = if (isVisible(RIGHT)) 0.85f else 0.75f
+            if (lFaceMode != FACE_NUMBERS || isComplicationVisible(RIGHT)) {
+                //
+                // 3 o'clock
+                //
+                val rightLineStart = if (isComplicationVisible(RIGHT)) 0.85f else 0.75f
                 drawRadialLine(lFacePathCache, strokeWidth, 15.0, rightLineStart, 1.0f, false, bottomHack)
+            }
 
-                // bottom of watch
-                if (!isVisible(BOTTOM) || !bottomHack) { // don't even bother if we've got a flat tire *and* a complication
+            if (lFaceMode != FACE_NUMBERS || isComplicationVisible(BOTTOM)) {
+                //
+                // 6 o'clock
+                //
+                if (!(isComplicationVisible(BOTTOM) && bottomHack)) { // don't even bother if we've got a flat tire *and* a complication
                     val bottomLineStart = when {
-                        isVisible(BOTTOM) -> 0.85f
+                        isComplicationVisible(BOTTOM) -> 0.85f
                         bottomHack -> 0.9f
                         else -> 0.75f
                     }
@@ -423,7 +440,7 @@ class ClockFace(val configMode: Boolean = false): AnkoLogger {
             }
 
             // and the rest of the hour indicators!
-            for (i in 5..59 step 5) {
+            for (i in 5 until 60 step 5) {
                 if (i == 15 || i == 30 || i == 45) continue
 
                 drawRadialLine(lFacePathCache, strokeWidth, i.toDouble(), 0.75f, 1.0f, false, bottomHack)
@@ -451,7 +468,7 @@ class ClockFace(val configMode: Boolean = false): AnkoLogger {
             //
             // 12 o'clock
             //
-            if (!isVisible(TOP)) { // don't draw if there's a complication
+            if (!isComplicationVisible(TOP)) { // don't draw if there's a complication
                 r = 0.9f
 
                 x = clockX(0.0, r)
@@ -463,20 +480,13 @@ class ClockFace(val configMode: Boolean = false): AnkoLogger {
                     debugMetricsPrinted = true
                     verbose { "x(%.2f), y(%.2f), metrics.descent(%.2f), metrics.asacent(%.2f)".format(x, y, metrics.descent, metrics.ascent) }
                 }
-            } else {
-                val topLineStart = 0.85f
-
-                // we draw double lines here, because style
-                drawRadialLine(lFacePathCache, strokeWidth, -0.4, topLineStart, 1.0f, true, false)
-                drawRadialLine(lFacePathCache, strokeWidth, 0.4, topLineStart, 1.0f, true, false)
             }
-
 
             //
             // 3 o'clock
             //
 
-            if (!isVisible(RIGHT)) { // don't draw if there's a complication
+            if (!isComplicationVisible(RIGHT)) { // don't draw if there's a complication
                 r = 0.9f
 
                 val threeWidth = colorBig.measureText("3")
@@ -485,16 +495,13 @@ class ClockFace(val configMode: Boolean = false): AnkoLogger {
                 y = clockY(15.0, r) - metrics.ascent / 2f - metrics.descent / 2f // empirically gets the middle of the "3" -- actually a smidge off with Roboto but close enough for now and totally font-dependent with no help from metrics
 
                 drawShadowText(canvas, "3", x, y, colorBig, colorTextShadow)
-            } else {
-                val rightLineStart = 0.85f
-                drawRadialLine(lFacePathCache, strokeWidth, 15.0, rightLineStart, 1.0f, false, bottomHack)
             }
 
             //
             // 6 o'clock
             //
 
-            if (!isVisible(BOTTOM)) { // don't draw if there's a complication
+            if (!isComplicationVisible(BOTTOM)) { // don't draw if there's a complication
                 r = 0.9f
 
                 x = clockX(30.0, r)
@@ -504,12 +511,6 @@ class ClockFace(val configMode: Boolean = false): AnkoLogger {
                     clockY(30.0, r) + 0.75f * metrics.descent // scoot it up a tiny bit
 
                 drawShadowText(canvas, "6", x, y, colorBig, colorTextShadow)
-            } else {
-                val bottomLineStart = when {
-                    bottomHack -> 0.9f
-                    else -> 0.85f
-                }
-                drawRadialLine(lFacePathCache, strokeWidth, 30.0, bottomLineStart, 1.0f, false, bottomHack)
             }
 
             //

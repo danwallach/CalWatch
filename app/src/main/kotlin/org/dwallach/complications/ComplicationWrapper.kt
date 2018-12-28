@@ -73,7 +73,7 @@ import org.dwallach.calwatch2.ClockFaceConfigView
  * below the watch hands, then draw your hands *after* you call [drawComplications].
  *
  * If you want to adjust the geometry of your watchface around the presence or absence of a given
- * complication, you can call [isVisible]. These queries are guaranteed to be efficient enough
+ * complication, you can call [isComplicationVisible]. These queries are guaranteed to be efficient enough
  * that you can call them on every screen redraw without impacting performance.
  *
  * # Engineering history, work in progress
@@ -252,7 +252,7 @@ object ComplicationWrapper : AnkoLogger {
             complicationData.type == ComplicationData.TYPE_NOT_CONFIGURED -> {
                 // when we get back no complication data, that's the only signal we get
                 // that a complication has been killed, so we're just going to remove the
-                // entry from our map; see also isVisible()
+                // entry from our map; see also isComplicationVisible()
                 complicationDataMap -= complicationId
                 info { "Removed complication, id: $complicationId (${complicationIdToLocationString(complicationId)})" }
             }
@@ -274,7 +274,7 @@ object ComplicationWrapper : AnkoLogger {
             }
         }
 
-        verbose { "Visibility map: (LEFT, RIGHT, TOP, BOTTOM) -> ${isVisible(LEFT)}, ${isVisible(RIGHT)}, ${isVisible(TOP)}, ${isVisible(BOTTOM)}" }
+        verbose { "Visibility map: (LEFT, RIGHT, TOP, BOTTOM) -> ${isComplicationVisible(LEFT)}, ${isComplicationVisible(RIGHT)}, ${isComplicationVisible(TOP)}, ${isComplicationVisible(BOTTOM)}" }
 
         // makes sure that rendering the face background updates properly when changing complication settings
         ClockFaceConfigView.redraw()
@@ -284,7 +284,7 @@ object ComplicationWrapper : AnkoLogger {
      * Call this if you want to know if a given complication is visible to the user at the moment.
      * On a watchface, you might use this to decide whether to show or hide numerals.
      */
-    fun isVisible(location: ComplicationLocation) =
+    fun isComplicationVisible(location: ComplicationLocation) =
             complicationDataMap.containsKey(getComplicationId(location))
 
     /**

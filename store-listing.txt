@@ -25,6 +25,8 @@ level drops, the circle grows. At 10% battery remaining, it turns red.
 &bull; The calendars events shown on the watch face are exactly the calendar events that are
 visible from the calendar app on your phone, with the same event times and colors. If you want
 to change what's visible on your watch, run Wear OS app on your phone, then select "Agenda settings".
+<i>Note that WearOS can take a few minutes for calendar changes to update on your watch. CalWatch2
+responds as quickly as it can.</i>
 
 &bull; The watch will display your calendar events within a twelve hour window. If, for example,
 it's 9:30am, you'll see events starting at 9:00am and lasting through 8:59pm. Any events that
