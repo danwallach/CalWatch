@@ -31,6 +31,7 @@ Android Wear command-line things I can never remember:
 
     setprop log.tag.ClockFace VERBOSE
     setprop log.tag.ClockState VERBOSE
+    setprop log.tag.ClockStateHelper VERBOSE
     setprop log.tag.MyViewAnim VERBOSE
     setprop log.tag.PhoneActivity VERBOSE
     setprop log.tag.CalendarFetcher VERBOSE
@@ -52,6 +53,8 @@ Deal with multiday events that aren't "all day" events
         adding Kotlin material.
 
 ANDROID N / WEAR 2.0 OVERHAUL / REFACTORING / RE-ENGINEERING
+    TODO not noticing when the calendar is updating?
+
     TODO preferences for day/date thing
     - managed to switch to the new "rounded" style, but can't move the toggle to the left of the text
 

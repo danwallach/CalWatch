@@ -46,8 +46,8 @@ object ClockState : AnkoLogger {
      * Helper function to determine if we need subsecond refresh intervals.
      */
     fun subSecondRefreshNeeded(face: ClockFace?) =
-        // if the second-hand is supposed to be rendered and we're not in ambient mode
-        if (face == null) false else showSeconds && !face.ambientMode
+    // if the second-hand is supposed to be rendered and we're not in ambient mode
+            if (face == null) false else showSeconds && !face.ambientMode
 
     /**
      * Load the eventlist. This is meant to consume the output of the calendarFetcher,
@@ -59,7 +59,7 @@ object ClockState : AnkoLogger {
      */
     fun setWireEventList(eventList: List<CalendarEvent>) {
         verbose { "fresh calendar event list, " + eventList.size + " entries" }
-        val (visibleEventList, maxLevel) = clipToVisible(eventList)
+        val (visibleEventList, maxLevel) = ClockStateHelper.clipToVisible(eventList)
         verbose { "--> $visibleEventList visible events" }
         this.eventList = eventList
         this.visibleEventList = visibleEventList
@@ -69,7 +69,7 @@ object ClockState : AnkoLogger {
     private var lastClipTime: Long = 0
 
     private fun recomputeVisibleEvents() {
-        if(!calendarPermission) return // nothing we can do!
+        if (!calendarPermission) return // nothing we can do!
 
         // This is going to be called on every screen refresh, so it needs to be fast in the common case.
         // We're going to measure the time and try to figure out whether we've ticked onto
@@ -93,11 +93,37 @@ object ClockState : AnkoLogger {
     }
 
     /**
+     * This returns a list of *visible* events on the watchface, cropped to size, and adjusted to
+     * the *local* timezone.
+     */
+    fun getVisibleEventList(): List<EventWrapper> {
+        recomputeVisibleEvents() // might start an async update, might not
+        return visibleEventList // return the best current data we've got
+    }
+
+    private fun debugDump() {
+        verbose("All events in the DB:")
+        eventList.forEach {
+            verbose { "--> displayColor(%06x), startTime(${it.startTime}), endTime(${it.endTime})".format(it.displayColor) }
+        }
+
+        verbose("Visible:")
+        visibleEventList.forEach {
+            verbose {
+                "--> displayColor(%06x), minLevel(${it.minLevel}), maxLevel(${it.maxLevel}), startTime(${it.calendarEvent.startTime}), endTime(${it.calendarEvent.endTime})"
+                        .format(it.calendarEvent.displayColor)
+            }
+        }
+    }
+}
+
+object ClockStateHelper: AnkoLogger {
+    /**
      * Given a list of events, return another list that corresponds to the set of
      * events visible in the next twelve hours, with events that would be off-screen
      * clipped to the 12-hour dial.
      */
-    private fun clipToVisible(events: List<CalendarEvent>): Pair<List<EventWrapper>, Int> {
+    internal fun clipToVisible(events: List<CalendarEvent>): Pair<List<EventWrapper>, Int> {
         val gmtOffset = TimeWrapper.gmtOffset
 
         val localClipTime = TimeWrapper.localFloorHour
@@ -106,12 +132,12 @@ object ClockState : AnkoLogger {
 
         val clippedEvents = events.map {
             it.clip(clipStartMillis, clipEndMillis)
-        } .filter {
+        }.filter {
             // require events to be onscreen
             it.endTime > clipStartMillis && it.startTime < clipEndMillis
-            // require events to not fill the full screen
+                    // require events to not fill the full screen
                     && !(it.endTime == clipEndMillis && it.startTime == clipStartMillis)
-            // require events to have some non-zero thickness (clipping can sometimes yield events that start and end at the same time)
+                    // require events to have some non-zero thickness (clipping can sometimes yield events that start and end at the same time)
                     && it.endTime > it.startTime
         }.map {
             // apply GMT offset, and then wrap with EventWrapper, where the layout will happen
@@ -141,28 +167,4 @@ object ClockState : AnkoLogger {
             return Pair(emptyList(), 0)
         }
     }
-
-    /**
-     * This returns a list of *visible* events on the watchface, cropped to size, and adjusted to
-     * the *local* timezone.
-     */
-    fun getVisibleEventList(): List<EventWrapper> {
-        recomputeVisibleEvents() // might start an async update, might not
-        return visibleEventList // return the best current data we've got
-    }
-
-    private fun debugDump() {
-        verbose("All events in the DB:")
-        eventList.forEach {
-            verbose { "--> displayColor(%06x), startTime(${it.startTime}), endTime(${it.endTime})".format(it.displayColor) }
-        }
-
-        verbose("Visible:")
-        visibleEventList.forEach {
-            verbose { "--> displayColor(%06x), minLevel(${it.minLevel}), maxLevel(${it.maxLevel}), startTime(${it.calendarEvent.startTime}), endTime(${it.calendarEvent.endTime})"
-                    .format(it.calendarEvent.displayColor) }
-        }
-    }
 }
-
-
