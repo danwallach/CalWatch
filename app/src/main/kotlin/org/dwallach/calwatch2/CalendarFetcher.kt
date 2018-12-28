@@ -140,7 +140,7 @@ class CalendarFetcher(initialContext: Context,
      * an exception, because this result is meant to be saved across threads, which a thrown exception
      * can't do very well.
      */
-    private fun loadContent(context: Context): Either<List<CalendarEvent>, Throwable> {
+    private fun loadContent(context: Context): List<CalendarEvent> {
         // local state which we'll eventually return
         val cr = mutableListOf<CalendarEvent>()
 
@@ -153,12 +153,15 @@ class CalendarFetcher(initialContext: Context,
         val queryEndMillis = queryStartMillis + 24.hours
 
         try {
-            info { "loadContent: Query times... Now: %s, QueryStart: %s, QueryEnd: %s"
-                    .format(DateUtils.formatDateTime(context, time, DateUtils.FORMAT_SHOW_DATE or DateUtils.FORMAT_SHOW_TIME),
-                            DateUtils.formatDateTime(context, queryStartMillis, DateUtils.FORMAT_SHOW_TIME or DateUtils.FORMAT_SHOW_DATE),
-                            DateUtils.formatDateTime(context, queryEndMillis, DateUtils.FORMAT_SHOW_TIME or DateUtils.FORMAT_SHOW_DATE)) }
-        } catch (t: Throwable) {
+            info {
+                "loadContent: Query times... Now: %s, QueryStart: %s, QueryEnd: %s"
+                        .format(DateUtils.formatDateTime(context, time, DateUtils.FORMAT_SHOW_DATE or DateUtils.FORMAT_SHOW_TIME),
+                                DateUtils.formatDateTime(context, queryStartMillis, DateUtils.FORMAT_SHOW_TIME or DateUtils.FORMAT_SHOW_DATE),
+                                DateUtils.formatDateTime(context, queryEndMillis, DateUtils.FORMAT_SHOW_TIME or DateUtils.FORMAT_SHOW_DATE))
+            }
+        } catch (th: Throwable) {
             // sometimes the date formatting blows up... who knew? best to just ignore and move on
+            warn("loadContent: date-formatter blew up while trying to log, ignoring", th)
         }
 
         // And now, the event instances
@@ -176,66 +179,52 @@ class CalendarFetcher(initialContext: Context,
         // https://issuetracker.google.com/issues/38476499
 
         // now, get the list of events
-        try {
-            val builder = contentUri.buildUpon()
-            ContentUris.appendId(builder, queryStartMillis)
-            ContentUris.appendId(builder, queryEndMillis)
-            val iCursor = context.contentResolver.query(builder.build(),
-                    instancesProjection, null, null, null)
+        val builder = contentUri.buildUpon()
+        ContentUris.appendId(builder, queryStartMillis)
+        ContentUris.appendId(builder, queryEndMillis)
+        val iCursor = context.contentResolver.query(builder.build(),
+                instancesProjection, null, null, null)
 
-            // if it's null, which shouldn't ever happen, then we at least won't gratuitously fail here
-            if (iCursor == null) {
-                warn { "Got null cursor, no events!" }
-            } else {
-                if (iCursor.moveToFirst()) {
-                    do {
-                        var i = 0
+        // if it's null, which shouldn't ever happen, then we at least won't gratuitously fail here
+        if (iCursor == null) {
+            warn("Got null cursor, no events!")
+        } else {
+            if (iCursor.moveToFirst()) {
+                do {
+                    var i = 0
 
-                        val startTime = iCursor.getLong(i++)
-                        val endTime = iCursor.getLong(i++)
-                        i++ // val eventID = iCursor.getLong(i++)
-                        val displayColor = calendarColorFix(iCursor.getInt(i++), iCursor.getInt(i++))
-                        val allDay = iCursor.getInt(i++) != 0
-                        val visible = iCursor.getInt(i) != 0
+                    val startTime = iCursor.getLong(i++)
+                    val endTime = iCursor.getLong(i++)
+                    i++ // val eventID = iCursor.getLong(i++)
+                    val displayColor = calendarColorFix(iCursor.getInt(i++), iCursor.getInt(i++))
+                    val allDay = iCursor.getInt(i++) != 0
+                    val visible = iCursor.getInt(i) != 0
 
-                        if (visible && !allDay)
-                            cr.add(CalendarEvent(startTime, endTime, displayColor))
+                    if (visible && !allDay)
+                        cr.add(CalendarEvent(startTime, endTime, displayColor))
 
-                    } while (iCursor.moveToNext())
-                    info { "loadContent: visible instances found: ${cr.size}" }
-                }
-
-                // lifecycle cleanliness: important to close down when we're done
-                iCursor.close()
+                } while (iCursor.moveToNext())
+                info { "loadContent: visible instances found: ${cr.size}" }
             }
 
-            // Primary sort: color, so events from the same calendar will become consecutive wedges
+            // lifecycle cleanliness: important to close down when we're done
+            iCursor.close()
+        }
 
-            // Secondary sort: endTime, with objects ending earlier appearing first in the sort.
-            //   (goal: first fill in the outer ring of the display with smaller wedges; the big
-            //    ones will end late in the day, and will thus end up on the inside of the watchface)
+        // Primary sort: color, so events from the same calendar will become consecutive wedges
 
-            // Third-priority sort: startTime, with objects starting later (smaller) appearing first in the sort.
-            val sorted =
+        // Secondary sort: endTime, with objects ending earlier appearing first in the sort.
+        //   (goal: first fill in the outer ring of the display with smaller wedges; the big
+        //    ones will end late in the day, and will thus end up on the inside of the watchface)
+
+        // Third-priority sort: startTime, with objects starting later (smaller) appearing first in the sort.
+        val sorted =
                 cr.sortedWith(
                         compareBy<CalendarEvent> { it.displayColor }
                                 .thenBy { it.endTime }
                                 .thenByDescending { it.startTime })
 
-
-            return eitherLeft(sorted)
-        } catch (e: SecurityException) {
-            // apparently we don't have permission for the calendar!
-            error("security exception while reading calendar!", e)
-            kill()
-            ClockState.calendarPermission = false
-
-            return eitherRight(e)
-        } catch (e: Throwable) {
-            error("wildly unexpected exception when reading calendar!", e)
-            kill()
-            return eitherRight(e)
-        }
+        return sorted
     }
 
     /**
@@ -275,17 +264,18 @@ class CalendarFetcher(initialContext: Context,
         // next to all of the hash tables and such as to what their generic types should have been,
         // but when I tried to make those into real parametric Java type declarations, some things
         // didn't match up quite right.
-        var result: Either<List<CalendarEvent>, Throwable>
-        doAsync {
-            try {
-                val startTime = SystemClock.elapsedRealtimeNanos()
-                result = loadContent(context)
-                val endTime = SystemClock.elapsedRealtimeNanos()
-                info { "async: total calendar computation time: %.3f ms".format((endTime - startTime) / 1000000.0) }
-            } catch (e: Throwable) {
-                // pass the exception back to the UI thread; we'll log it there
-                result = eitherRight(e)
-            }
+        doAsync({ th ->
+            if (th is SecurityException)
+                ClockState.calendarPermission = false
+
+            error("Failure in asyncTask!", th)
+            kill()
+            scanInProgress = false
+        }) {
+            val startTime = SystemClock.elapsedRealtimeNanos()
+            val result = loadContent(context)
+            val endTime = SystemClock.elapsedRealtimeNanos()
+            info { "async: total calendar computation time: %.3f ms".format((endTime - startTime) / 1000000.0) }
 
             //
             // This will run after the above chunk of the async completes, which could be a while
@@ -296,15 +286,8 @@ class CalendarFetcher(initialContext: Context,
             //
             uiThread {
                 scanInProgress = false
-                result.match(
-                        { wireEventList ->
-                            ClockState.setWireEventList(wireEventList)
-                            Utilities.redrawEverything()
-                        },
-                        { th ->
-                            warn( { "uiThread: failure in async computation (CalendarFetcher #$instanceID)" }, th)
-                        } )
-
+                ClockState.setWireEventList(result)
+                Utilities.redrawEverything()
                 info { "uiThread: complete (CalendarFetcher #$instanceID)" }
             }
         }

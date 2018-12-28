@@ -75,7 +75,8 @@ ANDROID N / WEAR 2.0 OVERHAUL / REFACTORING / RE-ENGINEERING
             https://developer.android.com/training/wearables/ui/lists.html
             Although, what we're doing now works, and makes it easy for us to tweak Wear 1.x vs. 2.x
 
-    TODO Merge in Anko synthetic properties where appropriate
+    TODO Merge in Kotlin Android synthetic properties where appropriate
+        https://kotlinlang.org/docs/tutorials/android-plugin.html
 
     App name: currently shows up as "CalWatch (Wear 1.0)"
         TODO: verify that it's "CalWatch2", since we want to distinguish from the original
