@@ -1,8 +1,8 @@
 ![CalWatch2](images/feature-graphic-sm.png)
 
 * Copyright (C) 2014-2018 by Dan Wallach
-* Home page: http://www.cs.rice.edu/~dwallach/calwatch/
-* Licensing: http://www.cs.rice.edu/~dwallach/calwatch/licensing.html
+* Home page: https://www.cs.rice.edu/~dwallach/calwatch/
+* Licensing: https://www.cs.rice.edu/~dwallach/calwatch/licensing.html
 
 ## tl;dr
 
