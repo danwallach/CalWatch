@@ -267,21 +267,24 @@ class CalendarFetcher(initialContext: Context,
         // https://medium.com/@andrea.bresolin/playing-with-kotlin-in-android-coroutines-and-how-to-get-rid-of-the-callback-hell-a96e817c108b
 
         GlobalScope.launch {
+            info { "runAsyncLoader: here we go! (CalendarFetcher #$instanceID)" }
             // Asynchronously fetches the content, then runs the rest of the block on the UI thread
             // once we get back.
             val eventList = withContext(Dispatchers.Default) { loadContent(context) }
 
             if (eventList == null) {
-                warn { "No result (something went wrong), so not updating any calendar state (CalendarFetcher #$instanceID)" }
+                warn { "runAsyncLoader: No result, not updating any calendar state (CalendarFetcher #$instanceID)" }
                 scanInProgress = false
             } else {
+                info { "runAsyncLoader: success reading the calendar (CalendarFetcher #$instanceID)" }
                 val layoutPair = withContext(Dispatchers.Default) { ClockStateHelper.clipToVisible(eventList) }
                 scanInProgress = false
                 ClockState.setWireEventList(eventList, layoutPair)
                 Utilities.redrawEverything()
-                info { "uiThread: complete (CalendarFetcher #$instanceID)" }
             }
+            info { "CalendarFetcher background tasks complete (CalendarFetcher #$instanceID)" }
         }
+        info { "Heading back to the uiThread while CalendarFetcher is running (CalendarFetcher #$instanceID)" }
     }
 
     companion object: AnkoLogger {
