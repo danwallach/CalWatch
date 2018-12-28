@@ -50,7 +50,8 @@ completely changed how the phone and the watch relate to one another. Fast forwa
 Google announced they were providing sample code and libraries to make it much easier to support
 complications, plus they're finally rolling out Wear 2 to more watches. Consequently, release6
 now supports Wear 2.x watches, moving all the configuration dialogs away from the phone and doing
-everything on the watch.
+everything on the watch. release6 also uses the latest Kotlin coroutine support to do the expensive
+calendar processing asynchronously.
 
 ## Credit where credit is due:
 
@@ -58,7 +59,4 @@ everything on the watch.
   https://constraints.cs.washington.edu/cassowary/
 
 * "Unavailable calendar" icon by Björn Andersson
-  https://thenounproject.com/term/calendar/139505/
-
-* "Walking" icon by Google
-  http://www.flaticon.com/authors/google
+  ttp://www.flaticon.com/authors/google
