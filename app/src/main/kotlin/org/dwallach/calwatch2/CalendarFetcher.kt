@@ -18,13 +18,19 @@ import android.os.*
 import android.provider.CalendarContract
 import android.support.wearable.provider.WearableCalendarContract
 import android.text.format.DateUtils
+import kotlinx.coroutines.*
+import kotlinx.coroutines.channels.Channel
+import org.jetbrains.anko.AnkoLogger
+import org.jetbrains.anko.error
+import org.jetbrains.anko.info
+import org.jetbrains.anko.warn
 
 import java.lang.ref.WeakReference
+import java.util.*
 import kotlin.comparisons.compareBy
 import kotlin.comparisons.thenBy
 import kotlin.comparisons.thenByDescending
 
-import org.jetbrains.anko.*
 
 /**
  * This class handles all the dirty work of asynchronously loading calendar data from the calendar provider
@@ -140,7 +146,9 @@ class CalendarFetcher(initialContext: Context,
      * an exception, because this result is meant to be saved across threads, which a thrown exception
      * can't do very well.
      */
-    private fun loadContent(context: Context): List<CalendarEvent> {
+    private fun loadContent(context: Context): List<CalendarEvent>? {
+        val startTimeNano = SystemClock.elapsedRealtimeNanos()
+
         // local state which we'll eventually return
         val cr = mutableListOf<CalendarEvent>()
 
@@ -166,49 +174,57 @@ class CalendarFetcher(initialContext: Context,
 
         // And now, the event instances
 
-        val instancesProjection = arrayOf(
-                CalendarContract.Instances.BEGIN,
-                CalendarContract.Instances.END,
-                CalendarContract.Instances.EVENT_ID,
-                CalendarContract.Instances.CALENDAR_COLOR,
-                CalendarContract.Instances.EVENT_COLOR,
-                CalendarContract.Instances.ALL_DAY,
-                CalendarContract.Instances.VISIBLE)
+        try {
+            val instancesProjection = arrayOf(
+                    CalendarContract.Instances.BEGIN,
+                    CalendarContract.Instances.END,
+                    CalendarContract.Instances.EVENT_ID,
+                    CalendarContract.Instances.CALENDAR_COLOR,
+                    CalendarContract.Instances.EVENT_COLOR,
+                    CalendarContract.Instances.ALL_DAY,
+                    CalendarContract.Instances.VISIBLE)
 
-        // Note: we used to use DISPLAY_COLOR, but that's now deprecated on Wear 2.0 because reasons.
-        // https://issuetracker.google.com/issues/38476499
+            // Note: we used to use DISPLAY_COLOR, but that's now deprecated on Wear 2.0 because reasons.
+            // https://issuetracker.google.com/issues/38476499
 
-        // now, get the list of events
-        val builder = contentUri.buildUpon()
-        ContentUris.appendId(builder, queryStartMillis)
-        ContentUris.appendId(builder, queryEndMillis)
-        val iCursor = context.contentResolver.query(builder.build(),
-                instancesProjection, null, null, null)
+            // now, get the list of events
+            val builder = contentUri.buildUpon()
+            ContentUris.appendId(builder, queryStartMillis)
+            ContentUris.appendId(builder, queryEndMillis)
+            val iCursor = context.contentResolver.query(builder.build(),
+                    instancesProjection, null, null, null)
 
-        // if it's null, which shouldn't ever happen, then we at least won't gratuitously fail here
-        if (iCursor == null) {
-            warn("Got null cursor, no events!")
-        } else {
-            if (iCursor.moveToFirst()) {
-                do {
-                    var i = 0
+            // if it's null, which shouldn't ever happen, then we at least won't gratuitously fail here
+            if (iCursor == null) {
+                warn("Got null cursor, no events!")
+            } else {
+                if (iCursor.moveToFirst()) {
+                    do {
+                        var i = 0
 
-                    val startTime = iCursor.getLong(i++)
-                    val endTime = iCursor.getLong(i++)
-                    i++ // val eventID = iCursor.getLong(i++)
-                    val displayColor = calendarColorFix(iCursor.getInt(i++), iCursor.getInt(i++))
-                    val allDay = iCursor.getInt(i++) != 0
-                    val visible = iCursor.getInt(i) != 0
+                        val startTime = iCursor.getLong(i++)
+                        val endTime = iCursor.getLong(i++)
+                        i++ // val eventID = iCursor.getLong(i++)
+                        val displayColor = calendarColorFix(iCursor.getInt(i++), iCursor.getInt(i++))
+                        val allDay = iCursor.getInt(i++) != 0
+                        val visible = iCursor.getInt(i) != 0
 
-                    if (visible && !allDay)
-                        cr.add(CalendarEvent(startTime, endTime, displayColor))
+                        if (visible && !allDay)
+                            cr.add(CalendarEvent(startTime, endTime, displayColor))
 
-                } while (iCursor.moveToNext())
-                info { "loadContent: visible instances found: ${cr.size}" }
+                    } while (iCursor.moveToNext())
+                    info { "loadContent: visible instances found: ${cr.size}" }
+                }
+
+                // lifecycle cleanliness: important to close down when we're done
+                iCursor.close()
             }
-
-            // lifecycle cleanliness: important to close down when we're done
-            iCursor.close()
+        } catch (e: SecurityException) {
+            error("unexpected security exception while reading calendar", e)
+            kill()
+            scanInProgress = false
+            ClockState.calendarPermission = false
+            return null
         }
 
         // Primary sort: color, so events from the same calendar will become consecutive wedges
@@ -223,6 +239,9 @@ class CalendarFetcher(initialContext: Context,
                         compareBy<CalendarEvent> { it.displayColor }
                                 .thenBy { it.endTime }
                                 .thenByDescending { it.startTime })
+
+        val endTimeNano = SystemClock.elapsedRealtimeNanos()
+        info { "async: total calendar computation time: %.3f ms".format((endTimeNano - startTimeNano) / 1000000.0) }
 
         return sorted
     }
@@ -243,50 +262,22 @@ class CalendarFetcher(initialContext: Context,
             warn { "not using the singleton fetcher! (CalendarFetcher me #$instanceID), singleton #${singletonFetcher?.instanceID})" }
 
 
-        // Historical note: we used to acquire a wake lock here, in part because that's what
-        // some sample Android code did while accessing the calendar. With Wear 2, this seemed
-        // to cause weird problems, but only after reboot. Experimentally removing the wake lock
-        // code fixed the weird problems, and everything still works. So, no more wake lock!
+        // Behold, the power of Kotlin 1.3's coroutines, with bonus wildly incomplete documentation!
+        // https://github.com/Kotlin/kotlinx.coroutines/blob/master/ui/coroutines-guide-ui.md
+        // https://medium.com/@andrea.bresolin/playing-with-kotlin-in-android-coroutines-and-how-to-get-rid-of-the-callback-hell-a96e817c108b
 
-        // The code below is the Anko library being awesome. Rather than using AsyncTask, which can get
-        // messy, we instead say "this block should run asynchronously, and oh by the way, run this
-        // other code on the UI thread once the asynchronous bit is done". Spectacular. The main async
-        // block will be producing its result in the result variable, declared below, which is then
-        // picked up by the UI thread part. Note that we don't want to throw an exception from the
-        // async code. Instead, we catch anything that might have gone wrong and just pass the exception
-        // back as part of the result.
-        //
-        // Mea culpa: I used to think one of the big problem with Google's Go language was that they
-        // didn't embrace exceptions for error handling. Now I get it. Exceptions don't play nicely
-        // with asynchronous/concurrent computations, which is pretty much the whole point of Go.
-        // That said, I still think Go is broken without parametric polymorphism. The Cassowary solver
-        // that we're using was written in Java before Java had generics and there were even comments
-        // next to all of the hash tables and such as to what their generic types should have been,
-        // but when I tried to make those into real parametric Java type declarations, some things
-        // didn't match up quite right.
-        doAsync({ th ->
-            if (th is SecurityException)
-                ClockState.calendarPermission = false
+        GlobalScope.launch {
+            // Asynchronously fetches the content, then runs the rest of the block on the UI thread
+            // once we get back.
+            val eventList = withContext(Dispatchers.Default) { loadContent(context) }
 
-            error("Failure in asyncTask!", th)
-            kill()
-            scanInProgress = false
-        }) {
-            val startTime = SystemClock.elapsedRealtimeNanos()
-            val result = loadContent(context)
-            val endTime = SystemClock.elapsedRealtimeNanos()
-            info { "async: total calendar computation time: %.3f ms".format((endTime - startTime) / 1000000.0) }
-
-            //
-            // This will run after the above chunk of the async completes, which could be a while
-            // if the watch goes into "doze" mode, but it will definitely happen when the screen is
-            // being redrawn, which is what we care about. Pretty much all that's going on here are
-            // the calls to ClockState, that make the new calendar state visible the next time
-            // the screen is being redrawn.
-            //
-            uiThread {
+            if (eventList == null) {
+                warn { "No result (something went wrong), so not updating any calendar state (CalendarFetcher #$instanceID)" }
                 scanInProgress = false
-                ClockState.setWireEventList(result)
+            } else {
+                val layoutPair = withContext(Dispatchers.Default) { ClockStateHelper.clipToVisible(eventList) }
+                scanInProgress = false
+                ClockState.setWireEventList(eventList, layoutPair)
                 Utilities.redrawEverything()
                 info { "uiThread: complete (CalendarFetcher #$instanceID)" }
             }
@@ -294,9 +285,9 @@ class CalendarFetcher(initialContext: Context,
     }
 
     companion object: AnkoLogger {
-        private var singletonFetcher: CalendarFetcher? = null
+        @Volatile private var singletonFetcher: CalendarFetcher? = null
         @Volatile private var scanInProgress: Boolean = false
-        private var instanceCounter: Int = 0 // ID numbers for tracking / better logging
+        @Volatile private var instanceCounter: Int = 0 // ID numbers for tracking / better logging
 
         private fun currentState() =
                 "singletonFetcher(%s), scanInProgress($scanInProgress), instanceCounter($instanceCounter)"
@@ -314,5 +305,3 @@ class CalendarFetcher(initialContext: Context,
         }
     }
 }
-
-

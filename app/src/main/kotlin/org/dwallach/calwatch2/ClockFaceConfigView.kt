@@ -68,7 +68,7 @@ class ClockFaceConfigView(context: Context, attrs: AttributeSet): View(context, 
         ACTION_UP, ACTION_BUTTON_RELEASE, ACTION_POINTER_UP -> {
             val rawx = event.x
             val rawy = event.y
-            info { String.format("onTouchEvent: %.1f, %.1f", rawx, rawy) }
+            info { "onTouchEvent: %.1f, %.1f".format(rawx, rawy) }
 
             if (h == -1 || w == -1) {
                 warn("We don't know the real screen size yet, bailing!")
@@ -76,7 +76,7 @@ class ClockFaceConfigView(context: Context, attrs: AttributeSet): View(context, 
             } else {
                 val y = (h / 2) - rawy
                 val x = rawx - ( w / 2 )
-                info { String.format("onTouchEvent: %.1f, %.1f --> %.1f, %.1f", rawx, rawy, x, y) }
+                info { "onTouchEvent: %.1f, %.1f --> %.1f, %.1f".format(rawx, rawy, x, y) }
 
                 // theta ranges from -180 to 180 (degrees)
                 val theta = atan2(y, x) * 180.0 / PI

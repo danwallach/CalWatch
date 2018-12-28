@@ -310,7 +310,7 @@ class AnalogComplicationConfigRecyclerViewAdapter(
                 }
             } else {
                 warn {
-                    String.format("Couldn't find complication (%s) or complicationBg (%s) for id $watchFaceComplicationId",
+                    "Couldn't find complication (%s) or complicationBg (%s) for id $watchFaceComplicationId".format(
                             if (complication == null) "null" else "okay",
                             if (complicationBg == null) "null" else "okay")
                 }

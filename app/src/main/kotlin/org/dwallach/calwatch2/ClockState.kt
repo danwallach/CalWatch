@@ -33,13 +33,6 @@ object ClockState : AnkoLogger {
     var maxLevel: Int = 0
         private set
 
-    /**
-     * Query whether or not a wire update has arrived yet. If the result is false,
-     * *and* we're running on the watch, then we've only got default values. If we're
-     * running on the phone, this data structure might be otherwise initialized, so
-     * this getter might return false even when the data structure is loaded with events.
-     * @return if a wire message has successfully initialized the clock state
-     */
     var calendarPermission = false
 
     /**
@@ -50,16 +43,12 @@ object ClockState : AnkoLogger {
             if (face == null) false else showSeconds && !face.ambientMode
 
     /**
-     * Load the eventlist. This is meant to consume the output of the calendarFetcher,
-     * which is in GMT time, *not* local time. Note that this method will *not* notify
-     * any observers of the ClockState that the state has changed. This is because we
-     * expect setWireEventList() to be called from other threads. Instead, pingObservers()
-     * should be called externally, and only from the main UI thread. This is exactly what
-     * CalendarFetcher does.
+     * Load the eventlist. This is meant to consume the output of [CalendarFetcher]
+     * which is in GMT time, *not* local time.
      */
-    fun setWireEventList(eventList: List<CalendarEvent>) {
-        verbose { "fresh calendar event list, " + eventList.size + " entries" }
-        val (visibleEventList, maxLevel) = ClockStateHelper.clipToVisible(eventList)
+    fun setWireEventList(eventList: List<CalendarEvent>, layoutPair: Pair<List<EventWrapper>, Int>) {
+        verbose { "fresh calendar event list, ${eventList.size}  entries" }
+        val (visibleEventList, maxLevel) = layoutPair
         verbose { "--> $visibleEventList visible events" }
         this.eventList = eventList
         this.visibleEventList = visibleEventList
@@ -123,7 +112,7 @@ object ClockStateHelper: AnkoLogger {
      * events visible in the next twelve hours, with events that would be off-screen
      * clipped to the 12-hour dial.
      */
-    internal fun clipToVisible(events: List<CalendarEvent>): Pair<List<EventWrapper>, Int> {
+    fun clipToVisible(events: List<CalendarEvent>): Pair<List<EventWrapper>, Int> {
         val gmtOffset = TimeWrapper.gmtOffset
 
         val localClipTime = TimeWrapper.localFloorHour
