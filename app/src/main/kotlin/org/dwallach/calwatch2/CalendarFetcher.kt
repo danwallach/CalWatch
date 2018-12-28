@@ -19,14 +19,12 @@ import android.provider.CalendarContract
 import android.support.wearable.provider.WearableCalendarContract
 import android.text.format.DateUtils
 import kotlinx.coroutines.*
-import kotlinx.coroutines.channels.Channel
 import org.jetbrains.anko.AnkoLogger
 import org.jetbrains.anko.error
 import org.jetbrains.anko.info
 import org.jetbrains.anko.warn
 
 import java.lang.ref.WeakReference
-import java.util.*
 import kotlin.comparisons.compareBy
 import kotlin.comparisons.thenBy
 import kotlin.comparisons.thenByDescending

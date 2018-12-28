@@ -54,6 +54,9 @@ Deal with multiday events that aren't "all day" events
 
 ANDROID N / WEAR 2.0 OVERHAUL / REFACTORING / RE-ENGINEERING
     TODO not noticing when the calendar is updating?
+    - All the code examples online seem to be really old
+    - We can't just move this into an <intent-filter> or something in the manifest, it has to be in the main code body
+      (because power savings instituted in Android Oreo, two APIs ago)
 
     TODO preferences for day/date thing
     - managed to switch to the new "rounded" style, but can't move the toggle to the left of the text
