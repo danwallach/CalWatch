@@ -59,7 +59,7 @@ class CalendarFetcher(initialContext: Context,
 
     private val broadcastReceiver = object : BroadcastReceiver() {
         override fun onReceive(context: Context, intent: Intent) {
-            info { "receiver: got intent message.  action(${intent.action}), data(${intent.data}), toString($intent)" }
+            info { "broadcastReceiver: GOT INTENT MESSAGE.  action(${intent.action}), data(${intent.data}), toString($intent)" }
             if (Intent.ACTION_PROVIDER_CHANGED == intent.action) {
 
                 // Google's reference code also checks that the Uri matches intent.getData(), but the URI we're getting back via intent.getData() is:
@@ -70,21 +70,21 @@ class CalendarFetcher(initialContext: Context,
 
                 // Solution? Screw it. Whatever we get, we don't care, we'll reload the calendar.
 
-                info("receiver: time to load new calendar data")
+                info("broadcastReceiver: time to load new calendar data")
                 rescan()
             } else {
-                warn { "receiver: ignoring intent: action(${intent.action}), data(${intent.data}), toString($intent)" }
+                warn { "broadcastReceiver: IGNORING INTENT: action(${intent.action}), data(${intent.data}), toString($intent)" }
             }
         }
     }
 
     init {
-        warn { "here begins CalendarFetcher #$instanceID" }
-        singletonFetcher?.kill() // clear out the old singleton fetcher, if it's there
+        info { "HERE BEGINS CalendarFetcher #$instanceID" }
+        singletonFetcher?.kill() ?: info { "No prior leftover singleton fetcher (CalendarFetcher #${instanceID})" }
         singletonFetcher = this // and now the newbie becomes the singleton
 
         // hook into watching the calendar (code borrowed from Google's calendar wear app)
-        info("setting up intent receiver")
+        info { "setting up intent receiver (CalendarFetcher #${instanceID})" }
         val filter = IntentFilter(Intent.ACTION_PROVIDER_CHANGED).apply {
             addDataScheme("content")
             addDataAuthority(authority, null)
@@ -126,14 +126,14 @@ class CalendarFetcher(initialContext: Context,
             // this means that we're reusing a `killed` CalendarFetcher, which is bad, because it
             // won't be listening to the broadcasts any more. Log so we can discover it, but otherwise
             // continue running. At least it will update once an hour...
-            error { "no receiver registered! (CalendarFetcher #$instanceID)" }
+            error { "rescan: no receiver registered! (CalendarFetcher #$instanceID)" }
         }
 
         if (scanInProgress) {
-            warn { "scan in progress, not doing another scan! (CalendarFetcher #$instanceID)" }
+            warn { "rescan: scan in progress, not doing another scan! (CalendarFetcher #$instanceID)" }
             return
         } else {
-            info { "rescan starting asynchronously (CalendarFetcher #$instanceID)" }
+            info { "rescan: starting asynchronously (CalendarFetcher #$instanceID)" }
             scanInProgress = true
             runAsyncLoader()
         }
@@ -249,13 +249,13 @@ class CalendarFetcher(initialContext: Context,
         val context = getContext()
 
         if (context == null) {
-            error { "no context, cannot load calendar" }
+            error { "runAsyncLoader: no context, cannot load calendar" }
             scanInProgress = false
             return
         }
 
         if (this != singletonFetcher)
-            warn { "not using the singleton fetcher! (CalendarFetcher me #$instanceID), singleton #${singletonFetcher?.instanceID})" }
+            warn { "runAsyncLoader: not using the singleton fetcher! (CalendarFetcher me #$instanceID), singleton #${singletonFetcher?.instanceID})" }
 
 
         // Behold, the power of Kotlin 1.3's coroutines, with bonus wildly incomplete documentation!
@@ -290,9 +290,9 @@ class CalendarFetcher(initialContext: Context,
                 ClockState.setWireEventList(eventList, layoutPair)
                 Utilities.redrawEverything()
             }
-            info { "CalendarFetcher background tasks complete (CalendarFetcher #$instanceID)" }
+            info { "runAsyncLoader: background tasks complete (CalendarFetcher #$instanceID)" }
         }
-        info { "Heading back to the uiThread while CalendarFetcher is running (CalendarFetcher #$instanceID)" }
+        info { "runAsyncLoader: Heading back to uiThread async tasks running (CalendarFetcher #$instanceID)" }
     }
 
     companion object: AnkoLogger {
@@ -305,7 +305,7 @@ class CalendarFetcher(initialContext: Context,
                         .format(singletonFetcher?.toString() ?: "null")
 
         fun requestRescan() {
-            info { "requestRescan: " + currentState() }
+            info { "requestRescan: ${currentState()}" }
             singletonFetcher?.rescan()
         }
 

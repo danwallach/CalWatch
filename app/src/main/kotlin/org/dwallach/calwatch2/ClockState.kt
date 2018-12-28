@@ -47,7 +47,7 @@ object ClockState : AnkoLogger {
      * which is in GMT time, *not* local time.
      */
     fun setWireEventList(eventList: List<CalendarEvent>, layoutPair: Pair<List<EventWrapper>, Int>) {
-        verbose { "fresh calendar event list, ${eventList.size}  entries" }
+        verbose { "fresh calendar event list, ${eventList.size} entries" }
         val (visibleEventList, maxLevel) = layoutPair
         verbose { "--> $visibleEventList visible events" }
         this.eventList = eventList
