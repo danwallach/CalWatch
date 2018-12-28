@@ -46,12 +46,10 @@ class CalendarFetcher(initialContext: Context,
                       private val contentUri: Uri = WearableCalendarContract.Instances.CONTENT_URI,
                       private val authority: String = WearableCalendarContract.AUTHORITY,
                       private val backupAuthority: String = CalendarContract.AUTHORITY): AnkoLogger {
-    // this will fire when it's time to (re)load the calendar, launching an asynchronous
-    // task to do all the dirty work and eventually update ClockState
+
     private val contextRef = WeakReference(initialContext)
     private var isReceiverRegistered: Boolean = false
     private val instanceID = ++instanceCounter
-
 
     override fun toString() =
         "CalendarFetcher(contextRef(%s), authority($authority), contentUri($contentUri), isReceiverRegistered($isReceiverRegistered), instanceId($instanceID))"
@@ -117,9 +115,7 @@ class CalendarFetcher(initialContext: Context,
         rescan(initialContext)
     }
 
-    private fun getContext(): Context? {
-        return contextRef.get()
-    }
+    private fun getContext(): Context? = contextRef.get()
 
     /**
      * Call this when the CalendarFetcher is no longer going to be used. This will get rid
@@ -159,6 +155,12 @@ class CalendarFetcher(initialContext: Context,
             scanInProgress = true
             runAsyncLoader(context ?: getContext())
         }
+    }
+
+    private fun calendarColorFix(calendarColor: Int, eventColor: Int) = when {
+        eventColor != 0 -> eventColor
+        calendarColor != 0 -> calendarColor
+        else -> Color.DKGRAY
     }
 
     /**
@@ -345,12 +347,6 @@ class CalendarFetcher(initialContext: Context,
         fun requestRescan() {
             info { "requestRescan: $currentState" }
             singletonFetcher?.rescan()
-        }
-
-        private fun calendarColorFix(calendarColor: Int, eventColor: Int) = when {
-            eventColor != 0 -> eventColor
-            calendarColor != 0 -> calendarColor
-            else -> Color.DKGRAY
         }
     }
 }
