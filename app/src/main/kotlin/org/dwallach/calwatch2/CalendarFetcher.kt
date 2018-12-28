@@ -44,54 +44,77 @@ import kotlin.comparisons.thenByDescending
  */
 class CalendarFetcher(initialContext: Context,
                       private val contentUri: Uri = WearableCalendarContract.Instances.CONTENT_URI,
-                      private val authority: String = WearableCalendarContract.AUTHORITY): AnkoLogger {
+                      private val authority: String = WearableCalendarContract.AUTHORITY,
+                      private val backupAuthority: String = CalendarContract.AUTHORITY): AnkoLogger {
     // this will fire when it's time to (re)load the calendar, launching an asynchronous
     // task to do all the dirty work and eventually update ClockState
     private val contextRef = WeakReference(initialContext)
     private var isReceiverRegistered: Boolean = false
-    private val instanceID = instanceCounter++
+    private val instanceID = ++instanceCounter
+
 
     override fun toString() =
         "CalendarFetcher(contextRef(%s), authority($authority), contentUri($contentUri), isReceiverRegistered($isReceiverRegistered), instanceId($instanceID))"
                 .format(if (contextRef.get() == null) "null" else "non-null")
 
-    private val broadcastReceiver = object : BroadcastReceiver() {
-        override fun onReceive(context: Context, intent: Intent) {
-            info { "broadcastReceiver: GOT INTENT MESSAGE.  action(${intent.action}), data(${intent.data}), toString($intent)" }
-            if (Intent.ACTION_PROVIDER_CHANGED == intent.action) {
+    private fun onReceiveBroadcastHandler(context: Context, intent: Intent, authority: String) {
+        info { "broadcastReceiver: GOT INTENT MESSAGE! action(${intent.action}), data(${intent.data}), toString($intent), authority($authority)" }
+        if (Intent.ACTION_PROVIDER_CHANGED == intent.action) {
 
-                // Google's reference code also checks that the Uri matches intent.getData(), but the URI we're getting back via intent.getData() is:
-                // content://com.google.android.wearable.provider.calendar
-                //
-                // versus the URL we're looking for in the first place:
-                // content://com.google.android.wearable.provider.calendar/instances/when
+            // Google's reference code also checks that the Uri matches intent.getData(), but the URI we're getting back via intent.getData() is:
+            // content://com.google.android.wearable.provider.calendar
+            //
+            // versus the URL we're looking for in the first place:
+            // content://com.google.android.wearable.provider.calendar/instances/when
 
-                // Solution? Screw it. Whatever we get, we don't care, we'll reload the calendar.
+            // Solution? Screw it. Whatever we get, we don't care, we'll reload the calendar.
 
-                info("broadcastReceiver: time to load new calendar data")
-                rescan()
-            } else {
-                warn { "broadcastReceiver: IGNORING INTENT: action(${intent.action}), data(${intent.data}), toString($intent)" }
-            }
+            info("broadcastReceiver: time to load new calendar data")
+            rescan(context)
+        } else {
+            warn { "broadcastReceiver: IGNORING INTENT: action(${intent.action}), data(${intent.data}), toString($intent), authority($authority)" }
         }
+    }
+
+    // Why do we have two separate BroadcastReceiver instances? In part, because we were mysteriously
+    // not receiving these intents at one point and this was a form of paranoia. Also, it doesn't seem
+    // to hurt anything. If, for whatever broken reason, both receivers get triggered, then the first
+    // one will launch the background task to read the calendar, and the second will notice that the
+    // first one is in progress and will become a no-op.
+
+    private val broadcastReceiver = object : BroadcastReceiver() {
+        override fun onReceive(context: Context, intent: Intent) = onReceiveBroadcastHandler(context, intent, authority)
+    }
+
+    private val broadcastReceiverBackup = object : BroadcastReceiver() {
+        override fun onReceive(context: Context, intent: Intent) = onReceiveBroadcastHandler(context, intent, backupAuthority)
     }
 
     init {
         info { "HERE BEGINS CalendarFetcher #$instanceID" }
-        singletonFetcher?.kill() ?: info { "No prior leftover singleton fetcher (CalendarFetcher #${instanceID})" }
+        singletonFetcher?.kill() ?: info { "No prior leftover singleton fetcher (CalendarFetcher #$instanceID)" }
         singletonFetcher = this // and now the newbie becomes the singleton
 
         // hook into watching the calendar (code borrowed from Google's calendar wear app)
-        info { "setting up intent receiver (CalendarFetcher #${instanceID})" }
+        info { "setting up intent receiver (CalendarFetcher #$instanceID)" }
         val filter = IntentFilter(Intent.ACTION_PROVIDER_CHANGED).apply {
             addDataScheme("content")
             addDataAuthority(authority, null)
         }
         initialContext.registerReceiver(broadcastReceiver, filter)
+
+        // desperate times call for desperate measures -- trying the "wrong" calendar contract
+        val filterBackup = IntentFilter(Intent.ACTION_PROVIDER_CHANGED).apply {
+            addDataScheme("content")
+            addDataAuthority(backupAuthority, null)
+        }
+        initialContext.registerReceiver(broadcastReceiverBackup, filterBackup)
+
+
         isReceiverRegistered = true
 
         // kick off initial loading of calendar state
-        rescan()
+        rescan(initialContext)
     }
 
     private fun getContext(): Context? {
@@ -104,12 +127,13 @@ class CalendarFetcher(initialContext: Context,
      * cannot be used any more. Make a new one if you want to restart things later.
      */
     fun kill() {
-        warn { "killing, state = " + currentState() }
+        warn { "killing, state = $currentState" }
 
         val context: Context? = getContext()
 
         if (isReceiverRegistered && context != null) {
             context.unregisterReceiver(broadcastReceiver)
+            context.unregisterReceiver(broadcastReceiverBackup)
         }
 
         isReceiverRegistered = false
@@ -119,7 +143,7 @@ class CalendarFetcher(initialContext: Context,
      * This will start asynchronously loading the calendar. The results will eventually arrive
      * in ClockState, and any Observers of ClockState will be notified.
      */
-    private fun rescan() {
+    private fun rescan(context: Context? = null) {
         if (!isReceiverRegistered) {
             // this means that we're reusing a `killed` CalendarFetcher, which is bad, because it
             // won't be listening to the broadcasts any more. Log so we can discover it, but otherwise
@@ -133,7 +157,7 @@ class CalendarFetcher(initialContext: Context,
         } else {
             info { "rescan: starting asynchronously (CalendarFetcher #$instanceID)" }
             scanInProgress = true
-            runAsyncLoader()
+            runAsyncLoader(context ?: getContext())
         }
     }
 
@@ -145,11 +169,13 @@ class CalendarFetcher(initialContext: Context,
      * can't do very well.
      */
     private fun loadContent(context: Context): List<CalendarEvent>? {
+        val lFetchCounter = ++fetchCounter
+
         // local state which we'll eventually return
         val cr = mutableListOf<CalendarEvent>()
 
         // first, get the list of calendars
-        info { "loadContent: starting to load content (CalendarFetcher #$instanceID)" }
+        info { "loadContent: starting to load content, fetchCounter($lFetchCounter) (CalendarFetcher #$instanceID)" }
 
         TimeWrapper.update()
         val time = TimeWrapper.gmtTime
@@ -230,22 +256,16 @@ class CalendarFetcher(initialContext: Context,
         //    ones will end late in the day, and will thus end up on the inside of the watchface)
 
         // Third-priority sort: startTime, with objects starting later (smaller) appearing first in the sort.
-        val sorted =
-                cr.sortedWith(
-                        compareBy<CalendarEvent> { it.displayColor }
-                                .thenBy { it.endTime }
-                                .thenByDescending { it.startTime })
-
-
-        return sorted
+        return cr.sortedWith(
+                compareBy<CalendarEvent> { it.displayColor }
+                        .thenBy { it.endTime }
+                        .thenByDescending { it.startTime })
     }
 
     /**
      * Starts an asynchronous task to load the calendar
      */
-    private fun runAsyncLoader() {
-        val context = getContext()
-
+    private fun runAsyncLoader(context: Context?) {
         if (context == null) {
             error { "runAsyncLoader: no context, cannot load calendar" }
             scanInProgress = false
@@ -256,9 +276,25 @@ class CalendarFetcher(initialContext: Context,
             warn { "runAsyncLoader: not using the singleton fetcher! (CalendarFetcher me #$instanceID), singleton #${singletonFetcher?.instanceID})" }
 
 
-        // Behold, the power of Kotlin 1.3's coroutines, with bonus wildly incomplete documentation!
+        // Behold! The power of Kotlin 1.3's coroutines, with bonus wildly incomplete documentation!
         // https://github.com/Kotlin/kotlinx.coroutines/blob/master/ui/coroutines-guide-ui.md
         // https://medium.com/@andrea.bresolin/playing-with-kotlin-in-android-coroutines-and-how-to-get-rid-of-the-callback-hell-a96e817c108b
+
+        // In a gratuitously short nutshell:
+
+        // There are two universes in Kotlin: the "regular" universe and the "suspend" universe.
+        // (More formally, these are CoroutineScopes.)
+
+        // In the "suspend" universe, functions and methods know how to suspend themselves and
+        // save behind a continuation so they can resume later. The call to GlobalScope.launch
+        // is the bridge from the "regular" universe to the "suspend" universe where we can call
+        // things that might want to go in the background.
+
+        // The call to withContext() creates a task that happily runs in the background, on
+        // some other thread, that will eventually return a value that we'll read here, back
+        // on the UI thread again! This is only possible when we're in the "suspend" universe,
+        // but note that we don't have to declare any "suspend" functions nor do we have to
+        // call await() for the results to come back. That's all handled by withContext().
 
         GlobalScope.launch {
             info { "runAsyncLoader: here we go! (CalendarFetcher #$instanceID)" }
@@ -294,16 +330,20 @@ class CalendarFetcher(initialContext: Context,
     }
 
     companion object: AnkoLogger {
+        // Declaring these volatile is probably overkill, but they may be read from different threads, so
+        // we want changes to propagate immediately. scanInProgress is particularly important for this,
+        // since it's how we prevent running multiple simultaneous queries to the calendar provider.
         @Volatile private var singletonFetcher: CalendarFetcher? = null
         @Volatile private var scanInProgress: Boolean = false
-        @Volatile private var instanceCounter: Int = 0 // ID numbers for tracking / better logging
+        @Volatile private var instanceCounter: Int = -1 // ID numbers for tracking / better logging
+        @Volatile private var fetchCounter: Int = -1 // ID numbers for tracking / better logging
 
-        private fun currentState() =
-                "singletonFetcher(%s), scanInProgress($scanInProgress), instanceCounter($instanceCounter)"
-                        .format(singletonFetcher?.toString() ?: "null")
+        private val currentState: String
+            get() = "singletonFetcher(%s), scanInProgress($scanInProgress), instanceCounter($instanceCounter)"
+                    .format(singletonFetcher?.toString() ?: "null")
 
         fun requestRescan() {
-            info { "requestRescan: ${currentState()}" }
+            info { "requestRescan: $currentState" }
             singletonFetcher?.rescan()
         }
 

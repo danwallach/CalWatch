@@ -31,7 +31,7 @@ import java.util.*
  * All of the graphics calls for drawing watchfaces happen here. Note that this class knows
  * nothing about Android widgets, views, or activities. That stuff is handled in CalWatchFaceService.
  */
-class ClockFace(val configMode: Boolean = false): AnkoLogger {
+class ClockFace(private val configMode: Boolean = false): AnkoLogger {
     // an instance of the ClockFace class is created anew alongside the rest of the UI; this number
     // helps us keep track of which instance is which
     private val instanceID: Int
