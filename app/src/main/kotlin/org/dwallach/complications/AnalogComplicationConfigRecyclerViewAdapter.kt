@@ -152,7 +152,7 @@ class AnalogComplicationConfigRecyclerViewAdapter(
      */
     fun updateSelectedComplication(complicationProviderInfo: ComplicationProviderInfo?) {
 
-        verbose { "updateSelectedComplication: $mPreviewAndComplicationsViewHolder" }
+        info { "updateSelectedComplication: $mPreviewAndComplicationsViewHolder" }
 
         // Checks if view is inflated and complication id is valid.
         if (mSelectedComplicationId >= 0) {
@@ -215,12 +215,12 @@ class AnalogComplicationConfigRecyclerViewAdapter(
         init {
             idToComplication.values.forEach { it?.setOnClickListener(this) }
 
-            verbose { "Complications from wrapper: ${ComplicationWrapper.complicationIds.toSet()}" }
-            verbose { "Active complications from wrapper: ${ComplicationWrapper.activeComplicationIds.toSet()}" }
-            verbose { "Total num complications (idToComplication): ${idToComplication.size}" }
-            verbose { "Disable complication Ids: $disabledComplicationIds" }
-            verbose { "Num disabled: ${disabledComplications.size}" }
-            verbose { "Num disabled bg: ${disabledComplicationBackgrounds.size}" }
+            info { "Complications from wrapper: ${ComplicationWrapper.complicationIds.toSet()}" }
+            info { "Active complications from wrapper: ${ComplicationWrapper.activeComplicationIds.toSet()}" }
+            info { "Total num complications (idToComplication): ${idToComplication.size}" }
+            info { "Disable complication Ids: $disabledComplicationIds" }
+            info { "Num disabled: ${disabledComplications.size}" }
+            info { "Num disabled bg: ${disabledComplicationBackgrounds.size}" }
         }
 
         override fun onClick(view: View) {
@@ -260,12 +260,12 @@ class AnalogComplicationConfigRecyclerViewAdapter(
                         AnalogComplicationConfigActivity.COMPLICATION_CONFIG_REQUEST_CODE)
 
             } else {
-                verbose { "Complication not supported by watch face." }
+                warn { "Complication not supported by watch face." }
             }
         }
 
         private fun setDefaultComplicationDrawable() {
-            verbose { "setting default complication drawable, resourceId = $iconId" }
+            info { "setting default complication drawable, resourceId = $iconId" }
 
             // This is a bit of a hack, but it works.
             val context = mWatchFaceArmsAndTicksView.context ?: return
@@ -293,8 +293,8 @@ class AnalogComplicationConfigRecyclerViewAdapter(
 
         fun updateComplicationViews(watchFaceComplicationId: Int,
                                     complicationProviderInfo: ComplicationProviderInfo?) {
-            verbose { "updateComplicationViews(): id:  $watchFaceComplicationId" }
-            verbose { "\tinfo: $complicationProviderInfo" }
+            info { "updateComplicationViews(): id:  $watchFaceComplicationId" }
+            info { "\tinfo: $complicationProviderInfo" }
 
             val complication = idToComplication[watchFaceComplicationId]
             val complicationBg = idToComplicationBackground[watchFaceComplicationId]
