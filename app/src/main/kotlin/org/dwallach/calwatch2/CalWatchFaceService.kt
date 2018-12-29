@@ -70,9 +70,12 @@ class CalWatchFaceService : CanvasWatchFaceService(), AnkoLogger {
             // there were a lot more choices here for Wear1; this seems to do what we want
             setWatchFaceStyle(
                     WatchFaceStyle.Builder(this@CalWatchFaceService)
+                            .setAccentColor(Color.YELLOW)
                             .setStatusBarGravity(Gravity.CENTER)
                             .setViewProtectionMode(WatchFaceStyle.PROTECT_WHOLE_SCREEN)
-                            .setShowUnreadCountIndicator(true)
+                            .setShowUnreadCountIndicator(false) // would prefer true, but doesn't seem to work reliably
+                            .setHideNotificationIndicator(false)
+                            .setHideStatusBar(false)
                             .setAcceptsTapEvents(true)
                             .build())
 
