@@ -323,8 +323,13 @@ class CalendarFetcher(initialContext: Context,
                     result
                 }
                 scanInProgress = false
-                ClockState.setWireEventList(eventList, layoutPair)
-                Utilities.redrawEverything()
+
+                // This last part really needs to happen on the UI thread, otherwise things
+                // get crashy. Dispatchers.Main is supposed to do what we want.
+                withContext(Dispatchers.Main) {
+                    ClockState.setWireEventList(eventList, layoutPair)
+                    Utilities.redrawEverything()
+                }
             }
             info { "runAsyncLoader: background tasks complete (CalendarFetcher #$instanceID)" }
         }

@@ -16,7 +16,7 @@ import androidx.core.content.ContextCompat
 import org.jetbrains.anko.*
 
 /**
- * Deal with all the Marshmallow permission machinery.
+ * Deal with all the run-time permission machinery.
  */
 object CalendarPermission: AnkoLogger {
     private const val INTERNAL_PERM_REQUEST_CODE = 31337

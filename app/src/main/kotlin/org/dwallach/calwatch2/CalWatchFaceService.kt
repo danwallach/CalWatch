@@ -159,7 +159,6 @@ class CalWatchFaceService : CanvasWatchFaceService(), AnkoLogger {
             invalidate()
         }
 
-
         override fun onInterruptionFilterChanged(interruptionFilter: Int) {
             super.onInterruptionFilterChanged(interruptionFilter)
             clockFace.muteMode = (interruptionFilter == WatchFaceService.INTERRUPTION_FILTER_NONE)
