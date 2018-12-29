@@ -17,17 +17,65 @@ import org.jetbrains.anko.*
  * as pretty as possible
  */
 object EventLayoutUniform: AnkoLogger {
-    const val MAXLEVEL = 10000 // we'll go from 0 to MAXLEVEL, inclusive
+    /**
+     * Given a list of events, return another list that corresponds to the set of
+     * events visible in the next twelve hours, with events that would be off-screen
+     * clipped to the 12-hour dial.
+     */
+    fun clipToVisible(events: List<CalendarEvent>): Pair<List<EventWrapper>, Int> {
+        val gmtOffset = TimeWrapper.gmtOffset
+
+        val localClipTime = TimeWrapper.localFloorHour
+        val clipStartMillis = localClipTime - gmtOffset // convert from localtime back to GMT time for looking at events
+        val clipEndMillis = clipStartMillis + 43200000  // 12 hours later
+
+        val clippedEvents = events.map {
+            it.clip(clipStartMillis, clipEndMillis)
+        }.filter {
+            // require events to be onscreen
+            it.endTime > clipStartMillis && it.startTime < clipEndMillis
+                    // require events to not fill the full screen
+                    && !(it.endTime == clipEndMillis && it.startTime == clipStartMillis)
+                    // require events to have some non-zero thickness (clipping can sometimes yield events that start and end at the same time)
+                    && it.endTime > it.startTime
+        }.map {
+            // apply GMT offset, and then wrap with EventWrapper, where the layout will happen
+            EventWrapper(it + gmtOffset)
+        }
+
+        // now, we run off and do screen layout
+        val lMaxLevel: Int
+
+        if (clippedEvents.isNotEmpty()) {
+            // first, try the fancy constraint solver
+            if (EventLayoutUniform.go(clippedEvents)) {
+                // yeah, we succeeded
+                lMaxLevel = EventLayoutUniform.MAXLEVEL
+            } else {
+                error("event layout failed!") // in years of testing, this failure apparently *never* happened
+                return Pair(emptyList(), 0)
+            }
+
+            EventLayoutUniform.sanityTest(clippedEvents, lMaxLevel, "After new event layout")
+            verbose { "maxLevel for visible events: $lMaxLevel" }
+            verbose { "number of visible events: ${clippedEvents.size}" }
+
+            return Pair(clippedEvents, lMaxLevel)
+        } else {
+            verbose("no events visible!")
+            return Pair(emptyList(), 0)
+        }
+    }
+    private const val MAXLEVEL = 10000 // we'll go from 0 to MAXLEVEL, inclusive
 
     /**
      * Takes a list of calendar events and mutates their minLevel and maxLevel for calendar side-by-side
      * non-overlapping layout.
-
+     *
      * @param events list of events
-     * *
      * @return true if it worked, false if it failed
      */
-    fun go(events: List<EventWrapper>): Boolean {
+    private fun go(events: List<EventWrapper>): Boolean {
         info { "Running uniform event layout with %d events".format(events.size) }
 
         val nEvents = events.size
@@ -41,8 +89,6 @@ object EventLayoutUniform: AnkoLogger {
             it.maxLevel = 0
             it.path = null
         }
-
-        val nanoStart = SystemClock.elapsedRealtimeNanos()
 
         try {
             val solver = ClSimplexSolver()
@@ -117,9 +163,6 @@ object EventLayoutUniform: AnkoLogger {
         } catch (e: ExCLNonlinearExpression) {
             error("solver failed", e)
             return false
-        } finally {
-            val nanoStop = SystemClock.elapsedRealtimeNanos()
-            verbose { "Event layout time: %.3f ms".format((nanoStop - nanoStart) / 1000000.0) }
         }
 
         return true
@@ -133,7 +176,7 @@ object EventLayoutUniform: AnkoLogger {
      * @param events list of events
      * @return maximum level of any calendar event
      */
-    fun sanityTest(events: List<EventWrapper>, maxLevel: Int, blurb: String) =
+    private fun sanityTest(events: List<EventWrapper>, maxLevel: Int, blurb: String) =
             events.forEach {
                 if (it.minLevel < 0 || it.maxLevel > maxLevel) {
                     error { "malformed eventwrapper ($blurb): $it" }

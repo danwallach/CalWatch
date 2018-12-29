@@ -99,3 +99,7 @@ ANDROID N / WEAR 2.0 OVERHAUL / REFACTORING / RE-ENGINEERING
 Distant future
     TODO replace left/right/top/bottom with arbitrary numbers of complications at arbitrary points on the watchface
     TODO support LONG_TEXT in addition to SHORT_TEXT
+
+    TODO lots of other linear constraint solvers out there these days, including some with nice Kotlin frontends
+        https://github.com/ytheohar/koptim
+        https://github.com/optimatika/okAlgo

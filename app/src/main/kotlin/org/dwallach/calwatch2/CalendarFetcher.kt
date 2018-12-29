@@ -316,7 +316,7 @@ class CalendarFetcher(initialContext: Context,
                 info { "runAsyncLoader: success reading the calendar (CalendarFetcher #$instanceID)" }
                 val layoutPair = withContext(Dispatchers.Default) {
                     val startTimeNano = SystemClock.elapsedRealtimeNanos()
-                    val result = ClockStateHelper.clipToVisible(eventList)
+                    val result = EventLayoutUniform.clipToVisible(eventList)
                     val endTimeNano = SystemClock.elapsedRealtimeNanos()
                     info { "runAsyncLoader: total calendar layout time: %.3f ms".format((endTimeNano - startTimeNano) / 1000000.0) }
                     result

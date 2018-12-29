@@ -70,8 +70,7 @@ object ClockState : AnkoLogger {
 
         val localClipTime = TimeWrapper.localFloorHour
 
-        if (lastClipTime == localClipTime)
-            return
+        if (lastClipTime == localClipTime) return
 
         // If we get here, that means we hit the top of a new hour. We're leaving
         // the old data alone while we fire off a request to reload the calendar. This might take
@@ -102,58 +101,6 @@ object ClockState : AnkoLogger {
                 "--> displayColor(%06x), minLevel(${it.minLevel}), maxLevel(${it.maxLevel}), startTime(${it.calendarEvent.startTime}), endTime(${it.calendarEvent.endTime})"
                         .format(it.calendarEvent.displayColor)
             }
-        }
-    }
-}
-
-object ClockStateHelper: AnkoLogger {
-    /**
-     * Given a list of events, return another list that corresponds to the set of
-     * events visible in the next twelve hours, with events that would be off-screen
-     * clipped to the 12-hour dial.
-     */
-    fun clipToVisible(events: List<CalendarEvent>): Pair<List<EventWrapper>, Int> {
-        val gmtOffset = TimeWrapper.gmtOffset
-
-        val localClipTime = TimeWrapper.localFloorHour
-        val clipStartMillis = localClipTime - gmtOffset // convert from localtime back to GMT time for looking at events
-        val clipEndMillis = clipStartMillis + 43200000  // 12 hours later
-
-        val clippedEvents = events.map {
-            it.clip(clipStartMillis, clipEndMillis)
-        }.filter {
-            // require events to be onscreen
-            it.endTime > clipStartMillis && it.startTime < clipEndMillis
-                    // require events to not fill the full screen
-                    && !(it.endTime == clipEndMillis && it.startTime == clipStartMillis)
-                    // require events to have some non-zero thickness (clipping can sometimes yield events that start and end at the same time)
-                    && it.endTime > it.startTime
-        }.map {
-            // apply GMT offset, and then wrap with EventWrapper, where the layout will happen
-            EventWrapper(it + gmtOffset)
-        }
-
-        // now, we run off and do screen layout
-        val lMaxLevel: Int
-
-        if (clippedEvents.isNotEmpty()) {
-            // first, try the fancy constraint solver
-            if (EventLayoutUniform.go(clippedEvents)) {
-                // yeah, we succeeded
-                lMaxLevel = EventLayoutUniform.MAXLEVEL
-            } else {
-                error("event layout failed!") // in years of testing, this failure apparently *never* happened
-                return Pair(emptyList(), 0)
-            }
-
-            EventLayoutUniform.sanityTest(clippedEvents, lMaxLevel, "After new event layout")
-            verbose { "maxLevel for visible events: $lMaxLevel" }
-            verbose { "number of visible events: ${clippedEvents.size}" }
-
-            return Pair(clippedEvents, lMaxLevel)
-        } else {
-            verbose("no events visible!")
-            return Pair(emptyList(), 0)
         }
     }
 }
