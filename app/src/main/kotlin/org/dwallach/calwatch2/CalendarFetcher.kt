@@ -285,16 +285,16 @@ class CalendarFetcher(initialContext: Context,
         // In a gratuitously short nutshell:
 
         // There are two universes in Kotlin: the "regular" universe and the "suspend" universe.
-        // (More formally, these are CoroutineScopes.)
 
         // In the "suspend" universe, functions and methods know how to suspend themselves and
         // save behind a continuation so they can resume later. The call to GlobalScope.launch
-        // is the bridge from the "regular" universe to the "suspend" universe where we can call
-        // things that might want to go in the background.
+        // is one bridge from the "regular" universe to the "suspend" universe where we can call
+        // things that might want to go in the background, including regular functions as
+        // well as "suspend" functions and other stuff.
 
         // The call to withContext() creates a task that happily runs in the background, on
-        // some other thread, that will eventually return a value that we'll read here, back
-        // on the UI thread again! This is only possible when we're in the "suspend" universe,
+        // some other thread, that will eventually return a value that we'll read here, which
+        // might be some other thread! This is only possible when we're in the "suspend" universe,
         // but note that we don't have to declare any "suspend" functions nor do we have to
         // call await() for the results to come back. That's all handled by withContext().
 
@@ -312,7 +312,6 @@ class CalendarFetcher(initialContext: Context,
 
             if (eventList == null) {
                 warn { "runAsyncLoader: No result, not updating any calendar state (CalendarFetcher #$instanceID)" }
-                scanInProgress = false
             } else {
                 info { "runAsyncLoader: success reading the calendar (CalendarFetcher #$instanceID)" }
                 val layoutPair = withContext(Dispatchers.Default) {
@@ -322,15 +321,15 @@ class CalendarFetcher(initialContext: Context,
                     info { "runAsyncLoader: total calendar layout time: %.3f ms".format((endTimeNano - startTimeNano) / 1000000.0) }
                     result
                 }
-                scanInProgress = false
 
-                // This last part really needs to happen on the UI thread, otherwise things
-                // get crashy. Dispatchers.Main is supposed to do what we want.
+                // This last part really needs to happen on the UI thread, otherwise things get crashy.
                 withContext(Dispatchers.Main) {
+                    info("runAsyncLoader: updating world state (should be on UI thread now)")
                     ClockState.setWireEventList(eventList, layoutPair)
                     Utilities.redrawEverything()
                 }
             }
+            scanInProgress = false
             info { "runAsyncLoader: background tasks complete (CalendarFetcher #$instanceID)" }
         }
         info { "runAsyncLoader: Heading back to uiThread async tasks running (CalendarFetcher #$instanceID)" }
