@@ -240,7 +240,7 @@ object ComplicationWrapper : AnkoLogger {
      * Call this whenever you get an onComplicationUpdate() event.
      */
     fun updateComplication(complicationId: Int, complicationData: ComplicationData?) {
-        verbose { "onComplicationDataUpdate() " +
+        info { "onComplicationDataUpdate() " +
                 "id: $complicationId (${complicationIdToLocationString(complicationId)})," +
                 " data: ${complicationData?.toString() ?: "NULL!"}" }
 
@@ -274,7 +274,7 @@ object ComplicationWrapper : AnkoLogger {
             }
         }
 
-        verbose { "Visibility map: (LEFT, RIGHT, TOP, BOTTOM) -> ${isComplicationVisible(LEFT)}, ${isComplicationVisible(RIGHT)}, ${isComplicationVisible(TOP)}, ${isComplicationVisible(BOTTOM)}" }
+        info { "Visibility map: (LEFT, RIGHT, TOP, BOTTOM) -> ${isComplicationVisible(LEFT)}, ${isComplicationVisible(RIGHT)}, ${isComplicationVisible(TOP)}, ${isComplicationVisible(BOTTOM)}" }
 
         // makes sure that rendering the face background updates properly when changing complication settings
         ClockFaceConfigView.redraw()
