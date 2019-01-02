@@ -30,4 +30,4 @@ Once you install CalWatch2, it will show up in the list of watchfaces on your wa
 
 There seems to be a bug in some newer versions of WearOS where CalWatch2 doesn't get notified when the calendar is updated. Your feedback on this is important to finding and fixing the bug. Meanwhile, you can force the calendar to reload itself by changing your watchface to something else and then back to CalWatch2. Also, CalWatch2 reloads the calendar every hour.
 
-(<i>Watches known to do event updates properly:</i> Wear 1.x devices (e.g., LG G Watch) and older Wear 2.x devices (e.g., Moto 360v2). <i>Watches known to have issues:</i> newer Wear 2.x devices (e.g., Fossil Sport). The latest "Wear H", appears to have solved the problem.)
+<i>Watches known to do event updates properly:</i> Wear 1.x devices (e.g., LG G Watch) and older Wear 2.x devices (e.g., Moto 360v2). <i>Watches known to have issues:</i> newer Wear 2.x devices (e.g., Fossil Sport). The latest "Wear H", appears to have solved the problem.
