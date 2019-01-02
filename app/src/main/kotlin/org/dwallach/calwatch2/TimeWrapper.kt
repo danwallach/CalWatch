@@ -106,8 +106,6 @@ object TimeWrapper: AnkoLogger {
     private var minRuntime: Long = 0
     private var maxRuntime: Long = 0
     private var avgRuntimeAccumulator: Long = 0
-    private var skippedFrames = 0
-    private var zombieFrames = 0
 
     /**
      * For performance monitoring: start the counters over again from scratch.
@@ -118,8 +116,6 @@ object TimeWrapper: AnkoLogger {
         maxRuntime = 0
         avgRuntimeAccumulator = 0
         lastFPSTime = 0
-        skippedFrames = 0
-        zombieFrames = 0
     }
 
     /**
@@ -151,11 +147,6 @@ object TimeWrapper: AnkoLogger {
             // thread that's outside of the ClockFace rendering methods, and it's also not counting
             // work that happens on other threads
             info { "Waketime: %.3f %%".format(100f * avgRuntimeAccumulator / elapsedTime) }
-
-            if (skippedFrames != 0)
-                info { "Skipped frames: $skippedFrames" }
-            if (zombieFrames != 0)
-                info { "Zombie frames: $zombieFrames" }
 
             lastFPSTime = 0
         }
