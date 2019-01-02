@@ -27,8 +27,6 @@ is mostly implemented in the Kotlin programming language.
       supported by Android. You'll find PDFs (drawn in Illustrator) here,
       and SVG output from that, which is then digestible by Android Studio.
 
-* /logdumps -- logcat plus notes from the various times that CalWatch has blown up
-
 * /app -- the unifed app that runs on Wear watches
     * src/androidTest/java/ -- some old unit tests for event layout
     * src/main/kotlin/ -- CalWatch source-code files
@@ -81,6 +79,14 @@ in earlier Kotlin releases. There seems to be [a bug in how we get notified abou
 changes](https://issuetracker.google.com/issues/122149553) that impacts the Android 8.1 Oreo variant
 of WearOS that's running on WearOS devices, but it seems to be fixed in the "Wear H" variant
 based on Android 9.0.
+
+Otherwise, what's notable about *release6* relative to earlier releases is how much code is now gone.
+With the new complication support, I threw out CalWatch's support for external stopwatches and timers,
+since you can just connect to those things using WearOS complications. I similarly threw out the
+step-count complication for the same reasons. I did keep my battery gauge dot in the center of the
+watch and my day/date rendering on the left -- both because I felt I could render those better with
+custom code than the general-purpose complication libraries do.
+
 
 ## Credit where credit is due:
 
