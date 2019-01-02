@@ -32,7 +32,7 @@ is mostly implemented in the Kotlin programming language.
 * /app -- the unifed app that runs on Wear watches
     * src/androidTest/java/ -- some old unit tests for event layout
     * src/main/kotlin/ -- CalWatch source-code files
-        * org.dwallach.calwatch/ -- CalWatch Kotlin files
+        * org.dwallach.calwatch2/ -- CalWatch Kotlin files
         * org.dwallach.complications/ -- based on the Android sample code and heavily modified
 
     * src/main/java/EDU.Washington.grad.gjb.cassowary -- the Cassowary linear constraint solver
@@ -42,16 +42,45 @@ is mostly implemented in the Kotlin programming language.
           updates to use the newer parametric HashMap versus the
           older non-parametric Hashtable.
 
-If you look at code prior to release4, you'll see that this project was written entirely in Java.
-Starting with release4, I ported most everything to Kotlin and did a ton of code cleanup. release5
-features a complete redesign of the user preferences panel, running on the phone, with the latest Material
-Design styling. Shortly thereafter, at I/O 2016, Google announced WearOS 2 which, of course,
-completely changed how the phone and the watch relate to one another. Fast forward to I/O 2017 and
+
+## History
+The original version of CalWatch was engineered for the original version of Android Wear, which
+originally shipped without any documented support for Android Wear watchfaces. You can see
+this in the [release1 code](https://github.com/danwallach/CalWatch/tree/release1) from November 2014.
+
+Then, Google announced decent APIs for building watchfaces, which did all the hard work for you.
+You can see that in [release2](https://github.com/danwallach/CalWatch/tree/release2)
+
+For [release3](https://github.com/danwallach/CalWatch/tree/release3), I added in support for an
+external stopwatch and timer app that would send messages to CalWatch to display their state on the
+watchface. (This was before Android Wear supported complications.) Also, in the earlier versions
+I was reading calendar events on the phone and sending them over to the watch. By this time, the watch
+finally had a working local calendar database, greatly simplifying things.
+
+For [release4](https://github.com/danwallach/CalWatch/tree/release4), I ported everything to
+Kotlin. I wrote up [the engineering process](https://discuss.kotlinlang.org/t/experience-porting-an-android-app-to-kotlin/1399)
+on the Kotlin discussion board.
+
+For [release5](https://github.com/danwallach/CalWatch/tree/release5), I rewrote the phone-side
+configuration panel, using all the newest Material Design style.
+
+Shortly thereafter, at Google I/O 2016, Google announced WearOS 2 which, of course,
+completely changed how the phone and the watch relate to one another,
+making it easier for a WearOS watch to interoperate with an iOS phone, but killing off the
+idea that every Wear app is embedded in an Android phone app. Fast forward to I/O 2017 and
 Google announced they were providing sample code and libraries to make it much easier to support
-complications, plus they're finally rolling out Wear 2 to more watches. Consequently, release6
-now supports Wear 2.x watches, moving all the configuration dialogs away from the phone and doing
-everything on the watch. release6 also uses the latest Kotlin coroutine support to do the expensive
-calendar processing asynchronously.
+complications, plus they began rolling out Wear 2 to more watches. If you rummage through the
+commit history, you'll see that I had the watch running with complications, but without a particularly
+usable configuration UI on the watch.
+
+I finally got everything working and pushed proper Wear1.x and 2.x-compatible APKs to the Play Store
+in December 2018/2019. The current release also uses the latest
+Kotlin coroutine support to do the expensive calendar processing asynchronously, and has
+a bunch of other small tweaks to use more of the Kotlin stdlib features that didn't exist
+in earlier Kotlin releases. There seems to be [a bug in how we get notified about calendar
+changes](https://issuetracker.google.com/issues/122149553) that impacts the Android 8.1 Oreo variant
+of WearOS that's running on WearOS devices, but it seems to be fixed in the "Wear H" variant
+based on Android 9.0.
 
 ## Credit where credit is due:
 
