@@ -11,7 +11,7 @@ import android.graphics.Path
 
 /**
  * This data structure contains each calendar event. We only care about a handful of fields.
- * It's separate from EventWrapper because we might want to save these things for later, while the
+ * It's separate from [EventWrapper] because we might want to save these things for later, while the
  * wrapper parts are easily reconstructed. We used to send them from phone to watch, but the
  * data is all now available locally.
  *

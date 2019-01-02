@@ -12,6 +12,7 @@ import android.text.format.DateUtils
 import org.jetbrains.anko.*
 
 import java.util.TimeZone
+import kotlin.math.floor
 
 /**
  * We're asking for the time an awful lot for each different frame we draw, which
@@ -38,7 +39,12 @@ object TimeWrapper: AnkoLogger {
 
     fun update() {
         gmtTime = System.currentTimeMillis() + magicOffset
+
+        // TODO: do we want to migrate from java.util.TimeZone to android.icu.util.TimeZone?
+        // - might work better in weird cases
+        // - only supported in Android 7.0 and higher, which would be an issue for Wear 1.0.
         val tz = TimeZone.getDefault()
+
         gmtOffset = tz.getOffset(gmtTime) // includes DST correction
     }
 
@@ -52,14 +58,18 @@ object TimeWrapper: AnkoLogger {
      * If it's currently 12:32pm, this value returned will be 12:00pm.
      */
     val localFloorHour: Long
-        get() = (Math.floor(localTime / 3600000.0) * 3600000.0).toLong()
+        get() = (floor(localTime / 3600000.0) * 3600000.0).toLong()
 
     private var localMonthDayCache: String = ""
     private var localDayOfWeekCache: String = ""
     private var monthDayCacheTime: Long = 0
 
     private fun updateMonthDayCache() {
-        // assumption: the day and month and such only change when we hit a new hour, otherwise we can reuse an old result
+        // Assumption: the day and month and such only change when we hit a new hour, otherwise we can reuse an old result
+
+        // In an early beta of CalWatch, I ran the profile and discovered that calling DateUtils.formatDateTime(),
+        // which I was doing as part of my onDraw() method, was a huge time sink, generated a bunch of garbage,
+        // etc. Needless to say, this was an obvious performance optimization.
         val newCacheTime = localFloorHour
         if (newCacheTime != monthDayCacheTime || localMonthDayCache == "") {
             localMonthDayCache = DateUtils.formatDateTime(null, gmtTime, DateUtils.FORMAT_ABBREV_MONTH or DateUtils.FORMAT_SHOW_DATE)

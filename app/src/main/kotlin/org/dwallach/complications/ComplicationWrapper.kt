@@ -17,11 +17,11 @@ import android.support.wearable.complications.rendering.ComplicationDrawable
 import android.support.wearable.complications.ComplicationHelperActivity
 import android.content.ComponentName
 import org.dwallach.calwatch2.CalWatchFaceService
+import org.dwallach.calwatch2.ClockFaceConfigView
 import org.dwallach.calwatch2.errorLogAndThrow
 import org.dwallach.complications.ComplicationLocation.*
 import org.jetbrains.anko.*
 import android.content.Intent.FLAG_ACTIVITY_NEW_TASK
-import org.dwallach.calwatch2.ClockFaceConfigView
 
 
 /**

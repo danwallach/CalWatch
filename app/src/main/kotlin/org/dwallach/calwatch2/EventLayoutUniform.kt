@@ -7,14 +7,11 @@
 
 package org.dwallach.calwatch2
 
-import android.os.SystemClock
-
 import EDU.Washington.grad.gjb.cassowary.*
 import org.jetbrains.anko.*
 
 /**
- * new variant of event layout, this time with a full-blown constraint solver to make things
- * as pretty as possible
+ * Event layout with the Cassowary linear constraint solver.
  */
 object EventLayoutUniform: AnkoLogger {
     /**

@@ -24,7 +24,6 @@ import org.dwallach.complications.ComplicationLocation.*
 import org.dwallach.complications.ComplicationWrapper
 import org.dwallach.complications.ComplicationWrapper.isComplicationVisible
 import org.jetbrains.anko.*
-import java.lang.Math.pow
 import java.util.*
 import kotlin.math.*
 
@@ -970,7 +969,8 @@ class ClockFace(private val configMode: Boolean = false): AnkoLogger {
 
             // two components here: the non-linear part (with Math.pow and Math.sin) and then a linear
             // part (with iFrac). This make sure we still have some motion. The second hand never entirely stops.
-            0.7 * pow((1.0 + sin(thetaMinusPi2)) / 2.0, 8.0) + 0.3 * iFrac
+            val nonLinearPart = ((1.0 + sin(thetaMinusPi2)) / 2.0).pow(8.0)
+            0.7 * nonLinearPart + 0.3 * iFrac
         }
 
         /**

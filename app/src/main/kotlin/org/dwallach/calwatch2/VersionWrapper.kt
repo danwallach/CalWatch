@@ -8,7 +8,6 @@
 package org.dwallach.calwatch2
 
 import android.content.Context
-import android.content.pm.PackageManager
 import org.jetbrains.anko.*
 
 object VersionWrapper: AnkoLogger {
@@ -18,8 +17,8 @@ object VersionWrapper: AnkoLogger {
             // TODO: replace versionCode with longVersionCode, except that's only supported in API 28
             info { "Version: ${pinfo.versionName} (${pinfo.versionCode})" }
 
-        } catch (e: PackageManager.NameNotFoundException) {
-            error("failed to get package manager!", e)
+        } catch (e: Throwable) {
+            error("failed to get version information!", e)
         }
     }
 }
