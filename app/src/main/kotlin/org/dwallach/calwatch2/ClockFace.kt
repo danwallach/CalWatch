@@ -24,8 +24,9 @@ import org.dwallach.complications.ComplicationLocation.*
 import org.dwallach.complications.ComplicationWrapper
 import org.dwallach.complications.ComplicationWrapper.isComplicationVisible
 import org.jetbrains.anko.*
-import java.lang.Math.*
+import java.lang.Math.pow
 import java.util.*
+import kotlin.math.*
 
 /**
  * All of the graphics calls for drawing watchfaces happen here. Note that this class knows
@@ -641,33 +642,34 @@ class ClockFace(private val configMode: Boolean = false): AnkoLogger {
             // eight little diamonds -- precompute the deltas when we're all the way out at the end,
             // then apply elsewhere
 
-            val stippleWidth = 0.3f
-            val stippleSteps = 8
-            val rDelta = CALENDAR_RING_WIDTH / stippleSteps.toFloat()
+            val stippleWidth = 0.3
+            val stippleSteps = 8f
+            val dStippleTime = stippleTime.toDouble()
+            val rDelta = CALENDAR_RING_WIDTH / stippleSteps
 
-            var x1: Float = clockX(stippleTime.toDouble(), CALENDAR_RING_MAX_RADIUS)
-            var y1: Float = clockY(stippleTime.toDouble(), CALENDAR_RING_MAX_RADIUS)
-            var x2: Float = clockX(stippleTime.toDouble(), CALENDAR_RING_MAX_RADIUS - rDelta)
-            var y2: Float = clockY(stippleTime.toDouble(), CALENDAR_RING_MAX_RADIUS - rDelta)
+            var x1: Float = clockX(dStippleTime, CALENDAR_RING_MAX_RADIUS)
+            var y1: Float = clockY(dStippleTime, CALENDAR_RING_MAX_RADIUS)
+            var x2: Float = clockX(dStippleTime, CALENDAR_RING_MAX_RADIUS - rDelta)
+            var y2: Float = clockY(dStippleTime, CALENDAR_RING_MAX_RADIUS - rDelta)
             var xmid: Float = (x1 + x2) / 2f
             var ymid: Float = (y1 + y2) / 2f
-            var xlow: Float = clockX((stippleTime - stippleWidth).toDouble(), CALENDAR_RING_MAX_RADIUS - rDelta / 2)
-            var ylow: Float = clockY((stippleTime - stippleWidth).toDouble(), CALENDAR_RING_MAX_RADIUS - rDelta / 2)
-            var xhigh: Float = clockX((stippleTime + stippleWidth).toDouble(), CALENDAR_RING_MAX_RADIUS - rDelta / 2)
-            var yhigh: Float = clockY((stippleTime + stippleWidth).toDouble(), CALENDAR_RING_MAX_RADIUS - rDelta / 2)
+            var xlow: Float = clockX((stippleTime - stippleWidth), CALENDAR_RING_MAX_RADIUS - rDelta / 2)
+            var ylow: Float = clockY((stippleTime - stippleWidth), CALENDAR_RING_MAX_RADIUS - rDelta / 2)
+            var xhigh: Float = clockX((stippleTime + stippleWidth), CALENDAR_RING_MAX_RADIUS - rDelta / 2)
+            var yhigh: Float = clockY((stippleTime + stippleWidth), CALENDAR_RING_MAX_RADIUS - rDelta / 2)
             val dxlow: Float = xmid - xlow
             val dylow: Float = ymid - ylow
             val dxhigh: Float = xmid - xhigh
             val dyhigh: Float = ymid - yhigh
 
             r1 = CALENDAR_RING_MIN_RADIUS
-            x1 = clockX(stippleTime.toDouble(), r1)
-            y1 = clockY(stippleTime.toDouble(), r1)
+            x1 = clockX(dStippleTime, r1)
+            y1 = clockY(dStippleTime, r1)
 
             for(i in 0..7) {
                 r2 = r1 + CALENDAR_RING_WIDTH / 8f
-                x2 = clockX(stippleTime.toDouble(), r2)
-                y2 = clockY(stippleTime.toDouble(), r2)
+                x2 = clockX(dStippleTime, r2)
+                y2 = clockY(dStippleTime, r2)
 
                 xmid = (x1 + x2) / 2f
                 ymid = (y1 + y2) / 2f
@@ -860,12 +862,12 @@ class ClockFace(private val configMode: Boolean = false): AnkoLogger {
     // clock math
     private fun clockX(seconds: Double, fractionFromCenter: Float): Float {
         val angleRadians = (seconds - 15) * PI * 2.0 / 60.0
-        return (cx + radius.toDouble() * fractionFromCenter.toDouble() * cos(angleRadians)).toFloat()
+        return (cx + radius * fractionFromCenter * cos(angleRadians)).toFloat()
     }
 
     private fun clockY(seconds: Double, fractionFromCenter: Float): Float {
         val angleRadians = (seconds - 15) * PI * 2.0 / 60.0
-        return (cy + radius.toDouble() * fractionFromCenter.toDouble() * sin(angleRadians)).toFloat()
+        return (cy + radius * fractionFromCenter * sin(angleRadians)).toFloat()
     }
 
     // hack for Moto360: given the location on the dial (seconds), and the originally
