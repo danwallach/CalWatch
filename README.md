@@ -49,7 +49,7 @@ originally shipped without any documented support for Android Wear watchfaces. Y
 this in the [release1 code](https://github.com/danwallach/CalWatch/tree/release1) from November 2014.
 
 Then, Google announced decent APIs for building watchfaces, which did all the hard work for you.
-You can see that in [release2](https://github.com/danwallach/CalWatch/tree/release2)
+This allowed [release2](https://github.com/danwallach/CalWatch/tree/release2) to simplify many things.
 
 For [release3](https://github.com/danwallach/CalWatch/tree/release3), I added in support for an
 external stopwatch and timer app that would send messages to CalWatch to display their state on the
