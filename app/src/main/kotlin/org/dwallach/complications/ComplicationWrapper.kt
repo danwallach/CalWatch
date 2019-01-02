@@ -1,6 +1,6 @@
 /*
- * CalWatch Complications Support
- * Copyright (C) 2017-2018 by Dan Wallach
+ * CalWatch / CalWatch2
+ * Copyright © 2014-2019 by Dan S. Wallach
  * Home page: http://www.cs.rice.edu/~dwallach/calwatch/
  * Licensing: http://www.cs.rice.edu/~dwallach/calwatch/licensing.html
  */
