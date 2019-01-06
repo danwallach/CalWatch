@@ -12,6 +12,11 @@ import org.jetbrains.anko.AnkoLogger
 import org.jetbrains.anko.error
 
 object Utilities: AnkoLogger {
+    /**
+     * This function, called from all over the place, is used to indicate that
+     * every instance of a ClockFace (whether it's on the watchface or inside
+     * the config panel) is now invalid and needs to be redrawn.
+     */
     fun redrawEverything() {
         ClockFace.wipeAllCaches()
         AnalogComplicationConfigRecyclerViewAdapter.reloadAllToggles()

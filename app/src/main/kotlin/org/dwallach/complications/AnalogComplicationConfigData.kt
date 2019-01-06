@@ -8,12 +8,19 @@ package org.dwallach.complications
 
 import android.content.Context
 import android.os.Build
+import androidx.recyclerview.widget.RecyclerView
 import androidx.recyclerview.widget.RecyclerView.ViewHolder
 
 import org.dwallach.R
 import org.jetbrains.anko.AnkoLogger
 import org.jetbrains.anko.info
 
+/**
+ * Code support to interact with the [RecyclerView]. Note that this code
+ * differentiates what we're doing based on the Android SDK version. If
+ * we're on Wear 1.x, then there's no support for complications, so we'll
+ * leave that out from our configuration dialog panel.
+ */
 object AnalogComplicationConfigData: AnkoLogger {
     data class ConfigItemType(val configType: Int, val iconResourceId: Int, val layoutId: Int, val inflatedId: Int, val name: String = "", val disabled: Boolean = false)
 

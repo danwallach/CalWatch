@@ -11,6 +11,9 @@ import android.content.Context
 import androidx.core.content.edit
 import org.jetbrains.anko.*
 
+/**
+ * Support for saving and loading preferences to persistent storage.
+ */
 object PreferencesHelper: AnkoLogger {
 //    @SuppressLint("CommitPrefEdits")
     fun savePreferences(context: Context) =

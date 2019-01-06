@@ -67,8 +67,6 @@ class AnalogComplicationConfigRecyclerViewAdapter(
 
     // Maintains reference view holder to dynamically update watch face preview. Used instead of
     // notifyItemChanged(int position) to avoid flicker and re-inflating the view.
-
-    // TODO Dynamic watchface preview updates? That code's not here. Find a way to do it!
     private var mPreviewAndComplicationsViewHolder: PreviewAndComplicationsViewHolder? = null
 
     init {

@@ -10,6 +10,9 @@ package org.dwallach.calwatch2
 import android.content.Context
 import org.jetbrains.anko.*
 
+/**
+ * Deals with reading our version name and number from the APK.
+ */
 object VersionWrapper: AnkoLogger {
     fun logVersion(activity: Context) {
         try {

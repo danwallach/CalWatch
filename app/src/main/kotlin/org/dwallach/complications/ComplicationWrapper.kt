@@ -236,9 +236,7 @@ object ComplicationWrapper : AnkoLogger {
         complicationDrawableMap.values.forEach(stylingFunc)
     }
 
-    /**
-     * Call this whenever you get an onComplicationUpdate() event.
-     */
+    /** Call this whenever you get an onComplicationUpdate() event. */
     fun updateComplication(complicationId: Int, complicationData: ComplicationData?) {
         info { "onComplicationDataUpdate() " +
                 "id: $complicationId (${complicationIdToLocationString(complicationId)})," +
@@ -331,9 +329,7 @@ object ComplicationWrapper : AnkoLogger {
         engine.setActiveComplications(*activeComplicationIds)
     }
 
-    /**
-     * Some complications types are "tappable" and others aren't.
-     */
+    /** Some complications types are "tappable" and others aren't. */
     private fun isTappableComplicationType(type: Int?) = when (type) {
         null, TYPE_EMPTY, TYPE_LARGE_IMAGE, TYPE_NOT_CONFIGURED -> false
         else -> true

@@ -23,6 +23,11 @@ import kotlin.math.PI
 import kotlin.math.atan2
 import kotlin.math.sqrt
 
+/**
+ * As part of our on-watch configuration dialog, the easiest way to make a background image
+ * was to just use our existing [ClockFace] code within an Android [View] that can appear
+ * in any layout.
+ */
 class ClockFaceConfigView(context: Context, attrs: AttributeSet): View(context, attrs), AnkoLogger {
     private val clockFace = ClockFace(true)
     private val blackPaint = PaintCan.getCalendarGreyPaint(Color.BLACK)
@@ -58,8 +63,14 @@ class ClockFaceConfigView(context: Context, attrs: AttributeSet): View(context, 
 
         info { "onDraw: $w, $h" }
 
-        // we don't want to clear everything, only the central circle
+        // We don't want to clear everything, only the central circle.
+        // Leaves the background color of the configuration panel alone,
+        // which is typically *not* black.
         canvas.drawCircle(w/2f, h/2f, w/2f, blackPaint)
+
+        // Doesn't draw the full watchface -- no hands, no calendar wedges --
+        // only the background style, since that's all we want in the configuration
+        // dialog panel.
         clockFace.drawBackgroundOnly(canvas)
     }
 
@@ -82,7 +93,11 @@ class ClockFaceConfigView(context: Context, attrs: AttributeSet): View(context, 
                 val theta = atan2(y, x) * 180.0 / PI
                 val radius = sqrt(x * x + y * y) / (w / 2) // as a fraction of total width
 
-                if ((theta > 135 || theta < -135) && radius > 0.2) { // left quarter of watchface
+                // We only care about clicks in the left quarter of the watchface, which
+                // we'll interpret as a request to toggle our built-in day/date complication.
+                // This widget will be overlaid with other buttons to deal with the WearOS
+                // complication system and they'll deal with their own click events.
+                if ((theta > 135 || theta < -135) && radius > 0.2) {
                     ClockState.showDayDate = !ClockState.showDayDate
                     PreferencesHelper.savePreferences(context)
                     Utilities.redrawEverything()

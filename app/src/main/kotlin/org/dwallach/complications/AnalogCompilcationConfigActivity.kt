@@ -6,9 +6,6 @@
  */
 package org.dwallach.complications
 
-/**
- * This began life as the AnalogComplicationConfigActivity example.
- */
 import android.app.Activity
 import android.content.Intent
 import android.os.Bundle
@@ -21,10 +18,11 @@ import org.jetbrains.anko.AnkoLogger
 import org.jetbrains.anko.debug
 import org.jetbrains.anko.info
 
-
 /**
  * The watch-side config activity for the watchface, which
  * allows for setting the left and right complications of watch face along with other goodies.
+ *
+ * This began life as the AnalogComplicationConfigActivity example code.
  */
 class AnalogComplicationConfigActivity : AppCompatActivity(), AnkoLogger {
 
