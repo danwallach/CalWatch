@@ -288,7 +288,7 @@ class ClockFace(private val configMode: Boolean = false) : AnkoLogger {
             clockY(0.0, radius), // top
             clockX(15.0, radius), // right
             clockY(30.0, radius)
-        )// bottom
+        ) // bottom
     }
 
     /**
@@ -589,7 +589,7 @@ class ClockFace(private val configMode: Boolean = false) : AnkoLogger {
 
         val seconds = time / (1.seconds.toDouble())
         val minutes = seconds / 60.0
-        val hours = minutes / 12.0  // because drawRadialLine is scaled to a 60-unit circle
+        val hours = minutes / 12.0 // because drawRadialLine is scaled to a 60-unit circle
 
         val shadowColor = paintCan[drawStyle, Brush.HAND_SHADOW]
         val hourColor = paintCan[drawStyle, Brush.HOUR_HAND]
@@ -814,7 +814,7 @@ class ClockFace(private val configMode: Boolean = false) : AnkoLogger {
         cx = width / 2
         cy = height / 2
 
-        if (cx == oldCx && cy == oldCy) return  // nothing changed, we're done
+        if (cx == oldCx && cy == oldCy) return // nothing changed, we're done
 
         oldCx = cx
         oldCy = cy

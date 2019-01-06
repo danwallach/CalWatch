@@ -320,7 +320,7 @@ object ComplicationWrapper : AnkoLogger {
     ) {
         verbose { "Complication locations: $locations" }
 
-        this.watchFace = watchFace  // intnerally saves a weakref
+        this.watchFace = watchFace // intnerally saves a weakref
 
         activeLocations = locations.toTypedArray()
         activeComplicationIds = locations.map(this::getComplicationId).toIntArray()
@@ -384,10 +384,10 @@ object ComplicationWrapper : AnkoLogger {
             // that isn't "active" right now or that isn't "tappable", and of course, whatever it
             // is, the tap has to actually be inside the bounds of the complication. (so complicated!)
             .filter {
-                it != BACKGROUND_COMPLICATION_ID
-                    && complicationDataMap[it]?.isActive(currentTime) ?: false
-                    && isTappableComplicationType(complicationDataMap[it]?.type)
-                    && complicationDrawableMap[it]?.bounds?.contains(x, y) ?: false
+                it != BACKGROUND_COMPLICATION_ID &&
+                    complicationDataMap[it]?.isActive(currentTime) ?: false &&
+                    isTappableComplicationType(complicationDataMap[it]?.type) &&
+                    complicationDrawableMap[it]?.bounds?.contains(x, y) ?: false
             }
 
         verbose { "Complication tap, hits on complication(s): " + tappedComplicationIds.joinToString() }

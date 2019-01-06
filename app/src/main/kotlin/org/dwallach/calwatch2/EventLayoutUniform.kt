@@ -30,11 +30,11 @@ object EventLayoutUniform : AnkoLogger {
             it.clip(clipStartMillis, clipEndMillis)
         }.filter {
             // require events to be onscreen
-            it.endTime > clipStartMillis && it.startTime < clipEndMillis
+            it.endTime > clipStartMillis && it.startTime < clipEndMillis &&
                 // require events to not fill the full screen
-                && !(it.endTime == clipEndMillis && it.startTime == clipStartMillis)
+                !(it.endTime == clipEndMillis && it.startTime == clipStartMillis) &&
                 // require events to have some non-zero thickness (clipping can sometimes yield events that start and end at the same time)
-                && it.endTime > it.startTime
+                it.endTime > it.startTime
         }.map {
             // apply GMT offset, and then wrap with EventWrapper, where the layout will happen
             EventWrapper(it + gmtOffset)

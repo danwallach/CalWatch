@@ -41,7 +41,7 @@ class PermissionActivity : AppCompatActivity(), AnkoLogger {
         fun kickStart(context: Context, firstTimeOnly: Boolean) {
             verbose("kickStart")
 
-            if (firstTimeOnly && CalendarPermission.numRequests > 0) return  // don't bug the user!
+            if (firstTimeOnly && CalendarPermission.numRequests > 0) return // don't bug the user!
 
             // Anko makes this much nicer than the original
             context.startActivity(context.intentFor<PermissionActivity>().newTask())

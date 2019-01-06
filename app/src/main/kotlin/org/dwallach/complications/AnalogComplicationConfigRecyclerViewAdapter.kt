@@ -10,7 +10,7 @@ import android.app.Activity
 import android.content.ComponentName
 import android.content.Context
 import android.graphics.drawable.Drawable
-//import android.support.v7.widget.RecyclerView
+// import android.support.v7.widget.RecyclerView
 import android.support.wearable.complications.ComplicationHelperActivity
 import android.support.wearable.complications.ComplicationProviderInfo
 import android.support.wearable.complications.ProviderInfoRetriever
@@ -247,7 +247,8 @@ class AnalogComplicationConfigRecyclerViewAdapter(
         // Verifies the watch face supports the complication location, then launches the helper
         // class, so user can choose their complication data provider.
         private fun launchComplicationHelperActivity(
-            currentActivity: Activity, complicationLocation: ComplicationLocation
+            currentActivity: Activity,
+            complicationLocation: ComplicationLocation
         ) {
 
             mSelectedComplicationId = getComplicationId(complicationLocation)

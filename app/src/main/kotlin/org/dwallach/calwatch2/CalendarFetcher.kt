@@ -110,7 +110,6 @@ class CalendarFetcher(
         }
         initialContext.registerReceiver(broadcastReceiverBackup, filterBackup)
 
-
         isReceiverRegistered = true
 
         // kick off initial loading of calendar state

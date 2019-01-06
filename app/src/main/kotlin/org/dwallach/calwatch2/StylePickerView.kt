@@ -5,7 +5,6 @@
  * Licensing: http://www.cs.rice.edu/~dwallach/calwatch/licensing.html
  */
 
-
 package org.dwallach.calwatch2
 
 import android.annotation.SuppressLint
@@ -106,4 +105,3 @@ class StylePickerView(context: Context, attrs: AttributeSet) : View(context, att
         else -> true // super.onTouchEvent(event)
     }
 }
-

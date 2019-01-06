@@ -156,7 +156,8 @@ class CalWatchFaceService : CanvasWatchFaceService(), AnkoLogger {
          * Called when there is updated data for a complication id.
          */
         override fun onComplicationDataUpdate(
-            complicationId: Int, complicationData: ComplicationData?
+            complicationId: Int,
+            complicationData: ComplicationData?
         ) {
             verbose { "onComplicationDataUpdate() id: $complicationId" }
 

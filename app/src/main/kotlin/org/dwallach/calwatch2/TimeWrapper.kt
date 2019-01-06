@@ -35,7 +35,7 @@ object TimeWrapper : AnkoLogger {
 
     //   private const val magicOffset: Long = -40 * 60 * 60 * 1000 // 12 hours earlier, for debugging
     //   private const val magicOffset: Long = 25 * 60 * 1000       // 25 minutes later, for debugging
-    private const val magicOffset: Long = 0                         // for production use
+    private const val magicOffset: Long = 0 // for production use
 
     fun update() {
         gmtTime = System.currentTimeMillis() + magicOffset
@@ -138,7 +138,7 @@ object TimeWrapper : AnkoLogger {
 
         val elapsedTime = currentTime - lastFPSTime // ns since last time we printed something
         if (samples > 0 && elapsedTime > 0) {
-            val fps = samples * 1000000000f / elapsedTime  // * 10^9 so we're not just computing frames per nanosecond
+            val fps = samples * 1000000000f / elapsedTime // * 10^9 so we're not just computing frames per nanosecond
             info { "FPS: %.3f, samples: $samples".format(fps) }
 
             info {
@@ -251,4 +251,3 @@ val Int.minutes: Long get() = (this * 60000L)
  * Helper function: convert from hours to our internal time units (milliseconds).
  */
 val Int.hours: Long get() = (this * 3600000L)
-
