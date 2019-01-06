@@ -34,7 +34,7 @@ class PermissionActivity : AppCompatActivity(), AnkoLogger {
         CalendarPermission.request(this)
     }
 
-    companion object: AnkoLogger {
+    companion object : AnkoLogger {
         /**
          * Call this to launch the wear permission dialog.
          */

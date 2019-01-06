@@ -35,7 +35,6 @@ class StylePickerView(context: Context, attrs: AttributeSet) : View(context, att
 
     private val allDrawables = listOf(toolSelected, liteSelected, numbersSelected)
 
-
     override fun onVisibilityChanged(changedView: View?, visibility: Int) = invalidate()
 
     override fun onSizeChanged(w: Int, h: Int, oldw: Int, oldh: Int) {
@@ -82,7 +81,7 @@ class StylePickerView(context: Context, attrs: AttributeSet) : View(context, att
                 super.onTouchEvent(event)
             } else {
                 val y = (h / 2) - rawy
-                val x = rawx - ( w / 2 )
+                val x = rawx - (w / 2)
                 info { "onTouchEvent: %.1f, %.1f --> %.1f, %.1f".format(rawx, rawy, x, y) }
 
                 // theta ranges from -180 to 180 (degrees)
@@ -96,7 +95,7 @@ class StylePickerView(context: Context, attrs: AttributeSet) : View(context, att
 
                 val thetaStr = "%.2f".format(theta)
 
-                info { "Theta: $thetaStr --> new face mode ${ ClockState.faceMode }" }
+                info { "Theta: $thetaStr --> new face mode ${ClockState.faceMode}" }
 
                 PreferencesHelper.savePreferences(context)
                 Utilities.redrawEverything()

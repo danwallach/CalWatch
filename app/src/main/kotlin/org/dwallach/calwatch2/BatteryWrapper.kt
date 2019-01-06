@@ -18,7 +18,7 @@ import java.lang.ref.WeakReference
  * want to make infrequent request to Android for the level of the battery, but we want to support
  * very frequent queries to this wrapper class.
  */
-object BatteryWrapper: AnkoLogger {
+object BatteryWrapper : AnkoLogger {
     private var contextRef = WeakReference<Context>(null)
 
     var isCharging: Boolean = false

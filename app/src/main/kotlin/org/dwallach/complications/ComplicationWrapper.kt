@@ -23,7 +23,6 @@ import org.dwallach.complications.ComplicationLocation.*
 import org.jetbrains.anko.*
 import android.content.Intent.FLAG_ACTIVITY_NEW_TASK
 
-
 /**
  * The goal is this class is to provide a super minimal interface for two things: specifying configuration
  * options for on-watch menus and providing hooks to render complications onto your watchface. It's actually
@@ -114,8 +113,8 @@ object ComplicationWrapper : AnkoLogger {
      */
     fun drawComplications(canvas: Canvas, currentTimeMillis: Long) =
         complicationDrawableMap.keys
-                .filter { it != BACKGROUND_COMPLICATION_ID }
-                .forEach { complicationDrawableMap[it]?.draw(canvas, currentTimeMillis) }
+            .filter { it != BACKGROUND_COMPLICATION_ID }
+            .forEach { complicationDrawableMap[it]?.draw(canvas, currentTimeMillis) }
 
     /**
      * Call this from your main redraw loop specifically to draw the background complication.
@@ -144,7 +143,6 @@ object ComplicationWrapper : AnkoLogger {
     // Left and right dial supported types.
     private lateinit var activeComplicationSupportedTypes: Array<IntArray>
 
-
     internal fun getComplicationId(complicationLocation: ComplicationLocation): Int =
         when (complicationLocation) {
             BACKGROUND -> BACKGROUND_COMPLICATION_ID
@@ -155,14 +153,14 @@ object ComplicationWrapper : AnkoLogger {
         }
 
     internal fun complicationIdToLocationString(locationId: Int) =
-            when (locationId) {
-                BACKGROUND_COMPLICATION_ID -> "background"
-                LEFT_COMPLICATION_ID -> "left"
-                RIGHT_COMPLICATION_ID -> "right"
-                TOP_COMPLICATION_ID -> "top"
-                BOTTOM_COMPLICATION_ID -> "bottom"
-                else -> "unknown"
-            }
+        when (locationId) {
+            BACKGROUND_COMPLICATION_ID -> "background"
+            LEFT_COMPLICATION_ID -> "left"
+            RIGHT_COMPLICATION_ID -> "right"
+            TOP_COMPLICATION_ID -> "top"
+            BOTTOM_COMPLICATION_ID -> "bottom"
+            else -> "unknown"
+        }
 
     internal fun getSupportedComplicationTypes(complicationLocation: ComplicationLocation) =
         when (complicationLocation) {
@@ -190,7 +188,7 @@ object ComplicationWrapper : AnkoLogger {
      * in the beginning. Note that we're ignoring the presence or absence of a flat tire.
      */
     fun updateBounds(width: Int, height: Int) {
-         // width/4 gives the "standard" size but we want a bit bigger
+        // width/4 gives the "standard" size but we want a bit bigger
         val sizeOfComplication = (width / 3.5).toInt()
         val midpointOfScreen = width / 2
 
@@ -198,34 +196,38 @@ object ComplicationWrapper : AnkoLogger {
         val verticalOffset = midpointOfScreen - sizeOfComplication / 2
 
         complicationDrawableMap[LEFT_COMPLICATION_ID]?.bounds = Rect(
-                // Left, Top, Right, Bottom
-                horizontalOffset,
-                verticalOffset,
-                horizontalOffset + sizeOfComplication,
-                verticalOffset + sizeOfComplication)
+            // Left, Top, Right, Bottom
+            horizontalOffset,
+            verticalOffset,
+            horizontalOffset + sizeOfComplication,
+            verticalOffset + sizeOfComplication
+        )
 
         complicationDrawableMap[RIGHT_COMPLICATION_ID]?.bounds = Rect(
-                // Left, Top, Right, Bottom
-                midpointOfScreen + horizontalOffset,
-                verticalOffset,
-                midpointOfScreen + horizontalOffset + sizeOfComplication,
-                verticalOffset + sizeOfComplication)
+            // Left, Top, Right, Bottom
+            midpointOfScreen + horizontalOffset,
+            verticalOffset,
+            midpointOfScreen + horizontalOffset + sizeOfComplication,
+            verticalOffset + sizeOfComplication
+        )
 
         // note that we've just swapped the x and y values for TOP to be the same as LEFT
         complicationDrawableMap[TOP_COMPLICATION_ID]?.bounds = Rect(
-                // Left, Top, Right, Bottom
-                verticalOffset,
-                horizontalOffset,
-                verticalOffset + sizeOfComplication,
-                horizontalOffset + sizeOfComplication)
+            // Left, Top, Right, Bottom
+            verticalOffset,
+            horizontalOffset,
+            verticalOffset + sizeOfComplication,
+            horizontalOffset + sizeOfComplication
+        )
 
         // note that we've just swapped the x and y values for BOTTOM to be the same as RIGHT
         complicationDrawableMap[BOTTOM_COMPLICATION_ID]?.bounds = Rect(
-                // Left, Top, Right, Bottom
-                verticalOffset,
-                midpointOfScreen + horizontalOffset,
-                verticalOffset + sizeOfComplication,
-                midpointOfScreen + horizontalOffset + sizeOfComplication)
+            // Left, Top, Right, Bottom
+            verticalOffset,
+            midpointOfScreen + horizontalOffset,
+            verticalOffset + sizeOfComplication,
+            midpointOfScreen + horizontalOffset + sizeOfComplication
+        )
 
         complicationDrawableMap[BACKGROUND_COMPLICATION_ID]?.bounds = Rect(0, 0, width, height)
 
@@ -238,16 +240,18 @@ object ComplicationWrapper : AnkoLogger {
 
     /** Call this whenever you get an onComplicationUpdate() event. */
     fun updateComplication(complicationId: Int, complicationData: ComplicationData?) {
-        info { "onComplicationDataUpdate() " +
+        info {
+            "onComplicationDataUpdate() " +
                 "id: $complicationId (${complicationIdToLocationString(complicationId)})," +
-                " data: ${complicationData?.toString() ?: "NULL!"}" }
+                " data: ${complicationData?.toString() ?: "NULL!"}"
+        }
 
         complicationDrawableMap[complicationId]?.setComplicationData(complicationData)
 
         when {
             complicationData == null ||
-            complicationData.type == ComplicationData.TYPE_EMPTY ||
-            complicationData.type == ComplicationData.TYPE_NOT_CONFIGURED -> {
+                complicationData.type == ComplicationData.TYPE_EMPTY ||
+                complicationData.type == ComplicationData.TYPE_NOT_CONFIGURED -> {
                 // when we get back no complication data, that's the only signal we get
                 // that a complication has been killed, so we're just going to remove the
                 // entry from our map; see also isComplicationVisible()
@@ -265,14 +269,22 @@ object ComplicationWrapper : AnkoLogger {
                     // this in some way or leave the slot empty."
                     // For now, we log.
 
-                    debug { "unexpected TYPE_NO_DATA for complication, id: $complicationId (${complicationIdToLocationString(complicationId)})" }
+                    debug {
+                        "unexpected TYPE_NO_DATA for complication, id: $complicationId (${complicationIdToLocationString(
+                            complicationId
+                        )})"
+                    }
                 }
 
                 info { "Added complication, id: $complicationId (${complicationIdToLocationString(complicationId)})" }
             }
         }
 
-        info { "Visibility map: (LEFT, RIGHT, TOP, BOTTOM) -> ${isComplicationVisible(LEFT)}, ${isComplicationVisible(RIGHT)}, ${isComplicationVisible(TOP)}, ${isComplicationVisible(BOTTOM)}" }
+        info {
+            "Visibility map: (LEFT, RIGHT, TOP, BOTTOM) -> ${isComplicationVisible(LEFT)}, ${isComplicationVisible(
+                RIGHT
+            )}, ${isComplicationVisible(TOP)}, ${isComplicationVisible(BOTTOM)}"
+        }
 
         // makes sure that rendering the face background updates properly when changing complication settings
         ClockFaceConfigView.redraw()
@@ -283,7 +295,7 @@ object ComplicationWrapper : AnkoLogger {
      * On a watchface, you might use this to decide whether to show or hide numerals.
      */
     fun isComplicationVisible(location: ComplicationLocation) =
-            complicationDataMap.containsKey(getComplicationId(location))
+        complicationDataMap.containsKey(getComplicationId(location))
 
     /**
      * Call this if you want to know whether the watchface has enabled a given complication location.
@@ -292,8 +304,8 @@ object ComplicationWrapper : AnkoLogger {
     fun isEnabled(location: ComplicationLocation) =
         complicationDrawableMap.containsKey(getComplicationId(location))
 
-    private var complicationDrawableMap: Map<Int,ComplicationDrawable> = emptyMap()
-    private var complicationDataMap: Map<Int,ComplicationData> = emptyMap()
+    private var complicationDrawableMap: Map<Int, ComplicationDrawable> = emptyMap()
+    private var complicationDataMap: Map<Int, ComplicationData> = emptyMap()
 
     /**
      * Call this in your onCreate() to initialize the complications for the engine.
@@ -301,7 +313,11 @@ object ComplicationWrapper : AnkoLogger {
      * @param locations specifies a list of [ComplicationLocation] entries where you want your
      * watchface to support them. To get everything, you'd say _listOf(BACKGROUND, LEFT, RIGHT, TOP, and BOTTOM)_.
      */
-    fun init(watchFace: CanvasWatchFaceService, engine: CanvasWatchFaceService.Engine, locations: List<ComplicationLocation>) {
+    fun init(
+        watchFace: CanvasWatchFaceService,
+        engine: CanvasWatchFaceService.Engine,
+        locations: List<ComplicationLocation>
+    ) {
         verbose { "Complication locations: $locations" }
 
         this.watchFace = watchFace  // intnerally saves a weakref
@@ -310,13 +326,15 @@ object ComplicationWrapper : AnkoLogger {
         activeComplicationIds = locations.map(this::getComplicationId).toIntArray()
         activeComplicationSupportedTypes = locations.map(this::getSupportedComplicationTypes).toTypedArray()
 
-        inactiveComplicationIds = listOf(BACKGROUND_COMPLICATION_ID,
-                LEFT_COMPLICATION_ID,
-                RIGHT_COMPLICATION_ID,
-                TOP_COMPLICATION_ID,
-                BOTTOM_COMPLICATION_ID)
-                .filter { !activeComplicationIds.contains(it) }
-                .toIntArray()
+        inactiveComplicationIds = listOf(
+            BACKGROUND_COMPLICATION_ID,
+            LEFT_COMPLICATION_ID,
+            RIGHT_COMPLICATION_ID,
+            TOP_COMPLICATION_ID,
+            BOTTOM_COMPLICATION_ID
+        )
+            .filter { !activeComplicationIds.contains(it) }
+            .toIntArray()
 
         // Creates a ComplicationDrawable for each location where the user can render a
         // complication on the watch face. Bonus coolness for Kotlin's associate method letting
@@ -343,11 +361,13 @@ object ComplicationWrapper : AnkoLogger {
         // kinda baffling that this is even necessary; why aren't permissions dealt with when you add the complication?
 
         val componentName = ComponentName(
-                watchFace.applicationContext,
-                watchFaceClass)
+            watchFace.applicationContext,
+            watchFaceClass
+        )
 
         val permissionRequestIntent = ComplicationHelperActivity.createPermissionRequestHelperIntent(
-                watchFace.applicationContext, componentName)
+            watchFace.applicationContext, componentName
+        )
 
         permissionRequestIntent.addFlags(FLAG_ACTIVITY_NEW_TASK) // trying to work around an odd bug
 
@@ -360,13 +380,15 @@ object ComplicationWrapper : AnkoLogger {
      */
     fun handleTap(x: Int, y: Int, currentTime: Long) {
         val tappedComplicationIds = complicationDrawableMap.keys
-                // first, we aren't sending clicks to the background, and we're supposed to ignore anything
-                // that isn't "active" right now or that isn't "tappable", and of course, whatever it
-                // is, the tap has to actually be inside the bounds of the complication. (so complicated!)
-                .filter { it != BACKGROUND_COMPLICATION_ID
-                        && complicationDataMap[it]?.isActive(currentTime) ?: false
-                        && isTappableComplicationType(complicationDataMap[it]?.type)
-                        && complicationDrawableMap[it]?.bounds?.contains(x, y) ?: false }
+            // first, we aren't sending clicks to the background, and we're supposed to ignore anything
+            // that isn't "active" right now or that isn't "tappable", and of course, whatever it
+            // is, the tap has to actually be inside the bounds of the complication. (so complicated!)
+            .filter {
+                it != BACKGROUND_COMPLICATION_ID
+                    && complicationDataMap[it]?.isActive(currentTime) ?: false
+                    && isTappableComplicationType(complicationDataMap[it]?.type)
+                    && complicationDrawableMap[it]?.bounds?.contains(x, y) ?: false
+            }
 
         verbose { "Complication tap, hits on complication(s): " + tappedComplicationIds.joinToString() }
 

@@ -36,9 +36,10 @@ class AnalogComplicationConfigActivity : AppCompatActivity(), AnkoLogger {
         setContentView(R.layout.activity_analog_complication_config)
 
         mAdapter = AnalogComplicationConfigRecyclerViewAdapter(
-                applicationContext,
-                ComplicationWrapper.watchFaceClass,
-                AnalogComplicationConfigData.getDataToPopulateAdapter(this))
+            applicationContext,
+            ComplicationWrapper.watchFaceClass,
+            AnalogComplicationConfigData.getDataToPopulateAdapter(this)
+        )
 
         mWearableRecyclerView = findViewById(R.id.wearable_recycler_view)
 
@@ -61,13 +62,13 @@ class AnalogComplicationConfigActivity : AppCompatActivity(), AnkoLogger {
 
         if (requestCode == COMPLICATION_CONFIG_REQUEST_CODE && resultCode == Activity.RESULT_OK) {
             // Retrieves information for selected Complication provider.
-            val complicationProviderInfo = data.getParcelableExtra<ComplicationProviderInfo>(ProviderChooserIntent.EXTRA_PROVIDER_INFO)
+            val complicationProviderInfo =
+                data.getParcelableExtra<ComplicationProviderInfo>(ProviderChooserIntent.EXTRA_PROVIDER_INFO)
             debug { "Provider:  $complicationProviderInfo" }
 
             // Updates preview with new complication information for selected complication id.
             // Note: complication id is saved and tracked in the adapter class.
             mAdapter?.updateSelectedComplication(complicationProviderInfo)
-
         }
     }
 

@@ -29,7 +29,6 @@ import kotlin.comparisons.compareBy
 import kotlin.comparisons.thenBy
 import kotlin.comparisons.thenByDescending
 
-
 /**
  * This class handles all the dirty work of asynchronously loading calendar data from the calendar provider
  * and updating the state in ClockState. The constructor arguments, contentUri and authority, are used
@@ -42,10 +41,12 @@ import kotlin.comparisons.thenByDescending
  * the most recently created CalendarFetcher to do the work. This is something worth doing at the top
  * of the hour, when it's time to update the calendar.
  */
-class CalendarFetcher(initialContext: Context,
-                      private val contentUri: Uri = WearableCalendarContract.Instances.CONTENT_URI,
-                      private val authority: String = WearableCalendarContract.AUTHORITY,
-                      private val backupAuthority: String = CalendarContract.AUTHORITY): AnkoLogger {
+class CalendarFetcher(
+    initialContext: Context,
+    private val contentUri: Uri = WearableCalendarContract.Instances.CONTENT_URI,
+    private val authority: String = WearableCalendarContract.AUTHORITY,
+    private val backupAuthority: String = CalendarContract.AUTHORITY
+) : AnkoLogger {
 
     private val contextRef = WeakReference(initialContext)
     private var isReceiverRegistered: Boolean = false
@@ -53,7 +54,7 @@ class CalendarFetcher(initialContext: Context,
 
     override fun toString() =
         "CalendarFetcher(contextRef(%s), authority($authority), contentUri($contentUri), isReceiverRegistered($isReceiverRegistered), instanceId($instanceID))"
-                .format(if (contextRef.get() == null) "null" else "non-null")
+            .format(if (contextRef.get() == null) "null" else "non-null")
 
     private fun onReceiveBroadcastHandler(context: Context, intent: Intent, authority: String) {
         info { "broadcastReceiver: GOT INTENT MESSAGE! action(${intent.action}), data(${intent.data}), toString($intent), authority($authority)" }
@@ -85,7 +86,8 @@ class CalendarFetcher(initialContext: Context,
     }
 
     private val broadcastReceiverBackup = object : BroadcastReceiver() {
-        override fun onReceive(context: Context, intent: Intent) = onReceiveBroadcastHandler(context, intent, backupAuthority)
+        override fun onReceive(context: Context, intent: Intent) =
+            onReceiveBroadcastHandler(context, intent, backupAuthority)
     }
 
     init {
@@ -187,9 +189,23 @@ class CalendarFetcher(initialContext: Context,
         try {
             info {
                 "loadContent: Query times... Now: %s, QueryStart: %s, QueryEnd: %s"
-                        .format(DateUtils.formatDateTime(context, time, DateUtils.FORMAT_SHOW_DATE or DateUtils.FORMAT_SHOW_TIME),
-                                DateUtils.formatDateTime(context, queryStartMillis, DateUtils.FORMAT_SHOW_TIME or DateUtils.FORMAT_SHOW_DATE),
-                                DateUtils.formatDateTime(context, queryEndMillis, DateUtils.FORMAT_SHOW_TIME or DateUtils.FORMAT_SHOW_DATE))
+                    .format(
+                        DateUtils.formatDateTime(
+                            context,
+                            time,
+                            DateUtils.FORMAT_SHOW_DATE or DateUtils.FORMAT_SHOW_TIME
+                        ),
+                        DateUtils.formatDateTime(
+                            context,
+                            queryStartMillis,
+                            DateUtils.FORMAT_SHOW_TIME or DateUtils.FORMAT_SHOW_DATE
+                        ),
+                        DateUtils.formatDateTime(
+                            context,
+                            queryEndMillis,
+                            DateUtils.FORMAT_SHOW_TIME or DateUtils.FORMAT_SHOW_DATE
+                        )
+                    )
             }
         } catch (th: Throwable) {
             // sometimes the date formatting blows up... who knew? best to just ignore and move on
@@ -200,13 +216,14 @@ class CalendarFetcher(initialContext: Context,
 
         try {
             val instancesProjection = arrayOf(
-                    CalendarContract.Instances.BEGIN,
-                    CalendarContract.Instances.END,
-                    CalendarContract.Instances.EVENT_ID,
-                    CalendarContract.Instances.CALENDAR_COLOR,
-                    CalendarContract.Instances.EVENT_COLOR,
-                    CalendarContract.Instances.ALL_DAY,
-                    CalendarContract.Instances.VISIBLE)
+                CalendarContract.Instances.BEGIN,
+                CalendarContract.Instances.END,
+                CalendarContract.Instances.EVENT_ID,
+                CalendarContract.Instances.CALENDAR_COLOR,
+                CalendarContract.Instances.EVENT_COLOR,
+                CalendarContract.Instances.ALL_DAY,
+                CalendarContract.Instances.VISIBLE
+            )
 
             // Note: we used to use DISPLAY_COLOR, but that's now deprecated on Wear 2.0 because reasons.
             // https://issuetracker.google.com/issues/38476499
@@ -215,8 +232,10 @@ class CalendarFetcher(initialContext: Context,
             val builder = contentUri.buildUpon()
             ContentUris.appendId(builder, queryStartMillis)
             ContentUris.appendId(builder, queryEndMillis)
-            val iCursor = context.contentResolver.query(builder.build(),
-                    instancesProjection, null, null, null)
+            val iCursor = context.contentResolver.query(
+                builder.build(),
+                instancesProjection, null, null, null
+            )
 
             // if it's null, which shouldn't ever happen, then we at least won't gratuitously fail here
             if (iCursor == null) {
@@ -235,7 +254,6 @@ class CalendarFetcher(initialContext: Context,
 
                         if (visible && !allDay)
                             cr.add(CalendarEvent(startTime, endTime, displayColor))
-
                     } while (iCursor.moveToNext())
                     info { "loadContent: visible instances found: ${cr.size}" }
                 }
@@ -259,9 +277,9 @@ class CalendarFetcher(initialContext: Context,
 
         // Third-priority sort: startTime, with objects starting later (smaller) appearing first in the sort.
         return cr.sortedWith(
-                compareBy<CalendarEvent> { it.displayColor }
-                        .thenBy { it.endTime }
-                        .thenByDescending { it.startTime })
+            compareBy<CalendarEvent> { it.displayColor }
+                .thenBy { it.endTime }
+                .thenByDescending { it.startTime })
     }
 
     /**
@@ -276,7 +294,6 @@ class CalendarFetcher(initialContext: Context,
 
         if (this != singletonFetcher)
             warn { "runAsyncLoader: not using the singleton fetcher! (CalendarFetcher me #$instanceID), singleton #${singletonFetcher?.instanceID})" }
-
 
         // Behold! The power of Kotlin 1.3's coroutines, with bonus wildly incomplete documentation!
         // https://github.com/Kotlin/kotlinx.coroutines/blob/master/ui/coroutines-guide-ui.md
@@ -335,18 +352,22 @@ class CalendarFetcher(initialContext: Context,
         info { "runAsyncLoader: Heading back to uiThread async tasks running (CalendarFetcher #$instanceID)" }
     }
 
-    companion object: AnkoLogger {
+    companion object : AnkoLogger {
         // Declaring these volatile is probably overkill, but they may be read from different threads, so
         // we want changes to propagate immediately. scanInProgress is particularly important for this,
         // since it's how we prevent running multiple simultaneous queries to the calendar provider.
-        @Volatile private var singletonFetcher: CalendarFetcher? = null
-        @Volatile private var scanInProgress: Boolean = false
-        @Volatile private var instanceCounter: Int = -1 // ID numbers for tracking / better logging
-        @Volatile private var fetchCounter: Int = -1 // ID numbers for tracking / better logging
+        @Volatile
+        private var singletonFetcher: CalendarFetcher? = null
+        @Volatile
+        private var scanInProgress: Boolean = false
+        @Volatile
+        private var instanceCounter: Int = -1 // ID numbers for tracking / better logging
+        @Volatile
+        private var fetchCounter: Int = -1 // ID numbers for tracking / better logging
 
         private val currentState: String
             get() = "singletonFetcher(%s), scanInProgress($scanInProgress), instanceCounter($instanceCounter)"
-                    .format(singletonFetcher?.toString() ?: "null")
+                .format(singletonFetcher?.toString() ?: "null")
 
         fun requestRescan() {
             info { "requestRescan: $currentState" }

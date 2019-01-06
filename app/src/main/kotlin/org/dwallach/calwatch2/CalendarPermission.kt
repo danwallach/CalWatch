@@ -18,7 +18,7 @@ import org.jetbrains.anko.*
 /**
  * Deal with all the run-time permission machinery.
  */
-object CalendarPermission: AnkoLogger {
+object CalendarPermission : AnkoLogger {
     private const val INTERNAL_PERM_REQUEST_CODE = 31337
 
     /**
@@ -28,7 +28,8 @@ object CalendarPermission: AnkoLogger {
         private set
 
     fun init(context: Context) {
-        numRequests = context.getSharedPreferences(Constants.PREFS_KEY, Context.MODE_PRIVATE).getInt("permissionRequests", 0)
+        numRequests =
+            context.getSharedPreferences(Constants.PREFS_KEY, Context.MODE_PRIVATE).getInt("permissionRequests", 0)
     }
 
     /**
@@ -37,7 +38,6 @@ object CalendarPermission: AnkoLogger {
     fun check(context: Context): Boolean {
         val result = ContextCompat.checkSelfPermission(context, Manifest.permission.READ_CALENDAR)
         verbose { "calendar permissions check: $result (granted = ${PackageManager.PERMISSION_GRANTED})" }
-
 
 //        val result2 = ContextCompat.checkSelfPermission(context, Manifest.permission.BODY_SENSORS)
 //        verbose { "body sensor permissions check: $result2 (granted = ${PackageManager.PERMISSION_GRANTED})" }
@@ -69,16 +69,18 @@ object CalendarPermission: AnkoLogger {
         if (!check(activity)) {
             numRequests++
             verbose { "this will be check #$numRequests" }
-            ActivityCompat.requestPermissions(activity,
-                    arrayOf(Manifest.permission.READ_CALENDAR), // Manifest.permission.BODY_SENSORS),
-                    INTERNAL_PERM_REQUEST_CODE)
+            ActivityCompat.requestPermissions(
+                activity,
+                arrayOf(Manifest.permission.READ_CALENDAR), // Manifest.permission.BODY_SENSORS),
+                INTERNAL_PERM_REQUEST_CODE
+            )
 
             //
             // This is redundant with the updates we do in WearReceiverService (on wear) and PreferencesHelper (on mobile),
             // but we really want to remember how many requests we've made, so we're dumping this out immediately. This
             // number will be restored on startup by the usual preferences restoration in the two classes above. (Hopefuly.)
             //
-            with (activity.getSharedPreferences("org.dwallach.calwatch.prefs", Activity.MODE_PRIVATE).edit()) {
+            with(activity.getSharedPreferences("org.dwallach.calwatch.prefs", Activity.MODE_PRIVATE).edit()) {
                 putInt("permissionRequests", numRequests)
 
                 if (!commit())
@@ -101,8 +103,10 @@ object CalendarPermission: AnkoLogger {
                 ClockState.calendarPermission = false
             }
         } else {
-            error { "weird permission result: code(%d), perms(%s), results(%s)"
-                    .format(requestCode, permissions.asList().toString(), grantResults.asList().toString()) }
+            error {
+                "weird permission result: code(%d), perms(%s), results(%s)"
+                    .format(requestCode, permissions.asList().toString(), grantResults.asList().toString())
+            }
         }
     }
 }

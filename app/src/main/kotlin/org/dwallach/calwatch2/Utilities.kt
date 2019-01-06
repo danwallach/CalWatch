@@ -11,7 +11,7 @@ import org.dwallach.complications.AnalogComplicationConfigRecyclerViewAdapter
 import org.jetbrains.anko.AnkoLogger
 import org.jetbrains.anko.error
 
-object Utilities: AnkoLogger {
+object Utilities : AnkoLogger {
     /**
      * This function, called from all over the place, is used to indicate that
      * every instance of a ClockFace (whether it's on the watchface or inside
@@ -41,7 +41,7 @@ fun AnkoLogger.errorLogAndThrow(message: Any, thr: Throwable? = null): Nothing {
  * Given any function from K to V, returns another function, also from K to V, which
  * memoizes the results, only calling the internal function exactly once for each input.
  */
-fun <K, V: Any, F: (K) -> V> F.memoize(): (K) -> V {
+fun <K, V : Any, F : (K) -> V> F.memoize(): (K) -> V {
     val map = mutableMapOf<K, V>()
     return {
         map.getOrPut(it) { this(it) }

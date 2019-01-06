@@ -13,7 +13,7 @@ import org.jetbrains.anko.*
 /**
  * Event layout with the Cassowary linear constraint solver.
  */
-object EventLayoutUniform: AnkoLogger {
+object EventLayoutUniform : AnkoLogger {
     /**
      * Given a list of events, return another list that corresponds to the set of
      * events visible in the next twelve hours, with events that would be off-screen
@@ -31,10 +31,10 @@ object EventLayoutUniform: AnkoLogger {
         }.filter {
             // require events to be onscreen
             it.endTime > clipStartMillis && it.startTime < clipEndMillis
-                    // require events to not fill the full screen
-                    && !(it.endTime == clipEndMillis && it.startTime == clipStartMillis)
-                    // require events to have some non-zero thickness (clipping can sometimes yield events that start and end at the same time)
-                    && it.endTime > it.startTime
+                // require events to not fill the full screen
+                && !(it.endTime == clipEndMillis && it.startTime == clipStartMillis)
+                // require events to have some non-zero thickness (clipping can sometimes yield events that start and end at the same time)
+                && it.endTime > it.startTime
         }.map {
             // apply GMT offset, and then wrap with EventWrapper, where the layout will happen
             EventWrapper(it + gmtOffset)
@@ -63,6 +63,7 @@ object EventLayoutUniform: AnkoLogger {
             return Pair(emptyList(), 0)
         }
     }
+
     private const val MAXLEVEL = 10000 // we'll go from 0 to MAXLEVEL, inclusive
 
     /**
@@ -95,14 +96,19 @@ object EventLayoutUniform: AnkoLogger {
 
             var sumSizes = ClLinearExpression(0.0)
 
-            for(i in 0 until nEvents) {
+            for (i in 0 until nEvents) {
                 // constraints: variables have to fit between 0 and max
                 solver.addBounds(startLevels[i], 0.0, MAXLEVEL.toDouble())
                 solver.addBounds(sizes[i], 0.0, MAXLEVEL.toDouble())
 
                 // constraints: add them together and they're still constrained by MAXLEVEL
                 val levelPlusSize = ClLinearExpression(startLevels[i]).plus(sizes[i])
-                val liq = ClLinearInequality(levelPlusSize, CL.LEQ, ClLinearExpression(MAXLEVEL.toDouble()), ClStrength.required)
+                val liq = ClLinearInequality(
+                    levelPlusSize,
+                    CL.LEQ,
+                    ClLinearExpression(MAXLEVEL.toDouble()),
+                    ClStrength.required
+                )
                 solver.addConstraint(liq)
 
                 sumSizes = sumSizes.plus(sizes[i])
@@ -110,11 +116,16 @@ object EventLayoutUniform: AnkoLogger {
 
             // constraint: the sum of all the sizes is greater than the maximum it could ever be under the absolute best of cases
             // (this constraint's job is to force us out of degenerate cases when the solver might prefer zeros everywhere)
-            val sumSizesEq = ClLinearInequality(sumSizes, CL.GEQ, ClLinearExpression((MAXLEVEL * nEvents).toDouble()), ClStrength.weak)
+            val sumSizesEq = ClLinearInequality(
+                sumSizes,
+                CL.GEQ,
+                ClLinearExpression((MAXLEVEL * nEvents).toDouble()),
+                ClStrength.weak
+            )
             solver.addConstraint(sumSizesEq)
 
-            for(i in 0 until nEvents) {
-                for(j in i+1 until nEvents) {
+            for (i in 0 until nEvents) {
+                for (j in i + 1 until nEvents) {
                     if (events[i].overlaps(events[j])) {
                         overlapCounter[i]++
                         overlapCounter[j]++
@@ -143,7 +154,7 @@ object EventLayoutUniform: AnkoLogger {
 
             verbose("Event layout success.")
 
-            for(i in 0 until nEvents) {
+            for (i in 0 until nEvents) {
                 val e = events[i]
                 val start = startLevels[i].value().toInt()
                 val size = sizes[i].value().toInt()
@@ -174,9 +185,9 @@ object EventLayoutUniform: AnkoLogger {
      * @return maximum level of any calendar event
      */
     private fun sanityTest(events: List<EventWrapper>, maxLevel: Int, blurb: String) =
-            events.forEach {
-                if (it.minLevel < 0 || it.maxLevel > maxLevel) {
-                    error { "malformed eventwrapper ($blurb): $it" }
-                }
+        events.forEach {
+            if (it.minLevel < 0 || it.maxLevel > maxLevel) {
+                error { "malformed eventwrapper ($blurb): $it" }
             }
+        }
 }

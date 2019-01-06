@@ -13,13 +13,12 @@ import org.jetbrains.anko.*
 /**
  * Deals with reading our version name and number from the APK.
  */
-object VersionWrapper: AnkoLogger {
+object VersionWrapper : AnkoLogger {
     fun logVersion(activity: Context) {
         try {
             val pinfo = activity.packageManager.getPackageInfo(activity.packageName, 0)
             // TODO: replace versionCode with longVersionCode, except that's only supported in API 28
             info { "Version: ${pinfo.versionName} (${pinfo.versionCode})" }
-
         } catch (e: Throwable) {
             error("failed to get version information!", e)
         }

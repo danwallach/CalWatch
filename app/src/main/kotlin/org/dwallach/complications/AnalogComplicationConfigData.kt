@@ -21,8 +21,15 @@ import org.jetbrains.anko.info
  * we're on Wear 1.x, then there's no support for complications, so we'll
  * leave that out from our configuration dialog panel.
  */
-object AnalogComplicationConfigData: AnkoLogger {
-    data class ConfigItemType(val configType: Int, val iconResourceId: Int, val layoutId: Int, val inflatedId: Int, val name: String = "", val disabled: Boolean = false)
+object AnalogComplicationConfigData : AnkoLogger {
+    data class ConfigItemType(
+        val configType: Int,
+        val iconResourceId: Int,
+        val layoutId: Int,
+        val inflatedId: Int,
+        val name: String = "",
+        val disabled: Boolean = false
+    )
 
     /**
      * Includes all data to populate each of the different custom
@@ -33,43 +40,51 @@ object AnalogComplicationConfigData: AnkoLogger {
             // Wear 1.x --- no complications so we won't show that part of the config choices
             info("getDataToPopulateAdapter: Wear 1.x")
             listOf(
-                    ConfigItemType(
-                            AnalogComplicationConfigRecyclerViewAdapter.TYPE_DAY_DATE,
-                            R.drawable.ic_date_time_selector,
-                            R.layout.config_day_date_select,
-                            R.id.day_date_select,
-                            context.getString(R.string.watchface_day_date_selector)),
-                    ConfigItemType(
-                            AnalogComplicationConfigRecyclerViewAdapter.TYPE_CHANGE_WATCHFACE_STYLE,
-                            R.drawable.icon_preview, // shouldn't be drawn ever, but...
-                            R.layout.config_watchface_style,
-                            R.id.watchface_view_style,
-                            context.getString(R.string.watchface_style_selector)))
+                ConfigItemType(
+                    AnalogComplicationConfigRecyclerViewAdapter.TYPE_DAY_DATE,
+                    R.drawable.ic_date_time_selector,
+                    R.layout.config_day_date_select,
+                    R.id.day_date_select,
+                    context.getString(R.string.watchface_day_date_selector)
+                ),
+                ConfigItemType(
+                    AnalogComplicationConfigRecyclerViewAdapter.TYPE_CHANGE_WATCHFACE_STYLE,
+                    R.drawable.icon_preview, // shouldn't be drawn ever, but...
+                    R.layout.config_watchface_style,
+                    R.id.watchface_view_style,
+                    context.getString(R.string.watchface_style_selector)
+                )
+            )
         } else {
             info("getDataToPopulateAdapter: Wear 2+")
             // Wear 2+
             listOf(
-                    ConfigItemType(
-                            AnalogComplicationConfigRecyclerViewAdapter.TYPE_PREVIEW_AND_COMPLICATIONS_CONFIG,
-                            R.drawable.add_complication,
-                            R.layout.config_list_preview_and_complications_item,
-                            R.id.preview_and_complications_item),
-                    ConfigItemType(
-                            AnalogComplicationConfigRecyclerViewAdapter.TYPE_MORE_OPTIONS,
-                            R.drawable.ic_expand_more_white_18dp,
-                            R.layout.config_list_more_options_item,
-                            R.id.more_options_image_view),
-                    ConfigItemType(
-                            AnalogComplicationConfigRecyclerViewAdapter.TYPE_DAY_DATE,
-                            R.drawable.ic_date_time_selector,
-                            R.layout.config_day_date_select,
-                            R.id.day_date_select,
-                            context.getString(R.string.watchface_day_date_selector)),
-                    ConfigItemType(
-                            AnalogComplicationConfigRecyclerViewAdapter.TYPE_CHANGE_WATCHFACE_STYLE,
-                            R.drawable.icon_preview, // shouldn't be drawn ever, but...
-                            R.layout.config_watchface_style,
-                            R.id.watchface_view_style,
-                            context.getString(R.string.watchface_style_selector)))
+                ConfigItemType(
+                    AnalogComplicationConfigRecyclerViewAdapter.TYPE_PREVIEW_AND_COMPLICATIONS_CONFIG,
+                    R.drawable.add_complication,
+                    R.layout.config_list_preview_and_complications_item,
+                    R.id.preview_and_complications_item
+                ),
+                ConfigItemType(
+                    AnalogComplicationConfigRecyclerViewAdapter.TYPE_MORE_OPTIONS,
+                    R.drawable.ic_expand_more_white_18dp,
+                    R.layout.config_list_more_options_item,
+                    R.id.more_options_image_view
+                ),
+                ConfigItemType(
+                    AnalogComplicationConfigRecyclerViewAdapter.TYPE_DAY_DATE,
+                    R.drawable.ic_date_time_selector,
+                    R.layout.config_day_date_select,
+                    R.id.day_date_select,
+                    context.getString(R.string.watchface_day_date_selector)
+                ),
+                ConfigItemType(
+                    AnalogComplicationConfigRecyclerViewAdapter.TYPE_CHANGE_WATCHFACE_STYLE,
+                    R.drawable.icon_preview, // shouldn't be drawn ever, but...
+                    R.layout.config_watchface_style,
+                    R.id.watchface_view_style,
+                    context.getString(R.string.watchface_style_selector)
+                )
+            )
         }
 }

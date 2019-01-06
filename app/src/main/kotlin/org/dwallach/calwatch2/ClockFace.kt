@@ -31,7 +31,7 @@ import kotlin.math.*
  * All of the graphics calls for drawing watchfaces happen here. Note that this class knows
  * nothing about Android widgets, views, or activities. That stuff is handled in CalWatchFaceService.
  */
-class ClockFace(private val configMode: Boolean = false): AnkoLogger {
+class ClockFace(private val configMode: Boolean = false) : AnkoLogger {
     // an instance of the ClockFace class is created anew alongside the rest of the UI; this number
     // helps us keep track of which instance is which
     private val instanceID: Int
@@ -111,11 +111,10 @@ class ClockFace(private val configMode: Boolean = false): AnkoLogger {
             updateMissingCalendarRect()
         }
 
-
     private fun updateMissingCalendarRect() {
         val lMissingCalendarDrawable = missingCalendarDrawable
 
-        if(lMissingCalendarDrawable == null) {
+        if (lMissingCalendarDrawable == null) {
             error("no missing calendar drawable?!")
             return
         }
@@ -127,10 +126,12 @@ class ClockFace(private val configMode: Boolean = false): AnkoLogger {
         val y = (clockY(0.0, 0f) - height / 2).toInt()
 
         // setBounds arguments: (int left, int top, int right, int bottom)
-        lMissingCalendarDrawable.setBounds(x, y, x+width, y+height)
+        lMissingCalendarDrawable.setBounds(x, y, x + width, y + height)
 
-        verbose { "missing calendar drawable size: (%d,%d), coordinates: (%d,%d),  (cy: %d, radius: %d)"
-                .format(width, height, x, y, cy, radius) }
+        verbose {
+            "missing calendar drawable size: (%d,%d), coordinates: (%d,%d),  (cy: %d, radius: %d)"
+                .format(width, height, x, y, cy, radius)
+        }
     }
 
     /**
@@ -202,7 +203,6 @@ class ClockFace(private val configMode: Boolean = false): AnkoLogger {
             // something a real watch can't do: float the text over the hands
             // (but disable when we're in ambientMode with burnInProtection)
             if (showDayDate) drawMonthBox(canvas)
-
         } catch (th: Throwable) {
             error("exception in drawEverything", th)
         } finally {
@@ -210,7 +210,15 @@ class ClockFace(private val configMode: Boolean = false): AnkoLogger {
         }
     }
 
-    private fun drawRadialLine(canvas: Canvas, seconds: Double, startRadius: Float, endRadius: Float, paint: Paint, shadowPaint: Paint?, forceVertical: Boolean = false) {
+    private fun drawRadialLine(
+        canvas: Canvas,
+        seconds: Double,
+        startRadius: Float,
+        endRadius: Float,
+        paint: Paint,
+        shadowPaint: Paint?,
+        forceVertical: Boolean = false
+    ) {
         val p = Path()
         drawRadialLine(p, paint.strokeWidth, seconds, startRadius, endRadius, forceVertical, false)
         canvas.drawPath(p, paint)
@@ -218,7 +226,15 @@ class ClockFace(private val configMode: Boolean = false): AnkoLogger {
             canvas.drawPath(p, shadowPaint)
     }
 
-    private fun drawRadialLine(path: Path, startStrokeWidth: Float, seconds: Double, startRadiusRatio: Float, endRadiusRatio: Float, forceVertical: Boolean, flatBottomHack: Boolean) {
+    private fun drawRadialLine(
+        path: Path,
+        startStrokeWidth: Float,
+        seconds: Double,
+        startRadiusRatio: Float,
+        endRadiusRatio: Float,
+        forceVertical: Boolean,
+        flatBottomHack: Boolean
+    ) {
         var lseconds = seconds
         var startRadius = startRadiusRatio
         var endRadius = endRadiusRatio
@@ -237,14 +253,14 @@ class ClockFace(private val configMode: Boolean = false): AnkoLogger {
          * this really hurts readability on a small screen.
          *
         if (drawStyle == Style.AMBIENT_ANTI_BURNIN || drawStyle == Style.LOWBIT_ANTI_BURNIN) {
-            // scale down everything to leave a 10 pixel margin
+        // scale down everything to leave a 10 pixel margin
 
-            val ratio = (radius - 10f) / radius
-            startRadius *= ratio
-            endRadius *= ratio
-            strokeWidth *= ratio
+        val ratio = (radius - 10f) / radius
+        startRadius *= ratio
+        endRadius *= ratio
+        strokeWidth *= ratio
         }
-        ***/
+         ***/
 
         val x1 = clockX(lseconds, startRadius)
         val y1 = clockY(lseconds, startRadius)
@@ -268,10 +284,11 @@ class ClockFace(private val configMode: Boolean = false): AnkoLogger {
 
     private fun getRectRadius(radius: Float): RectF {
         return RectF(
-                clockX(45.0, radius), // left
-                clockY(0.0, radius), // top
-                clockX(15.0, radius), // right
-                clockY(30.0, radius))// bottom
+            clockX(45.0, radius), // left
+            clockY(0.0, radius), // top
+            clockX(15.0, radius), // right
+            clockY(30.0, radius)
+        )// bottom
     }
 
     /**
@@ -279,7 +296,16 @@ class ClockFace(private val configMode: Boolean = false): AnkoLogger {
      * The path used for drawing is returned and may be passed back in next time, to the *path*
      * argument, which will make things go much faster.
      */
-    private fun drawRadialArc(canvas: Canvas, path: Path?, secondsStart: Double, secondsEnd: Double, startRadiusRatio: Float, endRadiusRatio: Float, paint: Paint, outlinePaint: Paint?): Path {
+    private fun drawRadialArc(
+        canvas: Canvas,
+        path: Path?,
+        secondsStart: Double,
+        secondsEnd: Double,
+        startRadiusRatio: Float,
+        endRadiusRatio: Float,
+        paint: Paint,
+        outlinePaint: Paint?
+    ): Path {
         /*
          * Below is an attempt to do this "correctly" using the arc functionality supported natively
          * by Android's Path.
@@ -287,7 +313,14 @@ class ClockFace(private val configMode: Boolean = false): AnkoLogger {
 
         if (startRadiusRatio < 0 || startRadiusRatio > 1 || endRadiusRatio < 0 || endRadiusRatio > 1) {
             // if this happens, then we've got a serious bug somewhere; time for a kaboom
-            errorLogAndThrow("arc too big! radius(%.2f -> %.2f), seconds(%.2f -> %.2f)".format(startRadiusRatio, endRadiusRatio, secondsStart, secondsEnd))
+            errorLogAndThrow(
+                "arc too big! radius(%.2f -> %.2f), seconds(%.2f -> %.2f)".format(
+                    startRadiusRatio,
+                    endRadiusRatio,
+                    secondsStart,
+                    secondsEnd
+                )
+            )
         }
 
         var p: Path? = path
@@ -303,7 +336,7 @@ class ClockFace(private val configMode: Boolean = false): AnkoLogger {
         }
 
         canvas.drawPath(p, paint)
-        if(outlinePaint != null)
+        if (outlinePaint != null)
             canvas.drawPath(p, outlinePaint)
 
         return p
@@ -330,7 +363,7 @@ class ClockFace(private val configMode: Boolean = false): AnkoLogger {
     }
 
     private fun drawShadowText(canvas: Canvas, text: String, x: Float, y: Float, paint: Paint, shadowPaint: Paint?) {
-        if(shadowPaint != null)
+        if (shadowPaint != null)
             canvas.drawText(text, x, y, shadowPaint)
         canvas.drawText(text, x, y, paint)
     }
@@ -340,7 +373,10 @@ class ClockFace(private val configMode: Boolean = false): AnkoLogger {
     private var facePathCacheMode = -1
 
     private fun complicationStateNow(): Int =
-            (if (isComplicationVisible(LEFT)) 8 else 0) + (if (isComplicationVisible(RIGHT)) 4 else 0) + (if (isComplicationVisible(TOP)) 2 else 0) + (if (isComplicationVisible(BOTTOM)) 1 else 0)
+        (if (isComplicationVisible(LEFT)) 8 else 0) + (if (isComplicationVisible(RIGHT)) 4 else 0) + (if (isComplicationVisible(
+                TOP
+            )
+        ) 2 else 0) + (if (isComplicationVisible(BOTTOM)) 1 else 0)
 
     private fun getCachedFacePath(mode: Int): Path? =
         if (facePathComplicationState == complicationStateNow() && facePathCacheMode == mode) facePathCache else null
@@ -367,10 +403,10 @@ class ClockFace(private val configMode: Boolean = false): AnkoLogger {
         val colorTextShadow = paintCan[drawStyle, Brush.BIG_SHADOW]
 
         val strokeWidth =
-                if (lFaceMode == FACE_LITE || lFaceMode == FACE_NUMBERS || drawStyle != Style.NORMAL)
-                    colorSmall.strokeWidth
-                else
-                    colorBig.strokeWidth
+            if (lFaceMode == FACE_LITE || lFaceMode == FACE_NUMBERS || drawStyle != Style.NORMAL)
+                colorSmall.strokeWidth
+            else
+                colorBig.strokeWidth
 
         // check if we've already rendered the face
         if (lFacePathCache == null) {
@@ -381,7 +417,11 @@ class ClockFace(private val configMode: Boolean = false): AnkoLogger {
             verbose { "rendering new face, faceMode($lFaceMode)" }
 
             if (calendarTicker % 1000 == 0) {
-                verbose { "Complication visibility map: (LEFT, RIGHT, TOP, BOTTOM) -> ${isComplicationVisible(LEFT)}, ${isComplicationVisible(RIGHT)}, ${isComplicationVisible(TOP)}, ${isComplicationVisible(BOTTOM)}" }
+                verbose {
+                    "Complication visibility map: (LEFT, RIGHT, TOP, BOTTOM) -> ${isComplicationVisible(LEFT)}, ${isComplicationVisible(
+                        RIGHT
+                    )}, ${isComplicationVisible(TOP)}, ${isComplicationVisible(BOTTOM)}"
+                }
             }
 
             if (lFaceMode == FACE_TOOL)
@@ -389,7 +429,15 @@ class ClockFace(private val configMode: Boolean = false): AnkoLogger {
                     if (bottomHack && isComplicationVisible(BOTTOM) && i >= 26 && i <= 34) continue // don't even bother if flat bottom and complication
 
                     if (i % 5 != 0)
-                        drawRadialLine(lFacePathCache, colorSmall.strokeWidth, i.toDouble(), 0.9f, 1.0f, false, bottomHack)
+                        drawRadialLine(
+                            lFacePathCache,
+                            colorSmall.strokeWidth,
+                            i.toDouble(),
+                            0.9f,
+                            1.0f,
+                            false,
+                            bottomHack
+                        )
                 }
 
             // The logic here is a bit painful: if we're doing LITE or TOOL, then we want to
@@ -464,7 +512,6 @@ class ClockFace(private val configMode: Boolean = false): AnkoLogger {
             //
             val metrics = colorBig.fontMetrics
 
-
             //
             // 12 o'clock
             //
@@ -478,7 +525,14 @@ class ClockFace(private val configMode: Boolean = false): AnkoLogger {
 
                 if (!debugMetricsPrinted) {
                     debugMetricsPrinted = true
-                    verbose { "x(%.2f), y(%.2f), metrics.descent(%.2f), metrics.asacent(%.2f)".format(x, y, metrics.descent, metrics.ascent) }
+                    verbose {
+                        "x(%.2f), y(%.2f), metrics.descent(%.2f), metrics.asacent(%.2f)".format(
+                            x,
+                            y,
+                            metrics.descent,
+                            metrics.ascent
+                        )
+                    }
                 }
             }
 
@@ -492,7 +546,8 @@ class ClockFace(private val configMode: Boolean = false): AnkoLogger {
                 val threeWidth = colorBig.measureText("3")
 
                 x = clockX(15.0, r) - threeWidth / 2f
-                y = clockY(15.0, r) - metrics.ascent / 2f - metrics.descent / 2f // empirically gets the middle of the "3" -- actually a smidge off with Roboto but close enough for now and totally font-dependent with no help from metrics
+                y = clockY(15.0, r) - metrics.ascent / 2f - metrics.descent /
+                    2f // empirically gets the middle of the "3" -- actually a smidge off with Roboto but close enough for now and totally font-dependent with no help from metrics
 
                 drawShadowText(canvas, "3", x, y, colorBig, colorTextShadow)
             }
@@ -535,7 +590,6 @@ class ClockFace(private val configMode: Boolean = false): AnkoLogger {
         val seconds = time / (1.seconds.toDouble())
         val minutes = seconds / 60.0
         val hours = minutes / 12.0  // because drawRadialLine is scaled to a 60-unit circle
-
 
         val shadowColor = paintCan[drawStyle, Brush.HAND_SHADOW]
         val hourColor = paintCan[drawStyle, Brush.HOUR_HAND]
@@ -609,15 +663,16 @@ class ClockFace(private val configMode: Boolean = false): AnkoLogger {
             val arcColor = it.paint
             val arcShadow = paintCan[drawStyle, Brush.ARC_SHADOW]
 
-            it.path = drawRadialArc(canvas, it.path, arcStart, arcEnd,
-                    CALENDAR_RING_MAX_RADIUS - evMinLevel * CALENDAR_RING_WIDTH / (maxLevel + 1),
-                    CALENDAR_RING_MAX_RADIUS - (evMaxLevel + 1) * CALENDAR_RING_WIDTH / (maxLevel + 1),
-                    arcColor, arcShadow)
+            it.path = drawRadialArc(
+                canvas, it.path, arcStart, arcEnd,
+                CALENDAR_RING_MAX_RADIUS - evMinLevel * CALENDAR_RING_WIDTH / (maxLevel + 1),
+                CALENDAR_RING_MAX_RADIUS - (evMaxLevel + 1) * CALENDAR_RING_WIDTH / (maxLevel + 1),
+                arcColor, arcShadow
+            )
         }
 
         // Lastly, draw a stippled pattern at the current hour mark to delineate where the
         // twelve-hour calendar rendering zone starts and ends.
-
 
         // integer division gets us the exact hour, then multiply by 5 to scale to our
         // 60-second circle
@@ -665,7 +720,7 @@ class ClockFace(private val configMode: Boolean = false): AnkoLogger {
             x1 = clockX(dStippleTime, r1)
             y1 = clockY(dStippleTime, r1)
 
-            for(i in 0..7) {
+            for (i in 0..7) {
                 r2 = r1 + CALENDAR_RING_WIDTH / 8f
                 x2 = clockX(dStippleTime, r2)
                 y2 = clockY(dStippleTime, r2)
@@ -733,7 +788,12 @@ class ClockFace(private val configMode: Boolean = false): AnkoLogger {
                 val dotRadius = maxRadius - if (batteryCritical) 0f else
                     (maxRadius - minRadius) * (batteryPct - Constants.POWER_WARN_CRITICAL_LEVEL) / (Constants.POWER_WARN_LOW_LEVEL - Constants.POWER_WARN_CRITICAL_LEVEL)
 
-                lBatteryPathCache.addCircle(cx.toFloat(), cy.toFloat(), radius * dotRadius, Path.Direction.CCW) // direction shouldn't matter
+                lBatteryPathCache.addCircle(
+                    cx.toFloat(),
+                    cy.toFloat(),
+                    radius * dotRadius,
+                    Path.Direction.CCW
+                ) // direction shouldn't matter
 
                 verbose { "--> dot radius: $dotRadius, critical: $batteryCritical" }
             }
@@ -857,7 +917,6 @@ class ClockFace(private val configMode: Boolean = false): AnkoLogger {
         return interpolate(flatBottomCornerY1_R80, 0.8f, flatBottomCornerY1_R100, 1f, radius)
     }
 
-
     // clock math
     private fun clockX(seconds: Double, fractionFromCenter: Float): Float {
         val angleRadians = (seconds - 15) * PI * 2.0 / 60.0
@@ -887,7 +946,6 @@ class ClockFace(private val configMode: Boolean = false): AnkoLogger {
                 // division by zero, weird, so fall back to the default
                 1f
             }
-
         } else
             return 1f
     }
@@ -913,7 +971,6 @@ class ClockFace(private val configMode: Boolean = false): AnkoLogger {
 
             updateDrawStyle()
             wipeCaches()
-
         }
 
     /**
@@ -943,7 +1000,6 @@ class ClockFace(private val configMode: Boolean = false): AnkoLogger {
         // for testing: sometimes it seems we have multiple instances of ClockFace, which is bad; let's
         // try to track them
         private var instanceCounter = 0
-
 
         // Android Wear eventually tells us these numbers, but best to start off with something in
         // the meanwhile.

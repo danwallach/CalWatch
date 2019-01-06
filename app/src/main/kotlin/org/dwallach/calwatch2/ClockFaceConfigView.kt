@@ -28,13 +28,12 @@ import kotlin.math.sqrt
  * was to just use our existing [ClockFace] code within an Android [View] that can appear
  * in any layout.
  */
-class ClockFaceConfigView(context: Context, attrs: AttributeSet): View(context, attrs), AnkoLogger {
+class ClockFaceConfigView(context: Context, attrs: AttributeSet) : View(context, attrs), AnkoLogger {
     private val clockFace = ClockFace(true)
     private val blackPaint = PaintCan.getCalendarGreyPaint(Color.BLACK)
 
     private var w: Int = -1
     private var h: Int = -1
-
 
     init {
         viewRefMap[this] = true
@@ -66,7 +65,7 @@ class ClockFaceConfigView(context: Context, attrs: AttributeSet): View(context, 
         // We don't want to clear everything, only the central circle.
         // Leaves the background color of the configuration panel alone,
         // which is typically *not* black.
-        canvas.drawCircle(w/2f, h/2f, w/2f, blackPaint)
+        canvas.drawCircle(w / 2f, h / 2f, w / 2f, blackPaint)
 
         // Doesn't draw the full watchface -- no hands, no calendar wedges --
         // only the background style, since that's all we want in the configuration
@@ -86,7 +85,7 @@ class ClockFaceConfigView(context: Context, attrs: AttributeSet): View(context, 
                 super.onTouchEvent(event)
             } else {
                 val y = (h / 2) - rawy
-                val x = rawx - ( w / 2 )
+                val x = rawx - (w / 2)
                 info { "onTouchEvent: %.1f, %.1f --> %.1f, %.1f".format(rawx, rawy, x, y) }
 
                 // theta ranges from -180 to 180 (degrees)

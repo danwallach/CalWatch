@@ -19,7 +19,7 @@ import kotlin.math.floor
  * is actually having a real impact on performance. That's all centralized here
  * to fix the problem.
  */
-object TimeWrapper: AnkoLogger {
+object TimeWrapper : AnkoLogger {
 
     /**
      * Offset from GMT time to local time (including daylight savings correction, if necessary), in milliseconds.
@@ -72,7 +72,8 @@ object TimeWrapper: AnkoLogger {
         // etc. Needless to say, this was an obvious performance optimization.
         val newCacheTime = localFloorHour
         if (newCacheTime != monthDayCacheTime || localMonthDayCache == "") {
-            localMonthDayCache = DateUtils.formatDateTime(null, gmtTime, DateUtils.FORMAT_ABBREV_MONTH or DateUtils.FORMAT_SHOW_DATE)
+            localMonthDayCache =
+                DateUtils.formatDateTime(null, gmtTime, DateUtils.FORMAT_ABBREV_MONTH or DateUtils.FORMAT_SHOW_DATE)
             localDayOfWeekCache = DateUtils.formatDateTime(null, gmtTime, DateUtils.FORMAT_SHOW_WEEKDAY)
             monthDayCacheTime = newCacheTime
         }
@@ -140,8 +141,11 @@ object TimeWrapper: AnkoLogger {
             val fps = samples * 1000000000f / elapsedTime  // * 10^9 so we're not just computing frames per nanosecond
             info { "FPS: %.3f, samples: $samples".format(fps) }
 
-            info { "Min/Avg/Max frame render speed (ms): %.3f / %.3f / %.3f".format(
-                minRuntime / 1000000f, + avgRuntimeAccumulator / samples / 1000000f, + maxRuntime / 1000000f ) }
+            info {
+                "Min/Avg/Max frame render speed (ms): %.3f / %.3f / %.3f".format(
+                    minRuntime / 1000000f, +avgRuntimeAccumulator / samples / 1000000f, +maxRuntime / 1000000f
+                )
+            }
 
             // this waketime percentage is really a lower bound; it's not counting work in the render thread
             // thread that's outside of the ClockFace rendering methods, and it's also not counting
@@ -189,7 +193,6 @@ object TimeWrapper: AnkoLogger {
 
         samples++
 
-
         // if at least one minute has elapsed, then it's time to print all the things
         if (elapsedTime > 60000000000L) {
             // 60 * 10^9 nanoseconds: one minute
@@ -206,46 +209,46 @@ object TimeWrapper: AnkoLogger {
 /**
  * Helper function: convert from seconds to our internal time units (milliseconds).
  */
-val Double.seconds: Long get() = (this *    1000.0).toLong()
+val Double.seconds: Long get() = (this * 1000.0).toLong()
 
 /**
  * Helper function: convert from minutes to our internal time units (milliseconds).
  */
 
-val Double.minutes: Long get() = (this *   60000.0).toLong()
+val Double.minutes: Long get() = (this * 60000.0).toLong()
 
 /**
  * Helper function: convert from hours to our internal time units (milliseconds).
  */
-val Double.hours: Long get() =   (this * 3600000.0).toLong()
+val Double.hours: Long get() = (this * 3600000.0).toLong()
 
 /**
  * Helper function: convert from seconds to our internal time units (milliseconds).
  */
-val Long.seconds: Long get() =   (this *    1000L)
+val Long.seconds: Long get() = (this * 1000L)
 
 /**
  * Helper function: convert from minutes to our internal time units (milliseconds).
  */
-val Long.minutes: Long get() =   (this *   60000L)
+val Long.minutes: Long get() = (this * 60000L)
 
 /**
  * Helper function: convert from hours to our internal time units (milliseconds).
  */
-val Long.hours: Long   get() =   (this * 3600000L)
+val Long.hours: Long get() = (this * 3600000L)
 
 /**
  * Helper function: convert from seconds to our internal time units (milliseconds).
  */
-val Int.seconds: Long get() =   (this *    1000L)
+val Int.seconds: Long get() = (this * 1000L)
 
 /**
  * Helper function: convert from minutes to our internal time units (milliseconds).
  */
-val Int.minutes: Long get() =   (this *   60000L)
+val Int.minutes: Long get() = (this * 60000L)
 
 /**
  * Helper function: convert from hours to our internal time units (milliseconds).
  */
-val Int.hours: Long   get() =   (this * 3600000L)
+val Int.hours: Long get() = (this * 3600000L)
 

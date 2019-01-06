@@ -14,8 +14,8 @@ import org.jetbrains.anko.*
 /**
  * Support for saving and loading preferences to persistent storage.
  */
-object PreferencesHelper: AnkoLogger {
-//    @SuppressLint("CommitPrefEdits")
+object PreferencesHelper : AnkoLogger {
+    //    @SuppressLint("CommitPrefEdits")
     fun savePreferences(context: Context) =
         context.getSharedPreferences(Constants.PREFS_KEY, Context.MODE_PRIVATE).edit {
             putInt("faceMode", ClockState.faceMode)
@@ -35,27 +35,28 @@ object PreferencesHelper: AnkoLogger {
      * which is the newest version. This will help with legacy migration. (If the version
      * is zero, then some of the values in ClockState will have been set from the defaults.)
      */
-    fun loadPreferences(context: Context): Int = with (context.getSharedPreferences(Constants.PREFS_KEY, Context.MODE_PRIVATE)) {
-        val faceMode = getInt("faceMode", Constants.DEFAULT_WATCHFACE)
-        val showSeconds = getBoolean("showSeconds", Constants.DEFAULT_SHOW_SECONDS)
-        val showDayDate = getBoolean("showDayDate", Constants.DEFAULT_SHOW_DAY_DATE)
-        val version = getInt("preferencesVersion", 0)
+    fun loadPreferences(context: Context): Int =
+        with(context.getSharedPreferences(Constants.PREFS_KEY, Context.MODE_PRIVATE)) {
+            val faceMode = getInt("faceMode", Constants.DEFAULT_WATCHFACE)
+            val showSeconds = getBoolean("showSeconds", Constants.DEFAULT_SHOW_SECONDS)
+            val showDayDate = getBoolean("showDayDate", Constants.DEFAULT_SHOW_DAY_DATE)
+            val version = getInt("preferencesVersion", 0)
 
-        verbose { "loadPreferences: $faceMode, showSeconds: $showSeconds, showDayDate: $showDayDate, preferencesVersion: $version" }
+            verbose { "loadPreferences: $faceMode, showSeconds: $showSeconds, showDayDate: $showDayDate, preferencesVersion: $version" }
 
-        ClockState.faceMode = faceMode
-        ClockState.showSeconds = showSeconds
-        ClockState.showDayDate = showDayDate
+            ClockState.faceMode = faceMode
+            ClockState.showSeconds = showSeconds
+            ClockState.showDayDate = showDayDate
 
-        Utilities.redrawEverything()
+            Utilities.redrawEverything()
 
-        return version
+            return version
 
-        // Kotlin engineering note: return inside of a lambda will return from the nearest enclosing `fun`,
-        // so the above code has the desired effect.
-        // https://www.reddit.com/r/Kotlin/comments/3yybyf/returning_from_lambda_functions/?
+            // Kotlin engineering note: return inside of a lambda will return from the nearest enclosing `fun`,
+            // so the above code has the desired effect.
+            // https://www.reddit.com/r/Kotlin/comments/3yybyf/returning_from_lambda_functions/?
 
-        // Curiously, this only really works because `with` is an inline function
-        // https://kotlinlang.org/docs/reference/inline-functions.html#non-local-returns
-    }
+            // Curiously, this only really works because `with` is an inline function
+            // https://kotlinlang.org/docs/reference/inline-functions.html#non-local-returns
+        }
 }

@@ -25,9 +25,10 @@ data class CalendarEvent(val startTime: Long, val endTime: Long, val displayColo
     operator fun plus(offset: Int) = plus(offset.toLong())
 
     fun clip(clipStart: Long, clipEnd: Long) = CalendarEvent(
-            startTime = if(startTime < clipStart) clipStart else startTime,
-            endTime = if(endTime > clipEnd) clipEnd else endTime,
-            displayColor = displayColor)
+        startTime = if (startTime < clipStart) clipStart else startTime,
+        endTime = if (endTime > clipEnd) clipEnd else endTime,
+        displayColor = displayColor
+    )
 }
 
 /**
@@ -44,9 +45,9 @@ class EventWrapper(val calendarEvent: CalendarEvent) {
     var maxLevel: Int = 0
 
     fun overlaps(e: EventWrapper) =
-            this.calendarEvent.startTime < e.calendarEvent.endTime && e.calendarEvent.startTime < this.calendarEvent.endTime
+        this.calendarEvent.startTime < e.calendarEvent.endTime && e.calendarEvent.startTime < this.calendarEvent.endTime
 
     override fun toString() =
-            "%d -> %d, color(%08x), levels(%d,%d)"
-                    .format(calendarEvent.startTime, calendarEvent.endTime, calendarEvent.displayColor, minLevel, maxLevel)
+        "%d -> %d, color(%08x), levels(%d,%d)"
+            .format(calendarEvent.startTime, calendarEvent.endTime, calendarEvent.displayColor, minLevel, maxLevel)
 }

@@ -69,15 +69,16 @@ class CalWatchFaceService : CanvasWatchFaceService(), AnkoLogger {
 
             // there were a lot more choices here for Wear1; this seems to do what we want
             setWatchFaceStyle(
-                    WatchFaceStyle.Builder(this@CalWatchFaceService)
-                            .setAccentColor(Color.YELLOW)
-                            .setStatusBarGravity(Gravity.CENTER)
-                            .setViewProtectionMode(WatchFaceStyle.PROTECT_WHOLE_SCREEN)
-                            .setShowUnreadCountIndicator(false) // would prefer true, but doesn't seem to work reliably
-                            .setHideNotificationIndicator(false)
-                            .setHideStatusBar(false)
-                            .setAcceptsTapEvents(true)
-                            .build())
+                WatchFaceStyle.Builder(this@CalWatchFaceService)
+                    .setAccentColor(Color.YELLOW)
+                    .setStatusBarGravity(Gravity.CENTER)
+                    .setViewProtectionMode(WatchFaceStyle.PROTECT_WHOLE_SCREEN)
+                    .setShowUnreadCountIndicator(false) // would prefer true, but doesn't seem to work reliably
+                    .setHideNotificationIndicator(false)
+                    .setHideStatusBar(false)
+                    .setAcceptsTapEvents(true)
+                    .build()
+            )
 
             BatteryWrapper.init(this@CalWatchFaceService)
 
@@ -114,8 +115,8 @@ class CalWatchFaceService : CanvasWatchFaceService(), AnkoLogger {
                 return
             }
 
-            with (properties) {
-                with (clockFace) {
+            with(properties) {
+                with(clockFace) {
                     ambientLowBit = getBoolean(WatchFaceService.PROPERTY_LOW_BIT_AMBIENT, false)
                     burnInProtection = getBoolean(WatchFaceService.PROPERTY_BURN_IN_PROTECTION, false)
                     ComplicationWrapper.updateProperties(ambientLowBit, burnInProtection)
@@ -155,7 +156,8 @@ class CalWatchFaceService : CanvasWatchFaceService(), AnkoLogger {
          * Called when there is updated data for a complication id.
          */
         override fun onComplicationDataUpdate(
-                complicationId: Int, complicationData: ComplicationData?) {
+            complicationId: Int, complicationData: ComplicationData?
+        ) {
             verbose { "onComplicationDataUpdate() id: $complicationId" }
 
             ComplicationWrapper.updateComplication(complicationId, complicationData)
@@ -284,6 +286,8 @@ class CalWatchFaceService : CanvasWatchFaceService(), AnkoLogger {
         val engine: Engine?
             get() = engineRef?.get()
 
-        fun redraw() { engine?.invalidate() }
+        fun redraw() {
+            engine?.invalidate()
+        }
     }
 }
