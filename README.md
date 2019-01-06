@@ -72,7 +72,7 @@ commit history, you'll see that I had the watch running with complications, but 
 usable configuration UI on the watch.
 
 I finally got everything working and pushed proper Wear1.x and 2.x-compatible APKs to the Play Store
-in December 2018/2019. The current release also uses the latest
+in December 2018/January 2019. The current release also uses the latest
 Kotlin coroutine support to do the expensive calendar processing asynchronously, and has
 a bunch of other small tweaks to use more of the Kotlin stdlib features that didn't exist
 in earlier Kotlin releases. There seems to be [a bug in how we get notified about calendar
