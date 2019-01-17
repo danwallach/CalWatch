@@ -317,7 +317,7 @@ object ComplicationWrapper : AnkoLogger {
     ) {
         verbose { "Complication locations: $locations" }
 
-        this.context = context // intnerally saves a weakref
+        this.context = context // internally saves a weakref
 
         activeLocations = locations.toTypedArray()
         activeComplicationIds = locations.map(this::getComplicationId).toIntArray()
