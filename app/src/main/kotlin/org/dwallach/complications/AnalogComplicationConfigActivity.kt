@@ -14,6 +14,9 @@ import android.support.wearable.complications.ProviderChooserIntent
 import android.support.wearable.view.WearableRecyclerView
 import androidx.appcompat.app.AppCompatActivity
 import org.dwallach.R
+import org.dwallach.complications.ComplicationLocation.BOTTOM
+import org.dwallach.complications.ComplicationLocation.RIGHT
+import org.dwallach.complications.ComplicationLocation.TOP
 import org.jetbrains.anko.AnkoLogger
 import org.jetbrains.anko.debug
 import org.jetbrains.anko.info
@@ -25,8 +28,8 @@ import org.jetbrains.anko.info
  * This began life as the AnalogComplicationConfigActivity example code.
  */
 class AnalogComplicationConfigActivity : AppCompatActivity(), AnkoLogger {
-
-    private var mWearableRecyclerView: WearableRecyclerView? = null // TODO: replace with non-deprecated variant
+    // TODO: replace with non-deprecated variant
+    private var mWearableRecyclerView: WearableRecyclerView? = null
     private var mAdapter: AnalogComplicationConfigRecyclerViewAdapter? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -34,6 +37,13 @@ class AnalogComplicationConfigActivity : AppCompatActivity(), AnkoLogger {
 
         info("analog config activity: onCreate")
         setContentView(R.layout.activity_analog_complication_config)
+
+        // Fixing a bug where the user goes straight from installing the watchface to the
+        // config dialog and we get an uninitialized property exception on one of our
+        // lateinit properties. The ComplicationWrapper is where we store all the state of which
+        // complications are active and whatnot. Testing is going to be necessary to make
+        // sure this works properly.
+        ComplicationWrapper.init(this, null, listOf(RIGHT, TOP, BOTTOM))
 
         mAdapter = AnalogComplicationConfigRecyclerViewAdapter(
             applicationContext,

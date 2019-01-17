@@ -16,9 +16,9 @@ import android.support.wearable.complications.ComplicationData.*
 import android.support.wearable.complications.rendering.ComplicationDrawable
 import android.support.wearable.complications.ComplicationHelperActivity
 import android.content.ComponentName
+import android.content.Context
 import org.dwallach.calwatch2.CalWatchFaceService
 import org.dwallach.calwatch2.ClockFaceConfigView
-import org.dwallach.calwatch2.errorLogAndThrow
 import org.dwallach.complications.ComplicationLocation.*
 import org.jetbrains.anko.*
 import android.content.Intent.FLAG_ACTIVITY_NEW_TASK
@@ -85,20 +85,17 @@ import android.content.Intent.FLAG_ACTIVITY_NEW_TASK
  * complication-handling logic are still smashed together.
  */
 object ComplicationWrapper : AnkoLogger {
-    private var watchFaceRef: WeakReference<CanvasWatchFaceService?>? = null
+    private var contextRef: WeakReference<Context>? = null
 
-    /**
-     * Here's a property to get the CanvasWatchFaceService in use. Set it at startup time.
-     * Storage internally is a weak reference, so it's possible, albeit unlikely, that this
-     * will fail, causing a RuntimeException. Yeah, that kinda sucks, but if the watchface
-     * is active, this won't be an issue. We're using a WeakReference to make sure that
-     * we're not accidentally keeping anything live that really should die at cleanup time.
-     */
-    private var watchFace: CanvasWatchFaceService
-        get() = watchFaceRef?.get() ?: errorLogAndThrow("no watchface service found!")
-        set(watchFace) {
-            verbose { "Saving watchface service ref in complication wrapper" }
-            watchFaceRef = WeakReference(watchFace)
+    private var context: Context?
+        get() = contextRef?.get()
+        set(context) {
+            contextRef = if (context == null) {
+                null
+            } else {
+                verbose { "Saving watchface service ref in complication wrapper" }
+                WeakReference(context)
+            }
         }
 
     /**
@@ -314,13 +311,13 @@ object ComplicationWrapper : AnkoLogger {
      * watchface to support them. To get everything, you'd say _listOf(BACKGROUND, LEFT, RIGHT, TOP, and BOTTOM)_.
      */
     fun init(
-        watchFace: CanvasWatchFaceService,
-        engine: CanvasWatchFaceService.Engine,
+        context: Context,
+        engine: CanvasWatchFaceService.Engine?,
         locations: List<ComplicationLocation>
     ) {
         verbose { "Complication locations: $locations" }
 
-        this.watchFace = watchFace // intnerally saves a weakref
+        this.context = context // intnerally saves a weakref
 
         activeLocations = locations.toTypedArray()
         activeComplicationIds = locations.map(this::getComplicationId).toIntArray()
@@ -339,12 +336,12 @@ object ComplicationWrapper : AnkoLogger {
         // Creates a ComplicationDrawable for each location where the user can render a
         // complication on the watch face. Bonus coolness for Kotlin's associate method letting
         // us convert from an array to a map in one go. Functional programming FTW!
-        complicationDrawableMap = activeComplicationIds.associate { it to ComplicationDrawable(watchFace) }
+        complicationDrawableMap = activeComplicationIds.associate { it to ComplicationDrawable(context) }
 
         // custom settings here: black unless an image bitmap makes it otherwise
         complicationDrawableMap[BACKGROUND_COMPLICATION_ID]?.setBackgroundColorActive(Color.BLACK)
 
-        engine.setActiveComplications(*activeComplicationIds)
+        engine?.setActiveComplications(*activeComplicationIds)
     }
 
     /** Some complications types are "tappable" and others aren't. */
@@ -360,18 +357,19 @@ object ComplicationWrapper : AnkoLogger {
     private fun launchPermissionForComplication() {
         // kinda baffling that this is even necessary; why aren't permissions dealt with when you add the complication?
 
-        val componentName = ComponentName(
-            watchFace.applicationContext,
-            watchFaceClass
-        )
+        val ctx = context
+        if (ctx == null) {
+            warn("Missing context, can't launch permissions")
+            return
+        }
+        val componentName = ComponentName(ctx, watchFaceClass)
 
-        val permissionRequestIntent = ComplicationHelperActivity.createPermissionRequestHelperIntent(
-            watchFace.applicationContext, componentName
-        )
+        val permissionRequestIntent =
+            ComplicationHelperActivity.createPermissionRequestHelperIntent(ctx, componentName)
 
         permissionRequestIntent.addFlags(FLAG_ACTIVITY_NEW_TASK) // trying to work around an odd bug
 
-        watchFace.startActivity(permissionRequestIntent)
+        ctx.startActivity(permissionRequestIntent)
     }
 
     /**
