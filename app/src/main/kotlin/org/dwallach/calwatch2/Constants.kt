@@ -6,6 +6,10 @@
  */
 package org.dwallach.calwatch2
 
+import org.dwallach.complications.ComplicationLocation.RIGHT
+import org.dwallach.complications.ComplicationLocation.TOP
+import org.dwallach.complications.ComplicationLocation.BOTTOM
+
 object Constants {
     const val PREFS_KEY = "org.dwallach.calwatch2.prefs"
     const val DATA_KEY = "org.dwallach.calwatch2.data"
@@ -15,4 +19,5 @@ object Constants {
     const val DEFAULT_SHOW_DAY_DATE = true
     const val POWER_WARN_LOW_LEVEL = 0.33f
     const val POWER_WARN_CRITICAL_LEVEL = 0.1f
+    val COMPLICATION_LOCATIONS = listOf(RIGHT, TOP, BOTTOM)
 }

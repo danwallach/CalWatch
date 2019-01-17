@@ -10,9 +10,7 @@ import android.graphics.Canvas
 import android.graphics.Color
 import android.graphics.Rect
 import android.support.wearable.watchface.CanvasWatchFaceService
-import java.lang.ref.WeakReference
 import android.support.wearable.complications.ComplicationData
-import android.support.wearable.complications.ComplicationData.*
 import android.support.wearable.complications.rendering.ComplicationDrawable
 import android.support.wearable.complications.ComplicationHelperActivity
 import android.content.ComponentName
@@ -22,6 +20,8 @@ import org.dwallach.calwatch2.ClockFaceConfigView
 import org.dwallach.complications.ComplicationLocation.*
 import org.jetbrains.anko.*
 import android.content.Intent.FLAG_ACTIVITY_NEW_TASK
+import android.support.wearable.complications.ComplicationData.*
+import android.support.wearable.watchface.WatchFaceService
 
 /**
  * The goal is this class is to provide a super minimal interface for two things: specifying configuration
@@ -85,19 +85,6 @@ import android.content.Intent.FLAG_ACTIVITY_NEW_TASK
  * complication-handling logic are still smashed together.
  */
 object ComplicationWrapper : AnkoLogger {
-    private var contextRef: WeakReference<Context>? = null
-
-    private var context: Context?
-        get() = contextRef?.get()
-        set(context) {
-            contextRef = if (context == null) {
-                null
-            } else {
-                verbose { "Saving watchface service ref in complication wrapper" }
-                WeakReference(context)
-            }
-        }
-
     /**
      * If all we need is a reference to the *class* of the watchface service, then this
      * property will have it, even if the watchface itself is garbage collected.
@@ -304,34 +291,49 @@ object ComplicationWrapper : AnkoLogger {
     private var complicationDrawableMap: Map<Int, ComplicationDrawable> = emptyMap()
     private var complicationDataMap: Map<Int, ComplicationData> = emptyMap()
 
+    private var wimpyInitFirstTime = true
+
     /**
-     * Call this in your onCreate() to initialize the complications for the engine.
-     *
-     * @param locations specifies a list of [ComplicationLocation] entries where you want your
-     * watchface to support them. To get everything, you'd say _listOf(BACKGROUND, LEFT, RIGHT, TOP, and BOTTOM)_.
+     * Call this from other activities that might need to use our complications library
+     * *before* the main watchface engine has started. Sets up which complications we
+     * might ever see. Don't forget to also call [init] from your [WatchFaceService].
      */
-    fun init(
-        context: Context,
-        engine: CanvasWatchFaceService.Engine?,
-        locations: List<ComplicationLocation>
-    ) {
-        verbose { "Complication locations: $locations" }
+    fun wimpyInit(locations: List<ComplicationLocation>) {
+        if (!wimpyInitFirstTime) return
+        wimpyInitFirstTime = false
 
-        this.context = context // internally saves a weakref
+        info { "wimpyInit: Complication locations: $locations" }
 
+        // sets all the lateinit properties that we'll need later
         activeLocations = locations.toTypedArray()
         activeComplicationIds = locations.map(this::getComplicationId).toIntArray()
         activeComplicationSupportedTypes = locations.map(this::getSupportedComplicationTypes).toTypedArray()
 
         inactiveComplicationIds = listOf(
-            BACKGROUND_COMPLICATION_ID,
-            LEFT_COMPLICATION_ID,
-            RIGHT_COMPLICATION_ID,
-            TOP_COMPLICATION_ID,
-            BOTTOM_COMPLICATION_ID
+                BACKGROUND_COMPLICATION_ID,
+                LEFT_COMPLICATION_ID,
+                RIGHT_COMPLICATION_ID,
+                TOP_COMPLICATION_ID,
+                BOTTOM_COMPLICATION_ID
         )
-            .filter { !activeComplicationIds.contains(it) }
-            .toIntArray()
+                .filter { !activeComplicationIds.contains(it) }
+                .toIntArray()
+    }
+
+    /**
+     * Call this in your onCreate() to initialize the complications for the engine.
+     *
+     * @param locations specifies a list of [ComplicationLocation] entries where you want your
+     * watchface to support them. To get everything, you'd say _listOf(BACKGROUND, LEFT, RIGHT, TOP, BOTTOM)_.
+     */
+    fun init(
+        context: WatchFaceService,
+        engine: CanvasWatchFaceService.Engine,
+        locations: List<ComplicationLocation>
+    ) {
+        info("Init")
+
+        wimpyInit(locations)
 
         // Creates a ComplicationDrawable for each location where the user can render a
         // complication on the watch face. Bonus coolness for Kotlin's associate method letting
@@ -341,7 +343,7 @@ object ComplicationWrapper : AnkoLogger {
         // custom settings here: black unless an image bitmap makes it otherwise
         complicationDrawableMap[BACKGROUND_COMPLICATION_ID]?.setBackgroundColorActive(Color.BLACK)
 
-        engine?.setActiveComplications(*activeComplicationIds)
+        engine.setActiveComplications(*activeComplicationIds)
     }
 
     /** Some complications types are "tappable" and others aren't. */
@@ -354,29 +356,26 @@ object ComplicationWrapper : AnkoLogger {
      * Call this if the watchface complication is of the NO_PERMISSION type, so we need
      * to request the permission.
      */
-    private fun launchPermissionForComplication() {
+    private fun launchPermissionForComplication(context: Context) {
         // kinda baffling that this is even necessary; why aren't permissions dealt with when you add the complication?
 
-        val ctx = context
-        if (ctx == null) {
-            warn("Missing context, can't launch permissions")
-            return
-        }
-        val componentName = ComponentName(ctx, watchFaceClass)
+        info("launchPermissionForComplication: beginning")
+
+        val componentName = ComponentName(context, watchFaceClass)
 
         val permissionRequestIntent =
-            ComplicationHelperActivity.createPermissionRequestHelperIntent(ctx.applicationContext, componentName)
+            ComplicationHelperActivity.createPermissionRequestHelperIntent(context.applicationContext, componentName)
 
         permissionRequestIntent.addFlags(FLAG_ACTIVITY_NEW_TASK) // trying to work around an odd bug
 
-        ctx.startActivity(permissionRequestIntent)
+        context.startActivity(permissionRequestIntent)
     }
 
     /**
      * Call this if you've got a tap event that might belong to the complication system. As a side
      * effect, may launch a permission dialog.
      */
-    fun handleTap(x: Int, y: Int, currentTime: Long) {
+    fun handleTap(context: Context, x: Int, y: Int, currentTime: Long) {
         val tappedComplicationIds = complicationDrawableMap.keys
             // first, we aren't sending clicks to the background, and we're supposed to ignore anything
             // that isn't "active" right now or that isn't "tappable", and of course, whatever it
@@ -402,7 +401,7 @@ object ComplicationWrapper : AnkoLogger {
             val tapAction = complicationData?.tapAction
             when {
                 tapAction != null -> tapAction.send()
-                complicationData?.type == TYPE_NO_PERMISSION -> launchPermissionForComplication()
+                complicationData?.type == TYPE_NO_PERMISSION -> launchPermissionForComplication(context)
                 else -> warn { "Tapped complication with no actions to take!" }
             }
         }

@@ -21,7 +21,6 @@ import org.jetbrains.anko.*
 
 import java.lang.ref.WeakReference
 import android.support.wearable.complications.ComplicationData
-import org.dwallach.complications.ComplicationLocation.*
 import org.dwallach.complications.ComplicationWrapper.styleComplications
 
 /**
@@ -99,7 +98,7 @@ class CalWatchFaceService : CanvasWatchFaceService(), AnkoLogger {
             // We're deliberately disabling the bottom and left complications, since we draw our
             // own background, and because the left complication is replaced with our built-in day/date
             // rendering.
-            ComplicationWrapper.init(this@CalWatchFaceService, this, listOf(RIGHT, TOP, BOTTOM))
+            ComplicationWrapper.init(this@CalWatchFaceService, this, Constants.COMPLICATION_LOCATIONS)
             styleComplications {
                 setBackgroundColorActive(PaintCan.COMPLICATION_BG_COLOR)
                 setBorderColorActive(PaintCan.COMPLICATION_FG_COLOR)
@@ -239,7 +238,7 @@ class CalWatchFaceService : CanvasWatchFaceService(), AnkoLogger {
                     if (!ClockState.calendarPermission)
                         PermissionActivity.kickStart(this@CalWatchFaceService, false)
                     else
-                        ComplicationWrapper.handleTap(x, y, eventTime)
+                        ComplicationWrapper.handleTap(this@CalWatchFaceService, x, y, eventTime)
                 }
             }
         }

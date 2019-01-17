@@ -14,10 +14,8 @@ import android.support.wearable.complications.ProviderChooserIntent
 import android.support.wearable.view.WearableRecyclerView
 import androidx.appcompat.app.AppCompatActivity
 import org.dwallach.R
+import org.dwallach.calwatch2.Constants
 import org.dwallach.calwatch2.PreferencesHelper
-import org.dwallach.complications.ComplicationLocation.BOTTOM
-import org.dwallach.complications.ComplicationLocation.RIGHT
-import org.dwallach.complications.ComplicationLocation.TOP
 import org.jetbrains.anko.AnkoLogger
 import org.jetbrains.anko.debug
 import org.jetbrains.anko.info
@@ -44,7 +42,7 @@ class AnalogComplicationConfigActivity : AppCompatActivity(), AnkoLogger {
         // lateinit properties in ComplicationWrapper, which we only originally
         // initialized from CalWatchFaceService.Engine.onCreate(). No good.
         // Solution? Stripped down version of the init code.
-        ComplicationWrapper.init(this, null, listOf(RIGHT, TOP, BOTTOM))
+        ComplicationWrapper.wimpyInit(Constants.COMPLICATION_LOCATIONS)
         PreferencesHelper.loadPreferences(this)
 
         mAdapter = AnalogComplicationConfigRecyclerViewAdapter(
