@@ -48,7 +48,7 @@ class AnalogComplicationConfigActivity : AppCompatActivity(), AnkoLogger {
         PreferencesHelper.loadPreferences(this)
 
         mAdapter = AnalogComplicationConfigRecyclerViewAdapter(
-            this,
+            applicationContext,
             ComplicationWrapper.watchFaceClass,
             AnalogComplicationConfigData.getDataToPopulateAdapter(this)
         )

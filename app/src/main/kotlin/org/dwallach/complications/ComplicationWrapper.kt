@@ -365,7 +365,7 @@ object ComplicationWrapper : AnkoLogger {
         val componentName = ComponentName(ctx, watchFaceClass)
 
         val permissionRequestIntent =
-            ComplicationHelperActivity.createPermissionRequestHelperIntent(ctx, componentName)
+            ComplicationHelperActivity.createPermissionRequestHelperIntent(ctx.applicationContext, componentName)
 
         permissionRequestIntent.addFlags(FLAG_ACTIVITY_NEW_TASK) // trying to work around an odd bug
 
