@@ -30,9 +30,7 @@ import org.jetbrains.anko.info
 import org.jetbrains.anko.verbose
 import org.jetbrains.anko.warn
 
-/**
- * Drawn heavily from the Android Wear SweepWatchFaceService / AnalogWatchFaceService examples.
- */
+/** Drawn heavily from the Android Wear SweepWatchFaceService / AnalogWatchFaceService examples. */
 class CalWatchFaceService : CanvasWatchFaceService(), AnkoLogger {
     override fun onCreateEngine(): Engine {
         val engine = Engine()
@@ -44,11 +42,9 @@ class CalWatchFaceService : CanvasWatchFaceService(), AnkoLogger {
         private lateinit var clockFace: ClockFace
         private var calendarFetcher: CalendarFetcher? = null
 
-        /**
-         * Call this if there's been a status update in the calendar permissions.
-         */
+        /** Call this if there's been a status update in the calendar permissions. */
         fun calendarPermissionUpdate() {
-            warn("initCalendarFetcher")
+            warn("calendarPermissionUpdate")
 
             val permissionGiven = CalendarPermission.check(this@CalWatchFaceService)
             if (!ClockState.calendarPermission && permissionGiven) {
@@ -121,6 +117,7 @@ class CalWatchFaceService : CanvasWatchFaceService(), AnkoLogger {
                 return
             }
 
+            // Kinda amazing that you can do nested with() calls and the right thing happens!
             with(properties) {
                 with(clockFace) {
                     ambientLowBit = getBoolean(WatchFaceService.PROPERTY_LOW_BIT_AMBIENT, false)
@@ -155,12 +152,10 @@ class CalWatchFaceService : CanvasWatchFaceService(), AnkoLogger {
             else
                 TimeWrapper.frameReset()
 
-            invalidate()
+            Utilities.redrawEverything()
         }
 
-        /*
-         * Called when there is updated data for a complication id.
-         */
+        /** Called when there is updated data for a complication id. */
         override fun onComplicationDataUpdate(
             complicationId: Int,
             complicationData: ComplicationData?
@@ -168,7 +163,7 @@ class CalWatchFaceService : CanvasWatchFaceService(), AnkoLogger {
             verbose { "onComplicationDataUpdate() id: $complicationId" }
 
             ComplicationWrapper.updateComplication(complicationId, complicationData)
-            invalidate()
+            Utilities.redrawEverything()
         }
 
         override fun onInterruptionFilterChanged(interruptionFilter: Int) {
@@ -188,7 +183,6 @@ class CalWatchFaceService : CanvasWatchFaceService(), AnkoLogger {
                 oldHeight = height
                 clockFace.setSize(width, height)
                 ComplicationWrapper.updateBounds(width, height)
-                Utilities.redrawEverything()
             }
         }
 
@@ -196,6 +190,7 @@ class CalWatchFaceService : CanvasWatchFaceService(), AnkoLogger {
             super.onSurfaceChanged(holder, format, width, height)
 
             updateBounds(width, height)
+            Utilities.redrawEverything()
         }
 
         override fun onDraw(canvas: Canvas?, bounds: Rect?) {
