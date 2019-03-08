@@ -349,7 +349,7 @@ class AnalogComplicationConfigRecyclerViewAdapter(
     }
 
     /** Displays icon to indicate there are more options below the fold.  */
-    inner class MoreOptionsViewHolder(val iconId: Int, view: View) : RecyclerView.ViewHolder(view), HolderInit {
+    inner class MoreOptionsViewHolder(private val iconId: Int, view: View) : RecyclerView.ViewHolder(view), HolderInit {
 
         private val mMoreOptionsImageView = view.findViewById<ImageView>(R.id.more_options_image_view)
 
@@ -369,7 +369,7 @@ class AnalogComplicationConfigRecyclerViewAdapter(
 
     inner class ToggleViewHolder(
         viewId: Int,
-        iconId: Int,
+        @Suppress("UNUSED_PARAMETER") iconId: Int,
         private val text: String,
         view: View,
         val isSelected: () -> Boolean,

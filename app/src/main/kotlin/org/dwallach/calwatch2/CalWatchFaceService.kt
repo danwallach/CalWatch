@@ -7,21 +7,28 @@
 
 package org.dwallach.calwatch2
 
-import android.graphics.*
+import android.graphics.Canvas
+import android.graphics.Color
+import android.graphics.PorterDuff
+import android.graphics.Rect
 import android.os.Bundle
+import android.support.wearable.complications.ComplicationData
 import android.support.wearable.watchface.CanvasWatchFaceService
 import android.support.wearable.watchface.WatchFaceService
 import android.support.wearable.watchface.WatchFaceStyle
 import android.view.Gravity
 import android.view.SurfaceHolder
 import android.view.WindowInsets
+import java.lang.ref.WeakReference
 import org.dwallach.R
 import org.dwallach.complications.ComplicationWrapper
-import org.jetbrains.anko.*
-
-import java.lang.ref.WeakReference
-import android.support.wearable.complications.ComplicationData
 import org.dwallach.complications.ComplicationWrapper.styleComplications
+import org.jetbrains.anko.AnkoLogger
+import org.jetbrains.anko.debug
+import org.jetbrains.anko.error
+import org.jetbrains.anko.info
+import org.jetbrains.anko.verbose
+import org.jetbrains.anko.warn
 
 /**
  * Drawn heavily from the Android Wear SweepWatchFaceService / AnalogWatchFaceService examples.

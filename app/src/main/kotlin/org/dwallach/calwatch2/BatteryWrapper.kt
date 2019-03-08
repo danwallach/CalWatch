@@ -9,8 +9,14 @@ package org.dwallach.calwatch2
 import android.content.Context
 import android.content.Intent
 import android.content.IntentFilter
-import android.os.BatteryManager.*
-import org.jetbrains.anko.*
+import android.os.BatteryManager.BATTERY_STATUS_CHARGING
+import android.os.BatteryManager.EXTRA_STATUS
+import android.os.BatteryManager.BATTERY_STATUS_FULL
+import android.os.BatteryManager.EXTRA_LEVEL
+import android.os.BatteryManager.EXTRA_SCALE
+import org.jetbrains.anko.AnkoLogger
+import org.jetbrains.anko.info
+import org.jetbrains.anko.warn
 import java.lang.ref.WeakReference
 
 /**

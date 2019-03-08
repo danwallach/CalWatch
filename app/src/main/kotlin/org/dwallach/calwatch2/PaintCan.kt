@@ -16,7 +16,7 @@ import org.jetbrains.anko.*
  * Cheesy helper for getting Paint values for calendar events and making sure we don't allocate
  * the same color twice.
  */
-class PaintCan(val radius: Float) : AnkoLogger {
+class PaintCan(private val radius: Float) : AnkoLogger {
     private var palette: Array<Array<Paint?>>
 
     enum class Style {

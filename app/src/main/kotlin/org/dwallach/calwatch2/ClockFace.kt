@@ -453,8 +453,8 @@ class ClockFace(private val configMode: Boolean = false) : AnkoLogger {
                 val topLineStart = if (isComplicationVisible(TOP)) 0.85f else 0.75f
 
                 // we draw double lines here, because style
-                drawRadialLine(lFacePathCache, strokeWidth, -0.4, topLineStart, 1.0f, true, false)
-                drawRadialLine(lFacePathCache, strokeWidth, 0.4, topLineStart, 1.0f, true, false)
+                drawRadialLine(lFacePathCache, strokeWidth, -0.4, topLineStart, 1.0f, forceVertical=true, flatBottomHack=false)
+                drawRadialLine(lFacePathCache, strokeWidth, 0.4, topLineStart, 1.0f, forceVertical=true, flatBottomHack=false)
             }
 
             if (lFaceMode != FACE_NUMBERS || isComplicationVisible(LEFT)) {
@@ -462,7 +462,7 @@ class ClockFace(private val configMode: Boolean = false) : AnkoLogger {
                 // 9 o'clock
                 //
                 val leftLineStart = if (showDayDate) 0.9f else 0.75f
-                drawRadialLine(lFacePathCache, strokeWidth, 45.0, leftLineStart, 1.0f, false, false)
+                drawRadialLine(lFacePathCache, strokeWidth, 45.0, leftLineStart, 1.0f, forceVertical=false, flatBottomHack=false)
             }
 
             if (lFaceMode != FACE_NUMBERS || isComplicationVisible(RIGHT)) {
@@ -470,7 +470,7 @@ class ClockFace(private val configMode: Boolean = false) : AnkoLogger {
                 // 3 o'clock
                 //
                 val rightLineStart = if (isComplicationVisible(RIGHT)) 0.85f else 0.75f
-                drawRadialLine(lFacePathCache, strokeWidth, 15.0, rightLineStart, 1.0f, false, bottomHack)
+                drawRadialLine(lFacePathCache, strokeWidth, 15.0, rightLineStart, 1.0f, forceVertical=false, flatBottomHack=bottomHack)
             }
 
             if (lFaceMode != FACE_NUMBERS || isComplicationVisible(BOTTOM)) {
@@ -483,7 +483,7 @@ class ClockFace(private val configMode: Boolean = false) : AnkoLogger {
                         bottomHack -> 0.9f
                         else -> 0.75f
                     }
-                    drawRadialLine(lFacePathCache, strokeWidth, 30.0, bottomLineStart, 1.0f, false, bottomHack)
+                    drawRadialLine(lFacePathCache, strokeWidth, 30.0, bottomLineStart, 1.0f, forceVertical=false, flatBottomHack=bottomHack)
                 }
             }
 
@@ -491,7 +491,7 @@ class ClockFace(private val configMode: Boolean = false) : AnkoLogger {
             for (i in 5 until 60 step 5) {
                 if (i == 15 || i == 30 || i == 45) continue
 
-                drawRadialLine(lFacePathCache, strokeWidth, i.toDouble(), 0.75f, 1.0f, false, bottomHack)
+                drawRadialLine(lFacePathCache, strokeWidth, i.toDouble(), 0.75f, 1.0f, forceVertical=false, flatBottomHack=bottomHack)
             }
 
             saveCachedFacePath(lFaceMode, lFacePathCache)
@@ -841,8 +841,8 @@ class ClockFace(private val configMode: Boolean = false) : AnkoLogger {
     // (we'll be bilinearly interpolating between these two points, to determine a location on the flat bottom
     //  for any given time and radius -- see flatBottomX() and flatBottomY())
 
-    private var flatBottomCornerY1_R100: Float = 0f
-    private var flatBottomCornerY1_R80: Float = 0f
+    private var flatBottomCornerY1R100: Float = 0f
+    private var flatBottomCornerY1R80: Float = 0f
 
     private fun computeFlatBottomCorners() {
         // What angle does the flat bottom begin and end?
@@ -868,8 +868,8 @@ class ClockFace(private val configMode: Boolean = false) : AnkoLogger {
             flatBottomCornerTime = (angle * 30.0 / PI + 15).toFloat()
             verbose { "flatBottomCornerTime($flatBottomCornerTime) <-- angle($angle), missingBottomPixels($missingBottomPixels), cy($cy)" }
 
-            flatBottomCornerY1_R100 = clockY(flatBottomCornerTime.toDouble(), 1f)
-            flatBottomCornerY1_R80 = clockY(flatBottomCornerTime.toDouble(), 0.80f)
+            flatBottomCornerY1R100 = clockY(flatBottomCornerTime.toDouble(), 1f)
+            flatBottomCornerY1R80 = clockY(flatBottomCornerTime.toDouble(), 0.80f)
         } else {
             verbose { "no flat bottom corrections" }
         }
@@ -906,15 +906,15 @@ class ClockFace(private val configMode: Boolean = false) : AnkoLogger {
         return interpolate(r1X, r1Y, cx.toFloat(), cy.toFloat(), finalY)
     }
 
-    private fun flatBottomY(time: Float, radius: Float): Float {
+    private fun flatBottomY(@Suppress("UNUSED_PARAMETER") time: Float, radius: Float): Float {
         // old, incorrect approach: linear interpolation between the sides
-        //        float y1 = interpolate(flatBottomCornerY1_R80, 0.8f, flatBottomCornerY1_R100, 1f, radius)
+        //        float y1 = interpolate(flatBottomCornerY1R80, 0.8f, flatBottomCornerY1R100, 1f, radius)
         //        float y2 = interpolate(flatBottomCornerY2_R80, 0.8f, flatBottomCornerY2_R100, 1f, radius)
         //        return interpolate(y1, flatBottomCornerTime, y2, 60 - flatBottomCornerTime, time)
 
         // new shiny approach: we're just returning the magic Y-value as above
 
-        return interpolate(flatBottomCornerY1_R80, 0.8f, flatBottomCornerY1_R100, 1f, radius)
+        return interpolate(flatBottomCornerY1R80, 0.8f, flatBottomCornerY1R100, 1f, radius)
     }
 
     // clock math
