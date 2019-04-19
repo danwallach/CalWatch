@@ -453,8 +453,8 @@ class ClockFace(private val configMode: Boolean = false) : AnkoLogger {
                 val topLineStart = if (isComplicationVisible(TOP)) 0.85f else 0.75f
 
                 // we draw double lines here, because style
-                drawRadialLine(lFacePathCache, strokeWidth, -0.4, topLineStart, 1.0f, forceVertical=true, flatBottomHack=false)
-                drawRadialLine(lFacePathCache, strokeWidth, 0.4, topLineStart, 1.0f, forceVertical=true, flatBottomHack=false)
+                drawRadialLine(lFacePathCache, strokeWidth, -0.4, topLineStart, 1.0f, forceVertical = true, flatBottomHack = false)
+                drawRadialLine(lFacePathCache, strokeWidth, 0.4, topLineStart, 1.0f, forceVertical = true, flatBottomHack = false)
             }
 
             if (lFaceMode != FACE_NUMBERS || isComplicationVisible(LEFT)) {
@@ -462,7 +462,7 @@ class ClockFace(private val configMode: Boolean = false) : AnkoLogger {
                 // 9 o'clock
                 //
                 val leftLineStart = if (showDayDate) 0.9f else 0.75f
-                drawRadialLine(lFacePathCache, strokeWidth, 45.0, leftLineStart, 1.0f, forceVertical=false, flatBottomHack=false)
+                drawRadialLine(lFacePathCache, strokeWidth, 45.0, leftLineStart, 1.0f, forceVertical = false, flatBottomHack = false)
             }
 
             if (lFaceMode != FACE_NUMBERS || isComplicationVisible(RIGHT)) {
@@ -470,7 +470,7 @@ class ClockFace(private val configMode: Boolean = false) : AnkoLogger {
                 // 3 o'clock
                 //
                 val rightLineStart = if (isComplicationVisible(RIGHT)) 0.85f else 0.75f
-                drawRadialLine(lFacePathCache, strokeWidth, 15.0, rightLineStart, 1.0f, forceVertical=false, flatBottomHack=bottomHack)
+                drawRadialLine(lFacePathCache, strokeWidth, 15.0, rightLineStart, 1.0f, forceVertical = false, flatBottomHack = bottomHack)
             }
 
             if (lFaceMode != FACE_NUMBERS || isComplicationVisible(BOTTOM)) {
@@ -483,7 +483,7 @@ class ClockFace(private val configMode: Boolean = false) : AnkoLogger {
                         bottomHack -> 0.9f
                         else -> 0.75f
                     }
-                    drawRadialLine(lFacePathCache, strokeWidth, 30.0, bottomLineStart, 1.0f, forceVertical=false, flatBottomHack=bottomHack)
+                    drawRadialLine(lFacePathCache, strokeWidth, 30.0, bottomLineStart, 1.0f, forceVertical = false, flatBottomHack = bottomHack)
                 }
             }
 
@@ -491,7 +491,7 @@ class ClockFace(private val configMode: Boolean = false) : AnkoLogger {
             for (i in 5 until 60 step 5) {
                 if (i == 15 || i == 30 || i == 45) continue
 
-                drawRadialLine(lFacePathCache, strokeWidth, i.toDouble(), 0.75f, 1.0f, forceVertical=false, flatBottomHack=bottomHack)
+                drawRadialLine(lFacePathCache, strokeWidth, i.toDouble(), 0.75f, 1.0f, forceVertical = false, flatBottomHack = bottomHack)
             }
 
             saveCachedFacePath(lFaceMode, lFacePathCache)
