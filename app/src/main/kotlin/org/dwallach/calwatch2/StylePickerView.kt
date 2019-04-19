@@ -61,9 +61,9 @@ class StylePickerView(context: Context, attrs: AttributeSet) : View(context, att
         info { "onDraw: $w, $h: ${ClockState.faceMode}" }
 
         when (ClockState.faceMode) {
-            ClockState.FACE_NUMBERS -> numbersSelected?.draw(canvas)
-            ClockState.FACE_LITE -> liteSelected?.draw(canvas)
-            ClockState.FACE_TOOL -> toolSelected?.draw(canvas)
+            FACE_NUMBERS -> numbersSelected?.draw(canvas)
+            FACE_LITE -> liteSelected?.draw(canvas)
+            FACE_TOOL -> toolSelected?.draw(canvas)
             else -> warn { "onDraw: Unexpected faceMode: ${ClockState.faceMode}" }
         }
     }

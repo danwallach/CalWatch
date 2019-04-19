@@ -234,8 +234,8 @@ object ComplicationWrapper : AnkoLogger {
 
         when {
             complicationData == null ||
-                complicationData.type == ComplicationData.TYPE_EMPTY ||
-                complicationData.type == ComplicationData.TYPE_NOT_CONFIGURED -> {
+                complicationData.type == TYPE_EMPTY ||
+                complicationData.type == TYPE_NOT_CONFIGURED -> {
                 // when we get back no complication data, that's the only signal we get
                 // that a complication has been killed, so we're just going to remove the
                 // entry from our map; see also isComplicationVisible()

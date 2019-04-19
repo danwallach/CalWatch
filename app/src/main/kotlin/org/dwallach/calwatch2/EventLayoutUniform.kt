@@ -45,15 +45,15 @@ object EventLayoutUniform : AnkoLogger {
 
         if (clippedEvents.isNotEmpty()) {
             // first, try the fancy constraint solver
-            if (EventLayoutUniform.go(clippedEvents)) {
+            if (go(clippedEvents)) {
                 // yeah, we succeeded
-                lMaxLevel = EventLayoutUniform.MAXLEVEL
+                lMaxLevel = MAXLEVEL
             } else {
                 error("event layout failed!") // in years of testing, this failure apparently *never* happened
                 return Pair(emptyList(), 0)
             }
 
-            EventLayoutUniform.sanityTest(clippedEvents, lMaxLevel, "After new event layout")
+            sanityTest(clippedEvents, lMaxLevel, "After new event layout")
             verbose { "maxLevel for visible events: $lMaxLevel" }
             verbose { "number of visible events: ${clippedEvents.size}" }
 
