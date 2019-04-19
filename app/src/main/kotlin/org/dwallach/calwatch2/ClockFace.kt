@@ -29,7 +29,7 @@ import kotlin.math.*
 
 /**
  * All of the graphics calls for drawing watchfaces happen here. Note that this class knows
- * nothing about Android widgets, views, or activities. That stuff is handled in CalWatchFaceService.
+ * nothing about Android widgets, views, or activities. That stuff is handled in [CalWatchFaceService].
  */
 class ClockFace(private val configMode: Boolean = false) : AnkoLogger {
     // an instance of the ClockFace class is created anew alongside the rest of the UI; this number
@@ -59,18 +59,14 @@ class ClockFace(private val configMode: Boolean = false) : AnkoLogger {
             computeFlatBottomCorners()
         }
 
-    /**
-     * Tell the clock face if we're in "mute" mode. For now, we don't care.
-     */
+    /** Tell the clock face if we're in "mute" mode. For now, we don't care. */
     var muteMode: Boolean = false
         set(newVal) {
             verbose { "setMuteMode: $newVal" }
             field = newVal
         }
 
-    /**
-     * If true, ambient redrawing will be purely black and white, without any anti-aliasing (default: off).
-     */
+    /** If true, ambient redrawing will be purely black and white, without any anti-aliasing (default: off). */
     var ambientLowBit = FORCE_AMBIENT_LOW_BIT
         set(newVal) {
             field = newVal || FORCE_AMBIENT_LOW_BIT
@@ -102,9 +98,7 @@ class ClockFace(private val configMode: Boolean = false) : AnkoLogger {
         missingBottomPixels = 0 // just to get things started; flat bottom detection happens later
     }
 
-    /**
-     * Set this at initialization time with the icon for the missing calendar.
-     */
+    /** Set this at initialization time with the icon for the missing calendar. */
     var missingCalendarDrawable: Drawable? = null
         set(drawable) {
             field = drawable
@@ -144,8 +138,8 @@ class ClockFace(private val configMode: Boolean = false) : AnkoLogger {
     }
 
     /**
-     * Call this from your onDraw() method. Note that one possible side-effect of this will
-     * be the asynchronous refresh of the calendar database (inside CalendarFetcher), which might
+     * Call this from the main onDraw() method. Note that one possible side-effect of this will
+     * be the asynchronous refresh of the calendar database (inside [CalendarFetcher]), which might
      * not complete for seconds after drawEverything() returns.
      */
     fun drawEverything(canvas: Canvas) {
@@ -201,7 +195,6 @@ class ClockFace(private val configMode: Boolean = false) : AnkoLogger {
             drawHands(canvas)
 
             // something a real watch can't do: float the text over the hands
-            // (but disable when we're in ambientMode with burnInProtection)
             if (showDayDate) drawMonthBox(canvas)
         } catch (th: Throwable) {
             error("exception in drawEverything", th)
@@ -306,10 +299,8 @@ class ClockFace(private val configMode: Boolean = false) : AnkoLogger {
         paint: Paint,
         outlinePaint: Paint?
     ): Path {
-        /*
-         * Below is an attempt to do this "correctly" using the arc functionality supported natively
-         * by Android's Path.
-         */
+        // Below is an attempt to do this "correctly" using the arc functionality supported natively
+        // by Android's Path.
 
         if (startRadiusRatio < 0 || startRadiusRatio > 1 || endRadiusRatio < 0 || endRadiusRatio > 1) {
             // if this happens, then we've got a serious bug somewhere; time for a kaboom
@@ -608,10 +599,7 @@ class ClockFace(private val configMode: Boolean = false) : AnkoLogger {
         }
     }
 
-    /**
-     * call this if external forces at play may have invalidated state
-     * being saved inside ClockFace
-     */
+    /** call this if external forces at play may have invalidated state being saved inside ClockFace */
     private fun wipeCaches() {
         verbose { "clearing caches: instance $instanceID" }
 
@@ -960,9 +948,7 @@ class ClockFace(private val configMode: Boolean = false) : AnkoLogger {
         this.eventList = ClockState.getVisibleEventList()
     }
 
-    /**
-     * Tracking whether or not we're in ambient mode.
-     */
+    /** Tracking whether or not we're in ambient mode. */
     var ambientMode = false
         set(newVal) {
             info { "Ambient mode: $field -> $newVal" }
@@ -973,18 +959,14 @@ class ClockFace(private val configMode: Boolean = false) : AnkoLogger {
             wipeCaches()
         }
 
-    /**
-     * Tracking whether or not we need to be in burnin-protection mode.
-     */
+    /** Tracking whether or not we need to be in burnin-protection mode. */
     var burnInProtection = FORCE_BURNIN_PROTECTION
         set(newVal) {
             field = newVal || FORCE_BURNIN_PROTECTION
             updateDrawStyle()
         }
 
-    /**
-     * Let us know if we're on a square or round watchface. (We don't really care. For now.)
-     */
+    /** Let us know if we're on a square or round watchface. (We don't really care. For now.) */
     var round: Boolean = false
         set(newVal) {
             field = newVal

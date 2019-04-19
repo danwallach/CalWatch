@@ -16,26 +16,24 @@ import androidx.core.content.ContextCompat
 import org.jetbrains.anko.AnkoLogger
 import org.jetbrains.anko.verbose
 
-/**
- * Deal with all the run-time permission machinery.
- */
+/** Deal with all the run-time permission machinery. */
 object CalendarPermission : AnkoLogger {
     private const val INTERNAL_PERM_REQUEST_CODE = 31337
 
     /**
-     * Returns the number of permission requests ever made by CalWatch.
+     * The number of permission requests ever made by CalWatch, maintained persistently
+     * in the Android shared preferences.
      */
     var numRequests = -1
         private set
 
+    /** Call at startup time. */
     fun init(context: Context) {
         numRequests =
             context.getSharedPreferences(Constants.PREFS_KEY, Context.MODE_PRIVATE).getInt("permissionRequests", 0)
     }
 
-    /**
-     * Check whether we have permission to access the calendar.
-     */
+    /** Check whether we have permission to access the calendar. */
     fun check(context: Context): Boolean {
         val result = ContextCompat.checkSelfPermission(context, Manifest.permission.READ_CALENDAR)
         verbose { "calendar permissions check: $result (granted = ${PackageManager.PERMISSION_GRANTED})" }
@@ -46,26 +44,20 @@ object CalendarPermission : AnkoLogger {
         return result == PackageManager.PERMISSION_GRANTED
     }
 
-    /**
-     * Check whether we've already asked, so we're walking on thin ice.
-     */
+    /** Check whether we've already asked, so we're walking on thin ice. */
     fun checkAlreadyAsked(activity: Activity): Boolean {
         val result = ActivityCompat.shouldShowRequestPermissionRationale(activity, Manifest.permission.READ_CALENDAR)
         verbose { "previous calendar checks performed#$numRequests, shouldShowRationale=$result" }
         return result
     }
 
-    /**
-     * Make the permission request, but not if the user has already said no once.
-     */
+    /** Make the permission request, but not if the user has already said no once. */
     fun requestFirstTimeOnly(activity: Activity) {
         if (!checkAlreadyAsked(activity))
             request(activity)
     }
 
-    /**
-     * Request permission to access the calendar.
-     */
+    /** Request permission to access the calendar. */
     fun request(activity: Activity) {
         if (!check(activity)) {
             numRequests++
@@ -76,11 +68,6 @@ object CalendarPermission : AnkoLogger {
                 INTERNAL_PERM_REQUEST_CODE
             )
 
-            //
-            // This is redundant with the updates we do in WearReceiverService (on wear) and PreferencesHelper (on mobile),
-            // but we really want to remember how many requests we've made, so we're dumping this out immediately. This
-            // number will be restored on startup by the usual preferences restoration in the two classes above. (Hopefuly.)
-            //
             with(activity.getSharedPreferences("org.dwallach.calwatch.prefs", Activity.MODE_PRIVATE).edit()) {
                 putInt("permissionRequests", numRequests)
 
@@ -90,9 +77,7 @@ object CalendarPermission : AnkoLogger {
         }
     }
 
-    /**
-     * Deal with the activity callback when permissions are granted or denied.
-     */
+    /** Deal with the activity callback when permissions are granted or denied. */
     fun handleResult(requestCode: Int, permissions: Array<String>, grantResults: IntArray) {
         if (requestCode == INTERNAL_PERM_REQUEST_CODE) {
             // If request is cancelled, the result arrays are empty.

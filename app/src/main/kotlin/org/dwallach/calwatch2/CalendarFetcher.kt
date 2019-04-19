@@ -31,13 +31,13 @@ import kotlin.comparisons.thenByDescending
 
 /**
  * This class handles all the dirty work of asynchronously loading calendar data from the calendar provider
- * and updating the state in ClockState. The constructor arguments, contentUri and authority, are used
+ * and updating the state in [ClockState]. The constructor arguments, [contentUri] and [authority], are used
  * to specify what database Uri we're querying and what "authority" we're using to set up the IntentFilter.
  * These are different on wear vs. mobile, so are specified in those subdirectories. Everything else
  * is portable.
  *
- * Internally, this class registers a BroadcastReceiver such that it will detect and deal with updates
- * to the calendar itself. External users can call CalendarFetcher.requestRescan(), which will cause
+ * Internally, this class registers a [BroadcastReceiver] such that it will detect and deal with updates
+ * to the calendar itself. External users can call [CalendarFetcher.requestRescan], which will cause
  * the most recently created CalendarFetcher to do the work. This is something worth doing at the top
  * of the hour, when it's time to update the calendar.
  */
@@ -138,7 +138,7 @@ class CalendarFetcher(
 
     /**
      * This will start asynchronously loading the calendar. The results will eventually arrive
-     * in ClockState, and any Observers of ClockState will be notified.
+     * in [ClockState]. Safe to call this if a scan is already ongoing.
      */
     private fun rescan(context: Context? = null) {
         if (!isReceiverRegistered) {
@@ -166,10 +166,9 @@ class CalendarFetcher(
 
     /**
      * Queries the calendar database with proper Android APIs (ugly stuff). Note that we're returning
-     * two things: a list of events -- the thing we really want -- and an optional exception, which
-     * would be accompanied by an emptyList if it were non-null. We're doing this, rather than throwing
-     * an exception, because this result is meant to be saved across threads, which a thrown exception
-     * can't do very well.
+     * a list of events -- the thing we really want -- which might be null, indicating a failure.
+     * We're eating any security exceptions that might otherwise happen. They'll be logged, and
+     * null will be returned.
      */
     private fun loadContent(context: Context): List<CalendarEvent>? {
         val lFetchCounter = ++fetchCounter
@@ -281,9 +280,7 @@ class CalendarFetcher(
                 .thenByDescending { it.startTime })
     }
 
-    /**
-     * Starts an asynchronous task to load the calendar
-     */
+    /** Starts an asynchronous task to load the calendar. */
     private fun runAsyncLoader(context: Context?) {
         if (context == null) {
             error { "runAsyncLoader: no context, cannot load calendar" }
@@ -365,8 +362,7 @@ class CalendarFetcher(
         private var fetchCounter: Int = -1 // ID numbers for tracking / better logging
 
         private val currentState: String
-            get() = "singletonFetcher(%s), scanInProgress($scanInProgress), instanceCounter($instanceCounter)"
-                .format(singletonFetcher?.toString() ?: "null")
+            get() = "singletonFetcher($singletonFetcher), scanInProgress($scanInProgress), instanceCounter($instanceCounter)"
 
         fun requestRescan() {
             info { "requestRescan: $currentState" }
