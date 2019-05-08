@@ -397,9 +397,9 @@ object ComplicationWrapper : AnkoLogger {
             // is, the tap has to actually be inside the bounds of the complication. (so complicated!)
             .filter {
                 it != BACKGROUND_COMPLICATION_ID &&
-                    complicationDataMap[it]?.isActive(currentTime) ?: false &&
+                    (complicationDataMap[it]?.isActive(currentTime) ?: false) &&
                     isTappableComplicationType(complicationDataMap[it]?.type) &&
-                    complicationDrawableMap[it]?.bounds?.contains(x, y) ?: false
+                    (complicationDrawableMap[it]?.bounds?.contains(x, y) ?: false)
             }
 
         verbose { "Complication tap, hits on complication(s): " + tappedComplicationIds.joinToString() }

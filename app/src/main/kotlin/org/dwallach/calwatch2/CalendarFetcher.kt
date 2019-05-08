@@ -316,39 +316,45 @@ class CalendarFetcher(
 
         GlobalScope.launch {
             info { "runAsyncLoader: here we go! (CalendarFetcher #$instanceID)" }
-            // Asynchronously fetches the content, then runs the rest of the block on the UI thread
-            // once we get back.
-            val eventList = withContext(Dispatchers.Default) {
+
+            val result = withContext(Dispatchers.Default) {
+                // Everything in this block will execute on a background thread. The original
+                // function, runAsyncLoader(), will return immediately.
+
                 val startTimeNano = SystemClock.elapsedRealtimeNanos()
-                val result = loadContent(context)
+                val eventList = loadContent(context)
                 val endTimeNano = SystemClock.elapsedRealtimeNanos()
                 info { "runAsyncLoader: total calendar fetch time: %.3f ms".format((endTimeNano - startTimeNano) / 1000000.0) }
-                result
+
+                if (eventList == null) {
+                    warn { "runAsyncLoader: No result, not updating any calendar state (CalendarFetcher #$instanceID)" }
+                    null
+                } else {
+                    info { "runAsyncLoader: success reading the calendar (CalendarFetcher #$instanceID)" }
+                    val startTimeNano2 = SystemClock.elapsedRealtimeNanos()
+                    val layoutResult = EventLayoutUniform.clipToVisible(eventList)
+                    val endTimeNano2 = SystemClock.elapsedRealtimeNanos()
+                    info { "runAsyncLoader: total calendar layout time: %.3f ms".format((endTimeNano2 - startTimeNano2) / 1000000.0) }
+                    Pair(eventList, layoutResult)
+                }
             }
 
-            if (eventList == null) {
-                warn { "runAsyncLoader: No result, not updating any calendar state (CalendarFetcher #$instanceID)" }
-            } else {
-                info { "runAsyncLoader: success reading the calendar (CalendarFetcher #$instanceID)" }
-                val layoutPair = withContext(Dispatchers.Default) {
-                    val startTimeNano = SystemClock.elapsedRealtimeNanos()
-                    val result = EventLayoutUniform.clipToVisible(eventList)
-                    val endTimeNano = SystemClock.elapsedRealtimeNanos()
-                    info { "runAsyncLoader: total calendar layout time: %.3f ms".format((endTimeNano - startTimeNano) / 1000000.0) }
-                    result
-                }
-
+            if (result != null) {
                 // This last part really needs to happen on the UI thread, otherwise things get crashy.
+                // Dispatchers.Main gets us the Android UI thread.
+
                 withContext(Dispatchers.Main) {
                     info("runAsyncLoader: updating world state (should be on UI thread now)")
-                    ClockState.setWireEventList(eventList, layoutPair)
+                    ClockState.setWireEventList(result.first, result.second)
                     Utilities.redrawEverything()
                 }
             }
+
             scanInProgress = false
             info { "runAsyncLoader: background tasks complete (CalendarFetcher #$instanceID)" }
         }
-        info { "runAsyncLoader: Heading back to uiThread async tasks running (CalendarFetcher #$instanceID)" }
+
+        info { "runAsyncLoader: Heading back to uiThread; async task now running (CalendarFetcher #$instanceID)" }
     }
 
     companion object : AnkoLogger {
