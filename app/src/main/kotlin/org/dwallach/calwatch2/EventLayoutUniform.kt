@@ -22,9 +22,7 @@ import org.jetbrains.anko.error
 import org.jetbrains.anko.info
 import org.jetbrains.anko.verbose
 
-/**
- * Event layout with the Cassowary linear constraint solver.
- */
+/** Event layout with the Cassowary linear constraint solver. */
 object EventLayoutUniform : AnkoLogger {
     /**
      * Given a list of events, return another list that corresponds to the set of

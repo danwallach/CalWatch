@@ -38,9 +38,7 @@ class PermissionActivity : AppCompatActivity(), AnkoLogger {
     }
 
     companion object : AnkoLogger {
-        /**
-         * Call this to launch the wear permission dialog.
-         */
+        /** Call this to launch the wear permission dialog. */
         fun kickStart(context: Context, firstTimeOnly: Boolean) {
             verbose("kickStart")
 

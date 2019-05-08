@@ -31,9 +31,7 @@ data class CalendarEvent(val startTime: Long, val endTime: Long, val displayColo
     )
 }
 
-/**
- * This class wraps a calendar event with a number of other fields.
- */
+/** This class wraps a calendar event with a number of other fields. */
 class EventWrapper(val calendarEvent: CalendarEvent) {
     /**
      * The first time this event is rendered, it will be rendered to a Path, so subsequent calls to

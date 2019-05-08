@@ -10,6 +10,7 @@ package org.dwallach.calwatch2
 import android.content.Context
 import androidx.core.content.edit
 import org.jetbrains.anko.AnkoLogger
+import org.jetbrains.anko.error
 import org.jetbrains.anko.verbose
 
 /**

@@ -252,7 +252,7 @@ class ClockFace(private val configMode: Boolean = false) : AnkoLogger {
             }
         }
 
-        /***
+        /*
          * Killing this off for now. We've done lots of other goodies for anti-burnin, and
          * this really hurts readability on a small screen.
          *
@@ -264,7 +264,7 @@ class ClockFace(private val configMode: Boolean = false) : AnkoLogger {
         endRadius *= ratio
         strokeWidth *= ratio
         }
-         ***/
+         */
 
         val x1 = clockX(lseconds, startRadius)
         val y1 = clockY(lseconds, startRadius)

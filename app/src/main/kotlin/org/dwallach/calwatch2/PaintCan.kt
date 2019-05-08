@@ -10,6 +10,7 @@ package org.dwallach.calwatch2
 import android.graphics.Color
 import android.graphics.Paint
 import org.jetbrains.anko.AnkoLogger
+import org.jetbrains.anko.error
 import org.jetbrains.anko.verbose
 
 /**
@@ -81,12 +82,7 @@ class PaintCan(private val radius: Float) : AnkoLogger {
             palette[i][Brush.BIG_TEXT_AND_LINES.ordinal] = watchfacePaint(Color.WHITE, style, textSize, lineWidth)
             palette[i][Brush.BIG_SHADOW.ordinal] = watchfacePaint(Color.BLACK, style, textSize, lineWidth / 2f)
             palette[i][Brush.BLACK_FILL.ordinal] = watchfacePaint(Color.BLACK, style, textSize, lineWidth)
-            palette[i][Brush.LOWBIT_CALENDAR_FILL.ordinal] = watchfacePaint(
-                Color.WHITE,
-                style,
-                textSize,
-                lineWidth
-            ) // the docs claim we have access to other colors here, like CYAN, but that's not true at least on the Moto 360 Sport
+            palette[i][Brush.LOWBIT_CALENDAR_FILL.ordinal] = watchfacePaint(Color.WHITE, style, textSize, lineWidth)
             palette[i][Brush.MONTHBOX_SHADOW.ordinal] = watchfacePaint(Color.BLACK, style, smTextSize, lineWidth / 4f)
 
             // shadows are stroke, not fill, so we fix that here
@@ -102,8 +98,8 @@ class PaintCan(private val radius: Float) : AnkoLogger {
             palette[i][Brush.MONTHBOX_SHADOW.ordinal]?.textAlign = Paint.Align.LEFT
         }
 
-        // In anti-burnin mode: we'll be drawing some "shadows" as
-        // white outlines around black centers, "hollowing out" the hands as we're supposed to do.
+        // In anti-burnin mode: we'll be drawing some "shadows" as white outlines around
+        // black centers, "hollowing out" the hands as we're supposed to do.
         for (style in listOf(Style.AMBIENT, Style.AMBIENT_ANTI_BURNIN, Style.LOWBIT_ANTI_BURNIN)) {
             val i = style.ordinal
 
@@ -187,9 +183,7 @@ class PaintCan(private val radius: Float) : AnkoLogger {
             return a shl 24 or (y shl 16) or (y shl 8) or y
         }
 
-        /**
-         * This generates all the Paint that we'll need for drawing the watchface. These are all cached.
-         */
+        /** This generates all the Paint that we'll need for drawing the watchface. */
         private fun watchfacePaint(
             _argb: Int,
             _style: Style,
@@ -197,7 +191,7 @@ class PaintCan(private val radius: Float) : AnkoLogger {
             _strokeWidth: Float,
             forceColorAmbient: Boolean = false
         ) =
-        // underscores in the formal parameters to fix the variable shadowing in the apply block, below
+        // underscores in the formal parameters to get around the variable shadowing in the apply block, below
             Paint(Paint.SUBPIXEL_TEXT_FLAG or Paint.HINTING_ON).apply {
                 strokeCap = Paint.Cap.SQUARE
                 strokeWidth = _strokeWidth
@@ -216,22 +210,19 @@ class PaintCan(private val radius: Float) : AnkoLogger {
                     Style.NORMAL -> _argb
 
                     Style.LOWBIT, Style.LOWBIT_ANTI_BURNIN -> when (_argb) {
-                        //
                         // Quoth the Google: One reduced color space power saving method is to use a
                         // "low-bit" mode. In low-bit mode, the available colors are limited to
                         // black, white, blue, red, magenta, green, cyan, and yellow.
                         //
                         // http://developer.android.com/design/wear/watchfaces.html
                         //
-                        // So we'll pass those colors through unmolested. On some watches, like the Moto 360 Sport,
-                        // you still only get black & white, so all of these non-black colors just become white.
-                        //
+                        // So we'll pass those colors through unmolested.
+
                         Color.BLACK, Color.WHITE, Color.BLUE, Color.RED, Color.MAGENTA,
                         Color.GREEN, Color.CYAN, Color.YELLOW -> _argb
 
-                        //
                         // Any other color is mashed into being pure white or black
-                        //
+
                         else -> if (_argb and 0xffffff > 0) 0xffffffff.toInt() else 0xff000000.toInt()
                     }
 

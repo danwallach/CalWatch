@@ -36,9 +36,7 @@ object ClockState : AnkoLogger {
 
     var calendarPermission = false
 
-    /**
-     * Helper function to determine if we need subsecond refresh intervals.
-     */
+    /** Helper function to determine if we need subsecond refresh intervals. */
     fun subSecondRefreshNeeded(face: ClockFace?) =
     // if the second-hand is supposed to be rendered and we're not in ambient mode
         if (face == null) false else showSeconds && !face.ambientMode
