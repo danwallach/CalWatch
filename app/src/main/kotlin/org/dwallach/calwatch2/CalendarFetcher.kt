@@ -14,11 +14,14 @@ import android.content.Intent
 import android.content.IntentFilter
 import android.graphics.Color
 import android.net.Uri
-import android.os.*
+import android.os.SystemClock
 import android.provider.CalendarContract
 import android.support.wearable.provider.WearableCalendarContract
 import android.text.format.DateUtils
-import kotlinx.coroutines.*
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import org.jetbrains.anko.AnkoLogger
 import org.jetbrains.anko.error
 import org.jetbrains.anko.info

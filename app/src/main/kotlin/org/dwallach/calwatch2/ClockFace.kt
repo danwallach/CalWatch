@@ -20,12 +20,23 @@ import org.dwallach.calwatch2.ClockState.showDayDate
 import org.dwallach.calwatch2.ClockState.showSeconds
 import org.dwallach.calwatch2.PaintCan.Brush
 import org.dwallach.calwatch2.PaintCan.Style
-import org.dwallach.complications.ComplicationLocation.*
+import org.dwallach.complications.ComplicationLocation.LEFT
+import org.dwallach.complications.ComplicationLocation.RIGHT
+import org.dwallach.complications.ComplicationLocation.TOP
+import org.dwallach.complications.ComplicationLocation.BOTTOM
 import org.dwallach.complications.ComplicationWrapper
 import org.dwallach.complications.ComplicationWrapper.isComplicationVisible
-import org.jetbrains.anko.*
-import java.util.*
-import kotlin.math.*
+import org.jetbrains.anko.AnkoLogger
+import org.jetbrains.anko.error
+import org.jetbrains.anko.info
+import org.jetbrains.anko.verbose
+import java.util.WeakHashMap
+import kotlin.math.PI
+import kotlin.math.asin
+import kotlin.math.cos
+import kotlin.math.floor
+import kotlin.math.pow
+import kotlin.math.sin
 
 /**
  * All of the graphics calls for drawing watchfaces happen here. Note that this class knows
@@ -364,10 +375,10 @@ class ClockFace(private val configMode: Boolean = false) : AnkoLogger {
     private var facePathCacheMode = -1
 
     private fun complicationStateNow(): Int =
-        (if (isComplicationVisible(LEFT)) 8 else 0) + (if (isComplicationVisible(RIGHT)) 4 else 0) + (if (isComplicationVisible(
-                TOP
-            )
-        ) 2 else 0) + (if (isComplicationVisible(BOTTOM)) 1 else 0)
+        (if (isComplicationVisible(LEFT)) 8 else 0) +
+            (if (isComplicationVisible(RIGHT)) 4 else 0) +
+            (if (isComplicationVisible(TOP)) 2 else 0) +
+            (if (isComplicationVisible(BOTTOM)) 1 else 0)
 
     private fun getCachedFacePath(mode: Int): Path? =
         if (facePathComplicationState == complicationStateNow() && facePathCacheMode == mode) facePathCache else null

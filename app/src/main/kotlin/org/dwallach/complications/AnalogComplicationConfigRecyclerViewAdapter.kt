@@ -28,17 +28,27 @@ import androidx.recyclerview.widget.RecyclerView
 import java.util.concurrent.Executors
 
 import org.dwallach.R
-import org.dwallach.calwatch2.*
+import org.dwallach.calwatch2.ClockState
+import org.dwallach.calwatch2.PreferencesHelper
+import org.dwallach.calwatch2.Utilities
+import org.dwallach.calwatch2.errorLogAndThrow
 import org.dwallach.complications.AnalogComplicationConfigData.ConfigItemType
-import org.dwallach.complications.ComplicationLocation.*
+import org.dwallach.complications.ComplicationLocation.BOTTOM
+import org.dwallach.complications.ComplicationLocation.LEFT
+import org.dwallach.complications.ComplicationLocation.RIGHT
+import org.dwallach.complications.ComplicationLocation.TOP
 import org.dwallach.complications.ComplicationWrapper.BOTTOM_COMPLICATION_ID
 import org.dwallach.complications.ComplicationWrapper.LEFT_COMPLICATION_ID
 import org.dwallach.complications.ComplicationWrapper.RIGHT_COMPLICATION_ID
 import org.dwallach.complications.ComplicationWrapper.TOP_COMPLICATION_ID
 import org.dwallach.complications.ComplicationWrapper.getComplicationId
 import org.dwallach.complications.ComplicationWrapper.getSupportedComplicationTypes
-import org.jetbrains.anko.*
-import java.util.*
+import org.jetbrains.anko.AnkoLogger
+import org.jetbrains.anko.debug
+import org.jetbrains.anko.info
+import org.jetbrains.anko.verbose
+import org.jetbrains.anko.warn
+import java.util.WeakHashMap
 
 /**
  * This class handles all the different config items that might ever be displayed. The WearableRecyclerView

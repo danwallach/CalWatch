@@ -17,11 +17,26 @@ import android.content.ComponentName
 import android.content.Context
 import org.dwallach.calwatch2.CalWatchFaceService
 import org.dwallach.calwatch2.ClockFaceConfigView
-import org.dwallach.complications.ComplicationLocation.*
-import org.jetbrains.anko.*
+import org.dwallach.complications.ComplicationLocation.BACKGROUND
+import org.dwallach.complications.ComplicationLocation.BOTTOM
+import org.dwallach.complications.ComplicationLocation.TOP
+import org.dwallach.complications.ComplicationLocation.LEFT
+import org.dwallach.complications.ComplicationLocation.RIGHT
 import android.content.Intent.FLAG_ACTIVITY_NEW_TASK
-import android.support.wearable.complications.ComplicationData.*
+import android.support.wearable.complications.ComplicationData.TYPE_EMPTY
+import android.support.wearable.complications.ComplicationData.TYPE_ICON
+import android.support.wearable.complications.ComplicationData.TYPE_LARGE_IMAGE
+import android.support.wearable.complications.ComplicationData.TYPE_NOT_CONFIGURED
+import android.support.wearable.complications.ComplicationData.TYPE_NO_PERMISSION
+import android.support.wearable.complications.ComplicationData.TYPE_RANGED_VALUE
+import android.support.wearable.complications.ComplicationData.TYPE_SHORT_TEXT
+import android.support.wearable.complications.ComplicationData.TYPE_SMALL_IMAGE
 import android.support.wearable.watchface.WatchFaceService
+import org.jetbrains.anko.AnkoLogger
+import org.jetbrains.anko.debug
+import org.jetbrains.anko.info
+import org.jetbrains.anko.verbose
+import org.jetbrains.anko.warn
 
 /**
  * The goal is this class is to provide a super minimal interface for two things: specifying configuration

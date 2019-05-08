@@ -9,7 +9,9 @@ package org.dwallach.calwatch2
 
 import android.content.Context
 import android.os.Build
-import org.jetbrains.anko.*
+import org.jetbrains.anko.AnkoLogger
+import org.jetbrains.anko.error
+import org.jetbrains.anko.info
 
 /**
  * Deals with reading our version name and number from the APK.

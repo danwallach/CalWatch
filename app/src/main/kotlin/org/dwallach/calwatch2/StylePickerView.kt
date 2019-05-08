@@ -12,7 +12,9 @@ import android.content.Context
 import android.graphics.Canvas
 import android.util.AttributeSet
 import android.view.MotionEvent
-import android.view.MotionEvent.*
+import android.view.MotionEvent.ACTION_BUTTON_RELEASE
+import android.view.MotionEvent.ACTION_POINTER_UP
+import android.view.MotionEvent.ACTION_UP
 import android.view.View
 import org.dwallach.R
 import org.dwallach.calwatch2.ClockState.FACE_LITE

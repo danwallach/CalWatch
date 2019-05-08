@@ -6,7 +6,8 @@
  */
 package org.dwallach.calwatch2
 
-import org.jetbrains.anko.*
+import org.jetbrains.anko.AnkoLogger
+import org.jetbrains.anko.verbose
 
 /**
  * We're doing something of the model-view-controller thing here, where ClockState has the "model" --

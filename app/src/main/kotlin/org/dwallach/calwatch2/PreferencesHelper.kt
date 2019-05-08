@@ -9,7 +9,8 @@ package org.dwallach.calwatch2
 
 import android.content.Context
 import androidx.core.content.edit
-import org.jetbrains.anko.*
+import org.jetbrains.anko.AnkoLogger
+import org.jetbrains.anko.verbose
 
 /**
  * Support for saving and loading preferences to persistent storage.

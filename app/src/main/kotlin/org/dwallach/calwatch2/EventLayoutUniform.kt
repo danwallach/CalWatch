@@ -7,8 +7,20 @@
 
 package org.dwallach.calwatch2
 
-import EDU.Washington.grad.gjb.cassowary.*
-import org.jetbrains.anko.*
+import EDU.Washington.grad.gjb.cassowary.CL
+import EDU.Washington.grad.gjb.cassowary.ClLinearEquation
+import EDU.Washington.grad.gjb.cassowary.ClLinearExpression
+import EDU.Washington.grad.gjb.cassowary.ClLinearInequality
+import EDU.Washington.grad.gjb.cassowary.ClSimplexSolver
+import EDU.Washington.grad.gjb.cassowary.ClStrength
+import EDU.Washington.grad.gjb.cassowary.ClVariable
+import EDU.Washington.grad.gjb.cassowary.ExCLInternalError
+import EDU.Washington.grad.gjb.cassowary.ExCLNonlinearExpression
+import EDU.Washington.grad.gjb.cassowary.ExCLRequiredFailure
+import org.jetbrains.anko.AnkoLogger
+import org.jetbrains.anko.error
+import org.jetbrains.anko.info
+import org.jetbrains.anko.verbose
 
 /**
  * Event layout with the Cassowary linear constraint solver.

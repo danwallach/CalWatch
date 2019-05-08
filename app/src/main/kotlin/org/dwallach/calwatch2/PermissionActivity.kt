@@ -9,7 +9,10 @@ package org.dwallach.calwatch2
 
 import android.content.Context
 import androidx.appcompat.app.AppCompatActivity
-import org.jetbrains.anko.*
+import org.jetbrains.anko.AnkoLogger
+import org.jetbrains.anko.intentFor
+import org.jetbrains.anko.newTask
+import org.jetbrains.anko.verbose
 
 /**
  * We need a separate activity for the sole purpose of requesting permissions.

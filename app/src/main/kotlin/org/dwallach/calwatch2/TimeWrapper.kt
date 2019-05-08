@@ -9,7 +9,8 @@ package org.dwallach.calwatch2
 
 import android.os.SystemClock
 import android.text.format.DateUtils
-import org.jetbrains.anko.*
+import org.jetbrains.anko.AnkoLogger
+import org.jetbrains.anko.info
 
 import java.util.TimeZone
 import kotlin.math.floor
