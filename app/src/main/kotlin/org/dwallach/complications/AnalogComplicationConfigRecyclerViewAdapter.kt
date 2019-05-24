@@ -51,8 +51,17 @@ import org.jetbrains.anko.warn
 import java.util.WeakHashMap
 
 /**
- * This class handles all the different config items that might ever be displayed. The WearableRecyclerView
- * is going to query this for particular viewTypes, and it's going to return things.
+ * This class handles all the different config items that might ever be displayed.
+ * The WearableRecyclerView is going to query this.
+ *
+ * Each inner class corresponds to one of the entry types that might be returned.
+ * There's a little bit of planning for the future features here; we can add
+ * additional toggle switches via [ToggleViewHolder] without needing to redo
+ * everything else.
+ *
+ * See also: [AnalogComplicationConfigData], which deals with WearOS 1 vs. 2.
+ * (We don't want to display the complications selector when the watch doesn't
+ * support complications.)
  */
 class AnalogComplicationConfigRecyclerViewAdapter(
     mContext: Context,

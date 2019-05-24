@@ -11,8 +11,8 @@ import android.content.Intent
 import android.os.Bundle
 import android.support.wearable.complications.ComplicationProviderInfo
 import android.support.wearable.complications.ProviderChooserIntent
-import android.support.wearable.view.WearableRecyclerView
 import androidx.appcompat.app.AppCompatActivity
+import androidx.wear.widget.WearableRecyclerView
 import org.dwallach.R
 import org.dwallach.calwatch2.Constants
 import org.dwallach.calwatch2.PreferencesHelper
@@ -27,7 +27,6 @@ import org.jetbrains.anko.info
  * This began life as the AnalogComplicationConfigActivity example code.
  */
 class AnalogComplicationConfigActivity : AppCompatActivity(), AnkoLogger {
-    // TODO: replace with non-deprecated variant
     private var mWearableRecyclerView: WearableRecyclerView? = null
     private var mAdapter: AnalogComplicationConfigRecyclerViewAdapter? = null
 

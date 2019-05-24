@@ -94,9 +94,7 @@ class StylePickerView(context: Context, attrs: AttributeSet) : View(context, att
                     else -> FACE_TOOL
                 }
 
-                val thetaStr = "%.2f".format(theta)
-
-                info { "Theta: $thetaStr --> new face mode ${ClockState.faceMode}" }
+                info { "Theta: %.2f --> new face mode ${ClockState.faceMode}".format(theta) }
 
                 PreferencesHelper.savePreferences(context)
                 Utilities.redrawEverything()

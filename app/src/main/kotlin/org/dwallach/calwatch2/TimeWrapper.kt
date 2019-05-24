@@ -42,6 +42,7 @@ object TimeWrapper : AnkoLogger {
         // TODO: do we want to migrate from java.util.TimeZone to android.icu.util.TimeZone?
         // - might work better in weird cases
         // - only supported in Android 7.0 and higher, which would be an issue for Wear 1.0.
+        //   (assuming any of them are still around?)
         val tz = TimeZone.getDefault()
 
         gmtOffset = tz.getOffset(gmtTime) // includes DST correction
@@ -62,11 +63,17 @@ object TimeWrapper : AnkoLogger {
     private var monthDayCacheTime: Long = 0
 
     private fun updateMonthDayCache() {
-        // Assumption: the day and month and such only change when we hit a new hour, otherwise we can reuse an old result
+        // Assumption: the day and month and such only change when we hit a new hour,
+        // otherwise we can reuse an old result.
 
-        // In an early beta of CalWatch, I ran the profile and discovered that calling DateUtils.formatDateTime(),
-        // which I was doing as part of my onDraw() method, was a huge time sink, generated a bunch of garbage,
-        // etc. Needless to say, this was an obvious performance optimization.
+        // In an early beta of CalWatch, I ran the profiler and discovered that calling
+        // DateUtils.formatDateTime(), which I was doing as part of my onDraw() method,
+        // was a huge time sink, generated a bunch of garbage, etc. Needless to say,
+        // this was an obvious performance optimization.
+
+        // The nice part about using Android's DateUtils here is that we get a fully
+        // localized result.
+
         val newCacheTime = localFloorHour
         if (newCacheTime != monthDayCacheTime || localMonthDayCache == "") {
             localMonthDayCache =
@@ -86,12 +93,6 @@ object TimeWrapper : AnkoLogger {
     fun localDayOfWeek(): String {
         updateMonthDayCache()
         return localDayOfWeekCache
-
-        /* -- old version, based on standard Java utils
-        String format = "cccc"
-        SimpleDateFormat sdf = new SimpleDateFormat(format, Locale.getDefault())
-        return sdf.format(new Date())
-        */
     }
 
     private var frameStartTime: Long = 0

@@ -16,7 +16,7 @@ Android Wear command-line things I can never remember:
 -- How to set up the emulator: http://www.tech-recipes.com/rx/49586/how-do-i-connect-an-android-wear-emulator-to-a-real-phone/
    adb -d forward tcp:5601 tcp:5601
 
--- How to connect to Bluetooth debugging for Moto 360: http://blog.timmattison.com/archives/2014/07/16/common-android-wear-tasks-for-developers/
+-- How to connect to Bluetooth debugging: http://blog.timmattison.com/archives/2014/07/16/common-android-wear-tasks-for-developers/
     adb forward tcp:4444 localabstract:/adb-hub; adb connect 127.0.0.1:4444
 
 -- How to get a dump from the watch into a file and see it while it's going
@@ -45,55 +45,58 @@ Android Wear command-line things I can never remember:
 
 
 Deal with multiday events that aren't "all day" events
-    TODO idea: resurrect all-day events by rendering them (and long events) as thin rings, perhaps separate from the main time wedges
-
     TODO update the slides
         Now a standard lecture in Comp215, so some updates in there already, but should it change
         from an "evolution of CalWatch" into a "how to code for Android" talk? Or not? Also, worth
         adding Kotlin material.
 
-ANDROID N / WEAR 2.0 OVERHAUL / REFACTORING / RE-ENGINEERING
+Keeping up with newish Android features
+    TODO: Adopt newer Android LiveData/coroutine scoping idioms:
+      - https://developer.android.com/topic/libraries/architecture/livedata
+      - https://developer.android.com/topic/libraries/architecture/lifecycle
+      - https://developer.android.com/topic/libraries/architecture/coroutines
+
+    Hypothetically, we could keep the calendar as a LiveData object and could use these lifecycleScope
+    things rather than GlobalScope for doing the computation. Unclear whether we'd get any benefit from these changes.
+
+General code refactoring and improvement ideas
+    TODO: bucketing events by size, so >6 hr, 3-6hr, etc. This might allow small events to coalesce with fewer levels,
+      keep really long events to the center of the dial. Experimentation will be necessary to make sure it still looks good.
+
+      Also, maybe for the really long events, maybe make them thinner.
+
     TODO not noticing when the calendar is updating?
-    - All the code examples online seem to be really old
-    - We can't just move this into an <intent-filter> or something in the manifest, it has to be in the main code body
-      (because power savings instituted in Android Oreo, two APIs ago)
+      - All the code examples online seem to be really old
+      - We can't just move this into an <intent-filter> or something in the manifest, it has to be in the main code body
+        (because power savings instituted in Android Oreo, two APIs ago)
 
     TODO preferences for day/date thing
-    - managed to switch to the new "rounded" style, but can't move the toggle to the left of the text
+      - managed to switch to the new "rounded" style, but can't move the toggle to the left of the text
 
     TODO code refactoring
         TODO simplify / kill WireEvent and WireUpdate
         TODO simplify / kill PreferencesHelper
 
     TODO too much .toFloat() and .toDouble() in ClockFace -- cleanup?!
-    - We could try to standardize everything with Float, but many of the trig function in Math require Double
-    - Twice I've tried standardizing on Float and things break: loss of the second-hand (!), and misalignment of the stipple pattern,
-      so the thing to try next is standardizing on Double.
-    - There's something really subtle and weird about how Kotlin does floating point that I'm clearly missing.
-
-    TODO: Remove ProGuard, supposedly replace by R8
-
-    Settings UI
-        TODO tear out the WearableRecyclerView, go with a simpler ListView (now official advice!)
-            https://developer.android.com/training/wearables/ui/lists.html
-            Although, what we're doing now works, and makes it easy for us to tweak Wear 1.x vs. 2.x
+      - We could try to standardize everything with Float, but many of the trig function in Math require Double
+      - Twice I've tried standardizing on Float and things break: loss of the second-hand (!), and misalignment of the stipple pattern,
+        so the thing to try next is standardizing on Double.
+      - There's something really subtle and weird about how Kotlin does floating point that I'm clearly missing.
 
     TODO Merge in Kotlin Android synthetic properties where appropriate
         https://kotlinlang.org/docs/tutorials/android-plugin.html
 
-    App name: currently shows up as "CalWatch (Wear 1.0)"
-        TODO: verify that it's "CalWatch2", since we want to distinguish from the original
-
     Background support
-        TODO Rethink the "stippling" support, such that we get a cleaner layering from background to foreground
-        TODO Tentative approach: render the wedges to a bitmap (only needs to be done once per hour), cut a hole in that bitmap
-	http://www.techrepublic.com/article/punch-a-hole-in-a-bitmap-by-using-androids-porter-duff-xfer/
-	https://stackoverflow.com/questions/18387814/drawing-on-canvas-porterduff-mode-clear-draws-black-why
-	https://medium.com/@rgomez/android-how-to-draw-an-overlay-with-a-transparent-hole-471af6cf3953
-	-- This means that, at 60Hz, we'll be compositing bitmap images, but not doing anywhere near as much drawing.
-	-- When we draw the stippling, all we have to do is set paint.setXfermode(new PorterDuffXfermode(PorterDuff.Mode.CLEAR));
-	-- First link has code to create a new Canvas wrapping a Bitmap, draw into the Canvas, return the Bitmap.
-	-- Depending on how we did it, we'd also be able to supply a complication background to other watchfaces
+      TODO Rethink the "stippling" support, such that we get a cleaner layering from background to foreground
+
+      Tentative approach: render the wedges to a bitmap (only needs to be done once per hour), cut a hole in that bitmap
+      	- http://www.techrepublic.com/article/punch-a-hole-in-a-bitmap-by-using-androids-porter-duff-xfer/
+        - https://stackoverflow.com/questions/18387814/drawing-on-canvas-porterduff-mode-clear-draws-black-why
+        - https://medium.com/@rgomez/android-how-to-draw-an-overlay-with-a-transparent-hole-471af6cf3953
+        - This means that, at 60Hz, we'll be compositing bitmap images, but not doing anywhere near as much drawing.
+        When we draw the stippling, all we have to do is set paint.setXfermode(new PorterDuffXfermode(PorterDuff.Mode.CLEAR));
+        First link has code to create a new Canvas wrapping a Bitmap, draw into the Canvas, return the Bitmap.
+        Depending on how we did it, we'd also be able to supply a complication background to other watchfaces
 
 
 Distant future

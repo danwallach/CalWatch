@@ -277,6 +277,7 @@ class CalendarFetcher(
         //    ones will end late in the day, and will thus end up on the inside of the watchface)
 
         // Third-priority sort: startTime, with objects starting later (smaller) appearing first in the sort.
+
         return cr.sortedWith(
             compareBy<CalendarEvent> { it.displayColor }
                 .thenBy { it.endTime }
