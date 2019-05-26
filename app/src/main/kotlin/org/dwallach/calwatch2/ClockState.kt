@@ -13,8 +13,7 @@ import org.jetbrains.anko.verbose
  * We're doing something of the model-view-controller thing here, where ClockState has the "model" --
  * everything necessary to render a clockface including what style it is, whether we're supposed
  * to show the seconds-hand or the day-date display, and the list of events. The "controller" part
- * is different on the phone and on the watch (MyViewAnim/PhoneActivity vs. CalWatchFaceService).
- * The "view" (i.e., all the actual graphics calls) lives in ClockFace.
+ * is [CalWatchFaceService]. The "view" (i.e., all the actual graphics calls) lives in [ClockFace].
  *
  * The idea is that there is a ClockState singleton, and it doesn't know anything about Android
  * contexts or any of that stuff.
@@ -45,7 +44,7 @@ object ClockState : AnkoLogger {
      * Load the eventlist. This is meant to consume the output of [CalendarFetcher]
      * which is in GMT time, *not* local time.
      */
-    fun setWireEventList(eventList: List<CalendarEvent>, layoutPair: Pair<List<EventWrapper>, Int>) {
+    fun setEventList(eventList: List<CalendarEvent>, layoutPair: Pair<List<EventWrapper>, Int>) {
         verbose { "fresh calendar event list, ${eventList.size} entries" }
         val (visibleEventList, maxLevel) = layoutPair
         verbose { "--> $visibleEventList visible events" }

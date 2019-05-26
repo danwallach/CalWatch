@@ -74,7 +74,6 @@ General code refactoring and improvement ideas
       - managed to switch to the new "rounded" style, but can't move the toggle to the left of the text
 
     TODO code refactoring
-        TODO simplify / kill WireEvent and WireUpdate
         TODO simplify / kill PreferencesHelper
 
     TODO too much .toFloat() and .toDouble() in ClockFace -- cleanup?!

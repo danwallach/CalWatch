@@ -270,16 +270,25 @@ class CalendarFetcher(
             return null
         }
 
-        // Primary sort: color, so events from the same calendar will become consecutive wedges
+        // Sorting priorities:
 
-        // Secondary sort: endTime, with objects ending earlier appearing first in the sort.
+        // Priority #1: event duration, bucketed into three-hour chunks, short events first
+        //   (goal: deal with all the long events first, so that the short events are more
+        //    likely to coalesce into the same level, using integer division because we only
+        //    want to segregate "big" events from "small" events, otherwise we want to sort
+        //    against the priorities below)
+
+        // Priority #2: color, so events from the same calendar will become consecutive wedges
+
+        // Priority #3: endTime, with objects ending earlier appearing first in the sort.
         //   (goal: first fill in the outer ring of the display with smaller wedges; the big
         //    ones will end late in the day, and will thus end up on the inside of the watchface)
 
-        // Third-priority sort: startTime, with objects starting later (smaller) appearing first in the sort.
+        // Priority #4: startTime, with objects starting later (smaller) appearing first in the sort.
 
         return cr.sortedWith(
-            compareBy<CalendarEvent> { it.displayColor }
+            compareBy<CalendarEvent> { (it.endTime - it.startTime) / 3.hours }
+                .thenBy { it.displayColor }
                 .thenBy { it.endTime }
                 .thenByDescending { it.startTime })
     }
@@ -316,12 +325,12 @@ class CalendarFetcher(
         // call await() for the results to come back. That's all handled by withContext().
 
         GlobalScope.launch {
+            // Everything in this block will execute on a background thread. The original
+            // function, runAsyncLoader(), will return immediately.
+
             info { "runAsyncLoader: here we go! (CalendarFetcher #$instanceID)" }
 
             val result = withContext(Dispatchers.Default) {
-                // Everything in this block will execute on a background thread. The original
-                // function, runAsyncLoader(), will return immediately.
-
                 val startTimeNano = SystemClock.elapsedRealtimeNanos()
                 val eventList = loadContent(context)
                 val endTimeNano = SystemClock.elapsedRealtimeNanos()
@@ -335,6 +344,7 @@ class CalendarFetcher(
                     val startTimeNano2 = SystemClock.elapsedRealtimeNanos()
                     val layoutResult = EventLayoutUniform.clipToVisible(eventList)
                     val endTimeNano2 = SystemClock.elapsedRealtimeNanos()
+
                     info { "runAsyncLoader: total calendar layout time: %.3f ms".format((endTimeNano2 - startTimeNano2) / 1000000.0) }
                     Pair(eventList, layoutResult)
                 }
@@ -346,7 +356,7 @@ class CalendarFetcher(
 
                 withContext(Dispatchers.Main) {
                     info("runAsyncLoader: updating world state (should be on UI thread now)")
-                    ClockState.setWireEventList(result.first, result.second)
+                    ClockState.setEventList(result.first, result.second)
                     Utilities.redrawEverything()
                 }
             }
