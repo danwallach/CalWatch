@@ -117,7 +117,7 @@ dependencies {
     implementation 'androidx.appcompat:appcompat:1.0.2'
     compileOnly 'com.google.android.wearable:wearable:2.4.0'
 
-    implementation 'com.google.android.gms:play-services-wearable:16.0.1'
+    implementation 'com.google.android.gms:play-services-wearable:17.0.0'
 
     implementation 'androidx.core:core-ktx:1.0.2'
     implementation 'androidx.wear:wear:1.0.0'

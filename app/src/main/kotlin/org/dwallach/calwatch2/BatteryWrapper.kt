@@ -46,26 +46,26 @@ object BatteryWrapper : AnkoLogger {
             if (intent == null) {
                 warn("Failed to get intent from registerReceiver!")
                 return
-            }
+            } else {
+                // For whatever reason, Kotlin is failing to infer that intent is not null here,
+                // but adding the type cast seems to solve the problem. Shouldn't happen.
+                with(intent as Intent) {
+                    // Are we charging / charged?
+                    isCharging = when (getIntExtra(EXTRA_STATUS, -1)) {
+                        BATTERY_STATUS_CHARGING, BATTERY_STATUS_FULL -> true
+                        else -> false
+                    }
 
-            // For whatever reason, Kotlin is failing to infer that intent is not null here,
-            // but adding the type cast seems to solve the problem. Shouldn't happen.
-            with(intent as Intent) {
-                // Are we charging / charged?
-                isCharging = when (getIntExtra(EXTRA_STATUS, -1)) {
-                    BATTERY_STATUS_CHARGING, BATTERY_STATUS_FULL -> true
-                    else -> false
+                    // How are we charging?
+                    //            val chargePlug = getIntExtra(BatteryManager.EXTRA_PLUGGED, -1)
+                    //            val usbCharge = chargePlug == BatteryManager.BATTERY_PLUGGED_USB
+                    //            val acCharge = chargePlug == BatteryManager.BATTERY_PLUGGED_AC
+
+                    val level = getIntExtra(EXTRA_LEVEL, -1)
+                    val scale = getIntExtra(EXTRA_SCALE, -1)
+
+                    batteryPct = level / scale.toFloat()
                 }
-
-                // How are we charging?
-                //            val chargePlug = getIntExtra(BatteryManager.EXTRA_PLUGGED, -1)
-                //            val usbCharge = chargePlug == BatteryManager.BATTERY_PLUGGED_USB
-                //            val acCharge = chargePlug == BatteryManager.BATTERY_PLUGGED_AC
-
-                val level = getIntExtra(EXTRA_LEVEL, -1)
-                val scale = getIntExtra(EXTRA_SCALE, -1)
-
-                batteryPct = level / scale.toFloat()
             }
         } catch (throwable: Throwable) {
             // if something fails, we really don't care; whatever value as in batteryPct from
