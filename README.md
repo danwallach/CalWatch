@@ -94,4 +94,4 @@ custom code than the general-purpose complication libraries do.
   https://constraints.cs.washington.edu/cassowary/
 
 * "Unavailable calendar" icon by Björn Andersson
-  ttp://www.flaticon.com/authors/google
+  http://www.flaticon.com/authors/google
