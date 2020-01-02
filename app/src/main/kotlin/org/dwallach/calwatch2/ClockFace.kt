@@ -777,9 +777,7 @@ class ClockFace(private val configMode: Boolean = false) : AnkoLogger {
             //
 
             verbose { "battery at $batteryPct" }
-            if (batteryPct > Constants.POWER_WARN_LOW_LEVEL) {
-                // batteryPathCache = null
-            } else {
+            if (batteryPct <= Constants.POWER_WARN_LOW_LEVEL) {
                 val minRadius = 0.01f
                 val maxRadius = 0.06f
                 batteryCritical = batteryPct <= Constants.POWER_WARN_CRITICAL_LEVEL
