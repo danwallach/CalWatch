@@ -12,6 +12,7 @@ import android.os.Bundle
 import android.support.wearable.complications.ComplicationProviderInfo
 import android.support.wearable.complications.ProviderChooserIntent
 import androidx.appcompat.app.AppCompatActivity
+import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.wear.widget.WearableRecyclerView
 import org.dwallach.R
 import org.dwallach.calwatch2.Constants
@@ -53,20 +54,23 @@ class AnalogComplicationConfigActivity : AppCompatActivity(), AnkoLogger {
             adapterDataList
         )
 
-        val mWearableRecyclerView = findViewById<WearableRecyclerView>(R.id.wearable_recycler_view)
+        val recyclerView = findViewById<WearableRecyclerView>(R.id.wearable_recycler_view)
 
-        if (mWearableRecyclerView == null) {
+        if (recyclerView == null) {
             error("null recycler view!")
         } else {
 
             // Aligns the first and last items on the list vertically centered on the screen.
-//        mWearableRecyclerView?.centerEdgeItems = true
+//        recyclerView?.centerEdgeItems = true
 
             // Improves performance because we know changes in content do not change the layout size of
             // the RecyclerView.
-            mWearableRecyclerView.setHasFixedSize(true)
+            recyclerView.setHasFixedSize(true)
+            recyclerView.adapter = mAdapter
 
-            mWearableRecyclerView.adapter = mAdapter
+            // this didn't used to be necessary, but apparently it is now
+            recyclerView.layoutManager = LinearLayoutManager(this)
+
             info("recycler view initialized")
         }
     }
