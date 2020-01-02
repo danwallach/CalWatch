@@ -19,6 +19,8 @@ Android Wear command-line things I can never remember:
 -- How to connect to Bluetooth debugging: http://blog.timmattison.com/archives/2014/07/16/common-android-wear-tasks-for-developers/
     adb forward tcp:4444 localabstract:/adb-hub; adb connect 127.0.0.1:4444
 
+    -- The newer WiFi debugging is easier and faster, though.
+
 -- How to get a dump from the watch into a file and see it while it's going
    (-d == USB device, -e == TCP device)
     adb -e logcat -v time | & tee logdumps/whatever.txt
