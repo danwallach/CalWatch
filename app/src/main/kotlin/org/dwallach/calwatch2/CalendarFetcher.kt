@@ -36,13 +36,14 @@ import kotlin.comparisons.thenByDescending
  * This class handles all the dirty work of asynchronously loading calendar data from the calendar provider
  * and updating the state in [ClockState]. The constructor arguments, [contentUri] and [authority], are used
  * to specify what database Uri we're querying and what "authority" we're using to set up the IntentFilter.
- * These are different on wear vs. mobile, so are specified in those subdirectories. Everything else
- * is portable.
+ * These are different on wear vs. mobile, thus they're specified as arguments. (To use this class
+ * for an Android phone rather than a watch, you would use [CalendarContract.Instances.CONTENT_URI], and
+ * [CalendarContract.AUTHORITY]. There's already logic here to use both "authorities", just in case.)
  *
  * Internally, this class registers a [BroadcastReceiver] such that it will detect and deal with updates
- * to the calendar itself. External users can call [CalendarFetcher.requestRescan], which will cause
- * the most recently created CalendarFetcher to do the work. This is something worth doing at the top
- * of the hour, when it's time to update the calendar.
+ * when the calendar itself changes. External users can call [CalendarFetcher.requestRescan], which will cause
+ * the most recently created CalendarFetcher instance to do the work. This is something worth doing at the top
+ * of the hour, when it's time to update the local view of the calendar.
  */
 class CalendarFetcher(
     initialContext: Context,
@@ -161,6 +162,10 @@ class CalendarFetcher(
         }
     }
 
+    /**
+     * We don't want to have a black calendar wedge on a black background, so we'll fall back
+     * to "dark gray" when that happens.
+     */
     private fun calendarColorFix(calendarColor: Int, eventColor: Int) = when {
         eventColor != 0 -> eventColor
         calendarColor != 0 -> calendarColor
@@ -273,10 +278,9 @@ class CalendarFetcher(
         // Sorting priorities:
 
         // Priority #1: event duration, bucketed into three-hour chunks, short events first
-        //   (goal: deal with all the long events first, so that the short events are more
-        //    likely to coalesce into the same level, using integer division because we only
-        //    want to segregate "big" events from "small" events, otherwise we want to sort
-        //    against the priorities below)
+        //   (goal: get the short events to coalesce into the same level, using integer
+        //    division because we only want to segregate "big" events from "small" events,
+        //    otherwise we want to sort against the priorities below)
 
         // Priority #2: color, so events from the same calendar will become consecutive wedges
 
@@ -293,7 +297,10 @@ class CalendarFetcher(
                 .thenByDescending { it.startTime })
     }
 
-    /** Starts an asynchronous task to load the calendar. */
+    /**
+     * Starts an asynchronous task to load the calendar. This function returns immediately,
+     * eventually updating the state in [ClockState],
+     */
     private fun runAsyncLoader(context: Context?) {
         if (context == null) {
             error { "runAsyncLoader: no context, cannot load calendar" }
@@ -319,10 +326,12 @@ class CalendarFetcher(
         // well as "suspend" functions and other stuff.
 
         // The call to withContext() creates a task that happily runs in the background, on
-        // some other thread, that will eventually return a value that we'll read here, which
-        // might be some other thread! This is only possible when we're in the "suspend" universe,
-        // but note that we don't have to declare any "suspend" functions nor do we have to
-        // call await() for the results to come back. That's all handled by withContext().
+        // a worker thread, that will eventually return a value that we'll read "here", which
+        // might yet another worker thread when we get back, even though it's starting off
+        // (most likely) on the UI thread. This switching trick is only possible when we're
+        // in the "suspend" universe, but note that we don't have to declare any "suspend"
+        // functions nor do we have to call await() for the results to come back. That's
+        // all handled by withContext().
 
         GlobalScope.launch {
             // Everything in this block will execute on a background thread. The original
