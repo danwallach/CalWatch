@@ -48,11 +48,11 @@ def getVersionName = { ->
 }
 
 android {
-    compileSdkVersion 28
-    buildToolsVersion '28.0.3'
+    compileSdkVersion 29
+    buildToolsVersion '29.0.2'
     defaultConfig {
         applicationId 'org.dwallach.calwatch2'
-        targetSdkVersion 28
+        targetSdkVersion 29
 //        minSdkVersion 25
         minSdkVersion 23
         multiDexEnabled true
@@ -113,13 +113,13 @@ allprojects {
 
 dependencies {
     implementation fileTree(include: ['*.jar'], dir: 'libs')
-    implementation 'com.google.android.support:wearable:2.4.0'
-    implementation 'androidx.appcompat:appcompat:1.0.2'
-    compileOnly 'com.google.android.wearable:wearable:2.4.0'
+    implementation 'com.google.android.support:wearable:2.5.0'
+    implementation 'androidx.appcompat:appcompat:1.1.0'
+    compileOnly 'com.google.android.wearable:wearable:2.5.0'
 
     implementation 'com.google.android.gms:play-services-wearable:17.0.0'
 
-    implementation 'androidx.core:core-ktx:1.0.2'
+    implementation 'androidx.core:core-ktx:1.1.0'
     implementation 'androidx.wear:wear:1.0.0'
 
     implementation 'androidx.constraintlayout:constraintlayout:1.1.3'

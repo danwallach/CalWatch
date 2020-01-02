@@ -8,7 +8,7 @@
 package org.dwallach.calwatch2
 
 import android.content.Context
-import android.os.Build
+import androidx.core.content.pm.PackageInfoCompat
 import org.jetbrains.anko.AnkoLogger
 import org.jetbrains.anko.error
 import org.jetbrains.anko.info
@@ -20,11 +20,15 @@ object VersionWrapper : AnkoLogger {
     fun logVersion(activity: Context) {
         try {
             val pinfo = activity.packageManager.getPackageInfo(activity.packageName, 0)
-            if (Build.VERSION.SDK_INT < 28) {
-                // TODO: remove this line, but can't do that until we can guarantee API >= 28
-                info { "Version: ${pinfo.versionName} (${pinfo.versionCode})" }
+            if (pinfo == null) {
+                error { "package info was null, can't figure out version information" }
             } else {
-                info { "Version: ${pinfo.versionName} (${pinfo.longVersionCode})" }
+                val versionInfo = PackageInfoCompat.getLongVersionCode(pinfo)
+
+                val hiBits = (versionInfo shr 32) and 0xffffffff
+                val loBits = versionInfo and 0xffffff
+
+                info { "Version: ${pinfo.versionName} (versionCodeMajor: $hiBits / versionCode: $loBits)" }
             }
         } catch (e: Throwable) {
             error("failed to get version information!", e)

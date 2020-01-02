@@ -47,9 +47,7 @@ object BatteryWrapper : AnkoLogger {
                 warn("Failed to get intent from registerReceiver!")
                 return
             } else {
-                // For whatever reason, Kotlin is failing to infer that intent is not null here,
-                // but adding the type cast seems to solve the problem. Shouldn't happen.
-                with(intent as Intent) {
+                with(intent) {
                     // Are we charging / charged?
                     isCharging = when (getIntExtra(EXTRA_STATUS, -1)) {
                         BATTERY_STATUS_CHARGING, BATTERY_STATUS_FULL -> true

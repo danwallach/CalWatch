@@ -41,7 +41,10 @@ class ClockFaceConfigView(context: Context, attrs: AttributeSet) : View(context,
         viewRefMap[this] = true
     }
 
-    override fun onVisibilityChanged(changedView: View?, visibility: Int) = invalidate()
+    override fun onVisibilityChanged(changedView: View, visibility: Int) {
+        super.onVisibilityChanged(changedView, visibility)
+        invalidate()
+    }
 
     override fun onSizeChanged(w: Int, h: Int, oldw: Int, oldh: Int) {
         super.onSizeChanged(w, h, oldw, oldh)

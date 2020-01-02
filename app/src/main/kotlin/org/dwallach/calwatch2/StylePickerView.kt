@@ -36,7 +36,10 @@ class StylePickerView(context: Context, attrs: AttributeSet) : View(context, att
 
     private val allDrawables = listOf(toolSelected, liteSelected, numbersSelected)
 
-    override fun onVisibilityChanged(changedView: View?, visibility: Int) = invalidate()
+    override fun onVisibilityChanged(changedView: View, visibility: Int) {
+        super.onVisibilityChanged(changedView, visibility)
+        invalidate()
+    }
 
     override fun onSizeChanged(w: Int, h: Int, oldw: Int, oldh: Int) {
         super.onSizeChanged(w, h, oldw, oldh)
