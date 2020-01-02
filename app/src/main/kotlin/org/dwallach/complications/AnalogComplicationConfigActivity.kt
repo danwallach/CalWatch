@@ -27,7 +27,6 @@ import org.jetbrains.anko.info
  * This began life as the AnalogComplicationConfigActivity example code.
  */
 class AnalogComplicationConfigActivity : AppCompatActivity(), AnkoLogger {
-    private var mWearableRecyclerView: WearableRecyclerView? = null
     private var mAdapter: AnalogComplicationConfigRecyclerViewAdapter? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -44,25 +43,37 @@ class AnalogComplicationConfigActivity : AppCompatActivity(), AnkoLogger {
         ComplicationWrapper.wimpyInit(Constants.COMPLICATION_LOCATIONS)
         PreferencesHelper.loadPreferences(this)
 
+        val adapterDataList = AnalogComplicationConfigData.getDataToPopulateAdapter(this)
+
+        info { "For adapter data, got ${adapterDataList.size} entries" }
+
         mAdapter = AnalogComplicationConfigRecyclerViewAdapter(
             applicationContext,
             ComplicationWrapper.watchFaceClass,
-            AnalogComplicationConfigData.getDataToPopulateAdapter(this)
+            adapterDataList
         )
 
-        mWearableRecyclerView = findViewById(R.id.wearable_recycler_view)
+        val mWearableRecyclerView = findViewById<WearableRecyclerView>(R.id.wearable_recycler_view)
 
-        // Aligns the first and last items on the list vertically centered on the screen.
+        if (mWearableRecyclerView == null) {
+            error("null recycler view!")
+        } else {
+
+            // Aligns the first and last items on the list vertically centered on the screen.
 //        mWearableRecyclerView?.centerEdgeItems = true
 
-        // Improves performance because we know changes in content do not change the layout size of
-        // the RecyclerView.
-        mWearableRecyclerView?.setHasFixedSize(true)
+            // Improves performance because we know changes in content do not change the layout size of
+            // the RecyclerView.
+            mWearableRecyclerView.setHasFixedSize(true)
 
-        mWearableRecyclerView?.adapter = mAdapter
+            mWearableRecyclerView.adapter = mAdapter
+            info("recycler view initialized")
+        }
     }
 
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
+        super.onActivityResult(requestCode, resultCode, data)
+
         info("analog config activity: onActivityResult")
         if (data == null) {
             debug { "null intent, nothing to do (requestCode = $requestCode, resultCode = $resultCode)" }

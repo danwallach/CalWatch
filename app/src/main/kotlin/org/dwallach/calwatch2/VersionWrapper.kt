@@ -28,7 +28,7 @@ object VersionWrapper : AnkoLogger {
                 val hiBits = (versionInfo shr 32) and 0xffffffff
                 val loBits = versionInfo and 0xffffff
 
-                info { "Version: ${pinfo.versionName} (versionCodeMajor: $hiBits / versionCode: $loBits)" }
+                info { "Version: ${pinfo.versionName} (versionCodeMajor: $hiBits, versionCode: $loBits)" }
             }
         } catch (e: Throwable) {
             error("failed to get version information!", e)
