@@ -6,23 +6,13 @@
  */
 package org.dwallach.complications
 
+import android.content.ComponentName
+import android.content.Context
+import android.content.Intent.FLAG_ACTIVITY_NEW_TASK
 import android.graphics.Canvas
 import android.graphics.Color
 import android.graphics.Rect
-import android.support.wearable.watchface.CanvasWatchFaceService
 import android.support.wearable.complications.ComplicationData
-import android.support.wearable.complications.rendering.ComplicationDrawable
-import android.support.wearable.complications.ComplicationHelperActivity
-import android.content.ComponentName
-import android.content.Context
-import org.dwallach.calwatch2.CalWatchFaceService
-import org.dwallach.calwatch2.ClockFaceConfigView
-import org.dwallach.complications.ComplicationLocation.BACKGROUND
-import org.dwallach.complications.ComplicationLocation.BOTTOM
-import org.dwallach.complications.ComplicationLocation.TOP
-import org.dwallach.complications.ComplicationLocation.LEFT
-import org.dwallach.complications.ComplicationLocation.RIGHT
-import android.content.Intent.FLAG_ACTIVITY_NEW_TASK
 import android.support.wearable.complications.ComplicationData.TYPE_EMPTY
 import android.support.wearable.complications.ComplicationData.TYPE_ICON
 import android.support.wearable.complications.ComplicationData.TYPE_LARGE_IMAGE
@@ -31,7 +21,17 @@ import android.support.wearable.complications.ComplicationData.TYPE_NO_PERMISSIO
 import android.support.wearable.complications.ComplicationData.TYPE_RANGED_VALUE
 import android.support.wearable.complications.ComplicationData.TYPE_SHORT_TEXT
 import android.support.wearable.complications.ComplicationData.TYPE_SMALL_IMAGE
+import android.support.wearable.complications.ComplicationHelperActivity
+import android.support.wearable.complications.rendering.ComplicationDrawable
+import android.support.wearable.watchface.CanvasWatchFaceService
 import android.support.wearable.watchface.WatchFaceService
+import org.dwallach.calwatch2.CalWatchFaceService
+import org.dwallach.calwatch2.ClockFaceConfigView
+import org.dwallach.complications.ComplicationLocation.BACKGROUND
+import org.dwallach.complications.ComplicationLocation.BOTTOM
+import org.dwallach.complications.ComplicationLocation.LEFT
+import org.dwallach.complications.ComplicationLocation.RIGHT
+import org.dwallach.complications.ComplicationLocation.TOP
 import org.jetbrains.anko.AnkoLogger
 import org.jetbrains.anko.debug
 import org.jetbrains.anko.info

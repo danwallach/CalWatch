@@ -34,7 +34,7 @@ object EventLayoutUniform : AnkoLogger {
 
         val localClipTime = TimeWrapper.localFloorHour
         val clipStartMillis = localClipTime - gmtOffset // convert from localtime back to GMT time for looking at events
-        val clipEndMillis = clipStartMillis + 43200000  // 12 hours later
+        val clipEndMillis = clipStartMillis + 43200000 // 12 hours later
 
         val clippedEvents = events.map {
             it.clip(clipStartMillis, clipEndMillis)

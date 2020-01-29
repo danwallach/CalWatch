@@ -16,6 +16,8 @@ import android.view.MotionEvent.ACTION_BUTTON_RELEASE
 import android.view.MotionEvent.ACTION_POINTER_UP
 import android.view.MotionEvent.ACTION_UP
 import android.view.View
+import kotlin.math.PI
+import kotlin.math.atan2
 import org.dwallach.R
 import org.dwallach.calwatch2.ClockState.FACE_LITE
 import org.dwallach.calwatch2.ClockState.FACE_NUMBERS
@@ -23,8 +25,6 @@ import org.dwallach.calwatch2.ClockState.FACE_TOOL
 import org.jetbrains.anko.AnkoLogger
 import org.jetbrains.anko.info
 import org.jetbrains.anko.warn
-import kotlin.math.PI
-import kotlin.math.atan2
 
 class StylePickerView(context: Context, attrs: AttributeSet) : View(context, attrs), AnkoLogger {
     private var w: Int = -1

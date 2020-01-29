@@ -17,13 +17,13 @@ import android.view.MotionEvent.ACTION_BUTTON_RELEASE
 import android.view.MotionEvent.ACTION_POINTER_UP
 import android.view.MotionEvent.ACTION_UP
 import android.view.View
-import org.jetbrains.anko.AnkoLogger
-import org.jetbrains.anko.info
-import org.jetbrains.anko.warn
 import java.util.WeakHashMap
 import kotlin.math.PI
 import kotlin.math.atan2
 import kotlin.math.sqrt
+import org.jetbrains.anko.AnkoLogger
+import org.jetbrains.anko.info
+import org.jetbrains.anko.warn
 
 /**
  * As part of our on-watch configuration dialog, the easiest way to make a background image

@@ -11,6 +11,13 @@ import android.graphics.Paint
 import android.graphics.Path
 import android.graphics.RectF
 import android.graphics.drawable.Drawable
+import java.util.WeakHashMap
+import kotlin.math.PI
+import kotlin.math.asin
+import kotlin.math.cos
+import kotlin.math.floor
+import kotlin.math.pow
+import kotlin.math.sin
 import org.dwallach.calwatch2.BatteryWrapper.batteryPct
 import org.dwallach.calwatch2.ClockState.FACE_LITE
 import org.dwallach.calwatch2.ClockState.FACE_NUMBERS
@@ -20,23 +27,16 @@ import org.dwallach.calwatch2.ClockState.showDayDate
 import org.dwallach.calwatch2.ClockState.showSeconds
 import org.dwallach.calwatch2.PaintCan.Brush
 import org.dwallach.calwatch2.PaintCan.Style
+import org.dwallach.complications.ComplicationLocation.BOTTOM
 import org.dwallach.complications.ComplicationLocation.LEFT
 import org.dwallach.complications.ComplicationLocation.RIGHT
 import org.dwallach.complications.ComplicationLocation.TOP
-import org.dwallach.complications.ComplicationLocation.BOTTOM
 import org.dwallach.complications.ComplicationWrapper
 import org.dwallach.complications.ComplicationWrapper.isComplicationVisible
 import org.jetbrains.anko.AnkoLogger
 import org.jetbrains.anko.error
 import org.jetbrains.anko.info
 import org.jetbrains.anko.verbose
-import java.util.WeakHashMap
-import kotlin.math.PI
-import kotlin.math.asin
-import kotlin.math.cos
-import kotlin.math.floor
-import kotlin.math.pow
-import kotlin.math.sin
 
 /**
  * All of the graphics calls for drawing watchfaces happen here. Note that this class knows

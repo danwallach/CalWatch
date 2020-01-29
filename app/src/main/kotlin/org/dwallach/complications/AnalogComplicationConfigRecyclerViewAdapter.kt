@@ -10,7 +10,6 @@ import android.app.Activity
 import android.content.ComponentName
 import android.content.Context
 import android.graphics.drawable.Drawable
-// import android.support.v7.widget.RecyclerView
 import android.support.wearable.complications.ComplicationHelperActivity
 import android.support.wearable.complications.ComplicationProviderInfo
 import android.support.wearable.complications.ProviderInfoRetriever
@@ -24,9 +23,8 @@ import android.widget.ImageButton
 import android.widget.ImageView
 import android.widget.Switch
 import androidx.recyclerview.widget.RecyclerView
-
+import java.util.WeakHashMap
 import java.util.concurrent.Executors
-
 import org.dwallach.R
 import org.dwallach.calwatch2.ClockState
 import org.dwallach.calwatch2.PreferencesHelper
@@ -48,7 +46,6 @@ import org.jetbrains.anko.debug
 import org.jetbrains.anko.info
 import org.jetbrains.anko.verbose
 import org.jetbrains.anko.warn
-import java.util.WeakHashMap
 
 /**
  * This class handles all the different config items that might ever be displayed.

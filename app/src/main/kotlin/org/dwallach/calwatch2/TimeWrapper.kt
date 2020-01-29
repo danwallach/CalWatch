@@ -9,11 +9,10 @@ package org.dwallach.calwatch2
 
 import android.os.SystemClock
 import android.text.format.DateUtils
-import org.jetbrains.anko.AnkoLogger
-import org.jetbrains.anko.info
-
 import java.util.TimeZone
 import kotlin.math.floor
+import org.jetbrains.anko.AnkoLogger
+import org.jetbrains.anko.info
 
 /**
  * We're asking for the time an awful lot for each different frame we draw, which
@@ -163,7 +162,7 @@ object TimeWrapper : AnkoLogger {
         }
 
         val elapsedTime = frameEndTime - lastFPSTime // ns since last time we printed something
-        val runtime = frameEndTime - frameStartTime  // ns since frameStart() called
+        val runtime = frameEndTime - frameStartTime // ns since frameStart() called
 
         if (samples == 0) {
             avgRuntimeAccumulator = runtime

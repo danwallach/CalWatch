@@ -18,6 +18,10 @@ import android.os.SystemClock
 import android.provider.CalendarContract
 import android.support.wearable.provider.WearableCalendarContract
 import android.text.format.DateUtils
+import java.lang.ref.WeakReference
+import kotlin.comparisons.compareBy
+import kotlin.comparisons.thenBy
+import kotlin.comparisons.thenByDescending
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
@@ -26,11 +30,6 @@ import org.jetbrains.anko.AnkoLogger
 import org.jetbrains.anko.error
 import org.jetbrains.anko.info
 import org.jetbrains.anko.warn
-
-import java.lang.ref.WeakReference
-import kotlin.comparisons.compareBy
-import kotlin.comparisons.thenBy
-import kotlin.comparisons.thenByDescending
 
 /**
  * This class handles all the dirty work of asynchronously loading calendar data from the calendar provider

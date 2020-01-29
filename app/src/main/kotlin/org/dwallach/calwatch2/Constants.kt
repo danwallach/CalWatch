@@ -6,9 +6,9 @@
  */
 package org.dwallach.calwatch2
 
+import org.dwallach.complications.ComplicationLocation.BOTTOM
 import org.dwallach.complications.ComplicationLocation.RIGHT
 import org.dwallach.complications.ComplicationLocation.TOP
-import org.dwallach.complications.ComplicationLocation.BOTTOM
 
 object Constants {
     const val PREFS_KEY = "org.dwallach.calwatch2.prefs"

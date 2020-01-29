@@ -10,14 +10,14 @@ import android.content.Context
 import android.content.Intent
 import android.content.IntentFilter
 import android.os.BatteryManager.BATTERY_STATUS_CHARGING
-import android.os.BatteryManager.EXTRA_STATUS
 import android.os.BatteryManager.BATTERY_STATUS_FULL
 import android.os.BatteryManager.EXTRA_LEVEL
 import android.os.BatteryManager.EXTRA_SCALE
+import android.os.BatteryManager.EXTRA_STATUS
+import java.lang.ref.WeakReference
 import org.jetbrains.anko.AnkoLogger
 import org.jetbrains.anko.info
 import org.jetbrains.anko.warn
-import java.lang.ref.WeakReference
 
 /**
  * This class wraps all of our interaction with Android's BatteryManager. In particular, we only

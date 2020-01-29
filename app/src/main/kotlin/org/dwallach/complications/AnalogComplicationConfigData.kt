@@ -10,7 +10,6 @@ import android.content.Context
 import android.os.Build
 import androidx.recyclerview.widget.RecyclerView
 import androidx.recyclerview.widget.RecyclerView.ViewHolder
-
 import org.dwallach.R
 import org.jetbrains.anko.AnkoLogger
 import org.jetbrains.anko.info
