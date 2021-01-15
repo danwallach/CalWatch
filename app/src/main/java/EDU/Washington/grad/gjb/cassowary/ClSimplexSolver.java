@@ -782,7 +782,7 @@ public class ClSimplexSolver extends ClTableau
         // we haven't found an restricted variable yet
         if (v.isRestricted()) {
           if (!foundNewRestricted && !v.isDummy() && c < 0.0) {
-            final Set col = _columns.get(v);
+            final Set<ClAbstractVariable> col = _columns.get(v);
             if (col == null ||
                     ( col.size() == 1 && columnsHasKey(_objective) ) ) {
               subject = v;

@@ -9,6 +9,9 @@
     <uses-permission android:name="android.permission.READ_CALENDAR" />
     <uses-permission android:name="android.permission.WAKE_LOCK" />
     <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
+    <!-- WRITE_EXTENRAL_STORAGE is ignored in newer versions of Android, and you get local storage
+         without having to ask. But we need to run on older versions of Android, so we'll leave
+         this request in place. For now. https://developer.android.com/training/data-storage -->
     <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
     <uses-permission android:name="com.google.android.wearable.permission.RECEIVE_COMPLICATION_DATA" />
 
