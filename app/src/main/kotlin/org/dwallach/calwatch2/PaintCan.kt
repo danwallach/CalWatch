@@ -9,15 +9,14 @@ package org.dwallach.calwatch2
 
 import android.graphics.Color
 import android.graphics.Paint
-import org.jetbrains.anko.AnkoLogger
-import org.jetbrains.anko.error
-import org.jetbrains.anko.verbose
+import android.util.Log
 
+private val TAG = "PaintCan"
 /**
  * Cheesy helper for getting Paint values for calendar events and making sure we don't allocate
  * the same color twice.
  */
-class PaintCan(private val radius: Float) : AnkoLogger {
+class PaintCan(private val radius: Float) {
     private var palette: Array<Array<Paint?>>
 
     enum class Style {
@@ -54,7 +53,7 @@ class PaintCan(private val radius: Float) : AnkoLogger {
      * to call this *before* trying to get() any colors, or you'll get a NullPointerException.
      */
     init {
-        verbose { "initPaintBucket: $radius" }
+        Log.v(TAG, "initPaintBucket: $radius")
 
         val textSize = radius / 3f
         val smTextSize = radius / 6f
@@ -131,7 +130,7 @@ class PaintCan(private val radius: Float) : AnkoLogger {
             "undefined paintcan color, style($style), brushId($brushId)"
         }
 
-    companion object : AnkoLogger {
+    companion object {
         private fun colorFunc(argb: Int) = Paint(Paint.ANTI_ALIAS_FLAG).apply {
             strokeJoin = Paint.Join.BEVEL
             color = argb
@@ -229,7 +228,7 @@ class PaintCan(private val radius: Float) : AnkoLogger {
                     Style.AMBIENT, Style.AMBIENT_ANTI_BURNIN -> argbToGreyARGB(_argb)
 
                     else -> {
-                        error { "watchfacePaint: unknown style: $_style" }
+                        Log.e(TAG, "watchfacePaint: unknown style: $_style")
                         0
                     }
                 }

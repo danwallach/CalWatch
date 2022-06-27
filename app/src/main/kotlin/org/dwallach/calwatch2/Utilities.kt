@@ -7,11 +7,13 @@
 
 package org.dwallach.calwatch2
 
+import android.app.Activity
+import android.content.Context
+import android.content.Intent
+import android.util.Log
 import org.dwallach.complications.AnalogComplicationConfigRecyclerViewAdapter
-import org.jetbrains.anko.AnkoLogger
-import org.jetbrains.anko.error
 
-object Utilities : AnkoLogger {
+object Utilities {
     /**
      * This function, called from all over the place, is used to indicate that
      * every instance of a ClockFace (whether it's on the watchface or inside
@@ -31,9 +33,9 @@ object Utilities : AnkoLogger {
  * the given message. Kotlin's version throws an [IllegalStateException]. We want both behaviors.
  * The optional Throwable parameter is used for AnkoLogger and is not rethrown.
  */
-fun AnkoLogger.errorLogAndThrow(message: Any, thr: Throwable? = null): Nothing {
+fun errorLogAndThrow(tag: String, message: Any, thr: Throwable? = null): Nothing {
     // see also: https://discuss.kotlinlang.org/t/interaction-of-ankologger-error-and-kotlin-error/1508
-    error(message, thr) // AnkoLogger
+    Log.e(tag, message.toString(), thr)
     kotlin.error(message)
 }
 

@@ -11,14 +11,14 @@ import android.Manifest
 import android.app.Activity
 import android.content.Context
 import android.content.pm.PackageManager
+import android.util.Log
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
-import org.jetbrains.anko.AnkoLogger
-import org.jetbrains.anko.error
-import org.jetbrains.anko.verbose
+
+private val TAG = "CalendarPermission"
 
 /** Deal with all the run-time permission machinery. */
-object CalendarPermission : AnkoLogger {
+object CalendarPermission {
     private const val INTERNAL_PERM_REQUEST_CODE = 31337
 
     /**
@@ -37,7 +37,7 @@ object CalendarPermission : AnkoLogger {
     /** Check whether we have permission to access the calendar. */
     fun check(context: Context): Boolean {
         val result = ContextCompat.checkSelfPermission(context, Manifest.permission.READ_CALENDAR)
-        verbose { "calendar permissions check: $result (granted = ${PackageManager.PERMISSION_GRANTED})" }
+        Log.v(TAG, "calendar permissions check: $result (granted = ${PackageManager.PERMISSION_GRANTED})")
 
 //        val result2 = ContextCompat.checkSelfPermission(context, Manifest.permission.BODY_SENSORS)
 //        verbose { "body sensor permissions check: $result2 (granted = ${PackageManager.PERMISSION_GRANTED})" }
@@ -48,7 +48,7 @@ object CalendarPermission : AnkoLogger {
     /** Check whether we've already asked, so we're walking on thin ice. */
     fun checkAlreadyAsked(activity: Activity): Boolean {
         val result = ActivityCompat.shouldShowRequestPermissionRationale(activity, Manifest.permission.READ_CALENDAR)
-        verbose { "previous calendar checks performed#$numRequests, shouldShowRationale=$result" }
+        Log.v(TAG, "previous calendar checks performed#$numRequests, shouldShowRationale=$result")
         return result
     }
 
@@ -62,7 +62,7 @@ object CalendarPermission : AnkoLogger {
     fun request(activity: Activity) {
         if (!check(activity)) {
             numRequests++
-            verbose { "this will be check #$numRequests" }
+            Log.v(TAG, "this will be check #$numRequests")
             ActivityCompat.requestPermissions(
                 activity,
                 arrayOf(Manifest.permission.READ_CALENDAR), // Manifest.permission.BODY_SENSORS),
@@ -73,7 +73,7 @@ object CalendarPermission : AnkoLogger {
                 putInt("permissionRequests", numRequests)
 
                 if (!commit())
-                    verbose { "savePreferences commit failed ?!" }
+                    Log.v(TAG, "savePreferences commit failed ?!")
             }
         }
     }
@@ -83,17 +83,17 @@ object CalendarPermission : AnkoLogger {
         if (requestCode == INTERNAL_PERM_REQUEST_CODE) {
             // If request is cancelled, the result arrays are empty.
             if (grantResults.isNotEmpty() && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-                verbose { "calendar permission granted!" }
+                Log.v(TAG, "calendar permission granted!")
                 ClockState.calendarPermission = true
             } else {
-                verbose { "calendar permission denied!" }
+                Log.v(TAG, "calendar permission denied!")
                 ClockState.calendarPermission = false
             }
         } else {
-            error {
+            Log.e(TAG,
                 "weird permission result: code(%d), perms(%s), results(%s)"
                     .format(requestCode, permissions.asList().toString(), grantResults.asList().toString())
-            }
+            )
         }
     }
 }

@@ -6,8 +6,9 @@
  */
 package org.dwallach.calwatch2
 
-import org.jetbrains.anko.AnkoLogger
-import org.jetbrains.anko.verbose
+import android.util.Log
+
+private val TAG = "ClockState"
 
 /**
  * We're doing something of the model-view-controller thing here, where ClockState has the "model" --
@@ -18,7 +19,7 @@ import org.jetbrains.anko.verbose
  * The idea is that there is a ClockState singleton, and it doesn't know anything about Android
  * contexts or any of that stuff.
  */
-object ClockState : AnkoLogger {
+object ClockState {
     const val FACE_TOOL = 0
     const val FACE_NUMBERS = 1
     const val FACE_LITE = 2
@@ -45,9 +46,9 @@ object ClockState : AnkoLogger {
      * which is in GMT time, *not* local time.
      */
     fun setEventList(eventList: List<CalendarEvent>, layoutPair: Pair<List<EventWrapper>, Int>) {
-        verbose { "fresh calendar event list, ${eventList.size} entries" }
+        Log.v(TAG, "fresh calendar event list, ${eventList.size} entries")
         val (visibleEventList, maxLevel) = layoutPair
-        verbose { "--> $visibleEventList visible events" }
+        Log.v(TAG, "--> $visibleEventList visible events")
         this.eventList = eventList
         this.visibleEventList = visibleEventList
         this.maxLevel = maxLevel
@@ -88,17 +89,17 @@ object ClockState : AnkoLogger {
     }
 
     private fun debugDump() {
-        verbose("All events in the DB:")
+        Log.v(TAG, "All events in the DB:")
         eventList.forEach {
-            verbose { "--> displayColor(%06x), startTime(${it.startTime}), endTime(${it.endTime})".format(it.displayColor) }
+            Log.v(TAG, "--> displayColor(%06x), startTime(${it.startTime}), endTime(${it.endTime})".format(it.displayColor))
         }
 
-        verbose("Visible:")
+        Log.v(TAG, "Visible:")
         visibleEventList.forEach {
-            verbose {
+            Log.v(TAG,
                 "--> displayColor(%06x), minLevel(${it.minLevel}), maxLevel(${it.maxLevel}), startTime(${it.calendarEvent.startTime}), endTime(${it.calendarEvent.endTime})"
                     .format(it.calendarEvent.displayColor)
-            }
+            )
         }
     }
 }

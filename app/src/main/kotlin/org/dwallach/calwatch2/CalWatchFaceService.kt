@@ -16,6 +16,7 @@ import android.support.wearable.complications.ComplicationData
 import android.support.wearable.watchface.CanvasWatchFaceService
 import android.support.wearable.watchface.WatchFaceService
 import android.support.wearable.watchface.WatchFaceStyle
+import android.util.Log
 import android.view.Gravity
 import android.view.SurfaceHolder
 import android.view.WindowInsets
@@ -23,15 +24,11 @@ import java.lang.ref.WeakReference
 import org.dwallach.R
 import org.dwallach.complications.ComplicationWrapper
 import org.dwallach.complications.ComplicationWrapper.styleComplications
-import org.jetbrains.anko.AnkoLogger
-import org.jetbrains.anko.debug
-import org.jetbrains.anko.error
-import org.jetbrains.anko.info
-import org.jetbrains.anko.verbose
-import org.jetbrains.anko.warn
+
+private val TAG = "CalWatchFaceService"
 
 /** Drawn heavily from the Android Wear SweepWatchFaceService / AnalogWatchFaceService examples. */
-class CalWatchFaceService : CanvasWatchFaceService(), AnkoLogger {
+class CalWatchFaceService : CanvasWatchFaceService() {
     override fun onCreateEngine(): Engine {
         val engine = Engine()
         engineRef = WeakReference(engine)
@@ -44,13 +41,13 @@ class CalWatchFaceService : CanvasWatchFaceService(), AnkoLogger {
 
         /** Call this if there's been a status update in the calendar permissions. */
         fun calendarPermissionUpdate() {
-            warn("calendarPermissionUpdate")
+            Log.w(TAG, "calendarPermissionUpdate")
 
             val permissionGiven = CalendarPermission.check(this@CalWatchFaceService)
             if (!ClockState.calendarPermission && permissionGiven) {
                 // Hypothetically this isn't necessary, because it's handled in CalendarPermission.handleResult.
                 // However, we could get here after a reboot or something. So paranoia is good.
-                warn("we've got permission, need to update the ClockState")
+                Log.w(TAG, "we've got permission, need to update the ClockState")
                 ClockState.calendarPermission = true
             }
 
@@ -59,7 +56,7 @@ class CalWatchFaceService : CanvasWatchFaceService(), AnkoLogger {
         }
 
         override fun onCreate(holder: SurfaceHolder?) {
-            info("onCreate")
+            Log.i(TAG, "onCreate")
 
             super.onCreate(holder)
 
@@ -87,7 +84,7 @@ class CalWatchFaceService : CanvasWatchFaceService(), AnkoLogger {
             val resources = this@CalWatchFaceService.resources
 
             if (resources == null) {
-                error("no resources? not good")
+                Log.e(TAG, "no resources? not good")
             }
 
             clockFace = ClockFace()
@@ -113,7 +110,7 @@ class CalWatchFaceService : CanvasWatchFaceService(), AnkoLogger {
             super.onPropertiesChanged(properties)
 
             if (properties == null) {
-                info("onPropertiesChanged: empty properties?!")
+                Log.i(TAG, "onPropertiesChanged: empty properties?!")
                 return
             }
 
@@ -123,7 +120,7 @@ class CalWatchFaceService : CanvasWatchFaceService(), AnkoLogger {
                     ambientLowBit = getBoolean(WatchFaceService.PROPERTY_LOW_BIT_AMBIENT, false)
                     burnInProtection = getBoolean(WatchFaceService.PROPERTY_BURN_IN_PROTECTION, false)
                     ComplicationWrapper.updateProperties(ambientLowBit, burnInProtection)
-                    info { "onPropertiesChanged: low-bit ambient = $ambientLowBit, burn-in protection = $burnInProtection" }
+                    Log.i(TAG, "onPropertiesChanged: low-bit ambient = $ambientLowBit, burn-in protection = $burnInProtection")
                 }
             }
         }
@@ -140,7 +137,7 @@ class CalWatchFaceService : CanvasWatchFaceService(), AnkoLogger {
         override fun onAmbientModeChanged(inAmbientMode: Boolean) {
             super.onAmbientModeChanged(inAmbientMode)
 
-            info { "onAmbientModeChanged: $inAmbientMode" }
+            Log.i(TAG, "onAmbientModeChanged: $inAmbientMode")
             clockFace.ambientMode = inAmbientMode
             ComplicationWrapper.updateAmbientMode(inAmbientMode)
 
@@ -160,7 +157,7 @@ class CalWatchFaceService : CanvasWatchFaceService(), AnkoLogger {
             complicationId: Int,
             complicationData: ComplicationData?
         ) {
-            verbose { "onComplicationDataUpdate() id: $complicationId" }
+            Log.i(TAG, "onComplicationDataUpdate() id: $complicationId")
 
             ComplicationWrapper.updateComplication(complicationId, complicationData)
             Utilities.redrawEverything()
@@ -178,7 +175,7 @@ class CalWatchFaceService : CanvasWatchFaceService(), AnkoLogger {
 
         private fun updateBounds(width: Int, height: Int) {
             if (width != oldWidth || height != oldHeight) {
-                info { "updateBounds: $width x $height" }
+                Log.i(TAG, "updateBounds: $width x $height")
                 oldWidth = width
                 oldHeight = height
                 clockFace.setSize(width, height)
@@ -198,7 +195,7 @@ class CalWatchFaceService : CanvasWatchFaceService(), AnkoLogger {
             drawCounter++
 
             if (bounds == null || canvas == null) {
-                debug("onDraw: null bounds and/or canvas")
+                Log.d(TAG, "onDraw: null bounds and/or canvas")
                 return
             }
 
@@ -217,7 +214,7 @@ class CalWatchFaceService : CanvasWatchFaceService(), AnkoLogger {
                     invalidate()
             } catch (t: Throwable) {
                 if (drawCounter % 1000 == 0L)
-                    error("Something blew up while drawing", t)
+                    Log.e(TAG, "Something blew up while drawing", t)
             }
         }
 
@@ -246,7 +243,7 @@ class CalWatchFaceService : CanvasWatchFaceService(), AnkoLogger {
         }
 
         override fun onDestroy() {
-            verbose("onDestroy")
+            Log.v(TAG, "onDestroy")
 
             calendarFetcher?.kill()
 
@@ -259,7 +256,7 @@ class CalWatchFaceService : CanvasWatchFaceService(), AnkoLogger {
             with(clockFace) {
                 round = insets.isRound
                 missingBottomPixels = insets.systemWindowInsetBottom
-                verbose { "onApplyWindowInsets (round: $round), (chinSize: $missingBottomPixels)" }
+                Log.v(TAG, "onApplyWindowInsets (round: $round), (chinSize: $missingBottomPixels)")
             }
 
             Utilities.redrawEverything()

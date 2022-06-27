@@ -8,11 +8,12 @@ package org.dwallach.complications
 
 import android.content.Context
 import android.os.Build
+import android.util.Log
 import androidx.recyclerview.widget.RecyclerView
 import androidx.recyclerview.widget.RecyclerView.ViewHolder
 import org.dwallach.R
-import org.jetbrains.anko.AnkoLogger
-import org.jetbrains.anko.info
+
+private val TAG = "AnalogComplicationConfigDAta"
 
 /**
  * Code support to interact with the [RecyclerView]. Note that this code
@@ -20,7 +21,7 @@ import org.jetbrains.anko.info
  * we're on Wear 1.x, then there's no support for complications, so we'll
  * leave that out from our configuration dialog panel.
  */
-object AnalogComplicationConfigData : AnkoLogger {
+object AnalogComplicationConfigData {
     data class ConfigItemType(
         val configType: Int,
         val iconResourceId: Int,
@@ -37,7 +38,7 @@ object AnalogComplicationConfigData : AnkoLogger {
     fun getDataToPopulateAdapter(context: Context): List<ConfigItemType> =
         if (Build.VERSION.SDK_INT < 24) {
             // Wear 1.x --- no complications so we won't show that part of the config choices
-            info("getDataToPopulateAdapter: Wear 1.x")
+            Log.i(TAG, "getDataToPopulateAdapter: Wear 1.x")
             listOf(
                 ConfigItemType(
                     AnalogComplicationConfigRecyclerViewAdapter.TYPE_DAY_DATE,
@@ -55,7 +56,7 @@ object AnalogComplicationConfigData : AnkoLogger {
                 )
             )
         } else {
-            info("getDataToPopulateAdapter: Wear 2+")
+            Log.i(TAG, "getDataToPopulateAdapter: Wear 2+")
             // Wear 2+
             listOf(
                 ConfigItemType(

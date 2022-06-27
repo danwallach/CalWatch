@@ -9,17 +9,18 @@ package org.dwallach.calwatch2
 
 import android.os.SystemClock
 import android.text.format.DateUtils
+import android.util.Log
 import java.util.TimeZone
 import kotlin.math.floor
-import org.jetbrains.anko.AnkoLogger
-import org.jetbrains.anko.info
+
+private val TAG = "TimeWrapper"
 
 /**
  * We're asking for the time an awful lot for each different frame we draw, which
  * is actually having a real impact on performance. That's all centralized here
  * to fix the problem.
  */
-object TimeWrapper : AnkoLogger {
+object TimeWrapper {
 
     /**
      * Offset from GMT time to local time (including daylight savings correction, if necessary), in milliseconds.
@@ -128,18 +129,18 @@ object TimeWrapper : AnkoLogger {
         val elapsedTime = currentTime - lastFPSTime // ns since last time we printed something
         if (samples > 0 && elapsedTime > 0) {
             val fps = samples * 1000000000f / elapsedTime // * 10^9 so we're not just computing frames per nanosecond
-            info { "FPS: %.3f, samples: $samples".format(fps) }
+            Log.i(TAG, "FPS: %.3f, samples: $samples".format(fps))
 
-            info {
+            Log.i(TAG,
                 "Min/Avg/Max frame render speed (ms): %.3f / %.3f / %.3f".format(
                     minRuntime / 1000000f, +avgRuntimeAccumulator / samples / 1000000f, +maxRuntime / 1000000f
                 )
-            }
+            )
 
             // this waketime percentage is really a lower bound; it's not counting work in the render thread
             // thread that's outside of the ClockFace rendering methods, and it's also not counting
             // work that happens on other threads
-            info { "Waketime: %.3f %%".format(100f * avgRuntimeAccumulator / elapsedTime) }
+            Log.i(TAG, "Waketime: %.3f %%".format(100f * avgRuntimeAccumulator / elapsedTime))
 
             lastFPSTime = 0
         }

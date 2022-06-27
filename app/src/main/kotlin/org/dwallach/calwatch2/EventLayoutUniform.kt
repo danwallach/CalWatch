@@ -17,13 +17,12 @@ import EDU.Washington.grad.gjb.cassowary.ClVariable
 import EDU.Washington.grad.gjb.cassowary.ExCLInternalError
 import EDU.Washington.grad.gjb.cassowary.ExCLNonlinearExpression
 import EDU.Washington.grad.gjb.cassowary.ExCLRequiredFailure
-import org.jetbrains.anko.AnkoLogger
-import org.jetbrains.anko.error
-import org.jetbrains.anko.info
-import org.jetbrains.anko.verbose
+import android.util.Log
+
+private val TAG = "EventLayoutUniform"
 
 /** Event layout with the Cassowary linear constraint solver. */
-object EventLayoutUniform : AnkoLogger {
+object EventLayoutUniform {
     /**
      * Given a list of events, return another list that corresponds to the set of
      * events visible in the next twelve hours, with events that would be off-screen
@@ -59,17 +58,17 @@ object EventLayoutUniform : AnkoLogger {
                 // yeah, we succeeded
                 lMaxLevel = MAXLEVEL
             } else {
-                error("event layout failed!") // in years of testing, this failure apparently *never* happened
+                Log.e(TAG, "event layout failed!") // in years of testing, this failure apparently *never* happened
                 return Pair(emptyList(), 0)
             }
 
             sanityTest(clippedEvents, lMaxLevel, "After new event layout")
-            verbose { "maxLevel for visible events: $lMaxLevel" }
-            verbose { "number of visible events: ${clippedEvents.size}" }
+            Log.v(TAG, "maxLevel for visible events: $lMaxLevel")
+            Log.v(TAG, "number of visible events: ${clippedEvents.size}")
 
             return Pair(clippedEvents, lMaxLevel)
         } else {
-            verbose("no events visible!")
+            Log.v(TAG, "no events visible!")
             return Pair(emptyList(), 0)
         }
     }
@@ -84,7 +83,7 @@ object EventLayoutUniform : AnkoLogger {
      * @return true if it worked, false if it failed
      */
     private fun go(events: List<EventWrapper>): Boolean {
-        info { "Running uniform event layout with %d events".format(events.size) }
+        Log.i(TAG, "Running uniform event layout with %d events".format(events.size))
 
         val nEvents = events.size
         if (nEvents == 0) return true // degenerate case, in which we trivially succeed
@@ -162,7 +161,7 @@ object EventLayoutUniform : AnkoLogger {
             // and... away we go!
             solver.solve()
 
-            verbose("Event layout success.")
+            Log.v(TAG, "Event layout success.")
 
             for (i in 0 until nEvents) {
                 val e = events[i]
@@ -173,13 +172,13 @@ object EventLayoutUniform : AnkoLogger {
                 e.maxLevel = start + size
             }
         } catch (e: ExCLInternalError) {
-            error("solver failed", e)
+            Log.e(TAG, "solver failed", e)
             return false
         } catch (e: ExCLRequiredFailure) {
-            error("solver failed", e)
+            Log.e(TAG, "solver failed", e)
             return false
         } catch (e: ExCLNonlinearExpression) {
-            error("solver failed", e)
+            Log.e(TAG, "solver failed", e)
             return false
         }
 
@@ -197,7 +196,7 @@ object EventLayoutUniform : AnkoLogger {
     private fun sanityTest(events: List<EventWrapper>, maxLevel: Int, blurb: String) =
         events.forEach {
             if (it.minLevel < 0 || it.maxLevel > maxLevel) {
-                error { "malformed eventwrapper ($blurb): $it" }
+                Log.e(TAG, "malformed eventwrapper ($blurb): $it")
             }
         }
 }

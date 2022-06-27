@@ -15,13 +15,15 @@ import android.support.wearable.complications.ComplicationProviderInfo
 import android.support.wearable.complications.ProviderInfoRetriever
 import android.support.wearable.complications.ProviderInfoRetriever.OnProviderInfoReceivedCallback
 import android.support.wearable.watchface.CanvasWatchFaceService
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.View.OnClickListener
 import android.view.ViewGroup
 import android.widget.ImageButton
 import android.widget.ImageView
-import android.widget.Switch
+import androidx.appcompat.content.res.AppCompatResources
+import androidx.appcompat.widget.SwitchCompat
 import androidx.recyclerview.widget.RecyclerView
 import java.util.WeakHashMap
 import java.util.concurrent.Executors
@@ -41,11 +43,8 @@ import org.dwallach.complications.ComplicationWrapper.RIGHT_COMPLICATION_ID
 import org.dwallach.complications.ComplicationWrapper.TOP_COMPLICATION_ID
 import org.dwallach.complications.ComplicationWrapper.getComplicationId
 import org.dwallach.complications.ComplicationWrapper.getSupportedComplicationTypes
-import org.jetbrains.anko.AnkoLogger
-import org.jetbrains.anko.debug
-import org.jetbrains.anko.info
-import org.jetbrains.anko.verbose
-import org.jetbrains.anko.warn
+
+private val TAG = "AnalogComplicationConfigRecyclerViewAdapter"
 
 /**
  * This class handles all the different config items that might ever be displayed.
@@ -64,7 +63,7 @@ class AnalogComplicationConfigRecyclerViewAdapter(
     mContext: Context,
     watchFaceServiceClass: Class<out CanvasWatchFaceService>,
     private val mSettingsDataSet: List<ConfigItemType>
-) : RecyclerView.Adapter<RecyclerView.ViewHolder>(), AnkoLogger {
+) : RecyclerView.Adapter<RecyclerView.ViewHolder>() {
 
     // mapping from configTypes (int) to ConfigItemType
     private val mSettingsTypeMap = mSettingsDataSet.associateBy { it.configType }
@@ -96,9 +95,9 @@ class AnalogComplicationConfigRecyclerViewAdapter(
     }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): RecyclerView.ViewHolder {
-        verbose { "onCreateViewHolder(): viewType: $viewType" }
+        Log.v(TAG, "onCreateViewHolder(): viewType: $viewType")
 
-        val settings = mSettingsTypeMap[viewType] ?: errorLogAndThrow("No settings for viewType: $viewType")
+        val settings = mSettingsTypeMap[viewType] ?: errorLogAndThrow(TAG, "No settings for viewType: $viewType")
 
         return when (viewType) {
             TYPE_PREVIEW_AND_COMPLICATIONS_CONFIG -> {
@@ -151,7 +150,7 @@ class AnalogComplicationConfigRecyclerViewAdapter(
     }
 
     override fun onBindViewHolder(viewHolder: RecyclerView.ViewHolder, position: Int) {
-        verbose { "Element $position set." }
+        Log.v(TAG, "Element $position set.")
 
         (viewHolder as HolderInit).bindInit()
     }
@@ -171,7 +170,7 @@ class AnalogComplicationConfigRecyclerViewAdapter(
      */
     fun updateSelectedComplication(complicationProviderInfo: ComplicationProviderInfo?) {
 
-        info { "updateSelectedComplication: $mPreviewAndComplicationsViewHolder" }
+        Log.i(TAG, "updateSelectedComplication: $mPreviewAndComplicationsViewHolder")
 
         // Checks if view is inflated and complication id is valid.
         if (mSelectedComplicationId >= 0) {
@@ -236,12 +235,12 @@ class AnalogComplicationConfigRecyclerViewAdapter(
         init {
             idToComplication.values.forEach { it?.setOnClickListener(this) }
 
-            info { "Complications from wrapper: ${ComplicationWrapper.complicationIds.toSet()}" }
-            info { "Active complications from wrapper: ${ComplicationWrapper.activeComplicationIds.toSet()}" }
-            info { "Total num complications (idToComplication): ${idToComplication.size}" }
-            info { "Disable complication Ids: $disabledComplicationIds" }
-            info { "Num disabled: ${disabledComplications.size}" }
-            info { "Num disabled bg: ${disabledComplicationBackgrounds.size}" }
+            Log.i(TAG, "Complications from wrapper: ${ComplicationWrapper.complicationIds.toSet()}")
+            Log.i(TAG, "Active complications from wrapper: ${ComplicationWrapper.activeComplicationIds.toSet()}")
+            Log.i(TAG, "Total num complications (idToComplication): ${idToComplication.size}")
+            Log.i(TAG, "Disable complication Ids: $disabledComplicationIds")
+            Log.i(TAG, "Num disabled: ${disabledComplications.size}")
+            Log.i(TAG, "Num disabled bg: ${disabledComplicationBackgrounds.size}")
         }
 
         override fun onClick(view: View) {
@@ -257,7 +256,7 @@ class AnalogComplicationConfigRecyclerViewAdapter(
             if (location != null)
                 launchComplicationHelperActivity(currentActivity, location)
             else
-                warn { "Couldn't figure out location for click! Ignoring." }
+                Log.w(TAG, "Couldn't figure out location for click! Ignoring.")
         }
 
         // Verifies the watch face supports the complication location, then launches the helper
@@ -284,19 +283,19 @@ class AnalogComplicationConfigRecyclerViewAdapter(
                     AnalogComplicationConfigActivity.COMPLICATION_CONFIG_REQUEST_CODE
                 )
             } else {
-                warn { "Complication not supported by watch face." }
+                Log.w(TAG, "Complication not supported by watch face.")
             }
         }
 
         private fun setDefaultComplicationDrawable() {
-            info { "setting default complication drawable, resourceId = $iconId" }
+            Log.i(TAG, "setting default complication drawable, resourceId = $iconId")
 
             // This is a bit of a hack, but it works.
             val context = mWatchFaceArmsAndTicksView.context ?: return
 
             // It's technically possible or getDrawable to return null, but we're looking
             // up an id that was just passed to us, so it will never fail in practice.
-            mDefaultComplicationDrawable = context.getDrawable(iconId) ?: return
+            mDefaultComplicationDrawable = AppCompatResources.getDrawable(context, iconId) ?: return
 
             idToComplication.values.forEach {
                 it?.setImageDrawable(mDefaultComplicationDrawable)
@@ -319,8 +318,8 @@ class AnalogComplicationConfigRecyclerViewAdapter(
             watchFaceComplicationId: Int,
             complicationProviderInfo: ComplicationProviderInfo?
         ) {
-            info { "updateComplicationViews(): id:  $watchFaceComplicationId" }
-            info { "\tinfo: $complicationProviderInfo" }
+            Log.i(TAG, "updateComplicationViews(): id: $watchFaceComplicationId")
+            Log.i(TAG, "\tinfo: $complicationProviderInfo")
 
             val complication = idToComplication[watchFaceComplicationId]
             val complicationBg = idToComplicationBackground[watchFaceComplicationId]
@@ -334,12 +333,12 @@ class AnalogComplicationConfigRecyclerViewAdapter(
                     complicationBg.visibility = View.INVISIBLE
                 }
             } else {
-                warn {
+                Log.w(TAG,
                     "Couldn't find complication (%s) or complicationBg (%s) for id $watchFaceComplicationId".format(
                         if (complication == null) "null" else "okay",
                         if (complicationBg == null) "null" else "okay"
                     )
-                }
+                )
             }
         }
 
@@ -353,7 +352,7 @@ class AnalogComplicationConfigRecyclerViewAdapter(
                         complicationProviderInfo: ComplicationProviderInfo?
                     ) {
 
-                        debug { "onProviderInfoReceived: $complicationProviderInfo" }
+                        Log.d(TAG, "onProviderInfoReceived: $complicationProviderInfo")
 
                         updateComplicationViews(watchFaceComplicationId, complicationProviderInfo)
                     }
@@ -372,9 +371,9 @@ class AnalogComplicationConfigRecyclerViewAdapter(
         override fun bindInit() {
             val context = mMoreOptionsImageView.context
             if (context == null)
-                warn("No context for MoreOptionsViewHolder")
+                Log.w(TAG, "No context for MoreOptionsViewHolder")
             else
-                mMoreOptionsImageView.setImageDrawable(context.getDrawable(iconId))
+                mMoreOptionsImageView.setImageDrawable(AppCompatResources.getDrawable(context, iconId))
         }
     }
 
@@ -393,7 +392,7 @@ class AnalogComplicationConfigRecyclerViewAdapter(
     ) :
         RecyclerView.ViewHolder(view), HolderInit, OnClickListener {
 
-        private val switch = view.findViewById<Switch>(viewId)
+        private val switch = view.findViewById<SwitchCompat>(viewId)
 
         init {
             allToggles[this] = true
@@ -416,7 +415,7 @@ class AnalogComplicationConfigRecyclerViewAdapter(
 
         override fun onClick(v: View?) {
             val switchState = switch.isChecked
-            info { "Switch ($text) checked: $switchState" }
+            Log.i(TAG,  "Switch ($text) checked: $switchState")
 
             callback(switch.isChecked)
         }

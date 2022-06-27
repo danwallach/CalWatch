@@ -18,6 +18,7 @@ import android.os.SystemClock
 import android.provider.CalendarContract
 import android.support.wearable.provider.WearableCalendarContract
 import android.text.format.DateUtils
+import android.util.Log
 import java.lang.ref.WeakReference
 import kotlin.comparisons.compareBy
 import kotlin.comparisons.thenBy
@@ -26,10 +27,8 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
-import org.jetbrains.anko.AnkoLogger
-import org.jetbrains.anko.error
-import org.jetbrains.anko.info
-import org.jetbrains.anko.warn
+
+private val TAG = "CalendarFetcher"
 
 /**
  * This class handles all the dirty work of asynchronously loading calendar data from the calendar provider
@@ -49,7 +48,7 @@ class CalendarFetcher(
     private val contentUri: Uri = WearableCalendarContract.Instances.CONTENT_URI,
     private val authority: String = WearableCalendarContract.AUTHORITY,
     private val backupAuthority: String = CalendarContract.AUTHORITY
-) : AnkoLogger {
+) {
 
     private val contextRef = WeakReference(initialContext)
     private var isReceiverRegistered: Boolean = false
@@ -60,7 +59,7 @@ class CalendarFetcher(
             .format(if (contextRef.get() == null) "null" else "non-null")
 
     private fun onReceiveBroadcastHandler(context: Context, intent: Intent, authority: String) {
-        info { "broadcastReceiver: GOT INTENT MESSAGE! action(${intent.action}), data(${intent.data}), toString($intent), authority($authority)" }
+        Log.i(TAG, "broadcastReceiver: GOT INTENT MESSAGE! action(${intent.action}), data(${intent.data}), toString($intent), authority($authority)")
         if (Intent.ACTION_PROVIDER_CHANGED == intent.action) {
 
             // Google's reference code also checks that the Uri matches intent.getData(), but the URI we're getting back via intent.getData() is:
@@ -71,10 +70,10 @@ class CalendarFetcher(
 
             // Solution? Screw it. Whatever we get, we don't care, we'll reload the calendar.
 
-            info("broadcastReceiver: time to load new calendar data")
+            Log.i(TAG, "broadcastReceiver: time to load new calendar data")
             rescan(context)
         } else {
-            warn { "broadcastReceiver: IGNORING INTENT: action(${intent.action}), data(${intent.data}), toString($intent), authority($authority)" }
+            Log.w(TAG, "broadcastReceiver: IGNORING INTENT: action(${intent.action}), data(${intent.data}), toString($intent), authority($authority)")
         }
     }
 
@@ -94,12 +93,12 @@ class CalendarFetcher(
     }
 
     init {
-        info { "HERE BEGINS CalendarFetcher #$instanceID" }
-        singletonFetcher?.kill() ?: info { "No prior leftover singleton fetcher (CalendarFetcher #$instanceID)" }
+        Log.i(TAG, "HERE BEGINS CalendarFetcher #$instanceID")
+        singletonFetcher?.kill() ?: Log.i(TAG, "No prior leftover singleton fetcher (CalendarFetcher #$instanceID)")
         singletonFetcher = this // and now the newbie becomes the singleton
 
         // hook into watching the calendar (code borrowed from Google's calendar wear app)
-        info { "setting up intent receiver (CalendarFetcher #$instanceID)" }
+        Log.i(TAG, "setting up intent receiver (CalendarFetcher #$instanceID)")
         val filter = IntentFilter(Intent.ACTION_PROVIDER_CHANGED).apply {
             addDataScheme("content")
             addDataAuthority(authority, null)
@@ -127,7 +126,7 @@ class CalendarFetcher(
      * cannot be used any more. Make a new one if you want to restart things later.
      */
     fun kill() {
-        warn { "killing, state = $currentState" }
+        Log.w(TAG, "killing, state = $currentState")
 
         val context: Context? = getContext()
 
@@ -148,14 +147,14 @@ class CalendarFetcher(
             // this means that we're reusing a `killed` CalendarFetcher, which is bad, because it
             // won't be listening to the broadcasts any more. Log so we can discover it, but otherwise
             // continue running. At least it will update once an hour...
-            error { "rescan: no receiver registered! (CalendarFetcher #$instanceID)" }
+            Log.e(TAG, "rescan: no receiver registered! (CalendarFetcher #$instanceID)")
         }
 
         if (scanInProgress) {
-            warn { "rescan: scan in progress, not doing another scan! (CalendarFetcher #$instanceID)" }
+            Log.w(TAG, "rescan: scan in progress, not doing another scan! (CalendarFetcher #$instanceID)")
             return
         } else {
-            info { "rescan: starting asynchronously (CalendarFetcher #$instanceID)" }
+            Log.i(TAG, "rescan: starting asynchronously (CalendarFetcher #$instanceID)")
             scanInProgress = true
             runAsyncLoader(context ?: getContext())
         }
@@ -184,7 +183,7 @@ class CalendarFetcher(
         val cr = mutableListOf<CalendarEvent>()
 
         // first, get the list of calendars
-        info { "loadContent: starting to load content, fetchCounter($lFetchCounter) (CalendarFetcher #$instanceID)" }
+        Log.i(TAG, "loadContent: starting to load content, fetchCounter($lFetchCounter) (CalendarFetcher #$instanceID)")
 
         TimeWrapper.update()
         val time = TimeWrapper.gmtTime
@@ -192,7 +191,7 @@ class CalendarFetcher(
         val queryEndMillis = queryStartMillis + 24.hours
 
         try {
-            info {
+            Log.i(TAG,
                 "loadContent: Query times... Now: %s, QueryStart: %s, QueryEnd: %s"
                     .format(
                         DateUtils.formatDateTime(
@@ -211,10 +210,10 @@ class CalendarFetcher(
                             DateUtils.FORMAT_SHOW_TIME or DateUtils.FORMAT_SHOW_DATE
                         )
                     )
-            }
+            )
         } catch (th: Throwable) {
             // sometimes the date formatting blows up... who knew? best to just ignore and move on
-            warn("loadContent: date-formatter blew up while trying to log, ignoring", th)
+            Log.w(TAG, "loadContent: date-formatter blew up while trying to log, ignoring", th)
         }
 
         // And now, the event instances
@@ -244,7 +243,7 @@ class CalendarFetcher(
 
             // if it's null, which shouldn't ever happen, then we at least won't gratuitously fail here
             if (iCursor == null) {
-                warn("Got null cursor, no events!")
+                Log.w(TAG, "Got null cursor, no events!")
             } else {
                 if (iCursor.moveToFirst()) {
                     do {
@@ -260,14 +259,14 @@ class CalendarFetcher(
                         if (visible && !allDay)
                             cr.add(CalendarEvent(startTime, endTime, displayColor))
                     } while (iCursor.moveToNext())
-                    info { "loadContent: visible instances found: ${cr.size}" }
+                    Log.i(TAG, "loadContent: visible instances found: ${cr.size}")
                 }
 
                 // lifecycle cleanliness: important to close down when we're done
                 iCursor.close()
             }
         } catch (e: SecurityException) {
-            error("unexpected security exception while reading calendar", e)
+            Log.w(TAG, "unexpected security exception while reading calendar", e)
             kill()
             scanInProgress = false
             ClockState.calendarPermission = false
@@ -302,13 +301,13 @@ class CalendarFetcher(
      */
     private fun runAsyncLoader(context: Context?) {
         if (context == null) {
-            error { "runAsyncLoader: no context, cannot load calendar" }
+            Log.e(TAG, "runAsyncLoader: no context, cannot load calendar")
             scanInProgress = false
             return
         }
 
         if (this != singletonFetcher)
-            warn { "runAsyncLoader: not using the singleton fetcher! (CalendarFetcher me #$instanceID), singleton #${singletonFetcher?.instanceID})" }
+            Log.w(TAG, "runAsyncLoader: not using the singleton fetcher! (CalendarFetcher me #$instanceID), singleton #${singletonFetcher?.instanceID})")
 
         // Behold! The power of Kotlin 1.3's coroutines, with bonus wildly incomplete documentation!
         // https://github.com/Kotlin/kotlinx.coroutines/blob/master/ui/coroutines-guide-ui.md
@@ -336,24 +335,24 @@ class CalendarFetcher(
             // Everything in this block will execute on a background thread. The original
             // function, runAsyncLoader(), will return immediately.
 
-            info { "runAsyncLoader: here we go! (CalendarFetcher #$instanceID)" }
+            Log.i(TAG, "runAsyncLoader: here we go! (CalendarFetcher #$instanceID)")
 
             val result = withContext(Dispatchers.Default) {
                 val startTimeNano = SystemClock.elapsedRealtimeNanos()
                 val eventList = loadContent(context)
                 val endTimeNano = SystemClock.elapsedRealtimeNanos()
-                info { "runAsyncLoader: total calendar fetch time: %.3f ms".format((endTimeNano - startTimeNano) / 1000000.0) }
+                Log.i(TAG, "runAsyncLoader: total calendar fetch time: %.3f ms".format((endTimeNano - startTimeNano) / 1000000.0))
 
                 if (eventList == null) {
-                    warn { "runAsyncLoader: No result, not updating any calendar state (CalendarFetcher #$instanceID)" }
+                    Log.w(TAG, "runAsyncLoader: No result, not updating any calendar state (CalendarFetcher #$instanceID)")
                     null
                 } else {
-                    info { "runAsyncLoader: success reading the calendar (CalendarFetcher #$instanceID)" }
+                    Log.i(TAG, "runAsyncLoader: success reading the calendar (CalendarFetcher #$instanceID)")
                     val startTimeNano2 = SystemClock.elapsedRealtimeNanos()
                     val layoutResult = EventLayoutUniform.clipToVisible(eventList)
                     val endTimeNano2 = SystemClock.elapsedRealtimeNanos()
 
-                    info { "runAsyncLoader: total calendar layout time: %.3f ms".format((endTimeNano2 - startTimeNano2) / 1000000.0) }
+                    Log.i(TAG, "runAsyncLoader: total calendar layout time: %.3f ms".format((endTimeNano2 - startTimeNano2) / 1000000.0))
                     Pair(eventList, layoutResult)
                 }
             }
@@ -363,20 +362,20 @@ class CalendarFetcher(
                 // Dispatchers.Main gets us the Android UI thread.
 
                 withContext(Dispatchers.Main) {
-                    info("runAsyncLoader: updating world state (should be on UI thread now)")
+                    Log.i(TAG, "runAsyncLoader: updating world state (should be on UI thread now)")
                     ClockState.setEventList(result.first, result.second)
                     Utilities.redrawEverything()
                 }
             }
 
             scanInProgress = false
-            info { "runAsyncLoader: background tasks complete (CalendarFetcher #$instanceID)" }
+            Log.i(TAG, "runAsyncLoader: background tasks complete (CalendarFetcher #$instanceID)")
         }
 
-        info { "runAsyncLoader: Heading back to uiThread; async task now running (CalendarFetcher #$instanceID)" }
+        Log.i(TAG, "runAsyncLoader: Heading back to uiThread; async task now running (CalendarFetcher #$instanceID)")
     }
 
-    companion object : AnkoLogger {
+    companion object {
         // Declaring these volatile is probably overkill, but they may be read from different threads, so
         // we want changes to propagate immediately. scanInProgress is particularly important for this,
         // since it's how we prevent running multiple simultaneous queries to the calendar provider.
@@ -393,7 +392,7 @@ class CalendarFetcher(
             get() = "singletonFetcher($singletonFetcher), scanInProgress($scanInProgress), instanceCounter($instanceCounter)"
 
         fun requestRescan() {
-            info { "requestRescan: $currentState" }
+            Log.i(TAG, "requestRescan: $currentState")
             singletonFetcher?.rescan()
         }
     }

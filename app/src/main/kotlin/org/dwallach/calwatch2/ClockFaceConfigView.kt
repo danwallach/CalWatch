@@ -12,6 +12,7 @@ import android.content.Context
 import android.graphics.Canvas
 import android.graphics.Color
 import android.util.AttributeSet
+import android.util.Log
 import android.view.MotionEvent
 import android.view.MotionEvent.ACTION_BUTTON_RELEASE
 import android.view.MotionEvent.ACTION_POINTER_UP
@@ -21,16 +22,15 @@ import java.util.WeakHashMap
 import kotlin.math.PI
 import kotlin.math.atan2
 import kotlin.math.sqrt
-import org.jetbrains.anko.AnkoLogger
-import org.jetbrains.anko.info
-import org.jetbrains.anko.warn
+
+private val TAG = "ClockFaceConfigView"
 
 /**
  * As part of our on-watch configuration dialog, the easiest way to make a background image
  * was to just use our existing [ClockFace] code within an Android [View] that can appear
  * in any layout.
  */
-class ClockFaceConfigView(context: Context, attrs: AttributeSet) : View(context, attrs), AnkoLogger {
+class ClockFaceConfigView(context: Context, attrs: AttributeSet) : View(context, attrs) {
     private val clockFace = ClockFace(true)
     private val blackPaint = PaintCan.getCalendarGreyPaint(Color.BLACK)
 
@@ -52,7 +52,7 @@ class ClockFaceConfigView(context: Context, attrs: AttributeSet) : View(context,
         this.w = w
         this.h = h
 
-        info { "onSizeChanged: $w, $h" }
+        Log.i(TAG, "onSizeChanged: $w, $h")
         clockFace.setSize(w, h)
         invalidate()
     }
@@ -61,11 +61,11 @@ class ClockFaceConfigView(context: Context, attrs: AttributeSet) : View(context,
 //        canvas.drawColor(Color.TRANSPARENT, PorterDuff.Mode.CLEAR)
 
         if (w == -1 || h == -1) {
-            warn { "onDraw: no width or height yet!" }
+            Log.w(TAG, "onDraw: no width or height yet!")
             return
         }
 
-        info { "onDraw: $w, $h" }
+        Log.i(TAG, "onDraw: $w, $h")
 
         // We don't want to clear everything, only the central circle.
         // Leaves the background color of the configuration panel alone,
@@ -83,15 +83,15 @@ class ClockFaceConfigView(context: Context, attrs: AttributeSet) : View(context,
         ACTION_UP, ACTION_BUTTON_RELEASE, ACTION_POINTER_UP -> {
             val rawx = event.x
             val rawy = event.y
-            info { "onTouchEvent: %.1f, %.1f".format(rawx, rawy) }
+            Log.i(TAG, "onTouchEvent: %.1f, %.1f".format(rawx, rawy))
 
             if (h == -1 || w == -1) {
-                warn("We don't know the real screen size yet, bailing!")
+                Log.w(TAG, "We don't know the real screen size yet, bailing!")
                 super.onTouchEvent(event)
             } else {
                 val y = (h / 2) - rawy
                 val x = rawx - (w / 2)
-                info { "onTouchEvent: %.1f, %.1f --> %.1f, %.1f".format(rawx, rawy, x, y) }
+                Log.i(TAG, "onTouchEvent: %.1f, %.1f --> %.1f, %.1f".format(rawx, rawy, x, y))
 
                 // theta ranges from -180 to 180 (degrees)
                 val theta = atan2(y, x) * 180.0 / PI

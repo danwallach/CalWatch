@@ -8,15 +8,15 @@
 package org.dwallach.calwatch2
 
 import android.content.Context
+import android.util.Log
 import androidx.core.content.edit
-import org.jetbrains.anko.AnkoLogger
-import org.jetbrains.anko.error
-import org.jetbrains.anko.verbose
+
+private val TAG = "PreferencesHelper"
 
 /**
  * Support for saving and loading preferences to persistent storage.
  */
-object PreferencesHelper : AnkoLogger {
+object PreferencesHelper {
     //    @SuppressLint("CommitPrefEdits")
     fun savePreferences(context: Context) =
         context.getSharedPreferences(Constants.PREFS_KEY, Context.MODE_PRIVATE).edit {
@@ -25,10 +25,10 @@ object PreferencesHelper : AnkoLogger {
             putBoolean("showDayDate", ClockState.showDayDate)
             putInt("preferencesVersion", 3)
 
-            verbose { "savePreferences: ${ClockState.faceMode}, showSeconds: ${ClockState.showSeconds}, showDayDate: ${ClockState.showDayDate}" }
+            Log.v(TAG, "savePreferences: ${ClockState.faceMode}, showSeconds: ${ClockState.showSeconds}, showDayDate: ${ClockState.showDayDate}")
 
             if (!commit())
-                error("savePreferences commit failed ?!")
+                Log.e(TAG, "savePreferences commit failed ?!")
         }
 
     /**
@@ -44,7 +44,7 @@ object PreferencesHelper : AnkoLogger {
             val showDayDate = getBoolean("showDayDate", Constants.DEFAULT_SHOW_DAY_DATE)
             val version = getInt("preferencesVersion", 0)
 
-            verbose { "loadPreferences: $faceMode, showSeconds: $showSeconds, showDayDate: $showDayDate, preferencesVersion: $version" }
+            Log.v(TAG, "loadPreferences: $faceMode, showSeconds: $showSeconds, showDayDate: $showDayDate, preferencesVersion: $version")
 
             ClockState.faceMode = faceMode
             ClockState.showSeconds = showSeconds

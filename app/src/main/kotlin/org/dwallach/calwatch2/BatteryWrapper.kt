@@ -14,17 +14,17 @@ import android.os.BatteryManager.BATTERY_STATUS_FULL
 import android.os.BatteryManager.EXTRA_LEVEL
 import android.os.BatteryManager.EXTRA_SCALE
 import android.os.BatteryManager.EXTRA_STATUS
+import android.util.Log
 import java.lang.ref.WeakReference
-import org.jetbrains.anko.AnkoLogger
-import org.jetbrains.anko.info
-import org.jetbrains.anko.warn
+
+private val TAG = "BatterWrapper"
 
 /**
  * This class wraps all of our interaction with Android's BatteryManager. In particular, we only
  * want to make infrequent request to Android for the level of the battery, but we want to support
  * very frequent queries to this wrapper class.
  */
-object BatteryWrapper : AnkoLogger {
+object BatteryWrapper {
     private var contextRef = WeakReference<Context>(null)
 
     var isCharging: Boolean = false
@@ -44,7 +44,7 @@ object BatteryWrapper : AnkoLogger {
 
             val intent = context.registerReceiver(null, ifilter)
             if (intent == null) {
-                warn("Failed to get intent from registerReceiver!")
+                Log.w(TAG, "Failed to get intent from registerReceiver!")
                 return
             } else {
                 with(intent) {
@@ -72,7 +72,7 @@ object BatteryWrapper : AnkoLogger {
     }
 
     fun init(context: Context) {
-        info("init")
+        Log.i(TAG, "init")
         contextRef = WeakReference(context)
         fetchStatus()
     }

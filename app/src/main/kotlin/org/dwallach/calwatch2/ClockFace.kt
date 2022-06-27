@@ -11,6 +11,7 @@ import android.graphics.Paint
 import android.graphics.Path
 import android.graphics.RectF
 import android.graphics.drawable.Drawable
+import android.util.Log
 import java.util.WeakHashMap
 import kotlin.math.PI
 import kotlin.math.asin
@@ -33,16 +34,14 @@ import org.dwallach.complications.ComplicationLocation.RIGHT
 import org.dwallach.complications.ComplicationLocation.TOP
 import org.dwallach.complications.ComplicationWrapper
 import org.dwallach.complications.ComplicationWrapper.isComplicationVisible
-import org.jetbrains.anko.AnkoLogger
-import org.jetbrains.anko.error
-import org.jetbrains.anko.info
-import org.jetbrains.anko.verbose
+
+private val TAG = "ClockFace"
 
 /**
  * All of the graphics calls for drawing watchfaces happen here. Note that this class knows
  * nothing about Android widgets, views, or activities. That stuff is handled in [CalWatchFaceService].
  */
-class ClockFace(private val configMode: Boolean = false) : AnkoLogger {
+class ClockFace(private val configMode: Boolean = false) {
     // an instance of the ClockFace class is created anew alongside the rest of the UI; this number
     // helps us keep track of which instance is which
     private val instanceID: Int
@@ -73,7 +72,7 @@ class ClockFace(private val configMode: Boolean = false) : AnkoLogger {
     /** Tell the clock face if we're in "mute" mode. For now, we don't care. */
     var muteMode: Boolean = false
         set(newVal) {
-            verbose { "setMuteMode: $newVal" }
+            Log.v(TAG, "setMuteMode: $newVal")
             field = newVal
         }
 
@@ -81,7 +80,7 @@ class ClockFace(private val configMode: Boolean = false) : AnkoLogger {
     var ambientLowBit = FORCE_AMBIENT_LOW_BIT
         set(newVal) {
             field = newVal || FORCE_AMBIENT_LOW_BIT
-            verbose { "ambient low bit: $field" }
+            Log.v(TAG, "ambient low bit: $field")
             updateDrawStyle()
         }
 
@@ -103,7 +102,7 @@ class ClockFace(private val configMode: Boolean = false) : AnkoLogger {
     init {
         faceRefMap[this] = true // weak references to all ClockFace instances
         instanceID = instanceCounter++
-        verbose { "ClockFace setup, instance($instanceID)" }
+        Log.v(TAG, "ClockFace setup, instance($instanceID)")
         wipeAllCaches() // paranoia
 
         missingBottomPixels = 0 // just to get things started; flat bottom detection happens later
@@ -120,7 +119,7 @@ class ClockFace(private val configMode: Boolean = false) : AnkoLogger {
         val lMissingCalendarDrawable = missingCalendarDrawable
 
         if (lMissingCalendarDrawable == null) {
-            error("no missing calendar drawable?!")
+            Log.e(TAG, "no missing calendar drawable?!")
             return
         }
 
@@ -133,10 +132,10 @@ class ClockFace(private val configMode: Boolean = false) : AnkoLogger {
         // setBounds arguments: (int left, int top, int right, int bottom)
         lMissingCalendarDrawable.setBounds(x, y, x + width, y + height)
 
-        verbose {
+        Log.v(TAG,
             "missing calendar drawable size: (%d,%d), coordinates: (%d,%d),  (cy: %d, radius: %d)"
                 .format(width, height, x, y, cy, radius)
-        }
+        )
     }
 
     /**
@@ -208,7 +207,7 @@ class ClockFace(private val configMode: Boolean = false) : AnkoLogger {
             // something a real watch can't do: float the text over the hands
             if (showDayDate) drawMonthBox(canvas)
         } catch (th: Throwable) {
-            error("exception in drawEverything", th)
+            Log.e(TAG, "exception in drawEverything", th)
         } finally {
             TimeWrapper.frameEnd()
         }
@@ -315,7 +314,7 @@ class ClockFace(private val configMode: Boolean = false) : AnkoLogger {
 
         if (startRadiusRatio < 0 || startRadiusRatio > 1 || endRadiusRatio < 0 || endRadiusRatio > 1) {
             // if this happens, then we've got a serious bug somewhere; time for a kaboom
-            errorLogAndThrow(
+            errorLogAndThrow(TAG,
                 "arc too big! radius(%.2f -> %.2f), seconds(%.2f -> %.2f)".format(
                     startRadiusRatio,
                     endRadiusRatio,
@@ -412,18 +411,18 @@ class ClockFace(private val configMode: Boolean = false) : AnkoLogger {
 
         // check if we've already rendered the face
         if (lFacePathCache == null) {
-            verbose { "drawFace: cx($cx), cy($cy), r($radius)" }
+            Log.v(TAG, "drawFace: cx($cx), cy($cy), r($radius)")
 
             lFacePathCache = Path()
 
-            verbose { "rendering new face, faceMode($lFaceMode)" }
+            Log.v(TAG, "rendering new face, faceMode($lFaceMode)")
 
             if (calendarTicker % 1000 == 0) {
-                verbose {
+                Log.v(TAG,
                     "Complication visibility map: (LEFT, RIGHT, TOP, BOTTOM) -> ${isComplicationVisible(LEFT)}, ${isComplicationVisible(
                         RIGHT
                     )}, ${isComplicationVisible(TOP)}, ${isComplicationVisible(BOTTOM)}"
-                }
+                )
             }
 
             if (lFaceMode == FACE_TOOL)
@@ -527,14 +526,14 @@ class ClockFace(private val configMode: Boolean = false) : AnkoLogger {
 
                 if (!debugMetricsPrinted) {
                     debugMetricsPrinted = true
-                    verbose {
+                    Log.v(TAG,
                         "x(%.2f), y(%.2f), metrics.descent(%.2f), metrics.asacent(%.2f)".format(
                             x,
                             y,
                             metrics.descent,
                             metrics.ascent
                         )
-                    }
+                    )
                 }
             }
 
@@ -612,7 +611,7 @@ class ClockFace(private val configMode: Boolean = false) : AnkoLogger {
 
     /** call this if external forces at play may have invalidated state being saved inside ClockFace */
     private fun wipeCaches() {
-        verbose { "clearing caches: instance $instanceID" }
+        Log.v(TAG, "clearing caches: instance $instanceID")
 
         facePathCache = null
         batteryPathCache = null
@@ -766,7 +765,7 @@ class ClockFace(private val configMode: Boolean = false) : AnkoLogger {
         // we don't want to poll *too* often; the code below translates to about once per five minute
         val lBatteryPathCache = batteryPathCache ?: Path()
         if (batteryPathCache == null || time - batteryCacheTime > 5.minutes) {
-            verbose("fetching new battery status")
+            Log.v(TAG, "fetching new battery status")
             BatteryWrapper.fetchStatus()
             batteryCacheTime = time
 
@@ -776,7 +775,7 @@ class ClockFace(private val configMode: Boolean = false) : AnkoLogger {
             // (POWER_WARN_CRITICAL_LEVEL), then it switches to red.
             //
 
-            verbose { "battery at $batteryPct" }
+            Log.v(TAG, "battery at $batteryPct")
             if (batteryPct <= Constants.POWER_WARN_LOW_LEVEL) {
                 val minRadius = 0.01f
                 val maxRadius = 0.06f
@@ -792,7 +791,7 @@ class ClockFace(private val configMode: Boolean = false) : AnkoLogger {
                     Path.Direction.CCW
                 ) // direction shouldn't matter
 
-                verbose { "--> dot radius: $dotRadius, critical: $batteryCritical" }
+                Log.v(TAG, "--> dot radius: $dotRadius, critical: $batteryCritical")
             }
 
             batteryPathCache = lBatteryPathCache
@@ -807,7 +806,7 @@ class ClockFace(private val configMode: Boolean = false) : AnkoLogger {
     }
 
     fun setSize(width: Int, height: Int) {
-        verbose { "setSize: $width x $height" }
+        Log.v(TAG, "setSize: $width x $height")
         cx = width / 2
         cy = height / 2
 
@@ -863,12 +862,12 @@ class ClockFace(private val configMode: Boolean = false) : AnkoLogger {
             val angle = asin(1.0 - missingBottomPixels.toDouble() / cy.toDouble())
 
             flatBottomCornerTime = (angle * 30.0 / PI + 15).toFloat()
-            verbose { "flatBottomCornerTime($flatBottomCornerTime) <-- angle($angle), missingBottomPixels($missingBottomPixels), cy($cy)" }
+            Log.v(TAG, "flatBottomCornerTime($flatBottomCornerTime) <-- angle($angle), missingBottomPixels($missingBottomPixels), cy($cy)")
 
             flatBottomCornerY1R100 = clockY(flatBottomCornerTime.toDouble(), 1f)
             flatBottomCornerY1R80 = clockY(flatBottomCornerTime.toDouble(), 0.80f)
         } else {
-            verbose { "no flat bottom corrections" }
+            Log.v(TAG, "no flat bottom corrections")
         }
     }
 
@@ -960,7 +959,7 @@ class ClockFace(private val configMode: Boolean = false) : AnkoLogger {
     /** Tracking whether or not we're in ambient mode. */
     var ambientMode = false
         set(newVal) {
-            info { "Ambient mode: $field -> $newVal" }
+            Log.i(TAG, "Ambient mode: $field -> $newVal")
             if (field == newVal) return // nothing changed, so we're good
             field = newVal
 
@@ -979,7 +978,7 @@ class ClockFace(private val configMode: Boolean = false) : AnkoLogger {
     var round: Boolean = false
         set(newVal) {
             field = newVal
-            verbose { "setRound: $field" }
+            Log.v(TAG, "setRound: $field")
         }
 
     companion object {

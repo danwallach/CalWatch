@@ -8,43 +8,46 @@
 package org.dwallach.calwatch2
 
 import android.content.Context
+import android.util.Log
 import androidx.appcompat.app.AppCompatActivity
-import org.jetbrains.anko.AnkoLogger
-import org.jetbrains.anko.intentFor
-import org.jetbrains.anko.newTask
-import org.jetbrains.anko.verbose
+import splitties.activities
+
+private val TAG = "PermissionActivity"
 
 /**
  * We need a separate activity for the sole purpose of requesting permissions.
  */
-class PermissionActivity : AppCompatActivity(), AnkoLogger {
+class PermissionActivity : AppCompatActivity() {
     override fun onRequestPermissionsResult(requestCode: Int, permissions: Array<String>, grantResults: IntArray) {
-        verbose("onRequestPermissionsResult")
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults)
+
+        Log.v(TAG, "onRequestPermissionsResult")
         CalendarPermission.handleResult(requestCode, permissions, grantResults)
 
         // If there's no engine, which might happen if the watch face changes while the permission dialog
         // is up, or something equally weird, then the below line turns into a no-op, which is probably
         // the best we can do.
         CalWatchFaceService.engine?.calendarPermissionUpdate()
-        verbose("finishing PermissionActivity")
+        Log.v(TAG, "finishing PermissionActivity")
         this.finish() // we're done, so this shuts everything down
     }
 
     override fun onStart() {
         super.onStart()
 
-        verbose("starting PermissionActivity")
+        Log.v(TAG, "starting PermissionActivity")
         CalendarPermission.request(this)
     }
 
-    companion object : AnkoLogger {
+    companion object {
         /** Call this to launch the wear permission dialog. */
         fun kickStart(context: Context, firstTimeOnly: Boolean) {
-            verbose("kickStart")
+            Log.v(TAG, "kickStart")
 
             if (firstTimeOnly && CalendarPermission.numRequests > 0) return // don't bug the user!
 
-            // Anko makes this much nicer than the original
+            // TODO: find replacement for this otherwise nice Anko feature
+            start<PermissionActivity>()
             context.startActivity(context.intentFor<PermissionActivity>().newTask())
         }
     }

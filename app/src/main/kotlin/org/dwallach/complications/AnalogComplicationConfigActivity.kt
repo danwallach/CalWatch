@@ -11,15 +11,15 @@ import android.content.Intent
 import android.os.Bundle
 import android.support.wearable.complications.ComplicationProviderInfo
 import android.support.wearable.complications.ProviderChooserIntent
+import android.util.Log
 import androidx.appcompat.app.AppCompatActivity
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.wear.widget.WearableRecyclerView
 import org.dwallach.R
 import org.dwallach.calwatch2.Constants
 import org.dwallach.calwatch2.PreferencesHelper
-import org.jetbrains.anko.AnkoLogger
-import org.jetbrains.anko.debug
-import org.jetbrains.anko.info
+
+private val TAG = "AnalogComplicationConfigActivity"
 
 /**
  * The watch-side config activity for the watchface, which
@@ -27,13 +27,13 @@ import org.jetbrains.anko.info
  *
  * This began life as the AnalogComplicationConfigActivity example code.
  */
-class AnalogComplicationConfigActivity : AppCompatActivity(), AnkoLogger {
+class AnalogComplicationConfigActivity : AppCompatActivity() {
     private var mAdapter: AnalogComplicationConfigRecyclerViewAdapter? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-        info("analog config activity: onCreate")
+        Log.i(TAG, "analog config activity: onCreate")
         setContentView(R.layout.activity_analog_complication_config)
 
         // If the user went straight from installing the watchface to the
@@ -46,7 +46,7 @@ class AnalogComplicationConfigActivity : AppCompatActivity(), AnkoLogger {
 
         val adapterDataList = AnalogComplicationConfigData.getDataToPopulateAdapter(this)
 
-        info { "For adapter data, got ${adapterDataList.size} entries" }
+        Log.i(TAG, "For adapter data, got ${adapterDataList.size} entries")
 
         mAdapter = AnalogComplicationConfigRecyclerViewAdapter(
             applicationContext,
@@ -57,7 +57,7 @@ class AnalogComplicationConfigActivity : AppCompatActivity(), AnkoLogger {
         val recyclerView = findViewById<WearableRecyclerView>(R.id.wearable_recycler_view)
 
         if (recyclerView == null) {
-            error("null recycler view!")
+            Log.e(TAG, "null recycler view!")
         } else {
 
             // Aligns the first and last items on the list vertically centered on the screen.
@@ -71,16 +71,17 @@ class AnalogComplicationConfigActivity : AppCompatActivity(), AnkoLogger {
             // this didn't used to be necessary, but apparently it is now
             recyclerView.layoutManager = LinearLayoutManager(this)
 
-            info("recycler view initialized")
+            Log.i(TAG, "recycler view initialized")
         }
     }
 
+    @Deprecated("Deprecated in Java")
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         super.onActivityResult(requestCode, resultCode, data)
 
-        info("analog config activity: onActivityResult")
+        Log.i(TAG, "analog config activity: onActivityResult")
         if (data == null) {
-            debug { "null intent, nothing to do (requestCode = $requestCode, resultCode = $resultCode)" }
+            Log.d(TAG, "null intent, nothing to do (requestCode = $requestCode, resultCode = $resultCode)")
             return
         }
 
@@ -88,7 +89,7 @@ class AnalogComplicationConfigActivity : AppCompatActivity(), AnkoLogger {
             // Retrieves information for selected Complication provider.
             val complicationProviderInfo =
                 data.getParcelableExtra<ComplicationProviderInfo>(ProviderChooserIntent.EXTRA_PROVIDER_INFO)
-            debug { "Provider:  $complicationProviderInfo" }
+            Log.d(TAG, "Provider:  $complicationProviderInfo")
 
             // Updates preview with new complication information for selected complication id.
             // Note: complication id is saved and tracked in the adapter class.

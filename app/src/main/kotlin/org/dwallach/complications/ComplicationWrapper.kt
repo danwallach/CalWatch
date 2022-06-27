@@ -25,6 +25,7 @@ import android.support.wearable.complications.ComplicationHelperActivity
 import android.support.wearable.complications.rendering.ComplicationDrawable
 import android.support.wearable.watchface.CanvasWatchFaceService
 import android.support.wearable.watchface.WatchFaceService
+import android.util.Log
 import org.dwallach.calwatch2.CalWatchFaceService
 import org.dwallach.calwatch2.ClockFaceConfigView
 import org.dwallach.complications.ComplicationLocation.BACKGROUND
@@ -32,11 +33,8 @@ import org.dwallach.complications.ComplicationLocation.BOTTOM
 import org.dwallach.complications.ComplicationLocation.LEFT
 import org.dwallach.complications.ComplicationLocation.RIGHT
 import org.dwallach.complications.ComplicationLocation.TOP
-import org.jetbrains.anko.AnkoLogger
-import org.jetbrains.anko.debug
-import org.jetbrains.anko.info
-import org.jetbrains.anko.verbose
-import org.jetbrains.anko.warn
+
+private val TAG = "ComplicationWrapper"
 
 /**
  * The goal is this class is to provide a super minimal interface for two things: specifying configuration
@@ -99,7 +97,7 @@ import org.jetbrains.anko.warn
  * to package those separately. For now, that's the last piece where my application logic and the
  * complication-handling logic are still smashed together.
  */
-object ComplicationWrapper : AnkoLogger {
+object ComplicationWrapper {
     /**
      * If all we need is a reference to the *class* of the watchface service, then this
      * property will have it, even if the watchface itself is garbage collected.
@@ -239,11 +237,11 @@ object ComplicationWrapper : AnkoLogger {
 
     /** Call this whenever you get an onComplicationUpdate() event. */
     fun updateComplication(complicationId: Int, complicationData: ComplicationData?) {
-        info {
+        Log.i(TAG,
             "onComplicationDataUpdate() " +
                 "id: $complicationId (${complicationIdToLocationString(complicationId)})," +
                 " data: ${complicationData?.toString() ?: "NULL!"}"
-        }
+        )
 
         complicationDrawableMap[complicationId]?.setComplicationData(complicationData)
 
@@ -255,7 +253,7 @@ object ComplicationWrapper : AnkoLogger {
                 // that a complication has been killed, so we're just going to remove the
                 // entry from our map; see also isComplicationVisible()
                 complicationDataMap -= complicationId
-                info { "Removed complication, id: $complicationId (${complicationIdToLocationString(complicationId)})" }
+                Log.i(TAG, "Removed complication, id: $complicationId (${complicationIdToLocationString(complicationId)})")
             }
 
             else -> {
@@ -268,22 +266,22 @@ object ComplicationWrapper : AnkoLogger {
                     // this in some way or leave the slot empty."
                     // For now, we log.
 
-                    debug {
+                    Log.d(TAG,
                         "unexpected TYPE_NO_DATA for complication, id: $complicationId (${complicationIdToLocationString(
                             complicationId
                         )})"
-                    }
+                    )
                 }
 
-                info { "Added complication, id: $complicationId (${complicationIdToLocationString(complicationId)})" }
+                Log.i(TAG, "Added complication, id: $complicationId (${complicationIdToLocationString(complicationId)})")
             }
         }
 
-        info {
+        Log.i(TAG,
             "Visibility map: (LEFT, RIGHT, TOP, BOTTOM) -> ${isComplicationVisible(LEFT)}, ${isComplicationVisible(
                 RIGHT
             )}, ${isComplicationVisible(TOP)}, ${isComplicationVisible(BOTTOM)}"
-        }
+        )
 
         // makes sure that rendering the face background updates properly when changing complication settings
         ClockFaceConfigView.redraw()
@@ -317,7 +315,7 @@ object ComplicationWrapper : AnkoLogger {
         if (!wimpyInitFirstTime) return
         wimpyInitFirstTime = false
 
-        info { "wimpyInit: Complication locations: $locations" }
+        Log.i(TAG, "wimpyInit: Complication locations: $locations")
 
         // sets all the lateinit properties that we'll need later
         activeLocations = locations.toTypedArray()
@@ -346,7 +344,7 @@ object ComplicationWrapper : AnkoLogger {
         engine: CanvasWatchFaceService.Engine,
         locations: List<ComplicationLocation>
     ) {
-        info("Init")
+        Log.i(TAG, "Init")
 
         wimpyInit(locations)
 
@@ -374,7 +372,7 @@ object ComplicationWrapper : AnkoLogger {
     private fun launchPermissionForComplication(context: Context) {
         // kinda baffling that this is even necessary; why aren't permissions dealt with when you add the complication?
 
-        info("launchPermissionForComplication: beginning")
+        Log.i(TAG, "launchPermissionForComplication: beginning")
 
         val componentName = ComponentName(context, watchFaceClass)
 
@@ -402,14 +400,14 @@ object ComplicationWrapper : AnkoLogger {
                     (complicationDrawableMap[it]?.bounds?.contains(x, y) ?: false)
             }
 
-        verbose { "Complication tap, hits on complication(s): " + tappedComplicationIds.joinToString() }
+        Log.v(TAG, "Complication tap, hits on complication(s): " + tappedComplicationIds.joinToString())
 
         // we're only going to use the head of the list; it's going to basically never happen
         // that we have more than one hit here, since we're explicitly ignoring the background
         // image complication for tap events.
 
         if (tappedComplicationIds.size > 1)
-            warn { "Whoa, more than one complication hit: ${tappedComplicationIds.size}" }
+            Log.w(TAG, "Whoa, more than one complication hit: ${tappedComplicationIds.size}")
 
         if (tappedComplicationIds.isNotEmpty()) {
             val complicationData = complicationDataMap[tappedComplicationIds.first()]
@@ -417,14 +415,14 @@ object ComplicationWrapper : AnkoLogger {
             when {
                 tapAction != null -> tapAction.send()
                 complicationData?.type == TYPE_NO_PERMISSION -> launchPermissionForComplication(context)
-                else -> warn { "Tapped complication with no actions to take!" }
+                else -> Log.w(TAG, "Tapped complication with no actions to take!")
             }
         }
     }
 
     // initially a no-op, will replace later when styleComplications is called
     private var stylingFunc: ComplicationDrawable.() -> Unit = {
-        warn { "Default styles being applied to complications" }
+        Log.w(TAG, "Default styles being applied to complications")
     }
 
     /**
