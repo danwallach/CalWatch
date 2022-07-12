@@ -16,6 +16,9 @@ Android Wear command-line things I can never remember:
 -- How to set up the emulator: http://www.tech-recipes.com/rx/49586/how-do-i-connect-an-android-wear-emulator-to-a-real-phone/
    adb -d forward tcp:5601 tcp:5601
 
+   This seems to be no longer necessary on newer Android Studio versions; there's a "pair wearable"
+   selection from the vertical-dots menu.
+
 -- How to connect to Bluetooth debugging: http://blog.timmattison.com/archives/2014/07/16/common-android-wear-tasks-for-developers/
     adb forward tcp:4444 localabstract:/adb-hub; adb connect 127.0.0.1:4444
 

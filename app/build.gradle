@@ -49,7 +49,7 @@ def getVersionName = { ->
 }
 
 android {
-    compileSdkVersion 29
+    compileSdkVersion 31
     buildFeatures {
         viewBinding true
     }
