@@ -29,6 +29,7 @@ buildscript {
 plugins {
     id "idea"
     id "tech.formatter-kt.formatter" version "0.7.9"
+    id "com.louiscad.splitties" version "0.2.0"
 }
 
 allprojects {
@@ -49,6 +50,7 @@ allprojects {
 
 subprojects {
     apply plugin: "tech.formatter-kt.formatter" // Version should be inherited from parent
+    apply plugin: "com.louiscad.splitties"
 }
 
 task clean(type: Delete) {

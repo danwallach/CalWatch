@@ -331,6 +331,9 @@ class CalendarFetcher(
         // functions nor do we have to call await() for the results to come back. That's
         // all handled by withContext().
 
+        // TODO: replace GlobalScope with something more app-specific.
+        //   See: https://medium.com/androiddevelopers/coroutines-patterns-for-work-that-shouldnt-be-cancelled-e26c40f142ad
+
         GlobalScope.launch {
             // Everything in this block will execute on a background thread. The original
             // function, runAsyncLoader(), will return immediately.

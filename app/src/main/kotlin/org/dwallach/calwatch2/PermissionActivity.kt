@@ -10,7 +10,7 @@ package org.dwallach.calwatch2
 import android.content.Context
 import android.util.Log
 import androidx.appcompat.app.AppCompatActivity
-import splitties.activities
+import splitties.activities.start
 
 private val TAG = "PermissionActivity"
 
@@ -46,9 +46,7 @@ class PermissionActivity : AppCompatActivity() {
 
             if (firstTimeOnly && CalendarPermission.numRequests > 0) return // don't bug the user!
 
-            // TODO: find replacement for this otherwise nice Anko feature
-            start<PermissionActivity>()
-            context.startActivity(context.intentFor<PermissionActivity>().newTask())
+            context.start<PermissionActivity>()
         }
     }
 }
