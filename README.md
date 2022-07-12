@@ -1,8 +1,10 @@
 ![CalWatch2](images/feature-graphic-sm.png)
 
-* Copyright © 2014-2019 by Dan S. Wallach
+* Copyright © 2014-2022 by Dan S. Wallach
 * Home page: http://www.cs.rice.edu/~dwallach/calwatch/
 * Licensing: http://www.cs.rice.edu/~dwallach/calwatch/licensing.html
+* On the Google Play Store: https://play.google.com/store/apps/details?id=org.dwallach.calwatch2
+
 
 ## tl;dr
 
